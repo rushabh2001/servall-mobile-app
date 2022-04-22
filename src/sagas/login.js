@@ -16,10 +16,12 @@ const login = function* login({ data }) {
                 put(setUserToken({
                     user: res.data.user,
                     user_token: res.data.access_token,
-                    user_role: res.data.access_role,
                 })),
                 put(loginSuccess()),
                 put(appStart({ root: ROOT_INSIDE })),
+                put(setUserRole({
+                    user_role: res.data.user_role,
+                }))
                 // put(setGarage({
                 //     garage: res.data.user,
                 //     garage_id: res.data.access_token
@@ -28,7 +30,7 @@ const login = function* login({ data }) {
             ]);
             saveValue('USER', JSON.stringify(res.data.user));
             saveValue('USER_TOKEN', res.data.access_token);
-
+            saveValue('USER_ROLE', res.data.user_role);
             if(res.data.user_role == "Super Admin") {
                 saveValue('GARAGE', null);
                 saveValue('GARAGE_ID', '0');

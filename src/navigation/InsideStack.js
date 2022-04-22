@@ -8,6 +8,7 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import IconX from "react-native-vector-icons/MaterialCommunityIcons";
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { colors }  from "../constants";
+import { connect } from "react-redux";
 // import MyTabBar from './components/MyTabBar';
 import {
   // DashboardStack,
@@ -226,7 +227,7 @@ const AllStack = ({ navigation }) => {
   )
 }
 
-export default function InsideStack({ navigation }) {
+const InsideStack = ({ navigation, userRole }) => {
     return (
       <Tab.Navigator
         initialRouteName="Services"
@@ -247,13 +248,17 @@ export default function InsideStack({ navigation }) {
             ),
             headerRight: () => (
               <View style={{flexDirection: "row",justifyContent: "flex-end"}}>
-                <Button
-                  onPress={() => navigation.navigate('AllStack', { screen: 'ChooseGarage', initial: false})}
-                  style={[styles.buttonStyle, {marginRight: 15}]}
-                  color={colors.secondary}
-                  icon={ (color) => <Icon name={'edit'} size={16} color={colors.secondary}  /> }
-                  uppercase={false} 
-                ><Text style={{fontSize:12, padding:0}}>Choose Garage</Text></Button>
+                {userRole == "Super Admin" ? 
+                  <Button
+                    onPress={() => navigation.navigate('AllStack', { screen: 'ChooseGarage', initial: false})}
+                    style={[styles.buttonStyle, {marginRight: 15}]}
+                    color={colors.secondary}
+                    icon={ (color) => <Icon name={'edit'} size={16} color={colors.secondary}  /> }
+                    uppercase={false} 
+                  ><Text style={{fontSize:12, padding:0}}>Choose Garage</Text></Button>
+                : 
+                  null
+                }
               </View>
             ),
           }} 
@@ -308,6 +313,12 @@ export default function InsideStack({ navigation }) {
             // </MainStack.Navigator>
     )
 }
+
+const mapStateToProps = state => ({
+  userRole: state.role.user_role,
+})
+export default connect(mapStateToProps)(InsideStack);
+
 
 const styles = StyleSheet.create({
   buttonStyle: {

@@ -6,6 +6,7 @@ import { setGarage, getGarage } from '../actions/garage';
 import { getValue, saveValue } from '../lib/storage';
 import { apiGet } from '../network/apiFetch';
 import { signOut } from '../actions/login';
+import { setUserRole } from '../actions/role';
 
 const init = function* init() {
     // console.log("only init");
@@ -15,6 +16,7 @@ const init = function* init() {
     // console.log(user);
     let garage_id = JSON.stringify(yield call(getValue, 'GARAGE_ID'));
     let garage = yield call(getValue, 'GARAGE');
+    let user_role = yield call(getValue, 'USER_ROLE');
     // console.log(garage);
     // console.log(garage_id);
     let first_time = yield call(getValue, 'FIRST_TIME');
@@ -29,6 +31,7 @@ const init = function* init() {
                     put(setUserToken({ user: res.data, user_token: user_token })),
                     put(appStart({ root: ROOT_INSIDE })),
                     put(setupIntro({ isFirstTime: first_time ? false : true })),
+                    put(setUserRole({ user_role: res.data.user_role }))
                     // put({ type: "FETCH_CONTINUOUSLY" }),
                 ])
                 saveValue('USER', JSON.stringify(res.data));
@@ -57,6 +60,7 @@ const init = function* init() {
                 put(setUserToken({ user: JSON.parse(user), user_token: user_token })),
                 put(setGarage({ garage: JSON.parse(garage), garage_id: parseInt(garage_id) })),
                 put(appStart({ root: ROOT_INSIDE })),
+                put(appStart({ user_role: user_role })),
                 // put({ type: "FETCH_CONTINUOUSLY" }),
             ]);
         }

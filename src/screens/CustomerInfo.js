@@ -33,45 +33,53 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
 
     const scroll1Ref = useRef();
 
+    const validate = () => {
+        return !(
+            !isName || isName?.trim().length === 0  || 
+            !isPhoneNumber || isPhoneNumber?.trim().length === 0 || 
+            !isEmail || isEmail?.trim().length === 0 ||  isEmail?.trim().length < 6 || isEmail?.indexOf('@') < 0 || isEmail?.indexOf(' ') >= 0 ||
+            !isCity || isCity === 0 ||
+            !isState || isState === 0
+        )
+    }
+
     const submit = () => {
      
         Keyboard.dismiss();  
 
-        if(isName.length == 0){ setNameError("Customer Name is required"); }    
-        if(isPhoneNumber.length == 0){ setPhoneNumberError("Phone Number is required"); }
-        else if(isPhoneNumber.length < 9){ setPhoneNumberError("Phone Number should be minimum 13 characters"); }       
-        if(isCity.length == 0){ setCityError("City is required"); }    
-        if(isState.length == 0){ setStateError("State is required"); }    
-        if(isAddress.length == 0){ setAddressError("Address is required"); }    
-
-        if(isEmail.length == 0){ setEmailError("Email is required"); }    
-        else if(isEmail.length < 6){ setEmailError("Email should be minimum 6 characters"); }      
-        else if(isEmail?.indexOf(' ') >= 0){ setEmailError('Email cannot contain spaces'); }    
-        else if(isEmail?.indexOf('@') < 0){ setEmailError('Invalid Email Format'); }
+        if (!validate()) {
+            if (!isName) setNameError("Customer Name is required");
+            if (!isPhoneNumber) setPhoneNumberError("Phone Number is required");
+            if (!isEmail) setEmailError("Email is required");
+            else if (isEmail.length < 6) setEmailError("Email should be minimum 6 characters");
+            else if (isEmail?.indexOf(' ') >= 0) setEmailError('Email cannot contain spaces');
+            else if (isEmail?.indexOf('@') < 0) setEmailError('Invalid Email Format');
+            return;
+        }
         
+        // let dataCheck = ({'email': isEmail, 'phone_number': isPhoneNumber});
+        // let userVerified = userCheck(dataCheck);
+        // console.log(userVerified);
+        // if (userVerified === undefined)  { return; }
+        // else if(userVerified.statusCode == 200 ) {
+            const data = {
+                "name" : isName,
+                "email" : isEmail,
+                "phone_number" : isPhoneNumber,
+                "city" : isCity, 
+                "state" : isState, 
+                "address" : isAddress,
+                "vehicle_option" : "no_vehicle"
+            };
 
-        let dataCheck = ({'email': isEmail, 'phone_number': isPhoneNumber});
-        userCheck(dataCheck);
-        setEmailError("");
-        setPhoneNumberError("");
-
-        const data = {
-            "name" : isName,
-            "email" : isEmail,
-            "phone_number" : isPhoneNumber,
-            "city" : isCity, 
-            "state" : isState, 
-            "address" : isAddress,
-            "vehicle_option" : "no_vehicle"
-        };
-
-        console.log(data);
-        updateUser(data);
+            // console.log(data);
+            updateUser(data);
+        // }
     }
 
     const updateUser = async (data) => {
         try {
-            const res = await fetch(`${API_URL}update_customer/${route?.params?.userId}`, {
+            await fetch(`${API_URL}update_customer/${route?.params?.userId}`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
@@ -79,15 +87,35 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
                     'Authorization': 'Bearer ' + userToken
                 },
                 body: JSON.stringify(data)
-            });
-            console.log(res);
+            }) 
+            .then(res => {
+                const statusCode = res.status;
+                let data;
+                return res.json().then(obj => {
+                    data = obj;
+                    return { statusCode, data };
+                });
+            })
+            .then((res) => {
+                console.log(res);
+                if(res.statusCode == 400) {
+                  { res.data.message.email && setEmailError(res.data.message.email); }
+                  { res.data.message.phone_number && setPhoneNumberError(res.data.message.phone_number); }
+                  return;
+                } else if(res.statusCode == 201) {
+                    console.log(res);
+                    console.log("Customer Updated SuccessFully");
+                    navigation.navigate('AllStack', { screen: 'CustomerDetails', params: { userId: route?.params?.userId } });
+                }
+            });;
+            // console.log(res);
 
-            const json = await res.json();
-            if (json !== undefined) {
-                console.log(json);
-                console.log("Customer Updated SuccessFully");
-                navigation.navigate('AllStack', { screen: 'CustomerDetails', params: { userId: route?.params?.userId } });
-            }
+            // const json = await res.json();
+            // if (json !== undefined) {
+            //     console.log(json);
+            //     console.log("Customer Updated SuccessFully");
+            //     navigation.navigate('AllStack', { screen: 'CustomerDetails', params: { userId: route?.params?.userId } });
+            // }
         } catch (e) {
             console.log(e);
         } finally {
@@ -101,20 +129,22 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + userToken
             },
             body: JSON.stringify(data)
         })
-        .then(response => {
-            const statusCode = response.status;
+        .then(res => {
+            const statusCode = res.status;
             let data;
-            return response.json().then(obj => {
+            return res.json().then(obj => {
                 data = obj;
                 return { statusCode, data };
             });
         })
         .then((res) => {
-            if(res.statusCode == 401) {
+            console.log(res);
+            if(res.statusCode == 400) {
               { res.data.message.email && setEmailError(res.data.message.email); }
               { res.data.message.phone_number && setPhoneNumberError(res.data.message.phone_number); }
               return;
@@ -332,14 +362,14 @@ const styles = StyleSheet.create({
         justifyContent:'center',
     },
     input: {
-        marginTop: 15,
-        marginBottom: 5,
-        padding: 10,
-        height: 40,
+        marginTop: 20,
+        padding: 15,
+        height: 55,
         borderColor: colors.light_gray, // 7a42f4
         borderWidth: 1,
         borderRadius: 5,
         backgroundColor: colors.white,
+        fontSize: 16,
      },
      headingStyle: {
          fontSize: 20,

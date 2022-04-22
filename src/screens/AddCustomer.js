@@ -217,7 +217,8 @@ const AddCustomer = ({ navigation, userToken, garageId }) => {
             let formattedDate = moment(currentDate, 'YYYY MMMM D').format('DD-MM-YYYY');
             setDisplayPurchaseCalender(false);
             setDatePurchase(formattedDate);
-            setIsPurchaseDate(selectedDate);
+            let formateDateForDatabase = moment(currentDate, 'YYYY MMMM D').format('YYYY-MM-DD');
+            setIsPurchaseDate(formateDateForDatabase);
         }
      };
 
@@ -227,7 +228,8 @@ const AddCustomer = ({ navigation, userToken, garageId }) => {
             let formattedDate = moment(currentDate, 'YYYY MMMM D').format('DD-MM-YYYY');
             setDisplayManufacturingCalender(false);
             setDateManufacturing(formattedDate);
-            setIsManufacturingDate(selectedDate);
+            let formateDateForDatabase = moment(currentDate, 'YYYY MMMM D').format('YYYY-MM-DD');
+            setIsManufacturingDate(formateDateForDatabase);
         }
     };
 
@@ -237,7 +239,8 @@ const AddCustomer = ({ navigation, userToken, garageId }) => {
             let formattedDate = moment(currentDate, 'YYYY MMMM D').format('DD-MM-YYYY');
             setDisplayInsuranceExpiryCalender(false);
             setDateInsuranceExpiry(formattedDate);
-            setIsInsuranceExpiryDate(selectedDate);  
+            let formateDateForDatabase = moment(currentDate, 'YYYY MMMM D').format('YYYY-MM-DD');
+            setIsInsuranceExpiryDate(formateDateForDatabase);  
         }   
     };
 
@@ -273,12 +276,12 @@ const AddCustomer = ({ navigation, userToken, garageId }) => {
             return;
         }
         
-        let dataCheck = ({'email': isEmail, 'phone_number': isPhoneNumber, 'vehicle_registration_number': isVehicleRegistrationNumber});
+        // let dataCheck = ({'email': isEmail, 'phone_number': isPhoneNumber, 'vehicle_registration_number': isVehicleRegistrationNumber});
         // setEmailError("");
         // setPhoneNumberError("");
         // setVehicleRegistrationNumberError("");
 
-        userVehicleCheck(dataCheck);
+        // userVehicleCheck(dataCheck);
 
         const data = new FormData();
         data.append('name', isName?.trim());
@@ -294,7 +297,7 @@ const AddCustomer = ({ navigation, userToken, garageId }) => {
         if(isManufacturingDate) data.append('manufacturing_date', isManufacturingDate);
         if(isEngineNumber) data.append('engine_number', isEngineNumber?.trim());
         if(isChasisNumber) data.append('chasis_number', isChasisNumber?.trim());
-        if(isInsuranceProvider) data.append('insurance_provider', isInsuranceProvider);
+        if(isInsuranceProvider) data.append('insurance_id', parseInt(isInsuranceProvider));
         if(isInsurerGstin) data.append('insurer_gstin', isInsurerGstin?.trim());
         if(isInsurerAddress) data.append('insurer_address', isInsurerAddress?.trim());
         if(isPolicyNumber) data.append('policy_number', isPolicyNumber?.trim());
@@ -314,7 +317,7 @@ const AddCustomer = ({ navigation, userToken, garageId }) => {
             console.log("working fine till here");
             // console.log(isRegistrationCertificateImg[0]);  
             // console.log(data);
-            let res = await fetch(`${API_URL}add_new_customer`, {
+            await fetch(`${API_URL}add_new_customer`, {
                 method: 'POST',
                 headers: {
                     // 'Accept': 'application/json',
@@ -322,9 +325,27 @@ const AddCustomer = ({ navigation, userToken, garageId }) => {
                     'Authorization': 'Bearer ' + userToken
                 },
                 body: data
+            }) 
+            .then(res => {
+                const statusCode = res.status;
+                let data;
+                return res.json().then(obj => {
+                    data = obj;
+                    return { statusCode, data };
+                });
+            })
+            .then((res) => {
+                if(res.statusCode == 400) {
+                  { res.data.message.email && setEmailError(res.data.message.email); }
+                  { res.data.message.phone_number && setPhoneNumberError(res.data.message.phone_number); }
+                  { res.data.message.vehicle_registration_number && setVehicleRegistrationNumberError(res.data.message.vehicle_registration_number); }
+                  return;
+                } else if(res.statusCode == 201) {
+                    navigation.navigate('MyCustomers');
+                }
             });
-            let responseJson = await res.json();
-            console.log(responseJson);
+            // let responseJson = await res.json();
+            // console.log(responseJson);
 
             // fetch(`${API_URL}add_new_customer`, {
             //     method: 'POST',

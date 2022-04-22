@@ -74,6 +74,53 @@ const AddVehicle = ({ navigation, userToken, route }) => {
     
     const scroll1Ref = useRef();
 
+    const validate = () => {
+        return !(
+            !isBrand || isBrand === 0 ||
+            !isModel || isModel === 0 ||
+            !isVehicleRegistrationNumber || isVehicleRegistrationNumber?.trim().length === 0 
+        )
+    }
+
+    const submit = () => {
+     
+        Keyboard.dismiss();  
+
+        if (!validate()) {
+            if (!isBrand || isBrand === 0) setBrandError('Brand is required');
+            if (!isModel || isModel === 0) setModelError('Model is required');
+            if (!isVehicleRegistrationNumber || isVehicleRegistrationNumber?.trim().length === 0) setVehicleRegistrationNumberError("Vehicle Registration Number is required");
+            return;
+        }
+        
+        // let dataCheck = ({'vehicle_registration_number': isVehicleRegistrationNumber});
+        // vehicleCheck(dataCheck);
+
+        const data = new FormData();
+        data.append('brand_id', JSON.stringify(isBrand));
+        data.append('model_id', JSON.stringify(isModel));
+        data.append('vehicle_registration_number', isVehicleRegistrationNumber?.trim());
+        if(isPurchaseDate) data.append('purchase_date', isPurchaseDate);
+        if(isManufacturingDate) data.append('manufacturing_date', isManufacturingDate);
+        if(isEngineNumber) data.append('engine_number', isEngineNumber?.trim());
+        if(isChasisNumber) data.append('chasis_number', isChasisNumber?.trim());
+        if(isInsuranceProvider) data.append('insurance_id', parseInt(isInsuranceProvider));
+        if(isInsurerGstin) data.append('insurer_gstin', isInsurerGstin?.trim());
+        if(isInsurerAddress) data.append('insurer_address', isInsurerAddress?.trim());
+        if(isPolicyNumber) data.append('policy_number', isPolicyNumber?.trim());
+        if(isInsuranceExpiryDate) data.append('insurance_expiry_date', isInsuranceExpiryDate);
+        if(isRegistrationCertificateImg != null) data.append('registration_certificate_img', { uri: isRegistrationCertificateImg.uri, type: isRegistrationCertificateImg.type, name: isRegistrationCertificateImg.name });
+        if(isInsuranceImg != null) data.append('insurance_img', isInsuranceImg);
+        // data.append('user_id', 3);
+        data.append('user_id', parseInt(route?.params?.userId));
+
+
+        console.log(JSON.stringify(data));
+        addVehicle(data);
+        // console.log(JSON.stringify(data));
+        // console.log(isRegistrationCertificateImg);  
+    }
+
     const addNewInsuranceCompany = async () => {
         let data = {'name': newInsuranceCompanyName}
         try {
@@ -197,7 +244,8 @@ const AddVehicle = ({ navigation, userToken, route }) => {
             let formattedDate = moment(currentDate, 'YYYY MMMM D').format('DD-MM-YYYY');
             setDisplayPurchaseCalender(false);
             setDatePurchase(formattedDate);
-            setIsPurchaseDate(selectedDate);
+            let formateDateForDatabase = moment(currentDate, 'YYYY MMMM D').format('YYYY-MM-DD');
+            setIsPurchaseDate(formateDateForDatabase);
         }
      };
 
@@ -207,7 +255,8 @@ const AddVehicle = ({ navigation, userToken, route }) => {
             let formattedDate = moment(currentDate, 'YYYY MMMM D').format('DD-MM-YYYY');
             setDisplayManufacturingCalender(false);
             setDateManufacturing(formattedDate);
-            setIsManufacturingDate(selectedDate);
+            let formateDateForDatabase = moment(currentDate, 'YYYY MMMM D').format('YYYY-MM-DD');
+            setIsManufacturingDate(formateDateForDatabase);
         }
     };
 
@@ -217,63 +266,17 @@ const AddVehicle = ({ navigation, userToken, route }) => {
             let formattedDate = moment(currentDate, 'YYYY MMMM D').format('DD-MM-YYYY');
             setDisplayInsuranceExpiryCalender(false);
             setDateInsuranceExpiry(formattedDate);
-            setIsInsuranceExpiryDate(selectedDate);  
+            let formateDateForDatabase = moment(currentDate, 'YYYY MMMM D').format('YYYY-MM-DD');
+            setIsInsuranceExpiryDate(formateDateForDatabase);  
         }   
     };
 
-    const validate = () => {
-        return !(
-            !isBrand || isBrand === 0 ||
-            !isModel || isModel === 0 ||
-            !isVehicleRegistrationNumber || isVehicleRegistrationNumber?.trim().length === 0 
-        )
-    }
-
-    const submit = () => {
-     
-        Keyboard.dismiss();  
-
-        if (!validate()) {
-            if (!isBrand || isBrand === 0) setBrandError('Brand is required');
-            if (!isModel || isModel === 0) setModelError('Model is required');
-            if (!isVehicleRegistrationNumber || isVehicleRegistrationNumber?.trim().length === 0) setVehicleRegistrationNumberError("Vehicle Registration Number is required");
-            return;
-        }
-        
-        let dataCheck = ({'vehicle_registration_number': isVehicleRegistrationNumber});
-        vehicleCheck(dataCheck);
-
-        const data = new FormData();
-        data.append('brand_id', JSON.stringify(isBrand));
-        data.append('model_id', JSON.stringify(isModel));
-        data.append('vehicle_registration_number', isVehicleRegistrationNumber?.trim());
-        if(isPurchaseDate) data.append('purchase_date', isPurchaseDate);
-        if(isManufacturingDate) data.append('manufacturing_date', isManufacturingDate);
-        if(isEngineNumber) data.append('engine_number', isEngineNumber?.trim());
-        if(isChasisNumber) data.append('chasis_number', isChasisNumber?.trim());
-        if(isInsuranceProvider) data.append('insurance_provider', isInsuranceProvider);
-        if(isInsurerGstin) data.append('insurer_gstin', isInsurerGstin?.trim());
-        if(isInsurerAddress) data.append('insurer_address', isInsurerAddress?.trim());
-        if(isPolicyNumber) data.append('policy_number', isPolicyNumber?.trim());
-        if(isInsuranceExpiryDate) data.append('insurance_expiry_date', isInsuranceExpiryDate);
-        if(isRegistrationCertificateImg != null) data.append('registration_certificate_img', { uri: isRegistrationCertificateImg.uri, type: isRegistrationCertificateImg.type, name: isRegistrationCertificateImg.name });
-        if(isInsuranceImg != null) data.append('insurance_img', isInsuranceImg);
-        data.append('user_id', 3);
-        // data.append('user_id', parseInt(route?.params?.userId));
-
-
-        console.log(JSON.stringify(data));
-        addVehicle(data);
-        // console.log(JSON.stringify(data));
-        // console.log(isRegistrationCertificateImg);  
-    }
-
     const addVehicle = async (data) => {
         try {
-            console.log("working fine till here");
+            // console.log("working fine till here");
             // console.log(isRegistrationCertificateImg[0]);  
             // console.log(data);
-            let res = await fetch(`${API_URL}add_new_customer`, {
+            await fetch(`${API_URL}add_new_vehicle`, {
                 method: 'POST',
                 headers: {
                     // 'Accept': 'application/json',
@@ -281,9 +284,27 @@ const AddVehicle = ({ navigation, userToken, route }) => {
                     'Authorization': 'Bearer ' + userToken
                 },
                 body: data
+            })
+            .then(res => {
+                const statusCode = res.status;
+                let data;
+                return res.json().then(obj => {
+                    data = obj;
+                    return { statusCode, data };
+                });
+            })
+            .then((res) => {
+                console.log(res);
+                if (res.statusCode == 201 || res.statusCode == 200) {
+                    console.log("Vehicle Added SuccessFully");
+                    navigation.navigate('CustomerDetails' , { userId : route.params.userId });
+                } else if (res.statusCode == 400) {
+                    { res.data.message.vehicle_registration_number && setVehicleRegistrationNumberError(res.data.message.vehicle_registration_number); }
+                    return;
+                }
             });
-            let responseJson = await res.json();
-            console.log(responseJson);
+            // let responseJson = await res.json();
+            // console.log(responseJson);
 
             // fetch(`${API_URL}add_new_customer`, {
             //     method: 'POST',
@@ -354,54 +375,9 @@ const AddVehicle = ({ navigation, userToken, route }) => {
             if(res.statusCode == 400) {
               { res.data.message.vehicle_registration_number && setVehicleRegistrationNumberError(res.data.message.vehicle_registration_number); }
               return;
-            } 
+            }
         });
     }
-
-    const getStatesList = async () => {
-        try {
-            const res = await fetch(`${API_URL}fetch_states`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + userToken
-                },
-            });
-            const json = await res.json();
-            if (json !== undefined) {
-                // console.log(json.states);
-                setStateList(json.states);
-            }
-        } catch (e) {
-            console.log(e);
-        } finally {
-            // setIsLoading(false);
-        }
-    };
-
-    const getCityList = async () => {
-        try {
-            const res = await fetch(`${API_URL}fetch_cities?state_id=${isState}`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + userToken
-                },
-            });
-            const json = await res.json();
-            if (json !== undefined) {
-                setCityList(json.cities);
-                setCityFieldToggle(true);
-            }
-        } catch (e) {
-            console.log(e);
-            return alert(e);
-        } finally {
-            // setIsLoading(false);
-        }
-    };
 
     const getBrandList = async () => {
         try {

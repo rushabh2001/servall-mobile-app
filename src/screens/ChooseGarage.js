@@ -10,7 +10,7 @@ import { API_URL } from "../constants/config"
 
 // What we have display
 
-const ChooseGarage = ({ navigation, userToken }) => {
+const ChooseGarage = ({ navigation, userToken, userRole }) => {
 
     const [data, setData] = useState();
     const [isLoading, setIsLoading] = useState(true);
@@ -38,6 +38,7 @@ const ChooseGarage = ({ navigation, userToken }) => {
     };
 
     useEffect(() => {
+        console.log(userRole);
         setIsLoading(true);
         if(isFocused) {
             setData([]);
@@ -102,6 +103,7 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => ({
     userToken: state.user.userToken,
+    userRole: state.role.user_role,
 })
 
 export default connect(mapStateToProps)(ChooseGarage);

@@ -12,15 +12,14 @@ const MyCustomer = ({navigation, userToken, garageId }) => {
     const refRBSheet = useRef();
     const [isGarageId, setGarageId] = useState(garageId);
     const [data, setData] = useState([]);
-    const [customerId, setCustomerId] = useState('');
-    const [searchQuery, setSearchQuery] = useState(""); 
+    const [customerId, setCustomerId] = useState();
+    const [searchQuery, setSearchQuery] = useState(); 
     const [filteredData, setFilteredData] = useState([]);
 
     useEffect(() => {
-        setSearchQuery("");
-        setFilteredData([]);
+        // setSearchQuery();
+        // setFilteredData([]);
         // setData([]);
-        setData([]);
         getCustomerList();
     }, []);
 
@@ -37,7 +36,7 @@ const MyCustomer = ({navigation, userToken, garageId }) => {
             const json = await res.json();
             if (json !== undefined) {
                 // console.log(json);
-                setFilteredData(json.user_list)
+                setFilteredData(json.user_list);
                 setData(json.user_list);
             }
         } catch (e) {
@@ -51,9 +50,10 @@ const MyCustomer = ({navigation, userToken, garageId }) => {
         if (text) {
             const newData = data.filter(
                 function (listData) {
-                const itemData = listData.name
-                    ? listData.name.toUpperCase()
-                    : ''.toUpperCase();
+                let arr2 = listData.phone_number ? listData.phone_number : ''.toUpperCase() 
+                let arr1 = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
+                let itemData = arr1.concat(arr2);
+                // console.log(itemData);
                 const textData = text.toUpperCase();
                 return itemData.indexOf(textData) > -1;
                 }
