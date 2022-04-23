@@ -53,27 +53,35 @@ const ChooseGarage = ({ navigation, userToken, userRole }) => {
             <View style={styles.mainContainer}>
                 {isLoading ? <ActivityIndicator style={{paddingVertical: 20}}></ActivityIndicator> : 
                 // <View style={{flexDirection: "column", backgroundColor:colors.white, marginVertical:15 }}>
-                    <FlatList
-                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
-                        data={data}
-                        keyExtractor={item => item.id}
-                        renderItem={({item}) => {
-                            if (item != 0) {
-                                return (
-                                    <List.Item
-                                        title={item.garage_name}
-                                        description={item.owner_garage.name}
-                                        right={()=> (<Icon name={'chevron-right'} size={14} style={{alignSelf:'center'}} color={colors.gray} />)}
-                                        onPress={() => navigation.navigate('inside', {screen: "Services"} )}
-                                    />
-                                )
-                            } else {
-                                return (
-                                    <Text style={{textAlign: "center"}}>No Garage Found</Text>
-                                )
-                            }
-                        }}
-                    /> 
+                    <>
+                        <List.Item
+                            title="Global Values"
+                            description="For Super Admin Only"
+                            right={()=> (<Icon name={'chevron-right'} size={14} style={{alignSelf:'center'}} color={colors.gray} />)}
+                            onPress={() => navigation.navigate('inside', {screen: "Services"} )}
+                        />
+                        <FlatList
+                            ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                            data={data}
+                            keyExtractor={item => item.id}
+                            renderItem={({item}) => {
+                                if (item != 0) {
+                                    return (
+                                        <List.Item
+                                            title={item.garage_name}
+                                            description={item.owner_garage.name}
+                                            right={()=> (<Icon name={'chevron-right'} size={14} style={{alignSelf:'center'}} color={colors.gray} />)}
+                                            onPress={() => navigation.navigate('inside', {screen: "Services"} )}
+                                        />
+                                    )
+                                } else {
+                                    return (
+                                        <Text style={{textAlign: "center"}}>No Garage Found</Text>
+                                    )
+                                }
+                            }}
+                        /> 
+                    </>
                 }
                 {/* <Divider />
                 <Divider />

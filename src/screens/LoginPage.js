@@ -249,6 +249,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 5,
         backgroundColor: colors.white,
+        color: colors.black
      },
      headingStyle: {
          fontSize: 20,

@@ -6,6 +6,7 @@ import { setUserToken, updateUserNotification } from '../actions/user';
 import { getValue, saveValue, removeValue } from '../lib/storage';
 import { apiPost } from '../network/apiFetch';
 import { setGarage } from '../actions/garage';
+import { setUserRole } from '../actions/role';
 
 const login = function* login({ data }) {
     try {
@@ -56,11 +57,12 @@ const login = function* login({ data }) {
 
 const signOut = function* signOut() {
 	let user = JSON.parse(yield call(getValue, 'USER'));
-	saveValue('last_login_id', user.email.trim());
+	// saveValue('last_login_id', user.email.trim());
     removeValue('USER');
     removeValue('USER_TOKEN');
     removeValue('GARAGE');
     removeValue('GARAGE_ID');
+    removeValue('USER_ROLE');
     yield all([
         put(setupIntro({ isFirstTime: false })),
         put(appStart({ root: ROOT_OUTSIDE }))
@@ -81,7 +83,7 @@ const deleteAccount = function* deleteAccount() {
 
 const root = function* root() {
     yield takeLatest(AUTH.LOGIN, login);
-    // yield takeLatest(AUTH.SIGN_OUT, signOut);
+    yield takeLatest(AUTH.SIGN_OUT, signOut);
     // yield takeLatest(AUTH.DELETE_ACCOUNT, deleteAccount);
 }
 

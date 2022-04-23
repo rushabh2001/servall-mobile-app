@@ -7,7 +7,7 @@ import  { API_URL } from "../constants/config"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import RBSheet from "react-native-raw-bottom-sheet";
  
-const MyCustomer = ({navigation, userToken, garageId }) => {
+const VehicleSearch = ({navigation, userToken, garageId }) => {
     const [isLoading, setIsLoading] = useState(true);
     const refRBSheet = useRef();
     const [isGarageId, setGarageId] = useState(garageId);
@@ -17,9 +17,6 @@ const MyCustomer = ({navigation, userToken, garageId }) => {
     const [filteredData, setFilteredData] = useState([]);
 
     useEffect(() => {
-        // setSearchQuery();
-        // setFilteredData([]);
-        // setData([]);
         getCustomerList();
     }, []);
 
@@ -126,34 +123,6 @@ const MyCustomer = ({navigation, userToken, garageId }) => {
                     />   
                 }
             </View>
-            <RBSheet
-                ref={refRBSheet}
-                height={190}
-                openDuration={250}
-                >
-                <View style={{flexDirection:"column", flex:1}}>
-                    <List.Item
-                        title="View Customer Details"
-                        style={{paddingVertical:15}}
-                        onPress={() => { navigation.navigate("CustomerDetails", { userId: customerId });  refRBSheet.current.close(); }}
-                        left={() => (<Icon type={"MaterialCommunityIcons"} name="eye" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
-                    />
-                    <Divider />
-                    <List.Item
-                        title="Activity Log"
-                        style={{paddingVertical:15}}
-                        onPress={() =>  { navigation.navigate("MyCustomers");  refRBSheet.current.open(); }}
-                        left={() => (<Icon type={"MaterialCommunityIcons"} name="clipboard-list-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
-                    />
-                    <Divider />
-                    <List.Item
-                        title="Add Note"
-                        style={{paddingVertical:15}}
-                        onPress={() => { navigation.navigate("MyCustomers");  refRBSheet.current.open(); }}
-                        left={() => (<Icon type={"MaterialCommunityIcons"} name="notebook-plus-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
-                    />
-                </View>
-            </RBSheet>
         </View>
     );
 }
@@ -203,4 +172,4 @@ const mapStateToProps = state => ({
     garageId: state.garage.garage_id,
 })
 
-export default connect(mapStateToProps)(MyCustomer);
+export default connect(mapStateToProps)(VehicleSearch);

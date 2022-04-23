@@ -35,14 +35,11 @@ const CustomerDetails = ({ navigation, route, userToken }) => {
             // console.log(res);
             if (json !== undefined) {
                 // console.log(json);
-                setIsCustomerData('');
                 setIsCustomerData(json?.user_details);
                 if(json.user_details.profile_image != null) {
                     setImageUri('http://demo2.webstertech.in/servall_garage_api/public/uploads/profile_image/' + json?.user_details.profile_image);
-                    // console.log("this is working");
                 } else {
                     setImageUri('http://demo2.webstertech.in/servall_garage_api/public/img/placeolder_servall.jpg');
-                    // console.log("Else Part this is working");
                 }
             }
         } catch (e) {
@@ -68,8 +65,6 @@ const CustomerDetails = ({ navigation, route, userToken }) => {
             });
             let responseJson = await res.json();
             if (responseJson.message == true) {
-                setIsCustomerData('');
-                setImageUri('http://demo2.webstertech.in/servall_garage_api/public/img/placeolder_servall.jpg');
                 getCustomerDetails();
             }
         } else {
@@ -167,7 +162,6 @@ const CustomerDetails = ({ navigation, route, userToken }) => {
     }, [singleFile]);
     
     useEffect(() => {
-        setIsCustomerData('');
         // setImageUri('http://demo2.webstertech.in/servall_garage_api/public/img/placeolder_servall.jpg');
         getCustomerDetails();
     }, [isFocused]);
