@@ -6,11 +6,12 @@ import { connect } from "react-redux";
 import { Divider, List, useTheme } from "react-native-paper";
 import { colors } from "../constants";
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import { API_URL } from "../constants/config"
+import { API_URL } from "../constants/config";
+import { setSelectedGarage } from '../actions/garage';
 
 // What we have display
 
-const ChooseGarage = ({ navigation, userToken, userRole }) => {
+const ChooseGarage = ({ navigation, userToken, userRole, setSelectedGarage, userId }) => {
 
     const [data, setData] = useState();
     const [isLoading, setIsLoading] = useState(true);
@@ -18,7 +19,7 @@ const ChooseGarage = ({ navigation, userToken, userRole }) => {
 
     const getGarageList = async () => {
         try {
-            const res = await fetch(`${API_URL}fetch_garages`, {
+            const res = await fetch(`${API_URL}fetch_owner_garages?user_id=${userId}&user_role=${userRole}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -28,7 +29,8 @@ const ChooseGarage = ({ navigation, userToken, userRole }) => {
             });
             const json = await res.json();
             if (json !== undefined) {
-                setData(json.data);
+                setData(json.garage_list);
+                // console.log(json);
             }
         } catch (e) {
             console.log(e);
@@ -39,6 +41,7 @@ const ChooseGarage = ({ navigation, userToken, userRole }) => {
 
     useEffect(() => {
         console.log(userRole);
+        // console.log(userId);
         setIsLoading(true);
         if(isFocused) {
             setData([]);
@@ -50,18 +53,21 @@ const ChooseGarage = ({ navigation, userToken, userRole }) => {
 
     return (
         <View style={styles.surfaceContainer}>
-            <View style={styles.mainContainer}>
+            
                 {isLoading ? <ActivityIndicator style={{paddingVertical: 20}}></ActivityIndicator> : 
                 // <View style={{flexDirection: "column", backgroundColor:colors.white, marginVertical:15 }}>
-                    <>
+                <View style={[styles.mainContainer, userRole == "Super Admin" && {marginBottom: 70}]}>
+                        {userRole == "Super Admin" &&
                         <List.Item
                             title="Global Values"
                             description="For Super Admin Only"
                             right={()=> (<Icon name={'chevron-right'} size={14} style={{alignSelf:'center'}} color={colors.gray} />)}
                             onPress={() => navigation.navigate('inside', {screen: "Services"} )}
                         />
+                        }
                         <FlatList
                             ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                            // style={userRole == "Super Admin" && {marginBottom: 100}}
                             data={data}
                             keyExtractor={item => item.id}
                             renderItem={({item}) => {
@@ -71,7 +77,7 @@ const ChooseGarage = ({ navigation, userToken, userRole }) => {
                                             title={item.garage_name}
                                             description={item.owner_garage.name}
                                             right={()=> (<Icon name={'chevron-right'} size={14} style={{alignSelf:'center'}} color={colors.gray} />)}
-                                            onPress={() => navigation.navigate('inside', {screen: "Services"} )}
+                                            onPress={() => { setSelectedGarage({ selected_garage: item, selected_garage_id: item.id }); navigation.navigate('inside', {screen: "Services"}); }}
                                         />
                                     )
                                 } else {
@@ -80,8 +86,8 @@ const ChooseGarage = ({ navigation, userToken, userRole }) => {
                                     )
                                 }
                             }}
-                        /> 
-                    </>
+                        />
+                    </View>
                 }
                 {/* <Divider />
                 <Divider />
@@ -91,7 +97,7 @@ const ChooseGarage = ({ navigation, userToken, userRole }) => {
                     right={()=> (<Icon name={'plus'} size={14} style={{alignSelf:'center'}} color={colors.gray} />)}
                     onPress={() => navigation.navigate('AllStack', {screen: "AddGarage"} )}
                 /> */}
-            </View>
+            
         </View>
     )
 }
@@ -112,6 +118,11 @@ const styles = StyleSheet.create({
 const mapStateToProps = state => ({
     userToken: state.user.userToken,
     userRole: state.role.user_role,
+    userId: state.user?.user?.user_data?.id,
 })
 
-export default connect(mapStateToProps)(ChooseGarage);
+const mapDispatchToProps = (dispatch) => ({
+    setSelectedGarage: (data) => dispatch(setSelectedGarage(data)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(ChooseGarage);

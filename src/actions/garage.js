@@ -7,9 +7,9 @@ export function setGarage(data) {
     }
 }
 
-export function getGarage(data) {
+export function setSelectedGarage(data) {
     return {
-        type: GARAGE.GET_GARAGE,
+        type: GARAGE.SET_SELECTED_GARAGE,
         data
     }
 }

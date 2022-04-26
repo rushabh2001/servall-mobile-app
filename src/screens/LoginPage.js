@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { View , Text, StyleSheet, Image, TextInput, Keyboard, KeyboardAvoidingView  } from 'react-native';
 import { connect } from 'react-redux';
 import { colors, gStyle } from '../constants';
@@ -49,6 +49,8 @@ const Login = ({navigation, loginRequest, loginError, error, authenticating, res
             return setOtpError('OTP Should be 4 digit');
         };
         loginRequest({'email': email, 'otp': otp});
+        if(loginError) console.log(loginError)
+      
         // resetLogin();
         // navigation.navigate('inside');
     }
@@ -93,9 +95,9 @@ const Login = ({navigation, loginRequest, loginError, error, authenticating, res
         });
     }
 
-    // useEffect(() => {
-    //    
-    // }, []);
+    useEffect(() => {
+        if(loginError) console.log(loginError)
+    }, [loginError]);
     // const loginWithOtp = (formOTP) => { 
     //     fetch(`${API_URL}loginWithOtp`, 
     //     {

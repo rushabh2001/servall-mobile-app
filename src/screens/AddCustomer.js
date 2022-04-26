@@ -198,7 +198,7 @@ const AddCustomer = ({ navigation, userToken, garageId }) => {
         const res = await DocumentPicker.pick({
             type: [DocumentPicker.types.images],
         });
-        console.log(res);
+        // console.log(res);
         setIsInsuranceImg(res[0]);
         } catch (err) {
             setIsInsuranceImg(null);

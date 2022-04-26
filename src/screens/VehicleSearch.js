@@ -1,28 +1,25 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, StyleSheet, Linking, ActivityIndicator, FlatList } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, ScrollView, Image } from "react-native";
 import { connect } from 'react-redux';
-import { List, Button, Divider, Searchbar } from "react-native-paper";
+import { Button, Divider, Searchbar, Badge, Modal, Portal } from "react-native-paper";
 import { colors } from  "../constants";
-import  { API_URL } from "../constants/config"
+import  { API_URL, WEB_URL } from "../constants/config"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import RBSheet from "react-native-raw-bottom-sheet";
+import moment from 'moment';
  
-const VehicleSearch = ({navigation, userToken, garageId }) => {
+const VehicleSearch = ({navigation, userToken, selectedGarageId }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const refRBSheet = useRef();
-    const [isGarageId, setGarageId] = useState(garageId);
+    const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [data, setData] = useState([]);
-    const [customerId, setCustomerId] = useState();
     const [searchQuery, setSearchQuery] = useState(); 
     const [filteredData, setFilteredData] = useState([]);
+    const [viewVehicleDetailsModal, setViewVehicleDetailsModal] = useState(false);
+    const [VehicleData, setVehicleData] = useState('');
+    const [vehicleDataLoading, setVehicleDataLoading] = useState(true);
 
-    useEffect(() => {
-        getCustomerList();
-    }, []);
-
-    const getCustomerList = async () => {
+    const getVehicleDetails = async (vehicleId) => {
         try {
-            const res = await fetch(`${API_URL}fetch_my_garage_customers?garage_id=${isGarageId}`, {
+            const res = await fetch(`${API_URL}fetch_vehicle_data?id=${vehicleId}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -32,9 +29,31 @@ const VehicleSearch = ({navigation, userToken, garageId }) => {
             });
             const json = await res.json();
             if (json !== undefined) {
-                // console.log(json);
-                setData(json.user_list);
-                setFilteredData(json.user_list);
+                console.log(json);
+                setVehicleData(json.vehicle_details);
+            }
+        } catch (e) {
+            console.log(e);
+        } finally {
+            setVehicleDataLoading(false);
+        }
+    };
+
+    const getVehicleList = async () => {
+        try {
+            const res = await fetch(`${API_URL}fetch_all_vehicle_by_query?garage_id=${isGarageId}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+            });
+            const json = await res.json();
+            if (json !== undefined) {
+                // console.log(json.vehicle_list);
+                setData(json.vehicle_list);
+                setFilteredData(json.vehicle_list);
             }
         } catch (e) {
             console.log(e);
@@ -47,9 +66,10 @@ const VehicleSearch = ({navigation, userToken, garageId }) => {
         if (text) {
             const newData = data.filter(
                 function (listData) {
-                let arr2 = listData.phone_number ? listData.phone_number : ''.toUpperCase() 
-                let arr1 = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
-                let itemData = arr1.concat(arr2);
+                // let arr2 = listData.vehicle_registration_number ? listData.vehicle_registration_number : ''.toUpperCase() 
+                // let arr1 = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
+                // let itemData = arr1.concat(arr2);
+                let itemData = listData.vehicle_registration_number ? listData.vehicle_registration_number.toUpperCase() : ''.toUpperCase()
                 // console.log(itemData);
                 const textData = text.toUpperCase();
                 return itemData.indexOf(textData) > -1;
@@ -68,8 +88,13 @@ const VehicleSearch = ({navigation, userToken, garageId }) => {
     // }, [customerId]);
 
     useEffect(() => {
-       console.log(isGarageId);
-    }, [isGarageId]);
+        getVehicleList();
+        console.log(isGarageId);
+    }, []);
+
+    // useEffect(() => {
+    //    console.log(isGarageId);
+    // }, [isGarageId]);
 
     return (
         <View style={styles.surfaceContainer}>
@@ -78,49 +103,127 @@ const VehicleSearch = ({navigation, userToken, garageId }) => {
                 onChangeText={(text) => searchFilter(text)}
                 value={searchQuery}
             />
-            <View style={{flexDirection: "column", backgroundColor:colors.white, marginVertical:15, elevation: 2 }}>
+            <View style={{flexDirection: "column", marginVertical:15 }}>
                 {isLoading ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> :
-                    <FlatList
-                        ItemSeparatorComponent= {() => (<Divider />)}
-                        data={filteredData}
-                        // onEndReachedThreshold={1}
-                        keyExtractor={item => item.id}
-                        renderItem={({item}) => (
-                            <List.Item
-                                title={
-                                    <View style={{flexDirection:"column"}} >
-                                        <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
-                                            <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
-                                            <Text>   ({item.phone_number})</Text>
+                    (filteredData.length != 0 ? 
+                        <View>
+                            <FlatList
+                                ItemSeparatorComponent= {() => (<Divider />)}
+                                data={filteredData}
+                                // onEndReachedThreshold={1}
+                                keyExtractor={item => item.id}
+                                renderItem={({item}) => (
+                                    <View style={styles.cards}>
+                                        <View style={styles.cardOrderDetails}>
+                                            <Text style={styles.orderID}>Last Order ID: 11469</Text>
+                                            {/* <Text style={styles.orderStatus}>Completed</Text> */}
                                         </View>
-                                        <View style={{flexDirection:"row", alignItems:"center", marginVertical:15, flex:1}}>
-                                            <View style={{width:130}}>
-                                                <Button
-                                                    onPress={() => Linking.openURL(`https://wa.me/${item.phone_number}`) }
-                                                    style={styles.buttonStyle}
-                                                    color={colors.secondary}
-                                                    icon={ (color) => <Icon name={'whatsapp'} size={24} color={colors.secondary}  /> }
-                                                    uppercase={false} 
-                                                ><Text style={{fontSize:12}}>Whatsapp</Text></Button>
-                                            </View>
-                                            <View style={{width:15}}></View>
-                                            <View style={{width:100}}>
-                                                <Button
-                                                    onPress={() => Linking.openURL(`tel:${item.phone_number}`) }
-                                                    style={styles.buttonStyle}
-                                                    color={colors.secondary}
-                                                    icon={ (color) => <Icon name={'phone'} size={24} color={colors.secondary}  /> }
-                                                    uppercase={false} 
-                                                ><Text style={{fontSize:12}}>Call</Text></Button>
-                                            </View>
+                                        <View>
+                                            <Text style={styles.cardCustomerName}>Owner Name: {item.users[0].name}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardCustomerName}>Owner`s Phone Number: {item.users[0].phone_number}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardCustomerName}>Brand: {item.brand.name}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardCustomerName}>Model: {item.vehicle_model.model_name}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardCustomerName}>Registration Number: {item.vehicle_registration_number}</Text>
                                         </View>
-                                    </View> 
-                                }
-                                right={() => <Icon onPress={() => { refRBSheet.current.open(); setCustomerId(item.id); }}  type={"MaterialCommunityIcons"} style={{right: 5, top: 8,position: 'absolute',}} name={'dots-vertical'} size={22}  color={colors.gray} />}
-                            />
-                        )}
-                        // keyExtractor={(item, index) => index.toString()}
-                    />   
+                                        <View style={styles.cardActions}>
+                                            <TouchableOpacity onPress={()=>{setViewVehicleDetailsModal(true); getVehicleDetails(item.id);}} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>View More Details</Text></TouchableOpacity>
+                                        </View>
+                                    </View>
+                                )}
+                                // // keyExtractor={(item, index) => index.toString()}
+                            />     
+                            <Portal>
+                                <Modal visible={viewVehicleDetailsModal} onDismiss={() => { setViewVehicleDetailsModal(false); }} contentContainerStyle={styles.modalContainerStyle}>
+                                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Vehicle Details</Text>
+                                    {vehicleDataLoading 
+                                    ? 
+                                        <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> 
+                                    :
+                                        <ScrollView>
+                                        <Text style={styles.cardDetailsHeading}>Vehicle Owner Name:</Text>
+                                        <Text style={styles.cardDetailsData}>{VehicleData?.users[0]?.name ? VehicleData?.users[0]?.name : null}</Text>
+                                        <Divider />
+                                        <Text style={styles.cardDetailsHeading}>Vehicle Owner`s Phone Number:</Text>
+                                        <Text style={styles.cardDetailsData}>{VehicleData?.users[0]?.phone_number ? VehicleData?.users[0]?.phone_number : null}</Text>
+                                        <Divider />
+                                        <Text style={styles.cardDetailsHeading}>Vehicle Owner`s Email:</Text>
+                                        <Text style={styles.cardDetailsData}>{VehicleData?.users[0]?.email ? VehicleData?.users[0]?.email : null}</Text>
+                                        <Divider />
+                                        <Text style={styles.cardDetailsHeading}>Vehicle Registration Number:</Text>
+                                        <Text style={styles.cardDetailsData}>{VehicleData?.vehicle_registration_number ? VehicleData?.vehicle_registration_number : null}</Text>
+                                        <Divider />
+                                        <Text style={styles.cardDetailsHeading}>Vehicle Brand:</Text>
+                                        <Text style={styles.cardDetailsData}>{VehicleData?.brand?.name ? VehicleData?.brand?.name : null}</Text>
+                                        <Divider />
+                                        <Text style={styles.cardDetailsHeading}>Vehicle Model:</Text>
+                                        <Text style={styles.cardDetailsData}>{VehicleData?.vehicle_model?.model_name ? VehicleData?.vehicle_model?.model_name : null}</Text>
+                                        <Divider />
+                                        <Text style={styles.cardDetailsHeading}>Purchase Date:</Text>
+                                        <Text style={styles.cardDetailsData}>{VehicleData?.purchase_date ? moment(VehicleData?.purchase_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
+                                        <Divider />
+                                        <Text style={styles.cardDetailsHeading}>Manufacturing Date:</Text>
+                                        <Text style={styles.cardDetailsData}>{VehicleData?.manufacturing_date ? moment(VehicleData?.manufacturing_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
+                                        <Divider />
+                                        <Text style={styles.cardDetailsHeading}>Engine Number:</Text>
+                                        <Text style={styles.cardDetailsData}>{VehicleData?.engine_number ? VehicleData?.engine_number : null}</Text>
+                                        <Divider />
+                                        <Text style={styles.cardDetailsHeading}>Chasis Number:</Text>
+                                        <Text style={styles.cardDetailsData}>{VehicleData?.chasis_number ? VehicleData?.chasis_number : null}</Text>
+                                        <Divider />
+                                        <Text style={styles.cardDetailsHeading}>Insurance Provider Company:</Text>
+                                        <Text style={styles.cardDetailsData}>{VehicleData?.insurance_provider?.name ? VehicleData?.insurance_provider?.name : null}</Text>
+                                        <Divider />
+                                        <Text style={styles.cardDetailsHeading}>Insurer GSTIN:</Text>
+                                        <Text style={styles.cardDetailsData}>{VehicleData?.insurer_gstin ? VehicleData?.insurer_gstin : null}</Text>
+                                        <Divider />
+                                        <Text style={styles.cardDetailsHeading}>Insurer Address:</Text>
+                                        <Text style={styles.cardDetailsData}>{VehicleData?.insurer_address ? VehicleData?.insurer_address : null}</Text>
+                                        <Divider />
+                                        <Text style={styles.cardDetailsHeading}>Policy Number:</Text>
+                                        <Text style={styles.cardDetailsData}>{VehicleData?.policy_number ? VehicleData?.policy_number : null}</Text>
+                                        <Divider />
+                                        <Text style={styles.cardDetailsHeading}>Insurance Expiry Date:</Text>
+                                        <Text style={styles.cardDetailsData}>{VehicleData?.insurance_expiry_date ? moment(VehicleData?.insurance_expiry_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
+                                        <Divider />
+                                        <Text style={styles.cardDetailsHeading}>Registration Certificate:</Text>
+                                        <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/registration_certificate_img/' + VehicleData?.registration_certificate_img }} />
+                                        <Divider />
+                                        <Text style={styles.cardDetailsHeading}>Insurance Policy:</Text>
+                                        <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/insurance_img/' + VehicleData?.insurance_img }} />
+                                        {/* <Text style={styles.cardDetailsData}>Rushabh Patel</Text> */}
+                                        {/* {console.log(WEB_URL + 'uploads/insurance_img/' + VehicleData?.insurance_img)} */}
+                                        </ScrollView>
+                                    }
+                                    <View style={{flexDirection: "row",}}>
+                                        {/* <Button
+                                            style={{marginTop:15, flex: 1, marginRight: 10}}
+                                            mode={'contained'}
+                                            onPress={addNewInsuranceCompany}
+                                        >
+                                            Add
+                                        </Button> */}
+                                        <View style={{flex: 1}}></View>
+                                        <Button
+                                            style={{marginTop:15, flex: 1.4, alignSelf: 'center'}}
+                                            mode={'contained'}
+                                            onPress={() => setViewVehicleDetailsModal(false)}
+                                        >
+                                            Close
+                                        </Button>
+                                        <View style={{flex: 1}}></View>
+                                    </View>
+                                </Modal>
+                            </Portal>
+                        </View>
+                    :
+                        <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 50,  backgroundColor:colors.white,}}>
+                            <Text style={{ color: colors.black, textAlign: 'center'}}>No Vehicles are associated with this Garage!</Text>
+                        </View>
+                    )
                 }
             </View>
         </View>
@@ -164,12 +267,117 @@ const styles = StyleSheet.create({
     modalText: {
         marginBottom: 15,
         textAlign: "center"
+    },
+    cards: {
+        padding: 25,
+        elevation: 3,
+        backgroundColor: colors.white,
+        marginBottom: 10,
+    },
+    cardTags: {
+        flexDirection: "row",
+    },
+    tags: {
+        fontSize: 12,
+        paddingVertical: 2,
+        paddingHorizontal: 6,
+        borderWidth: 1,
+        borderRadius: 3,
+        borderColor: colors.black,
+        color: colors.black,
+        marginRight: 3,
+    },
+    cardOrderDetails: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginVertical: 7,
+    },
+    orderStatus: {
+        fontSize: 16,
+        backgroundColor: colors.secondary,
+        paddingVertical: 3,
+        paddingHorizontal: 7,
+        color: colors.white,
+        marginHorizontal: 10,
+    },
+    orderID: {
+        color: colors.black,
+        borderColor: colors.black,
+        borderWidth: 1,
+        paddingVertical: 3,
+        paddingHorizontal: 7,
+    },
+    orderAmount: {
+        color: colors.black,
+        fontSize: 16,
+        paddingVertical: 4        
+    },
+    cardCustomerName: {
+        color: colors.black,
+        fontSize: 16,
+        paddingVertical: 4      
+    },
+    orderDate: {
+        color: colors.black,
+        paddingVertical: 4,
+        fontSize: 16,
+    },
+    kmNoted: {
+        color: colors.black,
+        paddingVertical: 4,
+        fontSize: 16,   
+    },
+    modalContainerStyle: {
+        backgroundColor: 'white', 
+        padding: 20,
+        marginHorizontal: 30,
+        marginTop: 40,
+        marginBottom: 70
+    },
+    cardDetailsHeading: {
+        color: colors.black,
+        fontSize: 16,
+        paddingTop: 4,
+        paddingBottom: 4,
+        fontWeight: 'bold' 
+    }, 
+    cardDetailsData: {
+        color: colors.black,
+        fontSize: 16,
+        paddingTop: 4,
+        paddingBottom: 4
+    },
+    headingStyle: {
+        color: colors.black,
+        fontSize: 20,
+        paddingTop: 5,
+        paddingBottom: 5
+    },
+    smallButton: {
+        fontSize: 16,
+        color: colors.primary,
+        // flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        borderRadius: 2,
+        borderWidth: 1,
+        borderColor: colors.primary,
+        padding: 3,
+        marginHorizontal: 4,
+        marginTop: 3,
+        // alignSelf: 'space-between'
+    },
+    verticleImage: {
+        height: 250,
+        width: 150,
+        resizeMode: 'cover',    
     }
 })
 
 const mapStateToProps = state => ({
     userToken: state.user.userToken,
-    garageId: state.garage.garage_id,
+    // garageId: state.garage.garage_id,
+    selectedGarageId: state.garage.selected_garage_id,
 })
 
 export default connect(mapStateToProps)(VehicleSearch);

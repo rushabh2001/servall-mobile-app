@@ -3,6 +3,8 @@ import { GARAGE } from '../actions/actionTypes';
 const initialState = {
     garage: null,
     garage_id: null,
+    selected_garage: null,
+    selected_garage_id: null,
 }
 
 export default function Garage(state = initialState, action) {
@@ -12,12 +14,13 @@ export default function Garage(state = initialState, action) {
                 ...state,
                 garage: action.data.garage,
                 garage_id: action.data.garage_id
+              
             }
-        case GARAGE.GET_GARAGE:
+        case GARAGE.SET_SELECTED_GARAGE:
             return {
                 ...state,
-                garage: action.data.garage,
-                garage_id: action.data.garage_id
+                selected_garage: action.data.selected_garage,
+                selected_garage_id: action.data.selected_garage_id
             }
         default:
             return state;

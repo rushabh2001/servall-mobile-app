@@ -87,6 +87,7 @@ const AllStack = ({ navigation }) => {
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
   const userRole = useSelector((state) => state.role.user_role);
+  const garageId = useSelector((state) => state.garage.garage_id);
   // console.log(userRole);
   return (
     <MoreStack.Navigator
@@ -102,7 +103,7 @@ const AllStack = ({ navigation }) => {
           headerRight: () =>
           (
             <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
-              {userRole == "Super Admin" &&
+              {userRole == "Super Admin" || garageId?.length > 1 ? 
                 <Button
                   onPress={() => navigation.navigate('ChooseGarage')}
                   style={styles.buttonStyle}
@@ -111,7 +112,7 @@ const AllStack = ({ navigation }) => {
                   uppercase={false}
                 ><Text style={{ fontSize: 12, padding: 0 }}>Choose Garage</Text>
                 </Button>
-              }
+              : null }
             </View>
           )
         }}
@@ -241,7 +242,7 @@ const AllStack = ({ navigation }) => {
 }
 // connect(mapStateToProps)(AllStack);
 
-const InsideStack = ({ navigation, userRole }) => {
+const InsideStack = ({ navigation, userRole, garageId }) => {
   return (
     <Tab.Navigator
       initialRouteName="Services"
@@ -262,7 +263,7 @@ const InsideStack = ({ navigation, userRole }) => {
           ),
           headerRight: () => (
             <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
-              {userRole == "Super Admin" ?
+              {userRole == "Super Admin" || garageId?.length > 1 ? 
                 <Button
                   onPress={() => navigation.navigate('AllStack', { screen: 'ChooseGarage', initial: false })}
                   style={[styles.buttonStyle, { marginRight: 15 }]}
@@ -330,6 +331,7 @@ const InsideStack = ({ navigation, userRole }) => {
 
 const mapStateToProps = state => ({
   userRole: state.role.user_role,
+  garageId: state.garage.garage_id,
 })
 export default connect(mapStateToProps)(InsideStack);
 

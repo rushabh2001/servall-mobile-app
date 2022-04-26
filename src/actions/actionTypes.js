@@ -17,7 +17,7 @@ export const Types = {
   export const APP = createRequestTypes('APP', ['INIT', 'START', 'ERROR', 'SET_UP_INTRO']);
   export const USER = createRequestTypes('USER', ['SET_USER_TOKEN', 'UPDATE_USER', 'UPDATE_USER_NOTIFICATION']);
   export const USERS = createRequestTypes('USERS', ['GET_USERS', 'SET_USERS', 'TOGGLE_USER', 'TOGGLE_UPDATE']);
-  export const GARAGE = createRequestTypes('GARAGE', ['GET_GARAGE', 'SET_GARAGE']);
+  export const GARAGE = createRequestTypes('GARAGE', ['SET_SELECTED_GARAGE', 'SET_GARAGE']);
   export const ROLE = createRequestTypes('ROLE', ['SET_ROLE']);
 
   export const AUTH = createRequestTypes('AUTH', [

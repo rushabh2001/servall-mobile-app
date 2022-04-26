@@ -1,10 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View , Text, StyleSheet, TextInput, Keyboard, ActivityIndicator, TouchableOpacity, Pressable } from 'react-native';
-import { Modal, Portal } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { colors } from '../constants';
 import { API_URL } from '../constants/config';
-import { Button } from 'react-native-paper';
+import { Button, Modal, Portal } from 'react-native-paper';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import InputScrollView from 'react-native-input-scroll-view';
 import { Picker } from '@react-native-picker/picker';
@@ -478,8 +477,8 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                 setDisplayManufacturingCalender(false); 
                 setDateInsuranceExpiry(moment(selectedVehicleData?.insurance_expiry_date, 'YYYY MMMM D').format('DD-MM-YYYY'));
             }
-            if(selectedVehicleData?.isRegistrationCertificateImg) setIsRegistrationCertificateImg(JSON.stringify(selectedVehicleData.isRegistrationCertificateImg));
-            if(selectedVehicleData?.isInsuranceImg) setIsInsuranceImg(JSON.stringify(selectedVehicleData.isInsuranceImg));
+            if(selectedVehicleData?.isRegistrationCertificateImg) setIsRegistrationCertificateImg({name: selectedVehicleData.isRegistrationCertificateImg});
+            if(selectedVehicleData?.isInsuranceImg) setIsInsuranceImg({name: selectedVehicleData.isInsuranceImg});
         }
         setIsLoading(false);
     }, [selectedVehicleData]);
@@ -518,7 +517,7 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                                         style={styles.dropDownField}
                                         itemStyle={{padding: 0}}
                                     >
-                                        <Picker.Item label="Select Your Vehicle" value="0" />
+                                        <Picker.Item label="Select vehicle by registration number" value="0" />
                                         {vehicleList.map((vehicleList, i) => {
                                             return (
                                                 <Picker.Item
@@ -845,7 +844,7 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                         </Portal>
                         <Portal>
                             <Modal visible={addInsuranceCompanyModal} onDismiss={() => { setAddInsuranceCompanyModal(false); setNewInsuranceCompanyName(""); setIsInsuranceProvider(0); }} contentContainerStyle={styles.modalContainerStyle}>
-                                <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
+                                <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Insurance Provider Company</Text>
                                 <TextInput
                                     label='Insurance Company Name'
                                     style={styles.input}

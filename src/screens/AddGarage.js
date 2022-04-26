@@ -18,8 +18,8 @@ const AddGarage = ({navigation, userToken}) => {
     // Garage Fields
     const [isGarageName, setIsGarageName] = useState('');
     const [isGarageContactNumber, setIsGarageContactNumber] = useState('');
-    const [isCity, setIsCity] = useState('');
-    const [isState, setIsState] = useState('');
+    const [isCity, setIsCity] = useState();
+    const [isState, setIsState] = useState();
     const [isLocation, setIsLocation] = useState('');
     const [garageNameError, setGarageNameError] = useState('');
     const [garageContactNumberError, setGarageContactNumberError] = useState('');
@@ -46,6 +46,7 @@ const AddGarage = ({navigation, userToken}) => {
     const [adminList, setAdminList] =  useState([]);
 
     const [isLoading, setIsLoading] = useState(false);
+    const [cityFieldToggle, setCityFieldToggle] = useState(false);
 
     var radio_props = [
         {label: 'New User', value: 'new_user' },
@@ -77,8 +78,8 @@ const AddGarage = ({navigation, userToken}) => {
         else if(isEmail?.indexOf(' ') >= 0){ setEmailError('Email cannot contain spaces'); }    
         else if(isEmail?.indexOf('@') < 0){ setEmailError('Invalid Email Format'); }
         else{
-            let formOTP = ({'email': isEmail, 'phone_number': isPhoneNumber});
-            userCheck(formOTP);
+            // let formOTP = ({'email': isEmail, 'phone_number': isPhoneNumber});
+            // userCheck(formOTP);
             setEmailError("");
             setPhoneNumberError("");
             console.log('All Fields are Valid');
@@ -128,14 +129,30 @@ const AddGarage = ({navigation, userToken}) => {
                 },
                 body: data
                 // body: JSON.stringify(formData)
+            }).then(res => {
+                const statusCode = res.status;
+                let data;
+                return res.json().then(obj => {
+                    data = obj;
+                    return { statusCode, data };
+                });
+            })
+            .then((res) => {
+                if(res.statusCode == 400) {
+                  { res.data.message.email && setEmailError(res.data.message.email); }
+                  { res.data.message.phone_number && setPhoneNumberError(res.data.message.phone_number); }
+                  return;
+                } else if(res.statusCode == 201) {
+                    navigation.navigate('AllStack', { screen: 'ChooseGarage'});
+                }
             });
-            const json = await res.json();
-            if (json !== undefined) {
-                console.log(json);
-                // console.log("Garage Added SuccessFully");
-                // setStateList(json.states);
-                navigation.navigate('AllStack', { screen: 'ChooseGarage'});
-            }
+            // const json = await res.json();
+            // if (json !== undefined) {
+            //     console.log(json);
+            //     // console.log("Garage Added SuccessFully");
+            //     // setStateList(json.states);
+            //     navigation.navigate('AllStack', { screen: 'ChooseGarage'});
+            // }
         } catch (e) {
             console.log(e);
         } finally {
@@ -207,6 +224,7 @@ const AddGarage = ({navigation, userToken}) => {
             if (json !== undefined) {
                 // console.log(json);
                 setCityList(json.cities);
+                setCityFieldToggle(true);
             }
         } catch (e) {
             console.log(e);
@@ -323,7 +341,7 @@ const AddGarage = ({navigation, userToken}) => {
                             <Picker.Item label="Java" value="java" />
                             <Picker.Item label="JavaScript" value="js" />
                         </Picker> */}
-                        <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 10}}>
+                        <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 20}}>
                             <Picker
                                 selectedValue={isState}
                                 onValueChange={(v) => setIsState(v)}
@@ -347,13 +365,14 @@ const AddGarage = ({navigation, userToken}) => {
                         {stateError?.length > 0 &&
                             <Text style={{color: colors.danger}}>{stateError}</Text>
                         }
-                        <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 10}}>
+                        <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 20}}>
                             <Picker
                                 selectedValue={isCity}
                                 onValueChange={(v) => setIsCity(v) }
                                 style={{padding: 0}}
                                 // itemStyle={{height: 44, paddingTop:0, marginTop: 0}}
                                 itemStyle={{padding: 0}}
+                                enabled={cityFieldToggle}
                             >
                                 <Picker.Item label="Select City" value="0" />
                                 {CityList.map((CityList, i) => {
@@ -511,14 +530,14 @@ const styles = StyleSheet.create({
         justifyContent:'center',
     },
     input: {
-        marginTop: 15,
-        marginBottom: 5,
-        padding: 10,
-        height: 40,
+        marginTop: 20,
+        padding: 15,
+        height: 55,
         borderColor: colors.light_gray, // 7a42f4
         borderWidth: 1,
         borderRadius: 5,
         backgroundColor: colors.white,
+        fontSize: 16,
      },
      headingStyle: {
          fontSize: 20,

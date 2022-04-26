@@ -5,7 +5,7 @@ import { loginSuccess, loginError } from '../actions/login';
 import { setUserToken, updateUserNotification } from '../actions/user';
 import { getValue, saveValue, removeValue } from '../lib/storage';
 import { apiPost } from '../network/apiFetch';
-import { setGarage } from '../actions/garage';
+import { setGarage, setSelectedGarage } from '../actions/garage';
 import { setUserRole } from '../actions/role';
 
 const login = function* login({ data }) {
@@ -35,18 +35,39 @@ const login = function* login({ data }) {
             if(res.data.user_role == "Super Admin") {
                 saveValue('GARAGE', null);
                 saveValue('GARAGE_ID', '0');
-                yield put(setGarage({ garage: null, garage_id: 0 }))
+                yield all([
+                    put(setGarage({ garage: null, garage_id: 0 })),
+                    put(setSelectedGarage({ selected_garage: null, selected_garage_id: 0 }))
+                ])
                 // if(res.data.user.garage != null) {} else if (res.data.user.garage == null) {}
-            } else if(res.data.user_role == "Admin"){
-                saveValue('GARAGE', JSON.stringify(res.data.user.garage));
-                saveValue('GARAGE_ID', JSON.stringify(res.data.user.garage.id));
-                yield put(setGarage({ garage: res.data.user.garage, garage_id: parseInt(res.data.user.garage.id) }))
+            } else if(res.data.user == "Admin"){
+                if (res.data.user.garage.length == 1) {
+                    saveValue('GARAGE', JSON.stringify(res.data.user.garage));
+                    saveValue('GARAGE_ID', JSON.stringify(res.data.user.garage.id));
+                    yield all([
+                        put(setGarage({ garage: res.data.user.garage[0], garage_id: parseInt(res.data.user.garage[0].id) })),
+                        put(setSelectedGarage({ selected_garage: res.data.user.garage[0], selected_garage_id: parseInt(res.data.user.garage[0].id) }))
+                    ])
+                } else if (res.data.user.garage.length > 1) {
+                    saveValue('GARAGE', JSON.stringify(res.data.user.garage));
+                    saveValue('GARAGE_ID', JSON.stringify(res.data.user.garage.id));
+                    let garage_ids = res.data.user.garage.map((item) => item.id);
+                    // console.log('ids', garage_ids);
+                    yield all([
+                        put(setGarage({ garage: res.data.user.garage, garage_id: garage_ids })),
+                        put(setSelectedGarage({ selected_garage: res.data.user.garage[0], selected_garage_id: parseInt(res.data.user.garage[0].id), selected_garage: res.data.user.garage_customer, selected_garage_id: parseInt(res.data.user.garage_customer.id) }))
+                    ])
+                }
             } else {
                 saveValue('GARAGE', JSON.stringify(res.data.user.garage_customer));
                 saveValue('GARAGE_ID', JSON.stringify(res.data.user.garage_customer.id));
-                yield put(setGarage({ garage: res.data.user.garage_customer, garage_id: parseInt(res.data.user.garage_customer.id) }))
+                yield all([
+                    put(setGarage({ garage: res.data.user.garage_customer, garage_id: parseInt(res.data.user.garage_customer.id) })),
+                    put(setSelectedGarage({ selected_garage: res.data.user.garage_customer, selected_garage_id: parseInt(res.data.user.garage_customer.id) }))
+                ])
             }
         } else {
+            // console.log(res.data);
             yield put(loginError(res.data))
         }
     } catch (e) {

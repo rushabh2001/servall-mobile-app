@@ -285,7 +285,7 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
                             {phoneNumberError?.length > 0 &&
                                 <Text style={{color: colors.danger}}>{phoneNumberError}</Text>
                             }
-                            <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 10}}>
+                            <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 20}}>
                                 <Picker
                                     selectedValue={isState}
                                     onValueChange={(v) => {setIsState(v)}}
@@ -307,7 +307,7 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
                             {stateError?.length > 0 &&
                                 <Text style={{color: colors.danger}}>{stateError}</Text>
                             }
-                            <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 10}}>
+                            <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 20}}>
                                 <Picker
                                     selectedValue={isCity}
                                     onValueChange={(v) => setIsCity(v) }

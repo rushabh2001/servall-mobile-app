@@ -4,7 +4,7 @@ import { useTheme, Badge, Divider } from "react-native-paper";
 import { colors } from "../constants";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import { API_URL } from "../constants/config";
+import { API_URL, WEB_URL } from "../constants/config";
 import { connect } from "react-redux";
 import { useIsFocused } from "@react-navigation/native";
 import DocumentPicker from 'react-native-document-picker';
@@ -16,7 +16,7 @@ const CustomerDetails = ({ navigation, route, userToken }) => {
 
     const [isCustomerData, setIsCustomerData] = useState('');
     const [isLoading, setIsLoading] = useState(true);
-    const [imageUri, setImageUri] = useState('http://demo2.webstertech.in/servall_garage_api/public/img/placeolder_servall.jpg');
+    const [imageUri, setImageUri] = useState(`${WEB_URL}img/placeolder_servall.jpg`);
     const [singleFile, setSingleFile] = useState(null);
 
     const isFocused = useIsFocused();
@@ -37,9 +37,9 @@ const CustomerDetails = ({ navigation, route, userToken }) => {
                 // console.log(json);
                 setIsCustomerData(json?.user_details);
                 if(json.user_details.profile_image != null) {
-                    setImageUri('http://demo2.webstertech.in/servall_garage_api/public/uploads/profile_image/' + json?.user_details.profile_image);
+                    setImageUri( WEB_URL + 'uploads/profile_image/' + json?.user_details.profile_image);
                 } else {
-                    setImageUri('http://demo2.webstertech.in/servall_garage_api/public/img/placeolder_servall.jpg');
+                    setImageUri( WEB_URL + '/img/placeolder_servall.jpg');
                 }
             }
         } catch (e) {
