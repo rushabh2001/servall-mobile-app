@@ -49,7 +49,8 @@ const Login = ({navigation, loginRequest, loginError, error, authenticating, res
             return setOtpError('OTP Should be 4 digit');
         };
         loginRequest({'email': email, 'otp': otp});
-        if(loginError) console.log(loginError)
+        // if(error) setOtpError(error)
+        // console.log(loginError);
       
         // resetLogin();
         // navigation.navigate('inside');
@@ -96,8 +97,9 @@ const Login = ({navigation, loginRequest, loginError, error, authenticating, res
     }
 
     useEffect(() => {
-        if(loginError) console.log(loginError)
-    }, [loginError]);
+        if(error) setOtpError(error)
+    }, [error]);
+
     // const loginWithOtp = (formOTP) => { 
     //     fetch(`${API_URL}loginWithOtp`, 
     //     {
@@ -195,7 +197,7 @@ const Login = ({navigation, loginRequest, loginError, error, authenticating, res
                             Verify OTP
                         </Button>
                         <Button
-                            mode={'contained'}
+                            // mode={'contained'}
                             style={{marginTop:10}}
                             onPress={() => {
                                 submit();
@@ -203,6 +205,16 @@ const Login = ({navigation, loginRequest, loginError, error, authenticating, res
                             }}
                         >
                             Resend OTP
+                        </Button>
+                        <Button
+                            // mode={'contained'}
+                            style={{marginTop:10}}
+                            onPress={() => {
+                                setField(false);
+                                setEmailError("");
+                            }}
+                        >
+                            Change Email
                         </Button>
                     </View>
                 }

@@ -82,7 +82,7 @@ const AddGarage = ({navigation, userToken}) => {
             // userCheck(formOTP);
             setEmailError("");
             setPhoneNumberError("");
-            console.log('All Fields are Valid');
+            // console.log('All Fields are Valid');
         }
     
         const data = new FormData();
@@ -114,7 +114,7 @@ const AddGarage = ({navigation, userToken}) => {
         // }
         // console.log(isProfileImage);
         addGarage(data);
-        console.log(data);
+        // console.log(data);
     }
 
     const addGarage = async (data) => {
@@ -279,7 +279,7 @@ const AddGarage = ({navigation, userToken}) => {
 
 
     useEffect(() => {
-        getCityList();
+        if(isState != undefined) getCityList();
     }, [isState]);
 
     useEffect(() => {

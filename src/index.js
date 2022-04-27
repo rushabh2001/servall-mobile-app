@@ -28,7 +28,8 @@ export default function App() {
      // }, [])
  
      useEffect(() => {
-         setTimeout(() => store.dispatch(appInit()), 2000)
+        store.dispatch(appInit())
+        //  setTimeout(() => store.dispatch(appInit()), 2000)
      }, [])
  
      return (

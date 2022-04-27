@@ -29,7 +29,7 @@ const VehicleSearch = ({navigation, userToken, selectedGarageId }) => {
             });
             const json = await res.json();
             if (json !== undefined) {
-                console.log(json);
+                // console.log(json);
                 setVehicleData(json.vehicle_details);
             }
         } catch (e) {
@@ -89,7 +89,7 @@ const VehicleSearch = ({navigation, userToken, selectedGarageId }) => {
 
     useEffect(() => {
         getVehicleList();
-        console.log(isGarageId);
+        // console.log(isGarageId);
     }, []);
 
     // useEffect(() => {
@@ -137,7 +137,7 @@ const VehicleSearch = ({navigation, userToken, selectedGarageId }) => {
                                 // // keyExtractor={(item, index) => index.toString()}
                             />     
                             <Portal>
-                                <Modal visible={viewVehicleDetailsModal} onDismiss={() => { setViewVehicleDetailsModal(false); }} contentContainerStyle={styles.modalContainerStyle}>
+                                <Modal visible={viewVehicleDetailsModal} onDismiss={() => { setVehicleDataLoading(true); setViewVehicleDetailsModal(false); }} contentContainerStyle={styles.modalContainerStyle}>
                                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Vehicle Details</Text>
                                     {vehicleDataLoading 
                                     ? 
@@ -210,7 +210,7 @@ const VehicleSearch = ({navigation, userToken, selectedGarageId }) => {
                                         <Button
                                             style={{marginTop:15, flex: 1.4, alignSelf: 'center'}}
                                             mode={'contained'}
-                                            onPress={() => setViewVehicleDetailsModal(false)}
+                                            onPress={() => { setVehicleDataLoading(true); setViewVehicleDetailsModal(false); }}
                                         >
                                             Close
                                         </Button>

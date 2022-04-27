@@ -124,13 +124,15 @@ const AllStack = ({ navigation }) => {
           title: "Choose Garage",
           headerRight: () => (
             <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
-              <Button
-                onPress={() => navigation.navigate('AddGarage')}
-                style={styles.buttonStyle}
-                color={colors.secondary}
-                icon={(color) => <Icon name={'plus'} size={16} color={colors.secondary} />}
-                uppercase={false}
-              ><Text style={{ fontSize: 12, padding: 0 }}>Add Garage</Text></Button>
+              {userRole == "Super Admin" &&
+                <Button
+                  onPress={() => navigation.navigate('AddGarage')}
+                  style={styles.buttonStyle}
+                  color={colors.secondary}
+                  icon={(color) => <Icon name={'plus'} size={16} color={colors.secondary} />}
+                  uppercase={false}
+                ><Text style={{ fontSize: 12, padding: 0 }}>Add Garage</Text></Button>
+              }
             </View>
           ),
           headerLeft: () => (

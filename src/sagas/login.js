@@ -12,7 +12,7 @@ const login = function* login({ data }) {
     try {
         const res = yield call(apiPost, 'login', data);
         if (res.status == 200) {
-            console.log(res);
+            // console.log(res);
             yield all([
                 put(setUserToken({
                     user: res.data.user,
@@ -40,7 +40,7 @@ const login = function* login({ data }) {
                     put(setSelectedGarage({ selected_garage: null, selected_garage_id: 0 }))
                 ])
                 // if(res.data.user.garage != null) {} else if (res.data.user.garage == null) {}
-            } else if(res.data.user == "Admin"){
+            } else if(res.data.user_role == "Admin"){
                 if (res.data.user.garage.length == 1) {
                     saveValue('GARAGE', JSON.stringify(res.data.user.garage));
                     saveValue('GARAGE_ID', JSON.stringify(res.data.user.garage.id));

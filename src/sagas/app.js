@@ -25,8 +25,9 @@ const init = function* init() {
     if (user_token) {
         try {
             const res = yield call(apiGet, 'get_user', { 'Authorization': 'Bearer ' + user_token });
+            //  console.log('res:', res);
             if (res.status == 200) {
-                // console.log('Garages:', res.data.user_data.garage[0]);
+                // console.log('Garages:', res.data.user_data);
                 yield all([
                     put(setUserToken({ user: res.data, user_token: user_token })),
                     put(appStart({ root: ROOT_INSIDE })),
@@ -57,7 +58,7 @@ const init = function* init() {
                         saveValue('GARAGE', JSON.stringify(res.data.user_data.garage));
                         let garage_ids = res.data.user_data.garage.map((item) => item.id);
                         saveValue('GARAGE_ID', JSON.stringify(garage_ids));
-                        console.log('ids', garage_ids);
+                        // console.log('ids', garage_ids);
                         yield all([
                             put(setGarage({ garage: res.data.user_data.garage, garage_id: garage_ids, })),
                             put(setSelectedGarage({ selected_garage: res.data.user_data.garage[0], selected_garage_id: parseInt(res.data.user_data.garage[0].id) }))
@@ -91,6 +92,7 @@ const init = function* init() {
             // }
         }
     } else {
+        // console.log('1');
         yield all([
             put(appStart({ root: ROOT_OUTSIDE })),
             put(setupIntro({ isFirstTime: first_time ? false : true }))

@@ -12,7 +12,7 @@ import moment from 'moment';
 import DocumentPicker from 'react-native-document-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-const AddCustomer = ({ navigation, userToken, garageId }) => {
+const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId }) => {
     
     // User / Customer Fields
     // const [isUserDetails, setIsUserDetails] = useState('');
@@ -64,6 +64,10 @@ const AddCustomer = ({ navigation, userToken, garageId }) => {
     const [registrationCertificateImgError, setRegistrationCertificateImgError] = useState('');
     const [insuranceImgError, setInsuranceImgError] = useState('');
 
+    const [isGarageId, setIsGarageId] =  useState(selectedGarageId);
+    const [garageIdError, setGarageIdError] = useState('');
+
+    const [garageList, setGarageList] =  useState([]);
     const [brandList, setBrandList] =  useState([]);
     const [modelList, setModelList] =  useState([]);
     const [insuranceProviderList, setInsuranceProviderList] =  useState([]);
@@ -253,6 +257,7 @@ const AddCustomer = ({ navigation, userToken, garageId }) => {
             !isState || isState === 0 ||
             !isBrand || isBrand === 0 ||
             !isModel || isModel === 0 ||
+            !isGarageId || isGarageId === 0 ||
             !isVehicleRegistrationNumber || isVehicleRegistrationNumber?.trim().length === 0 
         )
     }
@@ -272,6 +277,7 @@ const AddCustomer = ({ navigation, userToken, garageId }) => {
             if (!isModel || isModel === 0) setModelError('Model is required');
             if (!isCity || isCity === 0) setCityError("City is required");
             if (!isState || isState === 0) setStateError("State is required");
+            if (!isGarageId || isGarageId === 0) setGarageIdError("Customer Belongs to Garage is required");
             if (!isVehicleRegistrationNumber || isVehicleRegistrationNumber?.trim().length === 0) setVehicleRegistrationNumberError("Vehicle Registration Number is required");
             return;
         }
@@ -305,7 +311,7 @@ const AddCustomer = ({ navigation, userToken, garageId }) => {
         if(isRegistrationCertificateImg != null) data.append('registration_certificate_img', { uri: isRegistrationCertificateImg.uri, type: isRegistrationCertificateImg.type, name: isRegistrationCertificateImg.name });
         if(isInsuranceImg != null) data.append('insurance_img', isInsuranceImg);
         data.append('vehicle_option', 'new_vehicle');
-        data.append('garage_id', parseInt(garageId));
+        data.append('garage_id', isGarageId);
 
         addCustomer(data);
         // console.log(JSON.stringify(data));
@@ -535,10 +541,35 @@ const AddCustomer = ({ navigation, userToken, garageId }) => {
         }
     };
 
+    const getGarageList = async () => {
+        try {
+            const res = await fetch(`${API_URL}fetch_garages`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+            });
+            const json = await res.json();
+            if (json !== undefined) {
+                // console.log(json.states);
+                setGarageList(json.data);
+            }
+        } catch (e) {
+            console.log(e);
+        } finally {
+            // setIsLoading(false);
+        }
+    };
+
     useEffect(() => {
         getStatesList();
         getBrandList();
+        getGarageList();
         getInsuranceProviderList();
+        // console.log('garageId:', garageId);
+        // console.log('selectedGarageId:',  selectedGarageId == 0 ? console.log('option1') : parseInt(garageId));
     }, []);
 
     useEffect(() => {
@@ -649,6 +680,33 @@ const AddCustomer = ({ navigation, userToken, garageId }) => {
                             />
                             {addressError?.length > 0 &&
                                 <Text style={styles.errorTextStyle}>{addressError}</Text>
+                            }
+                            {userRole == "Super Admin" &&
+                                <>
+                                    <View style={styles.dropDownContainer}>
+                                        <Picker
+                                            selectedValue={isGarageId}
+                                            onValueChange={(option) => setIsGarageId(option)}
+                                            style={styles.dropDownField}
+                                            itemStyle={{padding: 0}}
+                                        >
+                                            <Picker.Item label="Customer Belongs To Garage" value="0" />
+                                            {garageList.map((garageList, i) => {
+                                                return (
+                                                    <Picker.Item
+                                                        key={i}
+                                                        label={garageList.garage_name}
+                                                        value={garageList.id}
+                                                    />
+                                                );
+                                            })}
+                                                {/* <Picker.Item label="Add New Insurance Company" value="new_insurance_company" /> */}
+                                        </Picker>
+                                    </View>
+                                    {garageIdError?.length > 0 &&
+                                        <Text style={styles.errorTextStyle}>{garageIdError}</Text>
+                                    }
+                                </>
                             }
                          
                             <Text style={[styles.headingStyle, { marginTop:20 }]}>Vehicle Details:</Text>
@@ -1079,7 +1137,9 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => ({
     userToken: state.user.userToken,
-    garageId: state.garage.garage_id,
+    userRole: state.role.user_role,
+    // garageId: state.garage.garage_id,
+    selectedGarageId: state.garage.selected_garage_id,
 })
 
 export default connect(mapStateToProps)(AddCustomer);

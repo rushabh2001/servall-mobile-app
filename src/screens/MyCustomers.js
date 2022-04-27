@@ -6,6 +6,7 @@ import { colors } from  "../constants";
 import  { API_URL } from "../constants/config"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import RBSheet from "react-native-raw-bottom-sheet";
+import { useIsFocused  } from '@react-navigation/native';
  
 const MyCustomer = ({navigation, userToken, selectedGarageId }) => {
     const [isLoading, setIsLoading] = useState(true);
@@ -15,6 +16,7 @@ const MyCustomer = ({navigation, userToken, selectedGarageId }) => {
     const [customerId, setCustomerId] = useState();
     const [searchQuery, setSearchQuery] = useState(); 
     const [filteredData, setFilteredData] = useState([]);
+    const isFocused = useIsFocused();
     // const [isGarageIds, setGarageIds] = useState(garageId);
     // const [isUser, setUser] = useState(userId);
 
@@ -24,6 +26,12 @@ const MyCustomer = ({navigation, userToken, selectedGarageId }) => {
         // setData([]);
         getCustomerList();
     }, []);
+
+    useEffect(() => {
+        setIsLoading(true);
+        getCustomerList();
+    }, [isFocused]);
+
 
     const getCustomerList = async () => {
         try {

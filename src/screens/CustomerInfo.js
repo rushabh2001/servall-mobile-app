@@ -29,7 +29,7 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
     const [CityList, setCityList] =  useState([]);
     const [StateList, setStateList] =  useState([]);
 
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const scroll1Ref = useRef();
 
@@ -224,7 +224,6 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
             console.log(e);
         } finally {
             setIsLoading(false);
-                
         }
     };
 

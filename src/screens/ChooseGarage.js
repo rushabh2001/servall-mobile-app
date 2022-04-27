@@ -62,7 +62,7 @@ const ChooseGarage = ({ navigation, userToken, userRole, setSelectedGarage, user
                             title="Global Values"
                             description="For Super Admin Only"
                             right={()=> (<Icon name={'chevron-right'} size={14} style={{alignSelf:'center'}} color={colors.gray} />)}
-                            onPress={() => navigation.navigate('inside', {screen: "Services"} )}
+                            onPress={() => { setSelectedGarage({ selected_garage: 0 }); navigation.navigate('inside', {screen: "Services"} ); }}
                         />
                         }
                         <FlatList

@@ -64,6 +64,7 @@ const CustomerDetails = ({ navigation, route, userToken }) => {
                 body: data
             });
             let responseJson = await res.json();
+            console.log(responseJson);
             if (responseJson.message == true) {
                 getCustomerDetails();
             }
