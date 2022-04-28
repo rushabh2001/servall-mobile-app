@@ -81,7 +81,7 @@ const MyCustomer = ({navigation, userToken, selectedGarageId }) => {
     // }, [userToken]);
 
     useEffect(() => {
-       console.log(isGarageId);
+    //    console.log(isGarageId);
     //    console.log(isGarageIds);
     //    console.log(isUser);
      

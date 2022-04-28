@@ -308,7 +308,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId }) => {
         if(isInsurerAddress) data.append('insurer_address', isInsurerAddress?.trim());
         if(isPolicyNumber) data.append('policy_number', isPolicyNumber?.trim());
         if(isInsuranceExpiryDate) data.append('insurance_expiry_date', isInsuranceExpiryDate);
-        if(isRegistrationCertificateImg != null) data.append('registration_certificate_img', { uri: isRegistrationCertificateImg.uri, type: isRegistrationCertificateImg.type, name: isRegistrationCertificateImg.name });
+        if(isRegistrationCertificateImg != null) data.append('registration_certificate_img', isRegistrationCertificateImg);
         if(isInsuranceImg != null) data.append('insurance_img', isInsuranceImg);
         data.append('vehicle_option', 'new_vehicle');
         data.append('garage_id', isGarageId);
@@ -326,7 +326,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId }) => {
             await fetch(`${API_URL}add_new_customer`, {
                 method: 'POST',
                 headers: {
-                    // 'Accept': 'application/json',
+                    'Accept': 'application/json',
                     'Content-Type': 'multipart/form-data; ',
                     'Authorization': 'Bearer ' + userToken
                 },
@@ -346,7 +346,9 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId }) => {
                   { res.data.message.phone_number && setPhoneNumberError(res.data.message.phone_number); }
                   { res.data.message.vehicle_registration_number && setVehicleRegistrationNumberError(res.data.message.vehicle_registration_number); }
                   return;
-                } else if(res.statusCode == 201) {
+                } else if(res.statusCode == 201 || res.statusCode == 200) {
+                    navigation.navigate('MyCustomers');
+                } else {
                     navigation.navigate('MyCustomers');
                 }
             });

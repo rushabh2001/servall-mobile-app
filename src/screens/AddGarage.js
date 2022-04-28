@@ -103,7 +103,7 @@ const AddGarage = ({navigation, userToken}) => {
             }
         } else if(ownerOption == "existing_user") {
             data.append('user_owner_id', ownerId);
-            console.log(ownerId);
+            // console.log(ownerId);
         } else {
             console.log('owner options is not working');
         }

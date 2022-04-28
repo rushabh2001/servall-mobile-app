@@ -29,7 +29,7 @@ const VehicleSearch = ({navigation, userToken, selectedGarageId }) => {
             });
             const json = await res.json();
             if (json !== undefined) {
-                // console.log(json);
+                console.log(json);
                 setVehicleData(json.vehicle_details);
             }
         } catch (e) {
@@ -190,10 +190,18 @@ const VehicleSearch = ({navigation, userToken, selectedGarageId }) => {
                                         <Text style={styles.cardDetailsData}>{VehicleData?.insurance_expiry_date ? moment(VehicleData?.insurance_expiry_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
                                         <Divider />
                                         <Text style={styles.cardDetailsHeading}>Registration Certificate:</Text>
-                                        <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/registration_certificate_img/' + VehicleData?.registration_certificate_img }} />
+                                        {VehicleData?.registration_certificate_img !== null ?
+                                            <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/registration_certificate_img/' + VehicleData?.registration_certificate_img }} /> 
+                                        :
+                                            <Text style={styles.cardDetailsData}>Not Uploaded Registration Certificate</Text>
+                                        }
                                         <Divider />
                                         <Text style={styles.cardDetailsHeading}>Insurance Policy:</Text>
-                                        <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/insurance_img/' + VehicleData?.insurance_img }} />
+                                        {VehicleData?.insurance_img !== null ?
+                                            <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/insurance_img/' + VehicleData?.insurance_img }} />
+                                        :
+                                            <Text style={styles.cardDetailsData}>Not Uploaded Insurance Policy</Text>
+                                        }
                                         {/* <Text style={styles.cardDetailsData}>Rushabh Patel</Text> */}
                                         {/* {console.log(WEB_URL + 'uploads/insurance_img/' + VehicleData?.insurance_img)} */}
                                         </ScrollView>

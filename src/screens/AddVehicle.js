@@ -109,7 +109,7 @@ const AddVehicle = ({ navigation, userToken, route }) => {
         if(isInsurerAddress) data.append('insurer_address', isInsurerAddress?.trim());
         if(isPolicyNumber) data.append('policy_number', isPolicyNumber?.trim());
         if(isInsuranceExpiryDate) data.append('insurance_expiry_date', isInsuranceExpiryDate);
-        if(isRegistrationCertificateImg != null) data.append('registration_certificate_img', { uri: isRegistrationCertificateImg.uri, type: isRegistrationCertificateImg.type, name: isRegistrationCertificateImg.name });
+        if(isRegistrationCertificateImg != null) data.append('registration_certificate_img', isRegistrationCertificateImg);
         if(isInsuranceImg != null) data.append('insurance_img', isInsuranceImg);
         // data.append('user_id', 3);
         data.append('user_id', parseInt(route?.params?.userId));
@@ -295,7 +295,7 @@ const AddVehicle = ({ navigation, userToken, route }) => {
             })
             .then((res) => {
                 console.log(res);
-                if (res.statusCode == 201 || res.statusCode == 200) {
+                if (res.statusCode == 201 || res.statusCode == 200 || res.message == true) {
                     console.log("Vehicle Added SuccessFully");
                     navigation.navigate('CustomerDetails' , { userId : route.params.userId });
                 } else if (res.statusCode == 400) {

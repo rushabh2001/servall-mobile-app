@@ -39,7 +39,7 @@ const CustomerDetails = ({ navigation, route, userToken }) => {
                 if(json.user_details.profile_image != null) {
                     setImageUri( WEB_URL + 'uploads/profile_image/' + json?.user_details.profile_image);
                 } else {
-                    setImageUri( WEB_URL + '/img/placeolder_servall.jpg');
+                    setImageUri( WEB_URL + 'img/placeolder_servall.jpg');
                 }
             }
         } catch (e) {
@@ -48,6 +48,30 @@ const CustomerDetails = ({ navigation, route, userToken }) => {
             setIsLoading(false);
         }
     };
+
+    const changeProfileImage = async () => {
+        try {
+            const res = await DocumentPicker.pick({
+            type: [DocumentPicker.types.images],
+            });
+            // console.log('res : ' + JSON.stringify(res));
+            setSingleFile(res[0]);
+        } catch (err) {
+            setSingleFile(null);
+            if (DocumentPicker.isCancel(err)) {
+            alert('Canceled');
+            } else {
+            alert('Unknown Error: ' + JSON.stringify(err));
+            throw err;
+            }
+        } 
+    };
+
+    useEffect(() => {
+        if (singleFile != null) {
+            uploadImage();
+        }
+    }, [singleFile]);
 
     const uploadImage = async () => {
         if (singleFile != null) {
@@ -73,23 +97,6 @@ const CustomerDetails = ({ navigation, route, userToken }) => {
         }
     };
 
-    const changeProfileImage = async () => {
-        try {
-            const res = await DocumentPicker.pick({
-            type: [DocumentPicker.types.images],
-            });
-            // console.log('res : ' + JSON.stringify(res));
-            setSingleFile(res[0]);
-        } catch (err) {
-            setSingleFile(null);
-            if (DocumentPicker.isCancel(err)) {
-            alert('Canceled');
-            } else {
-            alert('Unknown Error: ' + JSON.stringify(err));
-            throw err;
-            }
-        } 
-    };
     // const changeProfileImage = async (data) => {
     //     try {
     //         const res = await DocumentPicker.pick({
@@ -156,11 +163,7 @@ const CustomerDetails = ({ navigation, route, userToken }) => {
     //     }
     // }
     
-    useEffect(() => {
-        if (singleFile != null) {
-            uploadImage();
-        }
-    }, [singleFile]);
+  
     
     useEffect(() => {
         // setImageUri('http://demo2.webstertech.in/servall_garage_api/public/img/placeolder_servall.jpg');
@@ -175,7 +178,7 @@ const CustomerDetails = ({ navigation, route, userToken }) => {
                    <Icon style={styles.iconChangeImage} onPress={changeProfileImage} name={"camera"} size={16} color={colors.white} />
                 </View>
                 <View style={{flexDirection: "row", alignItems:"center",}}>
-                    <Text style={styles.customerName}>{ isCustomerData != null ? isCustomerData.name : '' }</Text>
+                    <Text style={styles.customerName}>{ isCustomerData != null ? isCustomerData.name : null }</Text>
                     {/* <Text style={styles.customerName}>{ isCustomerData != null ? isCustomerData.name : '' }</Text> */}
                     <Icon onPress={() => navigation.navigate('CustomerInfo', { userId: route?.params?.userId })} name={"pencil"} size={20} color={colors.gray} />
                 </View>
@@ -405,7 +408,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-         padding: 10,
+        padding: 10,
     },
     lowerContainer: {
         flex: 1,
