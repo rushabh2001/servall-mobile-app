@@ -6,8 +6,9 @@ import { colors } from  "../constants";
 import  { API_URL, WEB_URL } from "../constants/config"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import moment from 'moment';
- 
-const VehicleSearch = ({navigation, userToken, selectedGarageId }) => {
+import Lightbox from 'react-native-lightbox-v2';
+
+const VehicleSearch = ({navigation, userToken, selectedGarageId, navigator  }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [data, setData] = useState([]);
@@ -191,14 +192,18 @@ const VehicleSearch = ({navigation, userToken, selectedGarageId }) => {
                                         <Divider />
                                         <Text style={styles.cardDetailsHeading}>Registration Certificate:</Text>
                                         {VehicleData?.registration_certificate_img !== null ?
-                                            <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/registration_certificate_img/' + VehicleData?.registration_certificate_img }} /> 
+                                            <Lightbox navigator={navigator} style={styles.lightBoxWrapper}>
+                                                <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/registration_certificate_img/' + VehicleData?.registration_certificate_img }} /> 
+                                            </Lightbox>
                                         :
                                             <Text style={styles.cardDetailsData}>Not Uploaded Registration Certificate</Text>
                                         }
                                         <Divider />
                                         <Text style={styles.cardDetailsHeading}>Insurance Policy:</Text>
                                         {VehicleData?.insurance_img !== null ?
-                                            <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/insurance_img/' + VehicleData?.insurance_img }} />
+                                            <Lightbox navigator={navigator} style={styles.lightBoxWrapper}>
+                                                <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/insurance_img/' + VehicleData?.insurance_img }} />
+                                            </Lightbox>
                                         :
                                             <Text style={styles.cardDetailsData}>Not Uploaded Insurance Policy</Text>
                                         }
@@ -376,10 +381,18 @@ const styles = StyleSheet.create({
         // alignSelf: 'space-between'
     },
     verticleImage: {
-        height: 250,
+        height: 150,
+        // width: 150,
+        // width: '100%',
+        // height: '100%',
+        resizeMode: 'contain',  
+        flex: 1, 
+    }, 
+    lightBoxWrapper: {
         width: 150,
-        resizeMode: 'cover',    
-    }
+        // height: 250,
+    },
+   
 })
 
 const mapStateToProps = state => ({

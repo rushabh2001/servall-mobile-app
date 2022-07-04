@@ -12,7 +12,7 @@ import moment from 'moment';
 import DocumentPicker from 'react-native-document-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId }) => {
+const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId, garageId }) => {
     
     // User / Customer Fields
     // const [isUserDetails, setIsUserDetails] = useState('');
@@ -64,8 +64,8 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId }) => {
     const [registrationCertificateImgError, setRegistrationCertificateImgError] = useState('');
     const [insuranceImgError, setInsuranceImgError] = useState('');
 
-    const [isGarageId, setIsGarageId] =  useState(selectedGarageId);
-    const [garageIdError, setGarageIdError] = useState('');
+    const [isGarageId, setIsGarageId] =  useState();
+    const [garageIdError, setGarageIdError] = useState();
 
     const [garageList, setGarageList] =  useState([]);
     const [brandList, setBrandList] =  useState([]);
@@ -267,18 +267,19 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId }) => {
         Keyboard.dismiss();  
 
         if (!validate()) {
-            if (!isName) setNameError("Customer Name is required");
-            if (!isPhoneNumber) setPhoneNumberError("Phone Number is required");
+            if (!isName) setNameError("Customer Name is required"); else setNameError('');
+            if (!isPhoneNumber) setPhoneNumberError("Phone Number is required"); else setPhoneNumberError('');
             if (!isEmail) setEmailError("Email is required");
             else if (isEmail.length < 6) setEmailError("Email should be minimum 6 characters");
             else if (isEmail?.indexOf(' ') >= 0) setEmailError('Email cannot contain spaces');
             else if (isEmail?.indexOf('@') < 0) setEmailError('Invalid Email Format');
-            if (!isBrand || isBrand === 0) setBrandError('Brand is required');
-            if (!isModel || isModel === 0) setModelError('Model is required');
-            if (!isCity || isCity === 0) setCityError("City is required");
-            if (!isState || isState === 0) setStateError("State is required");
-            if (!isGarageId || isGarageId === 0) setGarageIdError("Customer Belongs to Garage is required");
-            if (!isVehicleRegistrationNumber || isVehicleRegistrationNumber?.trim().length === 0) setVehicleRegistrationNumberError("Vehicle Registration Number is required");
+            else setEmailError('');
+            if (!isBrand || isBrand === 0) setBrandError('Brand is required'); else setBrandError('');
+            if (!isModel || isModel === 0) setModelError('Model is required'); else setModelError('');
+            if (!isCity || isCity === 0) setCityError("City is required"); else setCityError('');
+            if (!isState || isState === 0) setStateError("State is required"); else setStateError('');
+            if (!isGarageId || isGarageId == 0) setGarageIdError("Customer Belongs to Garage Field is required"); else setGarageIdError('');
+            if (!isVehicleRegistrationNumber || isVehicleRegistrationNumber?.trim().length === 0) setVehicleRegistrationNumberError("Vehicle Registration Number is required"); else setVehicleRegistrationNumberError('');
             return;
         }
         
@@ -402,34 +403,34 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId }) => {
         }
     };
 
-    const userVehicleCheck = (dataCheck) => { 
-        fetch(`${API_URL}user_vehicle_check`,
-        {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + userToken
-            },
-            body: JSON.stringify(dataCheck)
-        })
-        .then(res => {
-            const statusCode = res.status;
-            let data;
-            return res.json().then(obj => {
-                data = obj;
-                return { statusCode, data };
-            });
-        })
-        .then((res) => {
-            if(res.statusCode == 400) {
-              { res.data.message.email && setEmailError(res.data.message.email); }
-              { res.data.message.phone_number && setPhoneNumberError(res.data.message.phone_number); }
-              { res.data.message.vehicle_registration_number && setVehicleRegistrationNumberError(res.data.message.vehicle_registration_number); }
-              return;
-            } 
-        });
-    }
+    // const userVehicleCheck = (dataCheck) => { 
+    //     fetch(`${API_URL}user_vehicle_check`,
+    //     {
+    //         method: 'POST',
+    //         headers: {
+    //             Accept: 'application/json',
+    //             'Content-Type': 'application/json',
+    //             'Authorization': 'Bearer ' + userToken
+    //         },
+    //         body: JSON.stringify(dataCheck)
+    //     })
+    //     .then(res => {
+    //         const statusCode = res.status;
+    //         let data;
+    //         return res.json().then(obj => {
+    //             data = obj;
+    //             return { statusCode, data };
+    //         });
+    //     })
+    //     .then((res) => {
+    //         if(res.statusCode == 400) {
+    //           { res.data.message.email && setEmailError(res.data.message.email); }
+    //           { res.data.message.phone_number && setPhoneNumberError(res.data.message.phone_number); }
+    //           { res.data.message.vehicle_registration_number && setVehicleRegistrationNumberError(res.data.message.vehicle_registration_number); }
+    //           return;
+    //         } 
+    //     });
+    // }
 
     const getStatesList = async () => {
         try {
@@ -545,7 +546,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId }) => {
 
     const getGarageList = async () => {
         try {
-            const res = await fetch(`${API_URL}fetch_garages`, {
+            const res = await fetch(`${API_URL}fetch_owner_garages?user_id=${userId}&user_role=${userRole}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -555,14 +556,35 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId }) => {
             });
             const json = await res.json();
             if (json !== undefined) {
-                // console.log(json.states);
-                setGarageList(json.data);
+                setGarageList(json.garage_list);
+                // console.log(json);
             }
         } catch (e) {
             console.log(e);
         } finally {
-            // setIsLoading(false);
+            setIsLoading(false);
+            setIsGarageId(selectedGarageId);
         }
+
+        // try {
+        //     const res = await fetch(`${API_URL}fetch_garages`, {
+        //         method: 'GET',
+        //         headers: {
+        //             'Accept': 'application/json',
+        //             'Content-Type': 'application/json',
+        //             'Authorization': 'Bearer ' + userToken
+        //         },
+        //     });
+        //     const json = await res.json();
+        //     if (json !== undefined) {
+        //         // console.log(json.states);
+        //         setGarageList(json.data);
+        //     }
+        // } catch (e) {
+        //     console.log(e);
+        // } finally {
+        //     // setIsLoading(false);
+        // }
     };
 
     useEffect(() => {
@@ -581,6 +603,10 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId }) => {
     useEffect(() => {
         if(isBrand != undefined) getModelList();
     }, [isBrand]);
+
+    // useEffect(() => {
+    //     console.log('garageId:', isGarageId);
+    // }, [isGarageId]);
 
     return (
         <View style={styles.pageContainer}>
@@ -683,8 +709,9 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId }) => {
                             {addressError?.length > 0 &&
                                 <Text style={styles.errorTextStyle}>{addressError}</Text>
                             }
-                            {userRole == "Super Admin" &&
-                                <>
+
+                            {(userRole == "Super Admin" || garageId?.length > 1)  &&
+                                <View>
                                     <View style={styles.dropDownContainer}>
                                         <Picker
                                             selectedValue={isGarageId}
@@ -708,7 +735,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId }) => {
                                     {garageIdError?.length > 0 &&
                                         <Text style={styles.errorTextStyle}>{garageIdError}</Text>
                                     }
-                                </>
+                                </View>
                             }
                          
                             <Text style={[styles.headingStyle, { marginTop:20 }]}>Vehicle Details:</Text>
@@ -1140,8 +1167,9 @@ const styles = StyleSheet.create({
 const mapStateToProps = state => ({
     userToken: state.user.userToken,
     userRole: state.role.user_role,
-    // garageId: state.garage.garage_id,
+    userId: state.user?.user?.id,
     selectedGarageId: state.garage.selected_garage_id,
+    garageId: state.garage.garage_id,
 })
 
 export default connect(mapStateToProps)(AddCustomer);

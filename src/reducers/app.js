@@ -2,7 +2,8 @@ import {APP} from '../actions/actionTypes';
 
 const initialState={
     root: 'loading',
-    error: undefined,
+    error: null,
+    // error: undefined,
     isFirstTime: false,
     showThankYou: false
 }

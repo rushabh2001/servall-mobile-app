@@ -1,4 +1,4 @@
-import { GARAGE } from '../actions/actionTypes';
+import { GARAGE, AUTH } from '../actions/actionTypes';
 
 const initialState = {
     garage: null,
@@ -21,6 +21,14 @@ export default function Garage(state = initialState, action) {
                 ...state,
                 selected_garage: action.data.selected_garage,
                 selected_garage_id: action.data.selected_garage_id
+            }
+        case AUTH.SIGN_OUT:
+            return {
+                ...state,
+                garage: null,
+                garage_id: null,
+                selected_garage: null,
+                selected_garage_id: null,
             }
         default:
             return state;

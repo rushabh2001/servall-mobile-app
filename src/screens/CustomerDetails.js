@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Image, Text, View, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import { Image, Text, View, StyleSheet, TouchableOpacity, ScrollView, Linking } from "react-native";
 import { useTheme, Badge, Divider } from "react-native-paper";
 import { colors } from "../constants";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -8,16 +8,17 @@ import { API_URL, WEB_URL } from "../constants/config";
 import { connect } from "react-redux";
 import { useIsFocused } from "@react-navigation/native";
 import DocumentPicker from 'react-native-document-picker';
-
+import Lightbox from 'react-native-lightbox-v2';
 
 const customerTopTabs = createMaterialTopTabNavigator();
 
-const CustomerDetails = ({ navigation, route, userToken }) => {
+const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
 
     const [isCustomerData, setIsCustomerData] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [imageUri, setImageUri] = useState(`${WEB_URL}img/placeolder_servall.jpg`);
     const [singleFile, setSingleFile] = useState(null);
+    const [resizeImage, setResizeImage] = useState("cover");
 
     const isFocused = useIsFocused();
 
@@ -88,7 +89,7 @@ const CustomerDetails = ({ navigation, route, userToken }) => {
                 body: data
             });
             let responseJson = await res.json();
-            console.log(responseJson);
+            // console.log(responseJson);
             if (responseJson.message == true) {
                 getCustomerDetails();
             }
@@ -168,13 +169,14 @@ const CustomerDetails = ({ navigation, route, userToken }) => {
     useEffect(() => {
         // setImageUri('http://demo2.webstertech.in/servall_garage_api/public/img/placeolder_servall.jpg');
         getCustomerDetails();
+        console.log(userRole);
     }, [isFocused]);
     
     return (
         <View style={styles.surfaceContainer}>
             <View style={styles.upperContainer}>
                 <View>
-                   {imageUri && <Image resizeMode={"cover"} style={styles.imageContainer} source={{uri: imageUri}} />}
+                   {imageUri &&  <Lightbox onOpen={() => setResizeImage("contain")} willClose={() => setResizeImage("cover")} activeProps={styles.activeImage} navigator={navigator} style={styles.lightBoxWrapper}><Image resizeMode={resizeImage} style={styles.verticleImage} source={{uri: imageUri}} /></Lightbox>}
                    <Icon style={styles.iconChangeImage} onPress={changeProfileImage} name={"camera"} size={16} color={colors.white} />
                 </View>
                 <View style={{flexDirection: "row", alignItems:"center",}}>
@@ -187,10 +189,14 @@ const CustomerDetails = ({ navigation, route, userToken }) => {
                     {/* <Text style={styles.customerPhonenumber}>{ isCustomerData != null ? isCustomerData?.phone_number : '' }</Text> */}
                 </View>
                 <View style={{flexDirection:"row", marginTop: 15, flexWrap:"wrap", alignSelf:"center", justifyContent:'center', width:"80%",   flexFlow: "row wrap" }}>
-                    <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Icon name={"phone"} size={20} color={colors.primary} /></TouchableOpacity>
-                    <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Icon name={"comment-multiple"} size={20} color={colors.primary} /></TouchableOpacity>
-                    <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Icon name={"whatsapp"} size={20} color={colors.primary} /></TouchableOpacity>
-                    <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Icon name={"bell"} size={20} color={colors.primary} /><Text style={{marginLeft:4, color:colors.primary}}>Reminders</Text></TouchableOpacity>
+                    {userRole == "Super Admin" || userRole == "Admin" ?
+                        <>
+                            <TouchableOpacity onPress={()=> Linking.openURL(`tel:${isCustomerData.phone_number}`) } style={styles.smallButton}><Icon name={"phone"} size={20} color={colors.primary} /></TouchableOpacity>
+                            <TouchableOpacity onPress={()=> Linking.openURL(`sms:${isCustomerData.phone_number}?&body=Hello%20ServAll`) } style={styles.smallButton}><Icon name={"comment-multiple"} size={20} color={colors.primary} /></TouchableOpacity>
+                            <TouchableOpacity onPress={()=> Linking.openURL(`https://wa.me/${isCustomerData.phone_number}`) } style={styles.smallButton}><Icon name={"whatsapp"} size={20} color={colors.primary} /></TouchableOpacity>
+                            <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Icon name={"bell"} size={20} color={colors.primary} /><Text style={{marginLeft:4, color:colors.primary}}>Reminders</Text></TouchableOpacity>
+                        </>
+                    : null }
                     <TouchableOpacity onPress={()=>{navigation.navigate('UserVehicleTab', { userId: route?.params?.userId }) }} style={styles.smallButton}><Text style={{color:colors.primary}}>Vehicles</Text></TouchableOpacity>
                     <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Text style={{color:colors.primary}}>Appointments</Text></TouchableOpacity>
                 </View>
@@ -415,13 +421,6 @@ const styles = StyleSheet.create({
         // justifyContent: "center",
         // alignItems: "center",
     },
-    imageContainer: {
-        width: 80,
-        height: 80,
-        borderRadius: 500,
-        resizeMode: 'cover',    
-        marginBottom: 10
-    },
     customerName: {
         fontSize: 18,
         color: colors.black,
@@ -549,13 +548,44 @@ const styles = StyleSheet.create({
         padding: 5,
         borderRadius: 500,
     },
-    // cardActions: {
-    //     flex: 1
-    // }
+    imageContainer: {
+        width: 80,
+        height: 80,
+        borderRadius: 500,
+        // resizeMode: 'cover',    
+        marginBottom: 10
+    },
+    verticleImage: {
+        width: '100%',
+        height: '100%',
+        // flex:1,
+        // borderRadius: 500,
+        // overflow: "hidden",
+        // resizeMode: 'contain',
+        // resizeMode: 'cover',
+    }, 
+    activeImage: {
+        width: '100%',
+        height: null,
+        resizeMode: 'contain',
+        borderRadius: 0,
+        // marginBottom: 0,
+        flex: 1,
+        // display: 'none',
+    }, 
+    lightBoxWrapper: {
+        width: 80,
+        height: 80,
+        borderRadius: 500,    
+        marginBottom: 10,
+        overflow: "hidden",
+        backgroundColor: colors.black
+    },
 })
 
 const mapStateToProps = state => ({
     userToken: state.user.userToken,
+    userRole: state.role.user_role,
 })
 
 export default  connect(mapStateToProps)(CustomerDetails);

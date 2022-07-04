@@ -9,7 +9,7 @@ const Services = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const onChangeSearch = query => setSearchQuery(query);
   const { colors } = useTheme();
-
+  // console.log("Reached to: Services!")
     return (
         
         <View style= {styles.customSurface}>
@@ -23,7 +23,7 @@ const Services = ({ navigation }) => {
           {/* Create Repair Order Card */}
 
           <View style={styles.mainCards}>
-            <TouchableOpacity style={[styles.cardContainer, {  marginTop:10, elevation: 3, flex:1 }]} onPress={() => navigation.navigate('Parts')}>
+            <TouchableOpacity style={[styles.cardContainer, {  marginTop:10, elevation: 3, flex:1 }]} onPress={() => navigation.navigate("AllStack" , {screen:"Parts"}) }>
               <View style={{flex:1, alignItems: 'center'}}>
                 <Image resizeMode={'cover'} style={styles.cardImage} source={require('../assets/images/icons/addorder.png')} />
               </View>

@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View , Text, StyleSheet, Image, TextInput, Keyboard, KeyboardAvoidingView  } from 'react-native';
+import { View , Text, StyleSheet, Image, TextInput, Keyboard, KeyboardAvoidingView, } from 'react-native';
 import { connect } from 'react-redux';
 import { colors, gStyle } from '../constants';
 import { API_URL } from '../constants/config';
@@ -196,26 +196,26 @@ const Login = ({navigation, loginRequest, loginError, error, authenticating, res
                         >
                             Verify OTP
                         </Button>
-                        <Button
-                            // mode={'contained'}
-                            style={{marginTop:10}}
+                        <Text
+                            // mode={'text'}
+                            style={styles.smallBtn}
                             onPress={() => {
                                 submit();
                                 setOtpError("");
                             }}
                         >
                             Resend OTP
-                        </Button>
-                        <Button
-                            // mode={'contained'}
-                            style={{marginTop:10}}
+                        </Text>
+                        <Text
+                            // mode={'text'}
+                            style={styles.smallBtn}
                             onPress={() => {
                                 setField(false);
                                 setEmailError("");
                             }}
                         >
                             Change Email
-                        </Button>
+                        </Text>
                     </View>
                 }
             </KeyboardAvoidingView>
@@ -272,6 +272,12 @@ const styles = StyleSheet.create({
      },
      headingStyle2: {
          color: colors.dark_gray,
+     },
+     smallBtn: {
+         color: colors.primary,
+         alignSelf: 'center',
+         paddingTop: 20,
+         textDecorationLine: 'underline',
      }
 })
 

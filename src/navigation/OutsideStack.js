@@ -7,7 +7,8 @@ const Stack = createStackNavigator();
 
 export default function OutsideStack() {
     return (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Navigator 
+        screenOptions={{ headerShown: false }}>
             {/* <Stack.Screen
                 name={'intro'}
                 component={Intro} /> */}

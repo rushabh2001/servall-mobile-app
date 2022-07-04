@@ -10,6 +10,7 @@ import { Picker } from '@react-native-picker/picker';
 import moment from 'moment';
 import DocumentPicker from 'react-native-document-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import Lightbox from 'react-native-lightbox-v2';
 
 const EditVehicle = ({ navigation, userToken, route }) => {
     
@@ -78,6 +79,8 @@ const EditVehicle = ({ navigation, userToken, route }) => {
     const [isNewInsuranceImg, setIsNewInsuranceImg] = useState(null);
     const [isRegistrationCrtImgLoading, setIsRegistrationCrtImgLoading] = useState(false);
     const [isInsurancePolicyImgLoading, setIsInsurancePolicyImgLoading] = useState(false);
+
+    const [resizeImage, setResizeImage] = useState("cover");
     
     const scroll1Ref = useRef();
 
@@ -376,7 +379,7 @@ const EditVehicle = ({ navigation, userToken, route }) => {
     }
 
     const submit = () => {
-     
+        console.log(isVehicleRegistrationNumber);
         Keyboard.dismiss();  
 
         if (!validate()) {
@@ -386,22 +389,38 @@ const EditVehicle = ({ navigation, userToken, route }) => {
             return;
         }
         
-        const data = new FormData();
-        data.append('brand_id', JSON.stringify(isBrand));
-        data.append('model_id', JSON.stringify(isModel));
-        data.append('vehicle_registration_number', isVehicleRegistrationNumber?.trim());
-        if(isPurchaseDate) data.append('purchase_date', isPurchaseDate);
-        if(isManufacturingDate) data.append('manufacturing_date', isManufacturingDate);
-        if(isEngineNumber) data.append('engine_number', isEngineNumber?.trim());
-        if(isChasisNumber) data.append('chasis_number', isChasisNumber?.trim());
-        if(isInsuranceProvider) data.append('insurance_id', isInsuranceProvider);
-        if(isInsurerGstin) data.append('insurer_gstin', isInsurerGstin?.trim());
-        if(isInsurerAddress) data.append('insurer_address', isInsurerAddress?.trim());
-        if(isPolicyNumber) data.append('policy_number', isPolicyNumber?.trim());
-        if(isInsuranceExpiryDate) data.append('insurance_expiry_date', isInsuranceExpiryDate);
-        // if(isRegistrationCertificateImg != null) data.append('registration_certificate_img', { uri: isRegistrationCertificateImg.uri, type: isRegistrationCertificateImg.type, name: isRegistrationCertificateImg.name });
-        // if(isInsuranceImg != null) data.append('insurance_img', {uri: isInsuranceImg.uri, type: isInsuranceImg.type, name: isInsuranceImg.name });
-        data.append('user_id', parseInt(route?.params?.userId));
+        const data = {
+            'brand_id': isBrand,
+            'model_id': isModel,
+            'vehicle_registration_number': isVehicleRegistrationNumber,
+            'purchase_date': moment(isPurchaseDate, 'YYYY MMMM D').format('YYYY-MM-DD'),
+            'manufacturing_date': moment(isManufacturingDate, 'YYYY MMMM D').format('YYYY-MM-DD'),
+            'engine_number': isEngineNumber,
+            'chasis_number': isChasisNumber,
+            'insurance_id': isInsuranceProvider,
+            'insurer_gstin': isInsurerGstin,
+            'insurer_address': isInsurerAddress,
+            'policy_number': isPolicyNumber,
+            'insurance_expiry_date':  moment(isInsuranceExpiryDate, 'YYYY MMMM D').format('YYYY-MM-DD'),
+            'user_id': parseInt(route?.params?.userId)
+        }
+
+        // const data = new FormData();
+        // data.append('brand_id', JSON.stringify(isBrand));
+        // data.append('model_id', JSON.stringify(isModel));
+        // data.append('vehicle_registration_number', isVehicleRegistrationNumber?.trim());
+        // if(isPurchaseDate) data.append('purchase_date', isPurchaseDate);
+        // if(isManufacturingDate) data.append('manufacturing_date', isManufacturingDate);
+        // if(isEngineNumber) data.append('engine_number', isEngineNumber?.trim());
+        // if(isChasisNumber) data.append('chasis_number', isChasisNumber?.trim());
+        // if(isInsuranceProvider) data.append('insurance_id', isInsuranceProvider);
+        // if(isInsurerGstin) data.append('insurer_gstin', isInsurerGstin?.trim());
+        // if(isInsurerAddress) data.append('insurer_address', isInsurerAddress?.trim());
+        // if(isPolicyNumber) data.append('policy_number', isPolicyNumber?.trim());
+        // if(isInsuranceExpiryDate) data.append('insurance_expiry_date', isInsuranceExpiryDate);
+        // // if(isRegistrationCertificateImg != null) data.append('registration_certificate_img', { uri: isRegistrationCertificateImg.uri, type: isRegistrationCertificateImg.type, name: isRegistrationCertificateImg.name });
+        // // if(isInsuranceImg != null) data.append('insurance_img', {uri: isInsuranceImg.uri, type: isInsuranceImg.type, name: isInsuranceImg.name });
+        // data.append('user_id', parseInt(route?.params?.userId));
 
         UpdateVehicle(data);
         // console.log(JSON.stringify(data));
@@ -434,8 +453,10 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                 });
             })
             .then((res) => {
-                console.log(res);
+                console.log(JSON.stringify(res));
                 if(res.statusCode == 400) {
+                  { res.data.message.brand_id && setBrandError(res.data.message.brand_id); }
+                  { res.data.message.model_id && setModelError(res.data.message.model_id); }
                   { res.data.message.vehicle_registration_number && setVehicleRegistrationNumberError(res.data.message.vehicle_registration_number); }
                   return;
                 } else if (res.statusCode == 200) {
@@ -888,12 +909,14 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                                             :
                                                 (isRegistrationCertificateImg !== null ?
                                                     <View style={{position: 'relative', flex: 1, marginTop: 20, width: 150}}>
-                                                        <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/registration_certificate_img/' + isRegistrationCertificateImg }} /> 
+                                                        <Lightbox onOpen={() => setResizeImage("contain")} willClose={() => setResizeImage("cover")} activeProps={styles.activeImage} navigator={navigator} style={styles.lightBoxWrapper}>
+                                                            <Image resizeMode={resizeImage} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/registration_certificate_img/' + isRegistrationCertificateImg }} /> 
+                                                        </Lightbox>
                                                         <Icon style={styles.iconChangeImage} onPress={selectRegistrationCrtImg} name={"camera"} size={16} color={colors.white} />
                                                     </View>
                                                 :
                                                     <> 
-                                                        <Text style={styles.cardDetailsData}>Customer does not uploaded Registration Certificate!</Text>
+                                                        <Text style={styles.cardDetailsData}>Customer has not uploaded Registration Certificate!</Text>
                                                         {isNewRegistrationCertificateImg != null ? 
                                                             <Text style={styles.textStyle}>
                                                                 File Name: {isNewRegistrationCertificateImg?.name ? isNewRegistrationCertificateImg?.name : null}
@@ -919,12 +942,14 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                                             :
                                                 (isInsuranceImg !== null ?   
                                                     <View style={{position: 'relative', marginTop: 20, width: 150,}}>
-                                                        <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/insurance_img/' + isInsuranceImg }} />
+                                                        <Lightbox onOpen={() => setResizeImage("contain")} willClose={() => setResizeImage("cover")} activeProps={styles.activeImage} navigator={navigator} style={styles.lightBoxWrapper}>
+                                                            <Image resizeMode={resizeImage} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/insurance_img/' + isInsuranceImg }} />
+                                                        </Lightbox>
                                                         <Icon style={styles.iconChangeImage} onPress={selectInsurancePolicyImg} name={"camera"} size={16} color={colors.white} />
                                                     </View>
                                                 :
                                                     <>
-                                                        <Text style={styles.cardDetailsData}>Customer does not uploaded Insurance Policy!</Text>
+                                                        <Text style={styles.cardDetailsData}>Customer has not uploaded Insurance Policy!</Text>
                                                         {isNewInsuranceImg != null 
                                                         ? 
                                                             <Text style={styles.textStyle}>
@@ -1158,12 +1183,6 @@ const styles = StyleSheet.create({
         padding: 20,
         marginHorizontal: 30
     },
-    verticleImage: {
-        height: 250,
-        width: 150,
-        resizeMode: 'cover', 
-        position: 'relative',   
-    },
     cardDetailsHeading: {
         color: colors.black,
         fontSize: 16,
@@ -1190,6 +1209,34 @@ const styles = StyleSheet.create({
         padding: 5,
         borderRadius: 500,
         zIndex: 10,
+    },
+    // verticleImage: {
+    //     width: '100%',
+    //     height: '100%',
+    //     // flex:1,
+    //     // borderRadius: 500,
+    //     // overflow: "hidden",
+    //     // resizeMode: 'contain',
+    //     // resizeMode: 'cover',
+    // }, 
+    verticleImage: {
+        width: '100%',
+        height: '100%',
+        position: 'relative',   
+    },
+    activeImage: {
+        width: '100%',
+        height: null,
+        resizeMode: 'contain',
+        borderRadius: 0,
+        flex: 1,
+    }, 
+    lightBoxWrapper: {
+        width: 150,
+        height: 150,
+        marginBottom: 10,
+        overflow: "hidden",
+        // backgroundColor: colors.black
     },
 })
 

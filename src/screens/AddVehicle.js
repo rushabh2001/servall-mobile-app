@@ -12,7 +12,7 @@ import moment from 'moment';
 import DocumentPicker from 'react-native-document-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-const AddVehicle = ({ navigation, userToken, route }) => {
+const AddVehicle = ({ navigation, userToken, route, userRole }) => {
     
     // Vehicle Fields
     const [isBrand, setIsBrand] = useState();
@@ -486,7 +486,9 @@ const AddVehicle = ({ navigation, userToken, route }) => {
                                                 />
                                             );
                                         })}
-                                        <Picker.Item label="Add New Brand" value="new_brand" />
+                                        {userRole == "Super Admin" || userRole == "Admin" ?
+                                            <Picker.Item label="Add New Brand" value="new_brand" />
+                                        : null }
                                     </Picker>
                                 </View>
                                 {brandError?.length > 0 &&
@@ -510,7 +512,9 @@ const AddVehicle = ({ navigation, userToken, route }) => {
                                                 />
                                             );
                                         })}
-                                        <Picker.Item label="Add New Model" value="new_model" />
+                                        {userRole == "Super Admin" || userRole == "Admin" ?
+                                            <Picker.Item label="Add New Model" value="new_model" />
+                                        : null }
                                     </Picker>
                                 </View>
                                 {modelError?.length > 0 &&
@@ -605,7 +609,9 @@ const AddVehicle = ({ navigation, userToken, route }) => {
                                                 />
                                             );
                                         })}
-                                         <Picker.Item label="Add New Insurance Company" value="new_insurance_company" />
+                                        {userRole == "Super Admin" || userRole == "Admin" ?
+                                            <Picker.Item label="Add New Insurance Company" value="new_insurance_company" />
+                                        : null }
                                     </Picker>
                                 </View>
                                 {insuranceProviderError?.length > 0 &&
@@ -896,6 +902,7 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => ({
     userToken: state.user.userToken,
+    userRole: state.user.user_role,
 })
 
 export default connect(mapStateToProps)(AddVehicle);

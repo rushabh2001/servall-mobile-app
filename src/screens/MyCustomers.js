@@ -8,7 +8,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import RBSheet from "react-native-raw-bottom-sheet";
 import { useIsFocused  } from '@react-navigation/native';
  
-const MyCustomer = ({navigation, userToken, selectedGarageId }) => {
+const MyCustomer = ({navigation, userToken, selectedGarageId, selectedGarage }) => {
     const [isLoading, setIsLoading] = useState(true);
     const refRBSheet = useRef();
     const [isGarageId, setGarageId] = useState(selectedGarageId);
@@ -82,19 +82,20 @@ const MyCustomer = ({navigation, userToken, selectedGarageId }) => {
 
     useEffect(() => {
     //    console.log(isGarageId);
-    //    console.log(isGarageIds);
-    //    console.log(isUser);
+       console.log(selectedGarage);
+       console.log(isGarageId);
      
     }, [isGarageId]);
 
     return (
         <View style={styles.surfaceContainer}>
+            {selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages</Text> : <Text style={styles.garageNameTitle}>{selectedGarage.garage_name}</Text> }
             <Searchbar
                 placeholder="Search here..."
                 onChangeText={(text) => { if(text != null) searchFilter(text)}}
                 value={searchQuery}
             />
-            <View style={{flexDirection: "column", backgroundColor:colors.white, marginVertical:15, elevation: 2 }}>
+            <View style={{flexDirection: "column", backgroundColor:colors.white, elevation: 2, marginTop:15, marginBottom: 65 }}>
                 {isLoading ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> :
                     (data?.length > 0 ?  
                         <FlatList
@@ -214,13 +215,24 @@ const styles = StyleSheet.create({
     modalText: {
         marginBottom: 15,
         textAlign: "center"
+    },
+    garageNameTitle: {
+        borderRadius: 6, 
+        marginBottom: 15, 
+        textAlign: 'center', 
+        fontSize: 18, 
+        fontWeight: '600', 
+        color: colors.white, 
+        paddingVertical: 7, 
+        backgroundColor: colors.secondary
     }
 })
 
 const mapStateToProps = state => ({
     userToken: state.user.userToken,
     selectedGarageId: state.garage.selected_garage_id,
-    // garageId: state.garage.garage_id,
+    selectedGarage: state.garage.selected_garage,
+    // garage: state.garage.garage,
     // userId: state.user.user.user_data.id,
 })
 
