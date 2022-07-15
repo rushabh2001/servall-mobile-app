@@ -23,7 +23,7 @@ const Services = ({ navigation }) => {
           {/* Create Repair Order Card */}
 
           <View style={styles.mainCards}>
-            <TouchableOpacity style={[styles.cardContainer, {  marginTop:10, elevation: 3, flex:1 }]} onPress={() => navigation.navigate("AllStack" , {screen:"Parts"}) }>
+            <TouchableOpacity style={[styles.cardContainer, {  marginTop:10, elevation: 3, flex:1 }]} onPress={() => navigation.navigate("ServicesStack" , {screen:"AddRepairOrder"}) }>
               <View style={{flex:1, alignItems: 'center'}}>
                 <Image resizeMode={'cover'} style={styles.cardImage} source={require('../assets/images/icons/addorder.png')} />
               </View>

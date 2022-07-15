@@ -37,7 +37,7 @@ const init = function* init() {
                     put(appStart({ root: ROOT_INSIDE })),
                     // put({ type: "FETCH_CONTINUOUSLY" }),
                 ])
-                saveValue('USER', JSON.stringify(res.data));
+                saveValue('USER', JSON.stringify(res.data.user_data));
 
                 if(res.data.user_role == "Super Admin") {
                     saveValue('GARAGE', null);
@@ -55,7 +55,7 @@ const init = function* init() {
                         saveValue('GARAGE_ID', JSON.stringify(garage_ids));
                         // console.log(parseInt(res.data.user_data.garage.id));
                         yield all([
-                            put(setGarage({ garage: res.data.user_data.garage[0], garage_id: garage_ids })),
+                            put(setGarage({ garage: res.data.user_data.garage, garage_id: garage_ids })),
                             put(setSelectedGarage({ selected_garage: res.data.user_data.garage[0], selected_garage_id: parseInt(res.data.user_data.garage[0].id) }))
                         ]) 
                         // console.log(["1", res.data.user_data.garage[0]], ["2", garage_ids], ["3", res.data.user_data.garage[0]], ["4", parseInt(res.data.user_data.garage[0].id)]);
@@ -88,8 +88,8 @@ const init = function* init() {
         } catch (e) {
             yield all([
                 put(setUserToken({ user: JSON.parse(user), user_token: user_token })),
-                put(appStart({ root: ROOT_INSIDE })),
                 put(appStart({ user_role: user_role })),
+                put(appStart({ root: ROOT_INSIDE })),
                 put(setGarage({ garage: JSON.parse(garage), garage_id: JSON.parse(garage_id) })),
                 put(setSelectedGarage({ selected_garage: parseInt(garage[0]), selected_garage_id: parseInt(garage_id[0]) })),
                 // put({ type: "FETCH_CONTINUOUSLY" }),

@@ -13,8 +13,8 @@ import Splash from './screens/Splash';
 const Stack = createStackNavigator();
 
 const AppContainer = ({ root, userRole }) => {
-    // console.log("app container", userRole);
-    // console.log("app container", root);
+    console.log("app container", userRole);
+    console.log("app container", root);
 
     return (
         <NavigationContainer>

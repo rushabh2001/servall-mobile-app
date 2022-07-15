@@ -12,6 +12,7 @@ import AddCustomer from "./AddCustomer";
 import AddVehicle from "./AddVehicle";
 import EditVehicle from "./EditVehicle";
 import VehicleSearch from "./VehicleSearch";
+import AddRepairOrder from "./AddRepairOrder";
 
 export {
     Accounts,
@@ -28,4 +29,5 @@ export {
     AddVehicle,
     EditVehicle,
     VehicleSearch,
+    AddRepairOrder,
 }

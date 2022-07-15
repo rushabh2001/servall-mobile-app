@@ -52,7 +52,7 @@ const login = function* login({ data }) {
                     // console.log(garage_ids);
                     saveValue('GARAGE_ID',  JSON.stringify(garage_ids));
                     yield all([
-                        put(setGarage({ garage: res.data.user_data.garage[0], garage_id: garage_ids })),
+                        put(setGarage({ garage: res.data.user_data.garage, garage_id: garage_ids })),
                         put(setSelectedGarage({ selected_garage: res.data.user_data.garage[0], selected_garage_id: parseInt(res.data.user_data.garage[0].id) }))
                     ])
                     // console.log(["1", res.data.user_data.garage[0]], ["2", garage_ids], ["3", res.data.user_data.garage[0]], ["4", parseInt(res.data.user_data.garage[0].id)]);

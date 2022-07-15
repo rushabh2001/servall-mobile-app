@@ -29,6 +29,7 @@ import {
   AddVehicle,
   EditVehicle,
   VehicleSearch,
+  AddRepairOrder,
 } from '../screens';
 
 // const MainStack = createNativeStackNavigator();
@@ -97,6 +98,15 @@ const ServicesStack = ({ navigation }) => {
 
         }}
       />
+      <Stack.Screen
+        name="AddRepairOrder"
+        component={AddRepairOrder}
+        options={{
+          title: "Add Repair Order",
+
+        }}
+      />
+      
       {/* <Stack.Screen
         name={'survey-intro'}
         component={SurveyIntroScreen}
@@ -303,9 +313,9 @@ const AllCustomerStack = ({ navigation }) => {
   const onLogOut = async () => dispatch(signOutAction());
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
-  const userRole = useSelector((state) => state.role.user_role);
+  // const userRole = useSelector((state) => state.role.user_role);
   const userId = useSelector((state) => state.user.user.id);
-  // console.log('AllStack', garageId?.length);
+  // console.log('AllStack', userId);
   return (
     <Stack.Navigator
       initialRouteName="CustomerDetails"
