@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Image, Text, View, StyleSheet, TouchableOpacity, ScrollView, Linking } from "react-native";
-import { useTheme, Badge, Divider } from "react-native-paper";
+import { useTheme, Badge, Divider, Modal, Portal, Button, List } from "react-native-paper";
 import { colors } from "../constants";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
@@ -9,6 +9,7 @@ import { connect } from "react-redux";
 import { useIsFocused } from "@react-navigation/native";
 import DocumentPicker from 'react-native-document-picker';
 import Lightbox from 'react-native-lightbox-v2';
+import RBSheet from "react-native-raw-bottom-sheet";
 
 const customerTopTabs = createMaterialTopTabNavigator();
 
@@ -19,6 +20,8 @@ const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
     const [imageUri, setImageUri] = useState(`${WEB_URL}img/placeolder_servall.jpg`);
     const [singleFile, setSingleFile] = useState(null);
     const [resizeImage, setResizeImage] = useState("cover");
+    const refRBSheet = useRef();
+    const [viewVehicleDetailsModal, setViewVehicleDetailsModal] = useState(false);
 
     const isFocused = useIsFocused();
 
@@ -244,6 +247,94 @@ const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
                     />
                 </customerTopTabs.Navigator>
             </View>
+
+            <Portal>
+                <Modal visible={viewVehicleDetailsModal} onDismiss={() => {}} contentContainerStyle={styles.modalContainerStyle}>
+                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Order Details</Text>
+                    {/* {vehicleDataLoading 
+                    ? 
+                        <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> 
+                    : */}
+                        <ScrollView>
+                        <Text style={styles.cardDetailsHeading}>Vehicle Owner Name:</Text>
+                        <Text style={styles.cardDetailsData}>Test</Text>
+                        <Divider />
+                        <Text style={styles.cardDetailsHeading}>Vehicle Owner`s Phone Number:</Text>
+                        <Text style={styles.cardDetailsData}>Test</Text>
+                        <Divider />
+                        <Text style={styles.cardDetailsHeading}>Vehicle Owner`s Email:</Text>
+                        <Text style={styles.cardDetailsData}>Test</Text>
+                        <Divider />
+                        <Text style={styles.cardDetailsHeading}>Vehicle Registration Number:</Text>
+                        <Text style={styles.cardDetailsData}>Test</Text>
+                        <Divider />
+                        <Text style={styles.cardDetailsHeading}>Vehicle Brand:</Text>
+                        <Text style={styles.cardDetailsData}>Test</Text>
+                        <Divider />
+                        <Text style={styles.cardDetailsHeading}>Vehicle Model:</Text>
+                        <Text style={styles.cardDetailsData}>Test</Text>
+                        <Divider />
+                        <Text style={styles.cardDetailsHeading}>Purchase Date:</Text>
+                        <Text style={styles.cardDetailsData}>Test</Text>
+                        <Divider />
+                        <Text style={styles.cardDetailsHeading}>Manufacturing Date:</Text>
+                        <Text style={styles.cardDetailsData}>Test</Text>
+                        <Divider />
+                        <Text style={styles.cardDetailsHeading}>Engine Number:</Text>
+                        <Text style={styles.cardDetailsData}>Test</Text>
+                        <Divider />
+                        <Text style={styles.cardDetailsHeading}>Chasis Number:</Text>
+                        <Text style={styles.cardDetailsData}>Test</Text>
+                        <Divider />
+                        <Text style={styles.cardDetailsHeading}>Insurance Provider Company:</Text>
+                        <Text style={styles.cardDetailsData}>Test</Text>
+                        <Divider />
+                        <Text style={styles.cardDetailsHeading}>Insurer GSTIN:</Text>
+                        <Text style={styles.cardDetailsData}>Test</Text>
+                        <Divider />
+                        <Text style={styles.cardDetailsHeading}>Insurer Address:</Text>
+                        <Text style={styles.cardDetailsData}>Test</Text>
+                        <Divider />
+                        <Text style={styles.cardDetailsHeading}>Policy Number:</Text>
+                        <Text style={styles.cardDetailsData}>Test</Text>
+                        <Divider />
+                        <Text style={styles.cardDetailsHeading}>Insurance Expiry Date:</Text>
+                        <Text style={styles.cardDetailsData}>Test</Text>
+                        <Divider />
+                        <Text style={styles.cardDetailsHeading}>Registration Certificate:</Text>
+                        {/* {VehicleData?.registration_certificate_img !== null ? */}
+                            {/* <Lightbox navigator={navigator} style={styles.lightBoxWrapper}>
+                                <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/registration_certificate_img/' + VehicleData?.registration_certificate_img }} /> 
+                            </Lightbox> */}
+                        {/* : */}
+                            <Text style={styles.cardDetailsData}>Not Uploaded Registration Certificate</Text>
+                        {/* } */}
+                        <Divider />
+                        <Text style={styles.cardDetailsHeading}>Insurance Policy:</Text>
+                        {/* {VehicleData?.insurance_img !== null ? */}
+                            {/* <Lightbox navigator={navigator} style={styles.lightBoxWrapper}>
+                                <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/insurance_img/' + VehicleData?.insurance_img }} />
+                            </Lightbox> */}
+                        {/* : */}
+                            <Text style={styles.cardDetailsData}>Not Uploaded Insurance Policy</Text>
+                        {/* } */}
+    
+                        </ScrollView>
+                    {/* } */}
+                    <View style={{flexDirection: "row",}}>
+            
+                        <View style={{flex: 1}}></View>
+                        <Button
+                            style={{marginTop:15, flex: 1.4, alignSelf: 'center'}}
+                            mode={'contained'}
+                            onPress={() => { setVehicleDataLoading(true); setViewVehicleDetailsModal(false); }}
+                        >
+                            Close
+                        </Button>
+                        <View style={{flex: 1}}></View>
+                    </View>
+                </Modal>
+            </Portal>
         </View>
     )
 }
@@ -327,9 +418,14 @@ const CustomerNotifications = () => {
 }
 
 const CustomerOrders = () => {
+const refRBSheet = useRef();
     return (
         <ScrollView style={styles.innerTabContainer}>
             <View style={styles.cards}>
+                <View style={{right: 30, top: 35,position: 'absolute'}} >
+                    <Icon onPress={() => {refRBSheet.current.open();}} type={"MaterialCommunityIcons"} name={'dots-vertical'} size={22}  color={colors.gray} />
+                    {/* <Icon onPress={() => {refRBSheet.current.open();}} type={"MaterialCommunityIcons"} style={{right: 5, top: 8,position: 'absolute'}} name={'dots-vertical'} size={22}  color={colors.gray} /> */}
+                </View>
                 <View style={styles.cardTags} >
                     <Text style={styles.tags}>Running Repair</Text>
                     <Text style={styles.tags}>Running Repair</Text>
@@ -351,6 +447,35 @@ const CustomerOrders = () => {
                 <View style={styles.cardActions}>
                     <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>View Details</Text></TouchableOpacity>
                 </View>
+
+                <RBSheet
+                    ref={refRBSheet}
+                    height={126}
+                    openDuration={250}
+                    >
+                    <View style={{flexDirection:"column", flex:1}}>
+                        <List.Item
+                            title="View Order Details"
+                            style={{paddingVertical:15}}
+                            onPress={() => { setViewVehicleDetailsModal(true); refRBSheet.current.close(); }}
+                            left={() => (<Icon type={"MaterialCommunityIcons"} name="eye" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
+                        />
+                        <Divider />
+                        <List.Item
+                            title="Change Order Status"
+                            style={{paddingVertical:15}}
+                            onPress={() =>  { navigation.navigate("MyCustomers"); refRBSheet.current.close(); }}
+                            left={() => (<Icon type={"MaterialCommunityIcons"} name="clipboard-list-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
+                        />
+                        <Divider />
+                        {/* <List.Item
+                            title="Add Note"
+                            style={{paddingVertical:15}}
+                            onPress={() => { navigation.navigate("MyCustomers"); refRBSheet.current.close(); }}
+                            left={() => (<Icon type={"MaterialCommunityIcons"} name="notebook-plus-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
+                        /> */}
+                    </View>
+                </RBSheet>
             </View>
 
             <View style={styles.cards}>
@@ -588,4 +713,4 @@ const mapStateToProps = state => ({
     userRole: state.role.user_role,
 })
 
-export default  connect(mapStateToProps)(CustomerDetails);
+export default connect(mapStateToProps)(CustomerDetails);

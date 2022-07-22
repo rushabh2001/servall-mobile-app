@@ -16,6 +16,11 @@ import {
 import {
   // DashboardStack,
   // AllStack,
+  EditStock,
+  AddStock,
+  AddPayment,
+  OrderCreated,
+  OrderList,
   AddGarage,
   ChooseGarage,
   MyCustomers,
@@ -30,6 +35,8 @@ import {
   EditVehicle,
   VehicleSearch,
   AddRepairOrder,
+  AddRepairOrderStep2,
+  AddRepairOrderStep3,
 } from '../screens';
 
 // const MainStack = createNativeStackNavigator();
@@ -95,15 +102,61 @@ const ServicesStack = ({ navigation }) => {
         component={AddGarage}
         options={{
           title: "Add Garage",
-
         }}
       />
       <Stack.Screen
         name="AddRepairOrder"
         component={AddRepairOrder}
         options={{
+          title: "Select Vehicle",
+          headerRight: () => (
+            <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
+                <Button
+                  // onPress={() => navigation.navigate('ChooseGarage')}
+                  onPress={() => navigation.navigate('AddRepairOrderStep2')}
+                  style={[styles.buttonStyle, { marginRight: 15 }]}
+                  color={colors.secondary}
+                  icon={(color) => <Icon name={'plus'} size={16} color={colors.secondary} />}
+                  uppercase={false}
+                ><Text style={{ fontSize: 12, padding: 0 }}>Add New Vehicle</Text></Button>
+            </View>
+          ),
+          
+        }}
+      />
+      <Stack.Screen
+        name="AddRepairOrderStep2"
+        component={AddRepairOrderStep2}
+        options={{
           title: "Add Repair Order",
-
+        }}
+      />
+      <Stack.Screen
+        name="AddRepairOrderStep3"
+        component={AddRepairOrderStep3}
+        options={{
+          title: "Add Repair Order",
+        }}
+      />
+      <Stack.Screen
+        name="OrderList"
+        component={OrderList}
+        options={{
+          title: "Orders",
+        }}
+      />
+      <Stack.Screen
+        name="OrderCreated"
+        component={OrderCreated}
+        options={{
+          title: "Order Created",
+        }}
+      />
+      <Stack.Screen
+        name="AddPayment"
+        component={AddPayment}
+        options={{
+          title: "Add Payment",
         }}
       />
       
@@ -116,6 +169,99 @@ const ServicesStack = ({ navigation }) => {
         component={SurveySubmittedScreen}
         options={{ gestureEnabled: false }}
       /> */}
+    </Stack.Navigator>
+  )
+}
+
+const PartsStack = ({ navigation }) => {
+  const userRole = useSelector((state) => state.role.user_role);
+  const garageId = useSelector((state) => state.garage.garage_id);
+  // console.log('ServicesStack:', userRole, garageId);
+  return (
+    <Stack.Navigator
+      initialRouteName={'Parts'}
+      // screenOptions={{ headerShown: false }}
+      >
+      <Stack.Screen
+        name={'Parts'}
+        component={Parts}
+        options={{
+          headerRight: () => (
+            <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
+              {(userRole == "Super Admin" || garageId?.length > 1) ? 
+                <Button
+                  // onPress={() => navigation.navigate('ChooseGarage')}
+                  onPress={() => navigation.navigate('ServicesStack', { screen: 'ChooseGarage' })}
+                  style={[styles.buttonStyle, { marginRight: 15 }]}
+                  color={colors.secondary}
+                  icon={(color) => <Icon name={'edit'} size={16} color={colors.secondary} />}
+                  uppercase={false}
+                ><Text style={{ fontSize: 12, padding: 0 }}>Choose Garage</Text></Button>
+                :
+                null
+              }
+            </View>
+          ),
+        }}
+      />
+      <Stack.Screen
+        name="AddStock"
+        component={AddStock}
+        options={{
+          title: "Add Stock",
+        }}
+      />
+      <Stack.Screen
+        name="EditStock"
+        component={EditStock}
+        options={{
+          title: "Edit Stock",
+        }}
+      />
+  
+    </Stack.Navigator>
+  )
+}
+
+const AccountsStack = ({ navigation }) => {
+  const userRole = useSelector((state) => state.role.user_role);
+  const garageId = useSelector((state) => state.garage.garage_id);
+  // console.log('ServicesStack:', userRole, garageId);
+  return (
+    <Stack.Navigator
+      initialRouteName={'Accounts'}
+      // screenOptions={{ headerShown: false }}
+      >
+      <Stack.Screen
+        name={'Accounts'}
+        component={Accounts}
+        options={{
+          headerRight: () => (
+            <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
+              {(userRole == "Super Admin" || garageId?.length > 1) ? 
+                <Button
+                  // onPress={() => navigation.navigate('ChooseGarage')}
+                  onPress={() => navigation.navigate('ServicesStack', { screen: 'ChooseGarage' })}
+                  style={[styles.buttonStyle, { marginRight: 15 }]}
+                  color={colors.secondary}
+                  icon={(color) => <Icon name={'edit'} size={16} color={colors.secondary} />}
+                  uppercase={false}
+                ><Text style={{ fontSize: 12, padding: 0 }}>Choose Garage</Text></Button>
+                :
+                null
+              }
+            </View>
+          ),
+        }}
+      />
+      <Stack.Screen
+        name="AddStock"
+        component={AddStock}
+        options={{
+          title: "Add Stock",
+        }}
+      />
+      
     </Stack.Navigator>
   )
 }
@@ -422,8 +568,8 @@ const InsideCustomerStack = () => {
         }}
       />
       <Tab.Screen
-        name="Orders"
-        component={Parts}
+        name="PartsStack"
+        component={PartsStack}
         options={{
           tabBarLabel: 'Orders',
           tabBarIcon: ({ color }) => (
@@ -506,23 +652,25 @@ const InsideStack = ({ navigation }) => {
         }}
       />
       <Tab.Screen
-        name="Parts"
-        component={Parts}
+        name="PartsStack"
+        component={PartsStack}
         options={{
           tabBarLabel: 'Parts',
           tabBarIcon: ({ color }) => (
             <Icon name={'wrench'} size={20} color={color} />
           ),
+          headerShown: false
         }}
       />
       <Tab.Screen
-        name="Accounts"
-        component={Accounts}
+        name="AccountsStack"
+        component={AccountsStack}
         options={{
           tabBarLabel: 'Accounts',
           tabBarIcon: ({ color }) => (
             <Icon name={'calculator'} size={20} color={color} />
           ),
+          headerShown: false
         }}
       />
 

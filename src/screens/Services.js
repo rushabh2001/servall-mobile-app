@@ -60,7 +60,7 @@ const Services = ({ navigation }) => {
             </TouchableOpacity>
 
             <View style={[styles.mainVerticleCard, { marginTop:10 }]}>
-              <TouchableOpacity style={[styles.verticleCardContainer, {flex:1, elevation: 2}]}>
+              <TouchableOpacity style={[styles.verticleCardContainer, {flex:1, elevation: 2}]} onPress={ () => navigation.navigate("ServicesStack" , {screen:"OrderList"}) }>
                 <View style={{alignItems:'center'}}>
                   <Image resizeMode={'cover'} style={styles.verticleImage} source={require('../assets/images/icons/logistic.png')} />
                 </View>

@@ -134,7 +134,7 @@ const Parts = ({ navigation }) => {
                   color="#123038"
                   icon={({color}) => (<Icon name="plus" color={color} size={18} />) }
                   mode="contained"
-                  onPress={() => navigation.navigate('Login')}
+                  onPress={() => navigation.navigate('PartsStack', {screen: 'AddStock'})}
                   uppercase={false} 
                 > Add Stock
               </Button>
@@ -158,7 +158,7 @@ const Parts = ({ navigation }) => {
                   <DataTable.Cell style={{flex:0.5}} numeric>0</DataTable.Cell>
                   <DataTable.Cell style={{flex:0.5}} numeric>420</DataTable.Cell>
                   <DataTable.Cell style={{flex:0.5}}> </DataTable.Cell>
-                  <DataTable.Cell style={{flex:0.5}}><Icon name="chevron-circle-right" size={18} style={styles.actionArrow} /></DataTable.Cell>
+                  <DataTable.Cell style={{flex:0.5}}><TouchableOpacity onPress={() => {navigation.navigate('EditStock')}}><Icon name="chevron-circle-right" size={18} style={styles.actionArrow} /></TouchableOpacity></DataTable.Cell>
                 </DataTable.Row>
 
                 <DataTable.Row>

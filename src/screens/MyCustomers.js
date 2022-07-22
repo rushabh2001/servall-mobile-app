@@ -162,14 +162,14 @@ const MyCustomer = ({navigation, userToken, selectedGarageId, selectedGarage }) 
                     <List.Item
                         title="Activity Log"
                         style={{paddingVertical:15}}
-                        onPress={() =>  { navigation.navigate("MyCustomers");  refRBSheet.current.open(); }}
+                        onPress={() =>  { navigation.navigate("MyCustomers");  refRBSheet.current.close(); }}
                         left={() => (<Icon type={"MaterialCommunityIcons"} name="clipboard-list-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
                     />
                     <Divider />
                     <List.Item
                         title="Add Note"
                         style={{paddingVertical:15}}
-                        onPress={() => { navigation.navigate("MyCustomers");  refRBSheet.current.open(); }}
+                        onPress={() => { navigation.navigate("MyCustomers");  refRBSheet.current.close(); }}
                         left={() => (<Icon type={"MaterialCommunityIcons"} name="notebook-plus-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
                     />
                 </View>

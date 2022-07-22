@@ -3,10 +3,10 @@ import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, 
 import { connect } from 'react-redux';
 import { Button, Divider, Searchbar, Badge, Modal, Portal } from "react-native-paper";
 import { colors } from  "../constants";
-import  { API_URL, WEB_URL } from "../constants/config"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import moment from 'moment';
 import Lightbox from 'react-native-lightbox-v2';
+import  { API_URL, WEB_URL } from "../constants/config";
 
 const VehicleSearch = ({navigation, userToken, selectedGarageId, navigator  }) => {
     const [isLoading, setIsLoading] = useState(true);
