@@ -37,6 +37,12 @@ import {
   AddRepairOrder,
   AddRepairOrderStep2,
   AddRepairOrderStep3,
+  CounterSale,
+  CounterSaleStep2,
+  PurchaseOrder,
+  PurchaseOrderSelectOrder,
+  EditRepairOrder,
+  OpenOrderList,
 } from '../screens';
 
 // const MainStack = createNativeStackNavigator();
@@ -139,6 +145,13 @@ const ServicesStack = ({ navigation }) => {
         }}
       />
       <Stack.Screen
+        name="EditRepairOrder"
+        component={EditRepairOrder}
+        options={{
+          title: "Edit Repair Order",
+        }}
+      />
+      <Stack.Screen
         name="OrderList"
         component={OrderList}
         options={{
@@ -157,6 +170,13 @@ const ServicesStack = ({ navigation }) => {
         component={AddPayment}
         options={{
           title: "Add Payment",
+        }}
+      />
+      <Stack.Screen
+        name="OpenOrderList"
+        component={OpenOrderList}
+        options={{
+          title: "Open Orders List",
         }}
       />
       
@@ -218,7 +238,35 @@ const PartsStack = ({ navigation }) => {
           title: "Edit Stock",
         }}
       />
-  
+      <Stack.Screen
+        name="CounterSale"
+        component={CounterSale}
+        options={{
+          title: "Counter Sale",
+        }}
+      />
+      <Stack.Screen
+        name="CounterSaleStep2"
+        component={CounterSaleStep2}
+        options={{
+          title: "Counter Sale",
+        }}
+      />
+      <Stack.Screen
+        name="PurchaseOrder"
+        component={PurchaseOrder}
+        options={{
+          title: "Purchase Order",
+        }}
+      />
+      <Stack.Screen
+        name="PurchaseOrderSelectOrder"
+        component={PurchaseOrderSelectOrder}
+        options={{
+          title: "Purchase Order - Select Vehicle",
+        }}
+      />
+      
     </Stack.Navigator>
   )
 }
@@ -638,7 +686,11 @@ const InsideStack = ({ navigation }) => {
         tabBarStyle: { height: 60, marginTop: 0 },
         tabBarItemStyle: { paddingVertical: 7 },
         tabBarLabelStyle: { fontSize: 14 },
+        keyboardHidesTabBar: true
       }}
+      // tabBarOptions={{
+      
+      // }}
     >
       <Tab.Screen
         name="ServicesStack"

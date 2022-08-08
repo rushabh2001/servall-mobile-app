@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Keyboard, ActivityIndicator, TouchableOpacity, Pressable, Image, FlatList } from 'react-native';
+import { View, Text, StyleSheet, Keyboard, ActivityIndicator, TouchableOpacity, FlatList } from 'react-native';
 import { Modal, Portal, Button, TextInput, List, Divider, Searchbar } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { colors } from '../constants';
@@ -11,38 +11,38 @@ import moment from 'moment';
 import { useIsFocused } from "@react-navigation/native";
 import DocumentPicker from 'react-native-document-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { SliderPicker } from 'react-native-slider-picker';
 
 // Step - 2 for Repair Order
 
-const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
+const EditRepairOrder = ({ route, userToken }) => {
 
     // User / Customer Fields
     const [isUserDetails, setIsUserDetails] = useState();
 
-    const [isGarageId, setIsGarageId] = useState(route?.params?.userVehicleDetails?.garage_id);
-    const [isUserId, setIsUserId] = useState(route?.params?.userVehicleDetails?.user_id);
-    const [isVehicleId, setIsVehicleId] = useState(route?.params?.userVehicleDetails?.vehicle_id);
-    const [isName, setIsName] = useState(route?.params?.userVehicleDetails?.name);
-    const [isEmail, setIsEmail] = useState(route?.params?.userVehicleDetails?.email);
-    const [isPhoneNumber, setIsPhoneNumber] = useState(route?.params?.userVehicleDetails?.phone_number);
+    const [isUserId, setIsUserId] = useState(route?.params?.data?.user_id);
+    const [isVehicleId, setIsVehicleId] = useState(route?.params?.data?.vehicle_id);
+    const [isName, setIsName] = useState(route?.params?.data?.name);
+    const [isEmail, setIsEmail] = useState(route?.params?.data?.email);
+    const [isPhoneNumber, setIsPhoneNumber] = useState(route?.params?.data?.phone_number);
 
     // Vehicle Fields
-    const [isBrand, setIsBrand] = useState(route?.params?.userVehicleDetails?.brand_id);
-    const [isBrandName, setIsBrandName] = useState(route?.params?.userVehicleDetails?.brand_name);
-    const [isModel, setIsModel] = useState(route?.params?.userVehicleDetails?.model_id);
-    const [isModelName, setIsModelName] = useState(route?.params?.userVehicleDetails?.model_name);
-    const [isVehicleRegistrationNumber, setIsVehicleRegistrationNumber] = useState(route?.params?.userVehicleDetails?.vehicle_registration_number);
+    const [isBrand, setIsBrand] = useState(route?.params?.data?.brand_id);
+    const [isBrandName, setIsBrandName] = useState(route?.params?.data?.brand_name);
+    const [isModel, setIsModel] = useState(route?.params?.data?.model_id);
+    const [isModelName, setIsModelName] = useState(route?.params?.data?.model_name);
+    const [isVehicleRegistrationNumber, setIsVehicleRegistrationNumber] = useState(route?.params?.data?.vehicle_registration_number);
 
-    const [isOdometerKMs, setIsOdometerKMs] = useState(route?.params?.userVehicleDetails?.odometer);
-    const [isFuelLevel, setIsFuelLevel] = useState(route?.params?.userVehicleDetails?.fuel_level);
+    const [isOdometerKMs, setIsOdometerKMs] = useState(JSON.stringify(route?.params?.data?.odometer));
+    const [isFuelLevel, setIsFuelLevel] = useState(route?.params?.data?.fuel_level);
 
-    const [isVehicleImg, setIsVehicleImg] = useState();
+    const [isVehicleImg, setIsVehicleImg] = useState(route?.params?.data?.orderimage);
     const [vehicleImgError, setVehicleImgError] = useState();
 
     const [isQuantity, setIsQuantity] = useState();
     const [isRate, setIsRate] = useState();
     // const [isServiceName, setIsServiceName] = useState();
-    const [isComment, setIsComment] = useState();
+    const [isComment, setIsComment] = useState(route?.params?.data?.comment);
 
     const [isPart, setIsPart] = useState('');
     const [isPartName, setIsPartName] = useState('');
@@ -57,8 +57,10 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
     const [newPartError, setNewPartError] = useState();
     const [addNewPartModal, setAddNewPartModal] = useState(false);
 
-    const [isEstimatedDeliveryDateTime, setIsEstimatedDeliveryDateTime] = useState(new Date());
-    const [estimatedDeliveryDateTime, setEstimatedDeliveryDateTime] = useState('');
+    const [odometerKMsError, setOdometerKMsError] = useState();
+
+    const [isEstimatedDeliveryDateTime, setIsEstimatedDeliveryDateTime] = useState(route?.params?.data?.estimated_delivery_time);
+    const [estimatedDeliveryDateTime, setEstimatedDeliveryDateTime] = useState(moment(route?.params?.data?.estimated_delivery_time, 'YYYY-MM-DD hh:mm:ss').format('DD-MM-YYYY hh:mm A'));
     const [displayDeliveryDateCalender, setDisplayDeliveryDateCalender] = useState(false);
     const [displayDeliveryTimeClock, setDisplayDeliveryTimeClock] = useState(false);
     const [isDeliveryDate, setIsDeliveryDate] = useState(new Date());
@@ -67,7 +69,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
     const [estimateDeliveryDateError, setEstimateDeliveryDateError] = useState();
 
     const [isLoading, setIsLoading] = useState(false);
-    const [isLoading2, setIsLoading2] = useState(true);
+    // const [isLoading2, setIsLoading2] = useState(true);
 
     // const [addPartModal, setAddPartModal] = useState(false);
     // const [addServiceModal, setAddServiceModal] = useState(false);
@@ -79,17 +81,17 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
     // const [addNewBrand, setAddNewBrand] = useState();
     const [serviceError, setServiceError] = useState();
     const [serviceList, setServiceList] = useState([]);
+    const [partList, setPartList] = useState([]);
 
     const [partError, setPartError] = useState();
-    const [odometerKMsError, setOdometerKMsError] = useState();
 
     const [partTotals, setPartTotals] = useState([]);
     const [serviceTotals, setSeviceTotals] = useState([]);
 
-    const [servicesTotal, setServicesTotal] = useState(0);
-    const [partsTotal, setPartsTotal] = useState(0);
-    const [isTotal, setIsTotal] = useState(0);
-    const [isApplicableDiscount, setIsApplicableDiscount] = useState(0);
+    const [servicesTotal, setServicesTotal] = useState(route?.params?.data?.labor_total);
+    const [partsTotal, setPartsTotal] = useState(route?.params?.data?.parts_total);
+    const [isTotal, setIsTotal] = useState(route?.params?.data?.total);
+    const [isApplicableDiscount, setIsApplicableDiscount] = useState(route?.params?.data?.applicable_discount);
     const [isTotalServiceDiscount, setIsTotalServiceDiscount] = useState(0);
     const [isTotalPartDiscount, setIsTotalPartDiscount] = useState(0);
 
@@ -100,7 +102,6 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
 
     const [partListModal, setPartListModal] = useState(false);
     const [isLoadingPartList, setIsLoadingPartList] = useState(false);
-    const [partList, setPartList] = useState([]);
     const [filteredPartData, setFilteredPartData] = useState([]);
     const [searchQueryForParts, setSearchQueryForParts] = useState(); 
     
@@ -109,100 +110,53 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
     const [serviceListModal, setServiceListModal] = useState(false);
     const [isLoadingServiceList, setIsLoadingServiceList] = useState(false);
 
-    const validate = () => {
-        return !(
-            (!fieldsServices && !fieldsParts) || (fieldsServices.length === 0 && fieldsParts.length === 0  ) || 
-            // !isPhoneNumber || isPhoneNumber?.trim().length === 0 || 
-            // !isBrand || isBrand === 0 ||
-            // !isModel || isModel === 0 ||
-            // !isGarageId || isGarageId === 0 ||
-            !estimatedDeliveryDateTime || estimatedDeliveryDateTime?.trim().length === 0 
-        )
-    }
-
-    const submit = () => {
-     
-        Keyboard.dismiss();  
-
-        if (!validate()) {
-            // if (!isName) setNameError("Customer Name is required"); else setNameError('');
-            // if (!isPhoneNumber) setPhoneNumberError("Phone Number is required"); else setPhoneNumberError('');
-            // if (!isEmail) setEmailError("Email is required");
-            // else if (isEmail.length < 6) setEmailError("Email should be minimum 6 characters");
-            // else if (isEmail?.indexOf(' ') >= 0) setEmailError('Email cannot contain spaces');
-            // else if (isEmail?.indexOf('@') < 0) setEmailError('Invalid Email Format');
-            // else setEmailError('');
-            // if (!isBrand || isBrand === 0) setBrandError('Brand is required'); else setBrandError('');
-            // if (!isModel || isModel === 0) setModelError('Model is required'); else setModelError('');
-            // if (!isCity || isCity === 0) setCityError("City is required"); else setCityError('');
-            // if (!isState || isState === 0) setStateError("State is required"); else setStateError('');
-            // if (!isGarageId || isGarageId == 0) setGarageIdError("Customer Belongs to Garage Field is required"); else setGarageIdError('');
-            if (!estimatedDeliveryDateTime || estimatedDeliveryDateTime?.trim().length === 0) setEstimateDeliveryDateError("Estimate Delivery Date is required"); else setEstimateDeliveryDateError('');
-            return;
-        }
-
-        const data = new FormData();
-        data.append('garage_id', isGarageId);
-        data.append('user_id', isUserId);
-        data.append('vehicle_id', isVehicleId);
-        data.append('odometer', isOdometerKMs);
-        data.append('fuel_level', isFuelLevel);
-        data.append('order_service', fieldsServices);
-        data.append('order_parts', fieldsParts);
-        // if(isAddress) data.append('address', isAddress?.trim());
-        data.append('estimated_delivery_time', moment(estimatedDeliveryDateTime, 'DD-MM-YYYY hh:mm A').format('YYYY-MM-DD hh:mm:ss'));
-        data.append('labor_total', servicesTotal);
-        data.append('parts_total', partsTotal);
-        data.append('discount', isApplicableDiscount);
-        if(isVehicleImg != null) data.append('orderimage', isVehicleImg);
-        data.append('total', isTotal);
-        data.append('comment', isComment?.trim());
-
-        addOrder(data);
-        console.log(JSON.stringify(data));
-        // console.log(isRegistrationCertificateImg);  
-    }
-
-    const addOrder = async (data) => {
-        try {
-            // console.log("working fine till here");
-            // console.log(data);
-            await fetch(`${API_URL}add_order`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'multipart/form-data; ',
-                    'Authorization': 'Bearer ' + userToken
-                },
-                body: data
-            }) 
-            .then(res => {
-                const statusCode = res.status;
-                let data;
-                return res.json().then(obj => {
-                    data = obj;
-                    return { statusCode, data };
-                });
-            })
-            .then((res) => {
-                if(res.statusCode == 400) {
-                //   { res.data.message.email && setEmailError(res.data.message.email); }
-                //   { res.data.message.phone_number && setPhoneNumberError(res.data.message.phone_number); }
-                  { res.data.message.estimated_delivery_time && setEstimateDeliveryDateError(res.data.message.estimated_delivery_time); }
-                  return;
-                } else if(res.statusCode == 201 || res.statusCode == 200) {
-                    navigation.navigate('OrderList');
-                } else {
-                    navigation.navigate('OrderList');
-                }
+    useEffect(() => {
+        // setAddPartModal(false);
+        let values = [...fieldsServices];
+        route?.params?.data?.services_list.forEach(item => {
+            values.push({ 
+                serviceId: item.service.id, 
+                serviceName:item.service.name, 
+                rate: JSON.stringify(item.rate),
+                quantity: JSON.stringify(item.qty),
+                discount: JSON.stringify(item.discount),
+                applicableDiscountForItem: (item.rate * item.qty) * (item.discount / 100),
+                totalForThisService: item.amount
             });
-        } catch (e) {
-            console.log(e);
-        } finally {
-            // setIsLoading(false);
-            navigation.navigate('OrderList');
-        }
-    };
+            // fieldsParts[idx].rate
+        });
+        setFieldsServices(values);
+
+        let values2 = [...fieldsParts];
+        route?.params?.data?.parts_list.forEach(item => {
+            values2.push({ 
+                partId: item.parts.id, 
+                partName:item.parts.name, 
+                rate: JSON.stringify(item.rate), 
+                quantity: JSON.stringify(item.qty), 
+                discount: JSON.stringify(item.discount),  
+                applicableDiscountForItem: (item.rate * item.qty) * (item.discount / 100),
+                totalForThisPart: item.amount
+            });
+        });
+        setFieldsParts(values2);
+
+
+        // setFieldsServices = 
+        // route?.params?.data?.services_list
+        // handlePartAdd();
+    }, [route?.params?.data]);
+
+    
+    // useEffect(() => {
+    //     console.log('string', moment(route?.params?.data?.estimated_delivery_time, 'YYYY-MM-DD hh:mm:ss').format('DD-MM-YYYY hh:mm A'));
+    //     console.log('date', new Date(route?.params?.data?.estimated_delivery_time));
+    //     console.log('datebase', route?.params?.data?.estimated_delivery_time);
+
+    //     // getPartList();
+    // // console.log(route?.params?.data);
+    // }, [route?.params?.data]);
+
 
     function handleServiceChange(i, value) {
         const values = [...fieldsServices];
@@ -375,7 +329,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
     const changeEstimateDeliverySelectedDate = (event, selectedDate) => {
         if (selectedDate != null) {
          
-            let currentDate = selectedDate;
+            let currentDate = selectedDate || isEstimatedDeliveryDateTime;
             let formattedDate = moment(currentDate, 'YYYY MMMM D', true).format('DD-MM-YYYY');
             
             setDisplayDeliveryDateCalender(false);
@@ -401,7 +355,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
         if (selectedTime != null) {
             // setDisplayDeliveryDateCalender(false);
             
-            let currentTime = selectedTime;
+            let currentTime = selectedTime || isEstimatedDeliveryDateTime;
             let convertToTime = moment(currentTime, 'YYYY-MM-DD"T"hh:mm ZZ').format('hh:mm A');
             // console.log(isDeliveryDate1 + ' ' + convertToTime);
             var formattedDate = isDeliveryDate1 + ' ' + convertToTime;
@@ -415,6 +369,100 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
 
             // let formateDateForDatabase = moment(isDeliveryDate1 + ' ' + currentTime, 'DD-MM-YYYY HH:mm A', "Asia/Kolkata").format('YYYY-MM-DD HH:mm:ss');
 
+        }
+    };
+
+    const validate = () => {
+        return !(
+            // !isName || isName?.trim().length === 0  || 
+            // !isPhoneNumber || isPhoneNumber?.trim().length === 0 || 
+            // !isBrand || isBrand === 0 ||
+            // !isModel || isModel === 0 ||
+            // !isGarageId || isGarageId === 0 ||
+            !estimatedDeliveryDateTime || estimatedDeliveryDateTime?.trim().length === 0 
+        )
+    }
+
+    const submit = () => {
+     
+        Keyboard.dismiss();  
+
+        if (!validate()) {
+            // if (!isName) setNameError("Customer Name is required"); else setNameError('');
+            // if (!isPhoneNumber) setPhoneNumberError("Phone Number is required"); else setPhoneNumberError('');
+            // if (!isEmail) setEmailError("Email is required");
+            // else if (isEmail.length < 6) setEmailError("Email should be minimum 6 characters");
+            // else if (isEmail?.indexOf(' ') >= 0) setEmailError('Email cannot contain spaces');
+            // else if (isEmail?.indexOf('@') < 0) setEmailError('Invalid Email Format');
+            // else setEmailError('');
+            // if (!isBrand || isBrand === 0) setBrandError('Brand is required'); else setBrandError('');
+            // if (!isModel || isModel === 0) setModelError('Model is required'); else setModelError('');
+            // if (!isCity || isCity === 0) setCityError("City is required"); else setCityError('');
+            // if (!isState || isState === 0) setStateError("State is required"); else setStateError('');
+            // if (!isGarageId || isGarageId == 0) setGarageIdError("Customer Belongs to Garage Field is required"); else setGarageIdError('');
+            if (!estimatedDeliveryDateTime || estimatedDeliveryDateTime?.trim().length === 0) setEstimateDeliveryDateError("Estimate Delivery Date is required"); else setEstimateDeliveryDateError('');
+            return;
+        }
+
+        const data = new FormData();
+        data.append('user_id', isUserId);
+        data.append('vehicle_id', isVehicleId);
+        data.append('odometer', isOdometerKMs);
+        data.append('fuel_level', isFuelLevel);
+        data.append('order_service', fieldsServices);
+        data.append('order_parts', fieldsParts);
+        // if(isAddress) data.append('address', isAddress?.trim());
+        data.append('estimated_delivery_time', moment(estimatedDeliveryDateTime, 'DD-MM-YYYY hh:mm A').format('YYYY-MM-DD hh:mm:ss'));
+        data.append('labor_total', servicesTotal);
+        data.append('parts_total', partsTotal);
+        data.append('discount', isApplicableDiscount);
+        if(isVehicleImg != null) data.append('orderimage', isVehicleImg);
+        data.append('total', isTotal);
+        data.append('comment', isComment?.trim());
+
+        // editOrder(data);
+        console.log(JSON.stringify(data));
+        // console.log(isRegistrationCertificateImg);  
+    }
+
+    const editOrder = async (data) => {
+        try {
+            // console.log("working fine till here");
+            // console.log(data);
+            await fetch(`${API_URL}add_order`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'multipart/form-data; ',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: data
+            }) 
+            .then(res => {
+                const statusCode = res.status;
+                let data;
+                return res.json().then(obj => {
+                    data = obj;
+                    return { statusCode, data };
+                });
+            })
+            .then((res) => {
+                if(res.statusCode == 400) {
+                //   { res.data.message.email && setEmailError(res.data.message.email); }
+                //   { res.data.message.phone_number && setPhoneNumberError(res.data.message.phone_number); }
+                  { res.data.message.estimated_delivery_time && setEstimateDeliveryDateError(res.data.message.vehicle_registration_number); }
+                  return;
+                } else if(res.statusCode == 201 || res.statusCode == 200) {
+                    navigation.navigate('OrderList');
+                } else {
+                    navigation.navigate('OrderList');
+                }
+            });
+        } catch (e) {
+            console.log(e);
+        } finally {
+            // setIsLoading(false);
+            navigation.navigate('OrderList');
         }
     };
 
@@ -649,7 +697,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
     useEffect(() => {
         getServiceList();
         getPartList();
-    // console.log(route?.params?.userVehicleDetails);
+    // console.log(route?.params?.data);
     }, []);
 
     // useEffect(() => {
@@ -695,6 +743,51 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                             </View>
                         </View>
 
+
+                        <TextInput
+                            mode="outlined"
+                            label='Odometer (in KMs)'
+                            style={styles.input}
+                            placeholder="Odometer (in KMs)"
+                            value={isOdometerKMs}
+                            onChangeText={(text) => setIsOdometerKMs(text)}
+                        />
+                        {odometerKMsError?.length > 0 &&
+                            <Text style={styles.errorTextStyle}>{odometerKMsError}</Text>
+                        }
+                        <View style={styles.odometerContainer}>
+                            <SliderPicker
+                                minLabel={"Empty"}
+                                // minLabel={(color) => {<IconX name={'temperature-empty'} size={16} color={colors.secondary} />}} 
+                                // midLabel={'mid'}
+                                maxLabel={"Full"}
+                                // maxLabel={(color) => <IconX name={'temperature-full'} size={16} color={colors.secondary} />}
+                                minValue={0}
+                                maxValue={10}
+                                callback={(position) => {
+                                    setIsFuelLevel(position);
+                                    // console.log(isFuelLevel);
+                                }}
+                                defaultValue={5}
+                                showFill={true}
+                                fillColor={'green'}
+                                labelFontWeight={'500'}
+                                labelFontSize={14}
+                                labelFontColor={colors.default_theme.black}
+                                showNumberScale={false}
+                                showSeparatorScale={true}
+                                buttonBackgroundColor={'#fff'}
+                                buttonBorderColor={"#6c7682"}
+                                buttonBorderWidth={1}
+                                scaleNumberFontWeight={'300'}
+                                buttonDimensionsPercentage={6}
+                                heightPercentage={1}
+                                widthPercentage={80}
+                                labelStylesOverride={{ marginTop: 25 }}
+                            />
+                            <Text style={{ fontWeight: "600", fontSize: 18, color: colors.black }}>Fuel Level: {isFuelLevel}</Text>
+                        </View>
+
                         <Text style={[styles.headingStyle, { marginTop: 20 }]}>Service:</Text>
 
                         {fieldsServices.map((field, idx) => {
@@ -720,7 +813,8 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                                         style={styles.textEntryInput}
                                                         placeholder="Rate"
                                                         keyboardType="numeric"
-                                                        // value={isName}
+                                                        // defaultValue={fieldsServices[idx].rate}
+                                                        value={fieldsServices[idx]['rate']}
                                                         // onChangeText={(text) => setIsName(text)}
                                                         onChangeText={
                                                             e => {
@@ -738,7 +832,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                                         style={styles.textEntryInput}
                                                         placeholder="Quantity"
                                                         keyboardType="numeric"
-                                                        // value={isName}
+                                                        value={fieldsServices[idx].quantity}
                                                         // onChangeText={(text) => setIsName(text)}
                                                         onChangeText={
                                                             e => {
@@ -756,7 +850,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                                         style={styles.textEntryInput}
                                                         placeholder="Discount"
                                                         keyboardType="numeric"
-                                                        // value={isName}
+                                                        value={fieldsServices[idx].discount}
                                                         // onChangeText={(text) => setIsName(text)}
                                                         onChangeText=
                                                         {
@@ -952,7 +1046,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                                         style={[styles.textEntryInput]}
                                                         placeholder="Rate"
                                                         keyboardType="numeric"
-                                                        // value={isName}
+                                                        value={fieldsParts[idx].rate}
                                                         // onChangeText={(text) => setIsName(text)}
                                                         onChangeText={
                                                             e => {
@@ -971,7 +1065,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                                         style={styles.textEntryInput}
                                                         placeholder="Quantity"
                                                         keyboardType="numeric"
-                                                        // value={isName}
+                                                        value={fieldsParts[idx].quantity}
                                                         // onChangeText={(text) => setIsName(text)}
                                                         onChangeText={
                                                             e => {
@@ -989,7 +1083,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                                         style={styles.textEntryInput}
                                                         placeholder="Discount"
                                                         keyboardType="numeric"
-                                                        // value={isName}
+                                                        value={fieldsParts[idx].discount}
                                                         // onChangeText={(text) => setIsName(text)}
                                                         onChangeText=
                                                         {
@@ -1385,7 +1479,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                 {isVehicleImg != null ? (
                                     <Text style={styles.textStyle}>
                                         File Name: 
-                                        {isVehicleImg?.map((isVehicleImg, i) => {
+                                        {isVehicleImg?.map((isVehicleImg) => {
                                             return (
                                                 isVehicleImg.name + ", "
                                             );
@@ -1438,9 +1532,9 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                 )}
                             </View>
                         </TouchableOpacity>
-                        {/* {estimateDeliveryDateError?.length > 0 &&
+                        {estimateDeliveryDateError?.length > 0 &&
                             <Text style={styles.errorTextStyle}>{estimateDeliveryDateError}</Text>
-                        } */}
+                        }
 
 
                         <Button
@@ -1826,4 +1920,4 @@ const mapStateToProps = state => ({
     garageId: state.garage.garage_id,
 })
 
-export default connect(mapStateToProps)(AddRepairOrderStep3);
+export default connect(mapStateToProps)(EditRepairOrder);

@@ -291,7 +291,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken })
                             <Text style={styles.errorTextStyle}>{currentStockError}</Text>
                         }
 
-                        <TextInput
+                        {/* <TextInput
                             mode="outlined"
                             label='Current Stock'
                             style={styles.input}
@@ -302,7 +302,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken })
                         />
                         {currentStockError?.length > 0 &&
                             <Text style={styles.errorTextStyle}>{currentStockError}</Text>
-                        }
+                        } */}
 
                         <TextInput
                             mode="outlined"

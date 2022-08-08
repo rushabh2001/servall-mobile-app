@@ -6,7 +6,7 @@ import { colors } from '../constants';
 import { API_URL } from '../constants/config';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
-const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
+const CounterSale = ({navigation, userToken, selectedGarageId }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [data, setData] = useState([]);
@@ -17,9 +17,9 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
     // const [VehicleData, setVehicleData] = useState('');
     // const [vehicleDataLoading, setVehicleDataLoading] = useState(true);
 
-    const getVehicleList = async () => {
+    const getUserList = async () => {
         try {
-            const res = await fetch(`${API_URL}fetch_all_vehicle_by_query?garage_id=${isGarageId}`, {
+            const res = await fetch(`${API_URL}fetch_my_garage_customers?garage_id=${isGarageId}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -29,9 +29,9 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
             });
             const json = await res.json();
             if (json !== undefined) {
-                // console.log(json.vehicle_list);
-                setData(json.vehicle_list);
-                setFilteredData(json.vehicle_list);
+                // console.log(json.user_list);
+                setData(json.user_list);
+                setFilteredData(json.user_list);
             }
         } catch (e) {
             console.log(e);
@@ -44,13 +44,13 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
         if (text) {
             const newData = data.filter(
                 function (listData) {
-                // let arr2 = listData.vehicle_registration_number ? listData.vehicle_registration_number : ''.toUpperCase() 
-                // let arr1 = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
-                // let itemData = arr1.concat(arr2);
-                let itemData = listData.vehicle_registration_number ? listData.vehicle_registration_number.toUpperCase() : ''.toUpperCase()
-                // console.log(itemData);
-                const textData = text.toUpperCase();
-                return itemData.indexOf(textData) > -1;
+                    let arr3 = listData.email ? listData.email : ''.toUpperCase() 
+                    let arr2 = listData.phone_number ? listData.phone_number : ''.toUpperCase() 
+                    let arr1 = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
+                    let itemData = arr1.concat(arr2);
+                    // console.log(itemData);
+                    const textData = text.toUpperCase();
+                    return itemData.indexOf(textData) > -1;
                 }
             );
             setFilteredData(newData);
@@ -61,37 +61,20 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
         }
     };
 
-    const sendVehicleData = (index) => {
-        // console.log(index);
-        // console.log('sentData', filteredData[index]);
-        const vehicleData = {
-            'isVehicleId': filteredData[index]?.id,
-            'isUserId': filteredData[index]?.users[0].id,
-            'isGarageId': filteredData[index]?.users[0].garage_customers[0].id,
-            'isName': filteredData[index]?.users[0].name,
-            'isEmail': filteredData[index]?.users[0].email,
-            'isPhoneNumber': filteredData[index]?.users[0].phone_number,
-            'isCity': filteredData[index]?.users[0].city,
-            'isState': filteredData[index]?.users[0].state,
-            'isAddress': filteredData[index]?.users[0].address,
-            'isBrand': filteredData[index]?.brand_id,
-            'isBrandName': filteredData[index]?.brand.name,
-            'isModel': filteredData[index]?.model_id,
-            'isModelName': filteredData[index]?.vehicle_model?.model_name,
-            'isVehicleRegistrationNumber': filteredData[index]?.vehicle_registration_number,
-            'isPurchaseDate': filteredData[index]?.purchase_date,
-            'isManufacturingDate': filteredData[index]?.manufacturing_date,
-            'isEngineNumber': filteredData[index]?.engine_number,
-            'isChasisNumber': filteredData[index]?.chasis_number,
-            'isInsuranceProvider': filteredData[index]?.insurance_id,
-            'isInsurerGstin': filteredData[index]?.insurer_gstin,
-            'isInsurerAddress': filteredData[index]?.insurer_address,
-            'isPolicyNumber': filteredData[index]?.policy_number,
-            'isInsuranceExpiryDate': filteredData[index]?.insurance_expiry_date,
-            'isRegistrationCertificateImg': filteredData[index]?.registration_certificate_img,
-            'isInsuranceImg': filteredData[index]?.insurance_img,
+    const sendUserData = (index) => {
+        console.log(index);
+        console.log('sentData', filteredData[index]);
+        const userData = {
+            'user_id': filteredData[index]?.id,
+            'garage_id': isGarageId,
+            'name': filteredData[index]?.name,
+            'email': filteredData[index]?.email,
+            'phone_number': filteredData[index]?.phone_number,
+            'city': filteredData[index]?.city,
+            'state': filteredData[index]?.state,
+            'address': filteredData[index]?.address,
         }
-        navigation.navigate('AddRepairOrderStep2', { 'data': vehicleData } );
+        navigation.navigate('CounterSaleStep2', { 'data': userData } );
     }
 
     //  useEffect(() => {
@@ -99,7 +82,7 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
     // }, [customerId]);
 
     useEffect(() => {
-        getVehicleList();
+        getUserList();
         // console.log(isGarageId);
     }, []);
 
@@ -130,18 +113,18 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
                                                 <Text style={styles.orderStatus}>Completed</Text>
                                             </View> */}
                                             <View>
-                                                <Text style={styles.cardCustomerName}>Owner Name: {item.users[0] ? item?.users[0].name : null}</Text>
+                                                <Text style={styles.cardCustomerName}>Customer Name: {item ? item?.name : null}</Text>
                                                 <Divider />
-                                                <Text style={styles.cardCustomerName}>Owner`s Phone Number: {item.users[0] ? item?.users[0].phone_number : null}</Text>
+                                                <Text style={styles.cardCustomerName}>Phone Number: {item ? item?.phone_number : null}</Text>
                                                 <Divider />
-                                                <Text style={styles.cardCustomerName}>Brand: {item.brand.name}</Text>
-                                                <Divider />
-                                                <Text style={styles.cardCustomerName}>Model: {item.vehicle_model.model_name}</Text>
-                                                <Divider />
-                                                <Text style={styles.cardCustomerName}>Registration Number: {item.vehicle_registration_number}</Text>
+                                                <Text style={styles.cardCustomerName}>Email Address: {item.email}</Text>
+                                                {/* <Divider />
+                                                <Text style={styles.cardCustomerName}>Model: {item.User_model.model_name}</Text>
+                                                <Divider /> 
+                                                <Text style={styles.cardCustomerName}>Registration Number: {item.User_registration_number}</Text> */}
                                             </View>
                                             <View style={styles.cardActions}>
-                                                <TouchableOpacity onPress={()=> sendVehicleData(index)} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>Select Vehicle</Text></TouchableOpacity>
+                                                <TouchableOpacity onPress={()=> sendUserData(index)} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>Select User</Text></TouchableOpacity>
                                             </View>
                                         </View>
                                     )}
@@ -150,8 +133,8 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
                             </View>
                         :
                             <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 50,  backgroundColor:colors.white,}}>
-                                <Text style={{ color: colors.black, textAlign: 'center'}}>No Vehicles are associated with this Garage!</Text>
-                                <TouchableOpacity style={styles.buttonStyle} onPress={ () => navigation.navigate('AddRepairOrderStep2')}><Text><Icon name={'plus'} size={16} color={colors.secondary} /> Add New Vehicle</Text></TouchableOpacity>
+                                <Text style={{ color: colors.black, textAlign: 'center'}}>No Users are associated with this Garage!</Text>
+                                {/* <TouchableOpacity style={styles.buttonStyle} onPress={ () => navigation.navigate('CounterSaleStep2')}><Text><Icon name={'plus'} size={16} color={colors.secondary} /> Add New User</Text></TouchableOpacity> */}
                             </View>
                         )
                     }
@@ -321,4 +304,4 @@ const mapStateToProps = state => ({
     garageId: state.garage.garage_id,
 })
 
-export default connect(mapStateToProps)(AddRepairOrder);
+export default connect(mapStateToProps)(CounterSale);

@@ -321,7 +321,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
 
     const addCustomer = async (data) => {
         try {
-            console.log("working fine till here");
+            // console.log("working fine till here");
             // console.log(isRegistrationCertificateImg[0]);  
             // console.log(data);
             await fetch(`${API_URL}add_new_customer`, {

@@ -19,8 +19,8 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     // User / Customer Fields
     const [isUserVehicleDetails, setIsUserVehicleDetails] = useState('');
 
-    const [isUserId, setIsUserId] = useState('');
-    const [isVehicleId, setIsVehicleId] = useState('');
+    const [isUserId, setIsUserId] = useState();
+    const [isVehicleId, setIsVehicleId] = useState();
 
     const [isName, setIsName] = useState('');
     const [isEmail, setIsEmail] = useState('');
@@ -42,6 +42,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     const [isBrand, setIsBrand] = useState();
     const [isBrandName, setIsBrandName] = useState();
     const [isModel, setIsModel] = useState();
+    const [isModelName, setIsModelName] = useState();
     const [isVehicleRegistrationNumber, setIsVehicleRegistrationNumber] = useState('');
     const [isPurchaseDate, setIsPurchaseDate] = useState(new Date());
     const [isManufacturingDate, setIsManufacturingDate] = useState(new Date());
@@ -74,7 +75,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     const [odometerKMsError, setOdometerKMsError] = useState('');
     const [isFuelLevel, setIsFuelLevel] = useState(5);
 
-    const [isGarageId, setIsGarageId] = useState('');
+    const [isGarageId, setIsGarageId] = useState();
     const [garageIdError, setGarageIdError] = useState();
 
     const [garageList, setGarageList] = useState([]);
@@ -103,7 +104,6 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     const [newInsuranceCompanyName, setNewInsuranceCompanyName] = useState();
     const [newInsuranceCompanyNameError, setNewInsuranceCompanyNameError] = useState();
 
-
     const [isLoading, setIsLoading] = useState(false);
 
     const isFocused = useIsFocused();
@@ -112,10 +112,10 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     const modelRef = useRef(null);
 
     const fillVehicleData = (data) => {
-        console.log('fillVehicleData', data);
+        // console.log('fillVehicleData', data);
         {data.isVehicleId && setIsVehicleId(parseInt(data.isVehicleId))}
         {data.isUserId && setIsUserId(parseInt(data.isUserId))}
-        {data.isGarageId && setTimeout(function(){setIsGarageId(parseInt(data.isGarageId));}, 2000)}
+        {data.isGarageId ? setTimeout(function(){setIsGarageId(parseInt(data.isGarageId));}, 2000) : setIsGarageId(garageId)}
         {data.isName && setIsName(data.isName)}
         // {data.isName && setIsName(data.isName)}
         {data.isEmail && setIsEmail(data.isEmail)}
@@ -126,6 +126,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
         {data.isBrand && setIsBrand(parseInt(data.isBrand))}
         {data.isBrandName && setIsBrandName(data.isBrandName)}
         {data.isModel && setTimeout(function(){setIsModel(parseInt(data.isModel));}, 2000)}
+        {data.isModelName && setIsModelName(data.isModelName)}
         {data.isVehicleRegistrationNumber && setIsVehicleRegistrationNumber(data.isVehicleRegistrationNumber)}
         {data.isPurchaseDate &&     
             // changePurchaseSelectedDate(new Date(data.isPurchaseDate));
@@ -312,6 +313,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     const validate = () => {
         return !(
             !isName || isName?.trim().length === 0 ||
+            !isOdometerKMs || isOdometerKMs?.trim().length === 0 ||
             !isPhoneNumber || isPhoneNumber?.trim().length === 0 ||
             !isEmail || isEmail?.trim().length === 0 || isEmail?.trim().length < 6 || isEmail?.indexOf('@') < 0 || isEmail?.indexOf(' ') >= 0 ||
             !isCity || isCity === 0 ||
@@ -329,6 +331,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
 
         if (!validate()) {
             if (!isName) setNameError("Customer Name is required"); else setNameError('');
+            if (!isOdometerKMs) setOdometerKMsError("Odometer Kilometer is required"); else setOdometerKMsError('');
             if (!isPhoneNumber) setPhoneNumberError("Phone Number is required"); else setPhoneNumberError('');
             if (!isEmail) setEmailError("Email is required");
             else if (isEmail.length < 6) setEmailError("Email should be minimum 6 characters");
@@ -351,34 +354,34 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
 
         // userVehicleCheck(dataCheck);
 
-        const data = new FormData();
-        data.append('name', isName?.trim());
-        data.append('email', isEmail?.trim());
-        data.append('phone_number', isPhoneNumber?.trim());
-        data.append('city', isCity);
-        data.append('state', isState);
-        if (isAddress) data.append('address', isAddress?.trim());
-        data.append('brand_id', JSON.stringify(isBrand));
-        data.append('model_id', JSON.stringify(isModel));
-        data.append('vehicle_registration_number', isVehicleRegistrationNumber?.trim());
-        if (isPurchaseDate) data.append('purchase_date', isPurchaseDate);
-        if (isManufacturingDate) data.append('manufacturing_date', isManufacturingDate);
-        if (isEngineNumber) data.append('engine_number', isEngineNumber?.trim());
-        if (isChasisNumber) data.append('chasis_number', isChasisNumber?.trim());
-        if (isInsuranceProvider) data.append('insurance_id', parseInt(isInsuranceProvider));
-        if (isInsurerGstin) data.append('insurer_gstin', isInsurerGstin?.trim());
-        if (isInsurerAddress) data.append('insurer_address', isInsurerAddress?.trim());
-        if (isPolicyNumber) data.append('policy_number', isPolicyNumber?.trim());
-        if (isInsuranceExpiryDate) data.append('insurance_expiry_date', isInsuranceExpiryDate);
-        if (isRegistrationCertificateImg != null) data.append('registration_certificate_img', isRegistrationCertificateImg);
-        if (isInsuranceImg != null) data.append('insurance_img', isInsuranceImg);
-        data.append('vehicle_option', 'new_vehicle');
-        data.append('garage_id', isGarageId);
-        data.append('odometer_kms', isOdometerKMs);
-        data.append('fuel_level', isFuelLevel);
+        const formDate = new FormData();
+        formDate.append('name', isName?.trim());
+        formDate.append('email', isEmail?.trim());
+        formDate.append('phone_number', isPhoneNumber?.trim());
+        formDate.append('city', isCity);
+        formDate.append('state', isState);
+        if (isAddress) formDate.append('address', isAddress?.trim());
+        formDate.append('brand_id', JSON.stringify(isBrand));
+        formDate.append('model_id', JSON.stringify(isModel));
+        formDate.append('vehicle_registration_number', isVehicleRegistrationNumber?.trim());
+        if (isPurchaseDate) formDate.append('purchase_date', isPurchaseDate);
+        if (isManufacturingDate) formDate.append('manufacturing_date', isManufacturingDate);
+        if (isEngineNumber) formDate.append('engine_number', isEngineNumber?.trim());
+        if (isChasisNumber) formDate.append('chasis_number', isChasisNumber?.trim());
+        if (isInsuranceProvider) formDate.append('insurance_id', parseInt(isInsuranceProvider));
+        if (isInsurerGstin) formDate.append('insurer_gstin', isInsurerGstin?.trim());
+        if (isInsurerAddress) formDate.append('insurer_address', isInsurerAddress?.trim());
+        if (isPolicyNumber) formDate.append('policy_number', isPolicyNumber?.trim());
+        if (isInsuranceExpiryDate) formDate.append('insurance_expiry_date', isInsuranceExpiryDate);
+        if (isRegistrationCertificateImg != null) formDate.append('registration_certificate_img', isRegistrationCertificateImg);
+        if (isInsuranceImg != null) formDate.append('insurance_img', isInsuranceImg);
+        formDate.append('vehicle_option', 'new_vehicle');
+        formDate.append('garage_id', isGarageId);
+        // formDate.append('odometer_kms', isOdometerKMs);
+        // formDate.append('fuel_level', isFuelLevel);
 
-        addCustomer(data);
-        setIsUserVehicleDetails(data);
+        addCustomer(formDate);
+        // setIsUserVehicleDetails(formDate);
         // console.log(JSON.stringify(data));
         // console.log(isRegistrationCertificateImg);  
     }
@@ -406,6 +409,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                     });
                 })
                 .then((res) => {
+                    console.log("Add Customer Response:", res);
                     if (res.statusCode == 400) {
                         { res.data.message.email && setEmailError(res.data.message.email); }
                         { res.data.message.phone_number && setPhoneNumberError(res.data.message.phone_number); }
@@ -414,9 +418,9 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                     } else if (res.statusCode == 201 || res.statusCode == 200) {
                         setIsUserVehicleDetails([...isUserVehicleDetails, { 'user_id': res.data.user_id, 'vehicle_id': res.data.vehicle_id }]);
                         // changeStep(2);
-                        // navigation.navigate('MyCustomers');
+                        navigation.navigate('AddRepairOrderStep3', {'userVehicleDetails': isUserVehicleDetails});
                     } else {
-                        navigation.navigate('MyCustomers');
+                        navigation.navigate('AddRepairOrderStep3', {'userVehicleDetails': isUserVehicleDetails});
                     }
                 });
 
@@ -424,7 +428,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
             console.log(e);
         } finally {
             // setIsLoading(false);
-            navigation.navigate('MyCustomers');
+            // navigation.navigate('AddRepairOrderStep3');
         }
     };
 
@@ -600,11 +604,12 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
 
     useEffect(() => {
         // console.log('working');
+        getGarageList();
         getStatesList();
         getBrandList();
-        getGarageList();
+    
         getInsuranceProviderList();
-        console.log('useEffect', route?.params?.data);
+        // console.log('useEffect', route?.params?.data);
         {route.params && fillVehicleData(route.params.data)}
         // console.log('garageId:', garageId);
         // console.log('selectedGarageId:',  selectedGarageId == 0 ? console.log('option1') : parseInt(garageId));
@@ -658,6 +663,10 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     useEffect(() => {
         if (isBrand != undefined) getModelList();
     }, [isBrand]);
+
+    // useEffect(() => {
+    //     if (garageList != undefined) setIsGarageId(garageId);
+    // }, [garageList]);
 
     
     return (
@@ -723,7 +732,8 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                     {StateList?.map((StateList, i) => {
                                         return (
                                             <Picker.Item
-                                                key={'state'+i}
+                                                key={`state-${i}`}
+                                                // key={''+i}
                                                 label={StateList.name}
                                                 value={StateList.id}
                                             />
@@ -746,7 +756,8 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                     {CityList.map((CityList, i) => {
                                         return (
                                             <Picker.Item
-                                                key={'city'+i}
+                                                key={`city-${i}`}
+                                                // key={''+i}
                                                 label={CityList.name}
                                                 value={CityList.id}
                                             />
@@ -783,7 +794,8 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                             {garageList.map((garageList, i) => {
                                                 return (
                                                     <Picker.Item
-                                                        key={'garage'+i}
+                                                        key={`garage-${i}`}
+                                                        // key={''+i}
                                                         label={garageList.garage_name}
                                                         value={garageList.id}
                                                     />
@@ -812,7 +824,8 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                     {brandList.map((brandList, i) => {
                                         return (
                                             <Picker.Item
-                                                key={'brand'+i}
+                                                key={`brand-${i}`}
+                                                // key={''+i}
                                                 label={brandList.name}
                                                 value={brandList.id}
                                             />
@@ -838,7 +851,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                     {modelList.map((modelList, i) => {
                                         return (
                                             <Picker.Item
-                                                key={'model'+i}
+                                                key={`model-${i}`}
                                                 label={modelList.model_name}
                                                 value={modelList.id}
                                             />
@@ -938,7 +951,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                     {insuranceProviderList?.map((insuranceProviderList, i) => {
                                         return (
                                             <Picker.Item
-                                                key={'insurance_company'+i}
+                                                key={`insurance_company-${i}`}
                                                 label={insuranceProviderList.name}
                                                 value={insuranceProviderList.id}
                                             />
@@ -1089,19 +1102,37 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                 />
                                 <Text style={{ fontWeight: "600", fontSize: 18, color: colors.black }}>Fuel Level: {isFuelLevel}</Text>
                             </View>
-                            <Button
+                            {/* <Button
                                 style={{ marginTop: 15 }}
                                 mode={'contained'}
                                 // onPress={submit}
                                 onPress={() => navigation.navigate('AddRepairOrderStep3')}
                             >
                                 Next
-                            </Button>
+                            </Button> */}
                             <Button
                                 style={{ marginTop: 15 }}
                                 mode={'contained'}
                                 onPress={() => {
 
+                                    if (!validate()) {
+                                        if (!isName) setNameError("Customer Name is required"); else setNameError('');
+                                        if (!isOdometerKMs) setOdometerKMsError("Odometer Kilometer is required"); else setOdometerKMsError('');
+                                        if (!isPhoneNumber) setPhoneNumberError("Phone Number is required"); else setPhoneNumberError('');
+                                        if (!isEmail) setEmailError("Email is required");
+                                        else if (isEmail.length < 6) setEmailError("Email should be minimum 6 characters");
+                                        else if (isEmail?.indexOf(' ') >= 0) setEmailError('Email cannot contain spaces');
+                                        else if (isEmail?.indexOf('@') < 0) setEmailError('Invalid Email Format');
+                                        else setEmailError('');
+                                        if (!isBrand || isBrand === 0) setBrandError('Brand is required'); else setBrandError('');
+                                        if (!isModel || isModel === 0) setModelError('Model is required'); else setModelError('');
+                                        if (!isCity || isCity === 0) setCityError("City is required"); else setCityError('');
+                                        if (!isState || isState === 0) setStateError("State is required"); else setStateError('');
+                                        if (!isGarageId || isGarageId == 0) setGarageIdError("Customer Belongs to Garage Field is required"); else setGarageIdError('');
+                                        if (!isVehicleRegistrationNumber || isVehicleRegistrationNumber?.trim().length === 0) setVehicleRegistrationNumberError("Vehicle Registration Number is required"); else setVehicleRegistrationNumberError('');
+                                        return;
+                                    }
+                                    
                                     const data = {
                                         'name': isName?.trim(),
                                         'email': isEmail?.trim(),
@@ -1109,15 +1140,35 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                         'brand_id': isBrand,
                                         'model_id': isModel,
                                         'vehicle_registration_number': isVehicleRegistrationNumber?.trim(),
-                                        'user_id': 1,
-                                        'vehicle_id': 2,
+                                        // 'user_id': isUserId,
+                                        // 'vehicle_id': isVehicleId,
                                         'brand_name': isBrandName,
+                                        'model_name': isModelName,
+                                        'garage_id' : isGarageId,
+                                        'odometer' : isOdometerKMs,
+                                        'fuel_level' : isFuelLevel
                                         // 'model_name': modelRef.props?.children,
+                                    }
+                                    // console.log('user_id:', isUserId, ', vehicle_id:', isVehicleId );
+                                    {(isUserId == undefined || isVehicleId == undefined) ?
+                                        (
+                                            setIsUserVehicleDetails(data),
+                                            submit(),
+                                            console.log('case1')
+                                        )
+                                        :  
+                                        (   
+                                            // console.log('case2'),
+                                            data['user_id'] = isUserId,
+                                            data['vehicle_id'] = isVehicleId,
+                                            // console.log(data),
+                                            navigation.navigate('AddRepairOrderStep3', {'userVehicleDetails': data})
+                                        )
                                     }
                                     // console.log('jjjjjj',data);
                                     // console.log('ref', brandRef.current.props.children);
                                     // console.log('pickerRef', brandRef.current.pickerRef.current.focus);
-                                    setIsUserVehicleDetails(data);
+                                    // setIsUserVehicleDetails(data);
                                     // console.log('jjjjjj',data)
                                     // console.log('jjjjjj',isUserVehicleDetails)
                                     //    setStep(2);
