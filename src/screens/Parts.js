@@ -1,37 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
-import { useTheme, Searchbar, Button, DataTable  } from 'react-native-paper';
+import { useTheme, Searchbar, Button, DataTable, Divider } from 'react-native-paper';
 import { colors } from '../constants';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import DocumentPicker from 'react-native-document-picker';
 import { connect } from 'react-redux';
 import { API_URL } from "../constants/config";
 import { useIsFocused  } from '@react-navigation/native';
+import { Table, TableWrapper, Row, Cell } from 'react-native-table-component';
+import { FlatList } from 'react-native-gesture-handler';
 
 const Parts = ({ navigation, userToken }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [singleFile, setSingleFile] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const onChangeSearch = query => setSearchQuery(query);
   const [partList, setPartList] = useState([]);
   const { colors } = useTheme();
   // const optionsPerPage = [2, 3, 4];
   const isFocused = useIsFocused();
+  const tableHead = ['(P No.) Name', 'Stock', 'MRP','Rack No', 'Action'];
+  const [tableData, setTableData] = useState([]);
 
-
-  // useEffect(() => { setPage(0); }, [itemsPerPage]);
+  const [filteredPartData, setFilteredPartData] = useState([]);
+  const [searchQueryForParts, setSearchQueryForParts] = useState(); 
 
   const selectOneFile = async () => {
     //Opening Document Picker for selection of one file
     try {
       const res = await DocumentPicker.pick({
         type: [DocumentPicker.types.allFiles],
-        //There can me more options as well
-        // DocumentPicker.types.allFiles
-        // DocumentPicker.types.images
-        // DocumentPicker.types.plainText
-        // DocumentPicker.types.audio
-        // DocumentPicker.types.pdf
       });
       //Printing the log realted to the file
       console.log('res : ' + JSON.stringify(res));
@@ -58,6 +54,7 @@ const Parts = ({ navigation, userToken }) => {
     // Parts Functions ----- End Here
 
     const getPartList = async () => {
+      setIsLoading(true);
       try {
         const res = await fetch(`${API_URL}fetch_inventory`, {
           method: 'GET',
@@ -70,9 +67,20 @@ const Parts = ({ navigation, userToken }) => {
         const json = await res.json();
         // console.log(json);
         if (json !== undefined) {
-          console.log('setPartList', json.data);
+          // console.log('setPartList', json.data[1].parts.name);
           setPartList(json.data);
-          // handleServiceAdd();
+          // let values = [];
+          // json.data.forEach(item => {
+          //   values.push({ 
+          //     part_name: item.parts.name, 
+          //     current_stock:item.current_stock, 
+          //     mrp: item.mrp,
+          //     rack_id: item.rack_id,
+          //   });
+          // });
+          setTableData(json.data);
+          setFilteredPartData(json.data);
+ 
         }
       } catch (e) {
         console.log(e);
@@ -81,24 +89,54 @@ const Parts = ({ navigation, userToken }) => {
       }
     };
 
+  const searchFilterForParts = (text) => {
+    if (text) {
+        let newData = partList.filter(
+            function (listData) {
+            // let arr2 = listData.phone_number ? listData.phone_number : ''.toUpperCase() 
+            let itemData = listData.parts.name ? listData.parts.name.toUpperCase() : ''.toUpperCase()
+            // let itemData = arr1.concat(arr2);
+            // console.log(itemData);
+            let textData = text.toUpperCase();
+            return itemData.indexOf(textData) > -1;
+            }
+        );
+        setFilteredPartData(newData);
+        setSearchQueryForParts(text);
+    } else {
+        setFilteredPartData(partList);
+        setSearchQueryForParts(text);
+    }
+  };
+
     // useEffect(() => {
     //     getPartList();
     //     // console.log(route?.params?.data);
     // }, []);
 
     useEffect(() => {
-      setIsLoading(true);
       getPartList();
       // console.log(userRole);
     }, [isFocused]);
 
+    const element = (data, index) => (
+      <TouchableOpacity onPress={() => {navigation.navigate('EditStock', {'data': data})}} style={{marginLeft: 20}}>
+        <Icon name="chevron-circle-right" size={18} style={styles.actionArrow} />
+      </TouchableOpacity>
+    );
+      {/* <TouchableOpacity onPress={() => console.log(data, index)}>
+        <View style={styles.btn}>
+          <Text style={styles.btnText}>button</Text>
+        </View>
+      </TouchableOpacity> */}
+  
 
     return (
         <View style= {styles.customSurface}>
            
           {/* First Button Row */}
 
-          <View style={{flexDirection:'row'}}>
+          {/* <View style={{flexDirection:'row'}}>
             <View style={{flex:1}}>
               <Button
                     style={styles.buttonBlue}
@@ -122,11 +160,11 @@ const Parts = ({ navigation, userToken }) => {
                 > View Alerts
               </Button>
             </View>
-          </View>
+          </View> */}
 
             {/* Second Button Row */}
 
-          <View style={{flexDirection:'row'}}>
+          {/* <View style={{flexDirection:'row'}}>
             <View style={{flex:1}}>
               <Button
                 style={styles.buttonBlue}
@@ -135,7 +173,8 @@ const Parts = ({ navigation, userToken }) => {
                 mode="contained"
                 uppercase={false} 
                 onPress={() => navigation.navigate('CounterSale')}
-              > Counter Sale
+              > 
+                Counter Sale
               </Button>
             </View>
             <View style={{flex:0.08}}></View>
@@ -150,14 +189,14 @@ const Parts = ({ navigation, userToken }) => {
                 > Stock In
               </Button>
             </View>
-          </View>
+          </View> */}
 
           {/* Search Bar */}
 
           <Searchbar
             placeholder="Search here..."
-            onChangeText={onChangeSearch}
-            value={searchQuery}
+            onChangeText={(text) => { if(text != null) searchFilterForParts(text)}}
+            value={searchQueryForParts}
           />
 
           <View style={{flexDirection:'row',  marginTop: 15}}>
@@ -188,115 +227,69 @@ const Parts = ({ navigation, userToken }) => {
 
           </View>
 
-            <View style={{flex:1}}>
-              <ScrollView>
-              {isLoading ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> :
-                <DataTable style={{padding:0,margin:0}}>
-                  <DataTable.Header background="#000" style={{padding:0,margin:0}}>
-                    <DataTable.Title  background="#000" style={[styles.tableHeader, {flex:1}]}><Text style={styles.tableHeaderText}>(P No.) Name</Text></DataTable.Title>
-                    <DataTable.Title style={[styles.tableHeader, {flex:0.5}]} numeric><Text style={styles.tableHeaderText}>Stocks</Text></DataTable.Title>
-                    <DataTable.Title style={[styles.tableHeader, {flex:0.5}]} numeric><Text style={styles.tableHeaderText}>MRP</Text></DataTable.Title>
-                    <DataTable.Title style={[styles.tableHeader, {flex:0.5}]}><Text style={styles.tableHeaderText}>Rack No</Text></DataTable.Title>
-                    <DataTable.Title style={[styles.tableHeader, {flex:0.5}]}><Text style={styles.tableHeaderText}>Action</Text></DataTable.Title>
-                  </DataTable.Header>
+          <View style={{flex:1}}>
+            <ScrollView>
+            {isLoading ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> :
+              <View style={styles.container}>
+                <Table>
+                  <Row 
+                    data={tableHead} 
+                    style={
+                      styles.head 
+                      // (tableHead == '(P No.) Name') && {width: 100}
+                      } 
+                    textStyle={styles.textHeading}
+                    flexArr= {[2, 1, 1, 1, 1]}
+                  />
+             
+                    {filteredPartData?.length > 0 ?  
+                      <FlatList
+                          ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                          data={filteredPartData}
+                          // onEndReachedThreshold={1}
+                          // style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
+                          keyExtractor={item => item.id}
+                          renderItem={({item, index}) => (
+                            <View style={{flexDirection: 'row', margin: 5}}>
+                              <Cell data={item.parts.name} style={{flex: 2}} textStyle={styles.text} />
+                              <Cell data={item.current_stock} style={{flex: 1}} textStyle={styles.text} />
+                              <Cell data={item.mrp} style={{flex: 1}} textStyle={styles.text} />
+                              <Cell data={item.rack_id} style={{flex: 1}} textStyle={styles.text} />
+                              <Cell data={element(item, index)} style={{flex: 1}} textStyle={styles.text} />
+                            </View>
+                          )} 
+                      />
+                      :
+                      <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
+                          <Text style={{ color: colors.black, textAlign: 'center'}}>No such part is associated!</Text>
+                      </View>
+                    }
+             
+                </Table>
+              </View>
+            }
+              {/* <DataTable style={{padding:0,margin:0}}>
+                <DataTable.Header background="#000" style={{padding:0,margin:0}}>
+                  <DataTable.Title  background="#000" style={[styles.tableHeader, {flex:1}]}><Text style={styles.tableHeaderText}>(P No.) Name</Text></DataTable.Title>
+                  <DataTable.Title style={[styles.tableHeader, {flex:0.5}]} numeric><Text style={styles.tableHeaderText}>Stocks</Text></DataTable.Title>
+                  <DataTable.Title style={[styles.tableHeader, {flex:0.5}]} numeric><Text style={styles.tableHeaderText}>MRP</Text></DataTable.Title>
+                  <DataTable.Title style={[styles.tableHeader, {flex:0.5}]}><Text style={styles.tableHeaderText}>Rack No</Text></DataTable.Title>
+                  <DataTable.Title style={[styles.tableHeader, {flex:0.5}]}><Text style={styles.tableHeaderText}>Action</Text></DataTable.Title>
+                </DataTable.Header>
 
-                  {partList?.map((item, i) => {
-                    <DataTable.Row>
-                      <DataTable.Cell style={{flex:1}}>{item.parts.name}</DataTable.Cell>
-                      <DataTable.Cell style={{flex:0.5}} numeric>{item.current_stock}</DataTable.Cell>
-                      <DataTable.Cell style={{flex:0.5}} numeric>{item.mrp}</DataTable.Cell>
-                      <DataTable.Cell style={{flex:0.5}}>{item.rack_id}</DataTable.Cell>
-                      <DataTable.Cell style={{flex:0.5}}><TouchableOpacity onPress={() => {navigation.navigate('EditStock')}}><Icon name="chevron-circle-right" size={18} style={styles.actionArrow} /></TouchableOpacity></DataTable.Cell>
-                    </DataTable.Row>
-                  })}
-
-                  {/*<DataTable.Row>
-                    <DataTable.Cell style={{flex:1}}>70507-METER MACHINE PLEASURE</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}} numeric>0</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}} numeric>420</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}}> </DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}}><Icon name="chevron-circle-right" size={18} color={colors.black} style={styles.actionArrow} /></DataTable.Cell>
+                {partList?.map((item, i) => {
+                  <DataTable.Row key={i}>
+                    <DataTable.Cell style={{flex:1}}>{item.parts.name}</DataTable.Cell>
+                    <DataTable.Cell style={{flex:0.5}} numeric>{item.current_stock}</DataTable.Cell>
+                    <DataTable.Cell style={{flex:0.5}} numeric>{item.mrp}</DataTable.Cell>
+                    <DataTable.Cell style={{flex:0.5}}>{item.rack_id}</DataTable.Cell>
+                    <DataTable.Cell style={{flex:0.5}}><TouchableOpacity onPress={() => {navigation.navigate('EditStock')}}><Icon name="chevron-circle-right" size={18} style={styles.actionArrow} /></TouchableOpacity></DataTable.Cell>
                   </DataTable.Row>
-
-                  <DataTable.Row>
-                    <DataTable.Cell style={{flex:1}}>SD 521-SIDE STEND SPL</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}} numeric>3</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}} numeric>420</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}}> </DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}}><Icon name="chevron-circle-right" size={18} color={colors.black} style={styles.actionArrow} /></DataTable.Cell>
-                  </DataTable.Row>
-
-                  <DataTable.Row>
-                    <DataTable.Cell style={{flex:1}}>70507-METER MACHINE PLEASURE</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}} numeric>3</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}} numeric>420</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}}> </DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}}><Icon name="chevron-circle-right" size={18} color={colors.black} style={styles.actionArrow} /></DataTable.Cell>
-                  </DataTable.Row>
-
-                   <DataTable.Row>
-                    <DataTable.Cell style={{flex:1}}>SD 521-SIDE STEND SPL</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}} numeric>0</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}} numeric>420</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}}> </DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}}><Icon name="chevron-circle-right" size={18} color={colors.black} style={styles.actionArrow} /></DataTable.Cell>
-                  </DataTable.Row>
-
-                  <DataTable.Row>
-                    <DataTable.Cell style={{flex:1}}>70507-METER MACHINE PLEASURE</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}} numeric>0</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}} numeric>420</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}}> </DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}}><Icon name="chevron-circle-right" size={18} color={colors.black} style={styles.actionArrow} /></DataTable.Cell>
-                  </DataTable.Row>
-
-                  <DataTable.Row>
-                    <DataTable.Cell style={{flex:1}}>SD 521-SIDE STEND SPL</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}} numeric>0</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}} numeric>420</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}}> </DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}}><Icon name="chevron-circle-right" size={18} color={colors.black} style={styles.actionArrow} /></DataTable.Cell>
-                  </DataTable.Row>
-
-                  <DataTable.Row>
-                    <DataTable.Cell style={{flex:1}}>70507-METER MACHINE PLEASURE</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}} numeric>0</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}} numeric>420</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}}> </DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}}><Icon name="chevron-circle-right" size={18} color={colors.black} style={styles.actionArrow} /></DataTable.Cell>
-                  </DataTable.Row>
-
-                  
-                  <DataTable.Row>
-                    <DataTable.Cell style={{flex:1}}>SD 521-SIDE STEND SPL</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}} numeric>0</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}} numeric>420</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}}> </DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}}><Icon name="chevron-circle-right" size={18} color={colors.black} style={styles.actionArrow} /></DataTable.Cell>
-                  </DataTable.Row>
-
-                  <DataTable.Row>
-                    <DataTable.Cell style={{flex:1}}>70507-METER MACHINE PLEASURE</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}} numeric>0</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}} numeric>420</DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}}> </DataTable.Cell>
-                    <DataTable.Cell style={{flex:0.5}}><Icon name="chevron-circle-right" size={18} color={colors.black} style={styles.actionArrow} /></DataTable.Cell>
-                  </DataTable.Row> */}
-                  {/* <DataTable.Pagination
-                    page={page}
-                    numberOfPages={3}
-                    onPageChange={(page) => setPage(page)}
-                    label="1-2 of 6"
-                    optionsPerPage={optionsPerPage}
-                    itemsPerPage={itemsPerPage}
-                    setItemsPerPage={setItemsPerPage}
-                    showFastPagination
-                    optionsLabel={'Rows per page'}
-                  /> */}
-                </DataTable>
-              }
-              </ScrollView>
-            </View>
+                })} 
+                  </DataTable> */}
+          
+            </ScrollView>
+          </View>
 
          
 
@@ -306,6 +299,35 @@ const Parts = ({ navigation, userToken }) => {
    }
 
 const styles = StyleSheet.create({
+  container: { 
+    flex: 1, 
+    borderRadius: 5,
+    // paddingTop: 30, 
+    backgroundColor: '#fff' 
+  },
+  head: { 
+    height: 60,
+    backgroundColor: colors.secondary,
+    padding: 7, 
+    borderTopLeftRadius: 5,
+    borderTopRightRadius: 5,
+  },
+  text: { 
+    margin: 6,
+    color: colors.black,
+    // textAlign: 'center'
+  },
+  textHeading: { 
+    margin: 6,
+    color: colors.white 
+  },
+  row: { 
+    flexDirection: 'row',
+    padding: 7,  
+    // backgroundColor: '#FFF1C1' 
+  },
+  btn: { width: 58, height: 18, backgroundColor: '#78B7BB',  borderRadius: 2 },
+  btnText: { textAlign: 'center', color: '#fff' },
   customSurface: {
     padding: 15,
     flexDirection: "column",
@@ -340,6 +362,7 @@ const styles = StyleSheet.create({
   },
   actionArrow: {
     fontSize:16,
+    color: colors.black,
   }
 })
 

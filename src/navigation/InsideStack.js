@@ -43,6 +43,9 @@ import {
   PurchaseOrderSelectOrder,
   EditRepairOrder,
   OpenOrderList,
+  OrderWorkInProgress,
+  WIPOrderList,
+  OrderSearch,
 } from '../screens';
 
 // const MainStack = createNativeStackNavigator();
@@ -176,9 +179,24 @@ const ServicesStack = ({ navigation }) => {
         name="OpenOrderList"
         component={OpenOrderList}
         options={{
-          title: "Open Orders List",
+          title: "Open - Order List",
         }}
       />
+      <Stack.Screen
+        name="OrderWorkInProgress"
+        component={OrderWorkInProgress}
+        options={{
+          title: " Order WIP",
+        }}
+      />
+      <Stack.Screen
+        name="WIPOrderList"
+        component={WIPOrderList}
+        options={{
+          title: "Work In Progress - Order List",
+        }}
+      />
+      
       
       {/* <Stack.Screen
         name={'survey-intro'}
@@ -494,7 +512,14 @@ const AllStack = ({ navigation }) => {
           title: "Customer`s Vehicle",
         }}
       />
-
+      <MoreStack.Screen
+        name="OrderSearch"
+        component={OrderSearch}
+        options={{
+          title: "Order Search",
+        }}
+      />
+      
     </MoreStack.Navigator>
   )
 }
@@ -714,7 +739,7 @@ const InsideStack = ({ navigation }) => {
           headerShown: false
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="AccountsStack"
         component={AccountsStack}
         options={{
@@ -724,7 +749,7 @@ const InsideStack = ({ navigation }) => {
           ),
           headerShown: false
         }}
-      />
+      /> */}
 
       <Tab.Screen
         name="AllStack"

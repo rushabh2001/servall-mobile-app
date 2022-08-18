@@ -1027,328 +1027,132 @@ const EditRepairOrder = ({ route, userToken }) => {
                         {fieldsParts.map((field, idx) => {
                             return (
                                 <>
-                                    {/* {(firstPartField == true) && */}
-                                        <View style={styles.addFieldContainerGroup} key={`fieldsParts-${field}-${idx}`}>
+                                    <View style={styles.addFieldContainerGroup} key={`fieldsParts-${field}-${idx}`}>
+                                
+                                        <TouchableOpacity style={styles.removeEntryIconContainer} onPress={() => handlePartRemove(idx)}>
+                                            <Icon style={styles.removeEntryIcon} name="close" size={30} color="#000" />
+                                        </TouchableOpacity>
                                     
-                                            <TouchableOpacity style={styles.removeEntryIconContainer} onPress={() => handlePartRemove(idx)}>
-                                                <Icon style={styles.removeEntryIcon} name="close" size={30} color="#000" />
-                                            </TouchableOpacity>
-                                        
-                                            <View style={[styles.cardRightContent, { flex: 1, flexDirection: 'row', marginTop: 10, marginBottom: 0 }]}>
-                                                <Text style={[styles.partNameContent, {fontWeight: '600'}]}>Part Name: </Text>
-                                                <Text style={styles.partNameContent}>{fieldsParts[idx].partName}</Text>
-                                            </View>
-                                            <View style={[styles.cardRightContent, { flex: 1 }]}>
-                                                <View style={styles.addFieldContainer} >
-                                                    <TextInput
-                                                        mode="outlined"
-                                                        label='Rate'
-                                                        style={[styles.textEntryInput]}
-                                                        placeholder="Rate"
-                                                        keyboardType="numeric"
-                                                        value={fieldsParts[idx].rate}
-                                                        // onChangeText={(text) => setIsName(text)}
-                                                        onChangeText={
-                                                            e => {
-                                                                let parameter = {
-                                                                    name: 'rate',
-                                                                    value: e,
-                                                                };
-                                                                handlePartChange(idx, parameter);
-                                                                // console.log(fieldsParts[idx]['totalForThisService']);
-                                                            }
-                                                        }
-                                                    />
-                                                    <TextInput
-                                                        mode="outlined"
-                                                        label='Quantity'
-                                                        style={styles.textEntryInput}
-                                                        placeholder="Quantity"
-                                                        keyboardType="numeric"
-                                                        value={fieldsParts[idx].quantity}
-                                                        // onChangeText={(text) => setIsName(text)}
-                                                        onChangeText={
-                                                            e => {
-                                                                let parameter = {
-                                                                    name: 'quantity',
-                                                                    value: e,
-                                                                };
-                                                                handlePartChange(idx, parameter);
-                                                            }
-                                                        }
-                                                    />
-                                                    <TextInput
-                                                        mode="outlined"
-                                                        label='Discount'
-                                                        style={styles.textEntryInput}
-                                                        placeholder="Discount"
-                                                        keyboardType="numeric"
-                                                        value={fieldsParts[idx].discount}
-                                                        // onChangeText={(text) => setIsName(text)}
-                                                        onChangeText=
-                                                        {
-                                                            e => {
-                                                                let parameter = {
-                                                                    name: 'discount',
-                                                                    value: e,
-                                                                };
-                                                                handlePartChange(idx, parameter);
-                                                            }
-                                                        }
-                                                    />
-                                                
-                                                </View>
-                                                {/* <View style={[styles.cardRightContent, { flex: 1, flexDirection: 'row' }]}> */}
-                                                
-                                                    {/* <TextInput
-                                                        mode="outlined"
-                                                        label='Total Amount for this Part'
-                                                        style={styles.textEntryInput}
-                                                        placeholder="Total Amount for this Part"
-                                                        // editable={false}
-                                                        value={fieldsParts[idx]['totalForThisService']}
-                                                        // onChangeText={(text) => setIsName(text)}
-                                                        // onChangeText=
-                                                        // {
-                                                        //     e => {
-                                                        //         let parameter = {
-                                                        //             name: 'discount',
-                                                        //             value: e,
-                                                        //         };
-                                                        //         handlePartChange(idx, parameter);
-                                                        //     }
-                                                        // }
-                                                    /> */}
-                                                
-                                                {/* </View> */}
-                                                <View style={{flexDirection: 'row'}}>
-                                                    <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 0, fontWeight: '600'}}>Total for this Part: </Text>
-                                                    <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 5 }}>{(fieldsParts[idx]) ? fieldsParts[idx].totalForThisPart : 0}</Text>
-                                                </View>
-                                            
-                                            </View>
+                                        <View style={[styles.cardRightContent, { flex: 1, flexDirection: 'row', marginTop: 10, marginBottom: 0 }]}>
+                                            <Text style={[styles.partNameContent, {fontWeight: '600'}]}>Part Name: </Text>
+                                            <Text style={styles.partNameContent}>{fieldsParts[idx].partName}</Text>
                                         </View>
-                                    {/* }  */}
-                                        <Portal>
-                                            {/* <Modal visible={addPartModal} onDismiss={() => { setAddPartModal(false); setIsPart(0); setIsPartName(''); setPartError(''); }} contentContainerStyle={styles.modalContainerStyle}>
-                                                <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add Part</Text>
-                                                <View>
-                                                    <TouchableOpacity style={styles.repairOrderField} onPress={() => { setAddPartModal(false); setPartListModal(true); }}>
-                                                    </TouchableOpacity>
-                                                    <TextInput
-                                                        mode="outlined"
-                                                        label='Part'
-                                                        style={{marginTop: 10, backgroundColor: colors.white, width:'100%' }}
-                                                        placeholder="Select Part"
-                                                        value={isPartName}
-                                                    />
-                                                </View>
-                                                {partError?.length > 0 &&
-                                                    <Text style={styles.errorTextStyle}>{partError}</Text>
-                                                }
-                                                <View style={{ flexDirection: "row", }}>
-                                                    <Button
-                                                        style={{ marginTop: 15, flex: 1, marginRight: 10 }}
-                                                        mode={'contained'}
-                                                        onPress={() => {
-                                                            if(isPart == 0) {
-                                                                (setPartError('Please Select Any Part'))
-                                                            } else {
-                                                                console.log(fieldsParts.length);
-                                                                if(firstPartField === false) {
-                                                                    // console.log('case 1');                                                          
-                                                                    let parameter = {
-                                                                        name: 'partId',
-                                                                        value: isPart
-                                                                    };
-                                                                    handlePartChange(fieldsParts.length - 1, parameter);
+                                        <View style={[styles.cardRightContent, { flex: 1 }]}>
+                                            <View style={styles.addFieldContainer} >
+                                                <TextInput
+                                                    mode="outlined"
+                                                    label='Rate'
+                                                    style={[styles.textEntryInput]}
+                                                    placeholder="Rate"
+                                                    keyboardType="numeric"
+                                                    value={fieldsParts[idx].rate}
+                                                    // onChangeText={(text) => setIsName(text)}
+                                                    onChangeText={
+                                                        e => {
+                                                            let parameter = {
+                                                                name: 'rate',
+                                                                value: e,
+                                                            };
+                                                            handlePartChange(idx, parameter);
+                                                            // console.log(fieldsParts[idx]['totalForThisService']);
+                                                        }
+                                                    }
+                                                />
+                                                <TextInput
+                                                    mode="outlined"
+                                                    label='Quantity'
+                                                    style={styles.textEntryInput}
+                                                    placeholder="Quantity"
+                                                    keyboardType="numeric"
+                                                    value={fieldsParts[idx].quantity}
+                                                    // onChangeText={(text) => setIsName(text)}
+                                                    onChangeText={
+                                                        e => {
+                                                            let parameter = {
+                                                                name: 'quantity',
+                                                                value: e,
+                                                            };
+                                                            handlePartChange(idx, parameter);
+                                                        }
+                                                    }
+                                                />
+                                                <TextInput
+                                                    mode="outlined"
+                                                    label='Discount'
+                                                    style={styles.textEntryInput}
+                                                    placeholder="Discount"
+                                                    keyboardType="numeric"
+                                                    value={fieldsParts[idx].discount}
+                                                    // onChangeText={(text) => setIsName(text)}
+                                                    onChangeText=
+                                                    {
+                                                        e => {
+                                                            let parameter = {
+                                                                name: 'discount',
+                                                                value: e,
+                                                            };
+                                                            handlePartChange(idx, parameter);
+                                                        }
+                                                    }
+                                                />
+                                            </View>
+                                            <View style={{flexDirection: 'row'}}>
+                                                <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 0, fontWeight: '600'}}>Total for this Part: </Text>
+                                                <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 5 }}>{(fieldsParts[idx]) ? fieldsParts[idx].totalForThisPart : 0}</Text>
+                                            </View>
+                                        
+                                        </View>
+                                    </View>
 
-                                                                    // if(itemIndex != 0) {
-                                                                    let parameter2 = {
-                                                                        name: 'partName',
-                                                                        value: isPartName,
-                                                                    };
-                                                                    handlePartChange(fieldsParts.length - 1, parameter2);
-
-                                                                    // console.log('case 1');
-                                                                    setFirstPartField(true);
-                                                                    setIsPart(0);
-                                                                    setIsPartName(null);
-                                                                    setPartError('');
-                                                                    setAddPartModal(false);
-                                                                } else {
-                                                                    // console.log('case 2');
-                                                                    handlePartAdd();
-                                                                }
-                                                            }
-                                                        }}
-                                                    // onPress={addNewBrand}
-                                                    >
-                                                        Add
-                                                    </Button>
-                                                    <Button
-                                                        style={{ marginTop: 15, flex: 1 }}
-                                                        mode={'contained'}
-                                                        onPress={() => {
-                                                            setAddPartModal(false);
-                                                            setIsPart(0); 
-                                                            setIsPartName('');
-                                                            setPartError('');
-                                                        }}
-                                                    >
-                                                        Close
-                                                    </Button>
-                                                </View>
-                                            </Modal> */}
-
-                                            {/* Parts List Modal */}
-                                            {/* <Modal visible={partListModal} onDismiss={() => { setPartListModal(false);  setAddPartModal(true); setIsPart(0); setIsPartName(''); setPartError(''); setSearchQueryForParts('');  searchFilterForParts();}} contentContainerStyle={styles.modalContainerStyle}>
-                                                <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Part</Text>
-                                                {(isLoadingPartList == true) ? <ActivityIndicator></ActivityIndicator>
-                                                    :
-                                                    <>
-                                                        <View style={{marginTop: 20, marginBottom: 10}}>
-                                                            <Searchbar
-                                                                placeholder="Search here..."
-                                                                onChangeText={(text) => { if(text != null) searchFilterForParts(text)}}
-                                                                value={searchQueryForParts}
-                                                                elevation={0}
-                                                                style={{ elevation: 0.8, marginBottom: 10}}
-                                                            />
-                                                            {filteredPartData?.length > 0 ?  
-                                                                <FlatList
-                                                                    ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
-                                                                    data={filteredPartData}
-                                                                    // onEndReachedThreshold={1}
-                                                                    style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
-                                                                    keyExtractor={item => item.id}
-                                                                    renderItem={({item}) => (
-                                                                        <>
-                                                                            <List.Item
-                                                                                title={
-                                                                                    // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setPartListModal(false);  setAddPartModal(true); }}>
-                                                                                        <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
-                                                                                            <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
-                                                                                        </View>
-                                                                                    // </TouchableOpacity> 
-                                                                                }
-                                                                                onPress={() => {setPartListModal(false);  setAddPartModal(true); setIsPartName(item.name); setIsPart(item.id); setPartError(''); setSearchQueryForParts(''); searchFilterForParts();}}
-                                                                            />
-                                                                        </>
-                                                                    )} 
-                                                                />
-                                                            :
-                                                                <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
-                                                                    <Text style={{ color: colors.black, textAlign: 'center'}}>No such part is associated!</Text>
-                                                                </View>
-                                                            }
-                                                            <View style={{justifyContent:"flex-end", flexDirection: 'row'}}>
-                                                                <TouchableOpacity  style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: colors.primary, marginTop: 7, paddingVertical: 3, paddingHorizontal: 10, borderRadius: 4}} onPress={() => {setAddNewPartModal(true); setPartListModal(false); }}>
-                                                                    <Icon style={{color: colors.white, marginRight: 4}} name="plus" size={16} />
-                                                                    <Text style={{color: colors.white}}>Add New Part</Text>
-                                                                </TouchableOpacity>
-                                                            </View>
-                                                        </View>
-                                                    </>
-                                                }
-                                            </Modal> */}
-
-                                            <Modal visible={addNewPartModal} onDismiss={() => { setAddNewPartModal(false); setPartListModal(true);  setIsNewPart(0); setNewPartError(''); }} contentContainerStyle={styles.modalContainerStyle}>
-                                                <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Part</Text>
-                                                <View>
-                                                    <TextInput
-                                                        mode="outlined"
-                                                        label='Part Name'
-                                                        style={styles.input}
-                                                        placeholder="Part Name"
-                                                        value={isNewPart}
-                                                        onChangeText={(text) => setIsNewPart(text)}
-                                                    />
-                                                </View>
-                                                {newPartError?.length > 0 &&
-                                                    <Text style={styles.errorTextStyle}>{newPartError}</Text>
-                                                }
-                                                <View style={{ flexDirection: "row", marginTop: 10}}>
-                                                    <Button
-                                                        style={{ marginTop: 15, flex: 1, marginRight: 10 }}
-                                                        mode={'contained'}
-                                                        onPress={() => {
-                                                            if(isNewPart == "") {
-                                                                setNewPartError("Please Enter Part Name");
-                                                            } else {
-                                                                setAddNewPartModal(false);
-                                                                setIsNewPart('');
-                                                                setNewPartError('');
-                                                                addNewPart();
-                                                            }
-                                                        }}
-                                                    >
-                                                        Add
-                                                    </Button>
-                                                    <Button
-                                                        style={{ marginTop: 15, flex: 1 }}
-                                                        mode={'contained'}
-                                                        onPress={() => {
+                                    <Portal>
+                                        <Modal visible={addNewPartModal} onDismiss={() => { setAddNewPartModal(false); setPartListModal(true);  setIsNewPart(0); setNewPartError(''); }} contentContainerStyle={styles.modalContainerStyle}>
+                                            <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Part</Text>
+                                            <View>
+                                                <TextInput
+                                                    mode="outlined"
+                                                    label='Part Name'
+                                                    style={styles.input}
+                                                    placeholder="Part Name"
+                                                    value={isNewPart}
+                                                    onChangeText={(text) => setIsNewPart(text)}
+                                                />
+                                            </View>
+                                            {newPartError?.length > 0 &&
+                                                <Text style={styles.errorTextStyle}>{newPartError}</Text>
+                                            }
+                                            <View style={{ flexDirection: "row", marginTop: 10}}>
+                                                <Button
+                                                    style={{ marginTop: 15, flex: 1, marginRight: 10 }}
+                                                    mode={'contained'}
+                                                    onPress={() => {
+                                                        if(isNewPart == "") {
+                                                            setNewPartError("Please Enter Part Name");
+                                                        } else {
                                                             setAddNewPartModal(false);
-                                                            setPartListModal(true);
                                                             setIsNewPart('');
                                                             setNewPartError('');
-                                                            // setAddPartModal(true);
-                                                        }}
-                                                    >
-                                                        Close
-                                                    </Button>
-                                                </View>
-                                            </Modal>
-
-                                            {/* <Modal visible={addNewPartModal} onDismiss={() => { setAddNewPartModal(false); setIsNewPart(0); setNewPartError(''); setAddPartModal(true); }} contentContainerStyle={styles.modalContainerStyle}>
-                                                <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Part</Text>
-                                                <View>
-                                                    <TextInput
-                                                        mode="outlined"
-                                                        label='Part Name'
-                                                        style={styles.input}
-                                                        placeholder="Part Name"
-                                                        value={isNewPart}
-                                                        onChangeText={(text) => setIsNewPart(text)}
-                                                    />
-                                                </View>
-                                                {newPartError?.length > 0 &&
-                                                    <Text style={styles.errorTextStyle}>{newPartError}</Text>
-                                                }
-                                                <View style={{ flexDirection: "row", marginTop: 10}}>
-                                                    <Button
-                                                        style={{ marginTop: 15, flex: 1, marginRight: 10 }}
-                                                        mode={'contained'}
-                                                        onPress={() => {
-                                                            if(isNewPart == "") {
-                                                                setNewPartError("Please Enter Part Name");
-                                                            } else {
-                                                                setAddNewPartModal(false);
-                                                                setAddPartModal(true);
-                                                                setIsNewPart('');
-                                                                setNewPartError('');
-                                                                addNewPart();
-                                                            }
-                                                        }}
-                                                    >
-                                                        Add
-                                                    </Button>
-                                                    <Button
-                                                        style={{ marginTop: 15, flex: 1 }}
-                                                        mode={'contained'}
-                                                        onPress={() => {
-                                                            setAddNewPartModal(false);
-                                                            setAddPartModal(true);
-                                                            setIsNewPart('');
-                                                            setNewPartError('');
-                                                        }}
-                                                    >
-                                                        Close
-                                                    </Button>
-                                                </View>
-                                            </Modal> */}
-                                        </Portal>
+                                                            addNewPart();
+                                                        }
+                                                    }}
+                                                >
+                                                    Add
+                                                </Button>
+                                                <Button
+                                                    style={{ marginTop: 15, flex: 1 }}
+                                                    mode={'contained'}
+                                                    onPress={() => {
+                                                        setAddNewPartModal(false);
+                                                        setPartListModal(true);
+                                                        setIsNewPart('');
+                                                        setNewPartError('');
+                                                        // setAddPartModal(true);
+                                                    }}
+                                                >
+                                                    Close
+                                                </Button>
+                                            </View>
+                                        </Modal>
+                                    </Portal>
                                 </>
                             );
                         })}
@@ -1357,18 +1161,7 @@ const EditRepairOrder = ({ route, userToken }) => {
                                 style={{ marginTop: 15, flex: 0.3 }}
                                 mode={'contained'}
                                 icon="plus"
-                                // onPress={submit}
-                                onPress={() => {
-                                    // if(fieldsParts.length!=0) {
-                                        setPartListModal(true);
-                                //     } else {
-                                //         const partValues = [...fieldsParts];
-                                //         partValues.push({ partId: null, partName: null, rate: null, quantity: null, discount: 0, applicableDiscount: 0, totalForThisPart: null });
-                                //         setFieldsParts(partValues);
-                                //         setAddPartModal(true);
-                                //         setFirstPartField(false);
-                                //     }
-                                }}
+                                onPress={() => setPartListModal(true)}
                             >
                                 Add Part
                             </Button>
@@ -1376,10 +1169,6 @@ const EditRepairOrder = ({ route, userToken }) => {
                             </View>
                         </View>
 
-                     
-                        {/* {vehicleImgError?.length > 0 &&
-                            <Text style={styles.errorTextStyle}>{vehicleImgError}</Text>
-                        } */}
                         <Text style={[styles.headingStyle, { marginTop: 20 }]}>Totals:</Text>
                         <View style={styles.totalFieldContainerGroup}>
                             <View style={styles.totalFieldsGroup}>
@@ -1389,15 +1178,6 @@ const EditRepairOrder = ({ route, userToken }) => {
                                 <View style={[styles.totalFieldsRightContent, { flex: 1 }]}>
                                     <Text style={styles.totalFieldTextContainer}>INR </Text>
                                     <View style={styles.totalFieldContainer}>
-                                        {/* <TextInput
-                                            mode="outlined"
-                                            label='Labor Total'
-                                            style={styles.textEntryInput}
-                                            placeholder="Labor Total"
-                                            // value={isName}
-                                            // onChangeText={(text) => setIsName(text)}
-                                            onChangeText={(value) => setLaborTotal(value)}
-                                        /> */}
                                         <Text style={{fontSize: 18, color: colors.black}}>{servicesTotal}</Text>
                                     </View>
                                 </View>
@@ -1409,15 +1189,6 @@ const EditRepairOrder = ({ route, userToken }) => {
                                 <View style={[styles.totalFieldsRightContent, { flex: 1 }]}>
                                     <Text style={styles.totalFieldTextContainer}>INR </Text>
                                     <View style={styles.totalFieldContainer}>
-                                        {/* <TextInput
-                                            mode="outlined"
-                                            label='Parts Total'
-                                            style={styles.textEntryInput}
-                                            placeholder="Parts Total"
-                                            value={partsTotal}
-                                            // onChangeText={(text) => setIsName(text)}
-                                            // onChangeText={(value) => setPartsTotal(value)}
-                                        /> */}
                                         <Text style={{fontSize: 18, color: colors.black}}>{partsTotal}</Text>
                                     </View>
                                 </View>
@@ -1429,15 +1200,6 @@ const EditRepairOrder = ({ route, userToken }) => {
                                 <View style={[styles.totalFieldsRightContent, { flex: 1 }]}>
                                     <Text style={styles.totalFieldTextContainer}>INR </Text>
                                     <View style={styles.totalFieldContainer}>
-                                        {/* <TextInput
-                                            mode="outlined"
-                                            label='Applicable Amount'
-                                            style={styles.textEntryInput}
-                                            placeholder="Applicable Amount"
-                                            // value={isName}
-                                            // onChangeText={(text) => setIsName(text)}
-                                            onChangeText={(value) => setApplicableAmount(value)}
-                                        /> */}
                                          <Text style={{fontSize: 18, color: colors.black}}>{isApplicableDiscount}</Text>
                                     </View>
                                 </View>
@@ -1449,15 +1211,6 @@ const EditRepairOrder = ({ route, userToken }) => {
                                 <View style={[styles.totalFieldsRightContent, { flex: 1 }]}>
                                     <Text style={styles.totalFieldTextContainer}>INR </Text>
                                     <View style={styles.totalFieldContainer}>
-                                        {/* <TextInput
-                                            mode="outlined"
-                                            label='Total'
-                                            style={styles.textEntryInput}
-                                            placeholder="Total"
-                                            // value={isName}
-                                            // onChangeText={(text) => setIsName(text)}
-                                            onChangeText={(value) => setIsTotal(value)}
-                                        /> */}
                                         <Text style={{fontSize: 18, color: colors.black}}>{isTotal}</Text>
                                     </View>
                                 </View>
@@ -1480,11 +1233,8 @@ const EditRepairOrder = ({ route, userToken }) => {
                                     <Text style={styles.textStyle}>
                                         File Name: 
                                         {isVehicleImg?.map((isVehicleImg) => {
-                                            return (
-                                                isVehicleImg.name + ", "
-                                            );
+                                            return ( isVehicleImg.name + ", " );
                                         })}
-                                        {/* {isVehicleImg[0].name ? isVehicleImg[0].name : ''} */}
                                     </Text>
                                 ) : null}
                             </TouchableOpacity>
@@ -1516,9 +1266,9 @@ const EditRepairOrder = ({ route, userToken }) => {
                                         value={(isDeliveryDate) ? isDeliveryDate : null}
                                         mode={'date'}
                                         is24Hour={true}
-                                        display="default"
+                                        display="spinner"
                                         onChange={changeEstimateDeliverySelectedDate}
-                                    // display="spinner"
+                                        // display="spinner"
                                     />}
                                 {displayDeliveryTimeClock && (
                                     <DateTimePicker
@@ -1536,22 +1286,13 @@ const EditRepairOrder = ({ route, userToken }) => {
                             <Text style={styles.errorTextStyle}>{estimateDeliveryDateError}</Text>
                         }
 
-
                         <Button
                             style={{ marginTop: 15 }}
                             mode={'contained'}
                             onPress={submit}
                         >
-                            Create Repair Order
+                            Edit Repair Order
                         </Button>
-                        {/* <Button
-                            style={{ marginTop: 15 }}
-                            mode={'contained'}
-                            // onPress={() => changeStep(1)}
-                        >
-                            Back
-                        </Button> */}
-
 
                         <Portal>
                             {/* Parts List Modal */}

@@ -9,7 +9,7 @@ import moment from 'moment';
 import Lightbox from 'react-native-lightbox-v2';
 import RBSheet from "react-native-raw-bottom-sheet";
 
-const OpenOrderList = ({navigation, userToken, selectedGarageId, navigator  }) => {
+const WIPOrderList = ({navigation, userToken, selectedGarageId, navigator  }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [data, setData] = useState([]);
@@ -57,7 +57,7 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =
                     'Authorization': 'Bearer ' + userToken
                 },
                 body: JSON.stringify({
-                    status: 'Vehicle received',
+                    status: 'Work In Progress',
                 }),
             });
             // console.log(res);
@@ -147,15 +147,15 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =
                                                     </View>
                                                     <Divider />
                                                     <View style={{flexDirection: 'row'}}>
-                                                        <Text style={styles.orderDate}>Order Date: {moment(item.created_at, 'YYYY-MM-DD HH:mm:ss').format('DD-MM-YYYY')}</Text>
+                                                        <Text style={styles.orderDate}>Order Date: {moment(item.created_at, 'Y-m-d H:i:s').format('DD-MM-YYYY')}</Text>
                                                     </View>
                                                     <Divider />
                                                     <View style={{flexDirection: 'row'}}>
-                                                        <Text style={styles.cardCustomerName}>Registration Number: </Text><Text style={styles.cardCustomerName}>{item.vehicle.vehicle_registration_number}</Text>
+                                                        <Text style={styles.cardCustomerName}>Registration Number:</Text><Text style={styles.cardCustomerName}>{item.vehicle.vehicle_registration_number}</Text>
                                                     </View>
                                                     <Divider />
                                                     <View style={{flexDirection: 'row'}}>
-                                                        <Text style={styles.cardCustomerName}>Estimate Delivery Date: </Text><Text style={styles.cardCustomerName}>{moment(item.estimated_delivery_time, 'YYYY-MM-DD HH:mm:ss').format('DD-MM-YYYY HH:mm:ss')}</Text>
+                                                        <Text style={styles.cardCustomerName}>Estimate Delivery Date:</Text><Text style={styles.cardCustomerName}>{moment(item.estimated_delivery_time, 'YYYY MMMM D').format('DD-MM-YYYY')}</Text>
                                                     </View>
                                                  </View>
                                                 <View style={styles.cardActions}>
@@ -268,7 +268,6 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =
                                                             'parts_total': item?.parts_total,
                                                             'services_list': item?.orderservice,
                                                             'parts_list': item?.orderparts,
-                                                            'created_at': item?.created_at,
                                                             'total': item?.total,
                                                             'applicable_discount': item?.discount
                                                         }
@@ -493,4 +492,4 @@ const mapStateToProps = state => ({
     selectedGarageId: state.garage.selected_garage_id,
 })
 
-export default connect(mapStateToProps)(OpenOrderList);
+export default connect(mapStateToProps)(WIPOrderList);

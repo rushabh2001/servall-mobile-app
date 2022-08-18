@@ -147,8 +147,45 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
         data.append('vehicle_id', isVehicleId);
         data.append('odometer', isOdometerKMs);
         data.append('fuel_level', isFuelLevel);
-        data.append('order_service', fieldsServices);
-        data.append('order_parts', fieldsParts);
+
+    
+        // let order_service = [];
+        // let order_parts = [];
+
+      
+        // fieldsServices.forEach((item, index) => {
+        //     data.append(`order_service[${index}]['service_id']`, item['service_id']);
+        //     data.append(`order_service[${index}]['rate']`,  item['rate']);
+        //     data.append(`order_service[${index}]['qty']`, item['qty']);
+        //     data.append(`order_service[${index}]['discount']`, item['discount']);
+        //     data.append(`order_service[${index}]['amount']`, item['amount']);
+        // });
+
+        // function myFunction
+  
+
+        // for (let i = 0; i < fieldsServices.length; i++) {
+        //     data.push(order_service[i]['service_id'], item.service_id);
+        //     data.push(order_service[i]['rate'], item.rate);
+        //     data.push(order_service[i]['qty'], item.qty);
+        //     data.push(order_service[i]['discount'], item.discount);
+        //     data.push(order_service[i]['amount'], item.amount);
+        // }
+
+        // for (let i = 0; i < fieldsParts.length; i++) {
+        //     data.push(order_parts[i]['parts_id'], item.parts_id);
+        //     data.push(order_parts[i]['rate'], item.rate);
+        //     data.push(order_parts[i]['qty'], item.qty);
+        //     data.push(order_parts[i]['discount'], item.discount);
+        //     data.push(order_parts[i]['amount'], item.amount);
+        // }
+
+        // order_service.forEach(({item, index}) => {
+        //     data.push(items[i])
+        //     // console.log(total);
+        // });
+        data.append('order_service', JSON.stringify(fieldsServices));
+        data.append('order_parts', JSON.stringify(fieldsParts));
         // if(isAddress) data.append('address', isAddress?.trim());
         data.append('estimated_delivery_time', moment(estimatedDeliveryDateTime, 'DD-MM-YYYY hh:mm A').format('YYYY-MM-DD hh:mm:ss'));
         data.append('labor_total', servicesTotal);
@@ -191,16 +228,16 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                   { res.data.message.estimated_delivery_time && setEstimateDeliveryDateError(res.data.message.estimated_delivery_time); }
                   return;
                 } else if(res.statusCode == 201 || res.statusCode == 200) {
-                    navigation.navigate('OrderList');
+                    navigation.navigate('OpenOrderList');
                 } else {
-                    navigation.navigate('OrderList');
+                    navigation.navigate('OpenOrderList');
                 }
             });
         } catch (e) {
             console.log(e);
         } finally {
             // setIsLoading(false);
-            navigation.navigate('OrderList');
+            navigation.navigate('OpenOrderList');
         }
     };
 
@@ -208,30 +245,30 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
         const values = [...fieldsServices];
         values[i][value.name] = value.value;
         // calculateServicePrice
-        values[i]['totalForThisService'] = (values[i]['rate'] * values[i]['quantity']) - ((values[i]['rate'] * values[i]['quantity']) * (values[i]['discount'] / 100))
-        // values[i] = ({ key: serviceName, key: rate, key: quantity });
+        values[i]['amount'] = (values[i]['rate'] * values[i]['qty']) - ((values[i]['rate'] * values[i]['qty']) * (values[i]['discount'] / 100))
+        // values[i] = ({ key: serviceName, key: rate, key: qty });
         // values[i] = { key: value };
 
         // values[i].push({key: value});
         // values[i].rate = value.rate;
-        // values[i].quantity = value.quantity;
+        // values[i].qty = value.qty;
         // values[i].serviceName = value.serviceName;
         // values[i].value = value.rate;
         // console.log(i);
         // setFieldsServices(values);
         // console.log(fieldsServices);
-        serviceTotals[i] = values[i]['totalForThisService'];
+        serviceTotals[i] = values[i]['amount'];
 
         let total = 0;
         values.forEach(item => {
-            total += item.totalForThisService;
+            total += item.amount;
             // console.log(total);
         });
         setServicesTotal(total);
 
         setIsTotal(total + partsTotal);
 
-        values[i]['applicableDiscountForItem'] = (values[i]['rate'] * values[i]['quantity']) * (values[i]['discount'] / 100);
+        values[i]['applicableDiscountForItem'] = (values[i]['rate'] * values[i]['qty']) * (values[i]['discount'] / 100);
         let discountTotal = 0;
         values.forEach(item => {
             discountTotal += item.applicableDiscountForItem;
@@ -245,7 +282,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
 
     function handleServiceAdd(data) {
         const values = [...fieldsServices];
-        values.push({ serviceId: data.serviceId, serviceName: data.serviceName, rate: 0, quantity: 0, discount: 0, applicableDiscountForItem: 0, totalForThisService: 0 });
+        values.push({ service_id: data.service_id, serviceName: data.serviceName, rate: 0, qty: 0, discount: 0, applicableDiscountForItem: 0, amount: 0 });
         setFieldsServices(values);
         console.log(fieldsServices);
 
@@ -262,7 +299,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
 
         let total = 0;
         values.forEach(item => {
-            total += item.totalForThisService;
+            total += item.amount;
             // console.log(total);
         });
         setServicesTotal(total);
@@ -283,16 +320,16 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
 
         // Calculation of Specific Part's total
         partValues[i][value.name] = value.value;
-        partValues[i]['totalForThisPart'] = (partValues[i]['rate'] * partValues[i]['quantity']) - ((partValues[i]['rate'] * partValues[i]['quantity']) * (partValues[i]['discount'] / 100))
+        partValues[i]['amount'] = (partValues[i]['rate'] * partValues[i]['qty']) - ((partValues[i]['rate'] * partValues[i]['qty']) * (partValues[i]['discount'] / 100))
         // console.log(i);
         setFieldsParts(partValues);
-        partTotals[i] = partValues[i]['totalForThisPart'];
+        partTotals[i] = partValues[i]['amount'];
         // console.log(fieldsParts);
 
         // Calculation of Total of all Parts
         let total = 0;
         partValues.forEach(item => {
-            total += item.totalForThisPart;
+            total += item.amount;
             // console.log(total);
         });
         setPartsTotal(total);
@@ -300,7 +337,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
         // Calculate Total of Order
         setIsTotal(total + servicesTotal);
 
-        partValues[i]['applicableDiscountForItem'] = (partValues[i]['rate'] * partValues[i]['quantity']) * (partValues[i]['discount'] / 100);
+        partValues[i]['applicableDiscountForItem'] = (partValues[i]['rate'] * partValues[i]['qty']) * (partValues[i]['discount'] / 100);
         let discountTotal = 0;
         partValues.forEach(item => {
             discountTotal += item.applicableDiscountForItem;
@@ -317,7 +354,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
     function handlePartAdd(data) {
         // console.log('isPart:', isPart, 'isPartName:', isPartName, 'fieldsParts.length - 1:', fieldsParts.length - 1);
         const partValues = [...fieldsParts];
-        partValues.push({ partId: data.partId, partName: data.partName, rate: 0, quantity: 0, discount: 0, applicableDiscount: 0, totalForThisPart: 0 });
+        partValues.push({ parts_id: data.parts_id, partName: data.partName, rate: 0, qty: 0, discount: 0, applicableDiscount: 0, amount: 0 });
         setFieldsParts(partValues);
         
         // setIsPart(0);
@@ -335,7 +372,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
         // Recalculation of Totals
         let total = 0;
         partValues.forEach(item => {
-            total += item.totalForThisPart;
+            total += item.amount;
         });
         setPartsTotal(total);
 
@@ -518,7 +555,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                 setServiceList(json.data);
                 setFilteredServiceData(json.data);
                 // let data = {
-                //     serviceId: json.data.id,
+                //     service_id: json.data.id,
                 //     serviceName: json.data.name,
                 // }
                 // handleServiceAdd(data)
@@ -553,7 +590,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                 setIsService(parseInt(json.data.id));
                 setIsServiceName(json.data.name);
                 let data = {
-                    serviceId: json.data.id,
+                    service_id: json.data.id,
                     serviceName: json.data.name,
                 }
                 handleServiceAdd(data)
@@ -590,7 +627,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                 setIsPart(parseInt(json.data.id));
                 setIsPartName(json.data.name);
                 let data = {
-                    partId: json.data.id,
+                    parts_id: json.data.id,
                     partName: json.data.name,
                 }
                 handlePartAdd(data)
@@ -743,7 +780,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                                         onChangeText={
                                                             e => {
                                                                 let parameter = {
-                                                                    name: 'quantity',
+                                                                    name: 'qty',
                                                                     value: e,
                                                                 };
                                                                 handleServiceChange(idx, parameter);
@@ -773,7 +810,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                                 </View>
                                                 <View style={{flexDirection: 'row'}}>
                                                     <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 0, fontWeight: '600'}}>Total for this Service: </Text>
-                                                    <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 5 }}>{(fieldsServices[idx]) ? fieldsServices[idx].totalForThisService : 0}</Text>
+                                                    <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 5 }}>{(fieldsServices[idx]) ? fieldsServices[idx].amount : 0}</Text>
                                                 </View>
                                             </View>
                                         </View>
@@ -809,7 +846,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                                                 if(firstServiceField === false) {
                                                                     // console.log('case 1');                                                          
                                                                     let parameter = {
-                                                                        name: 'serviceId',
+                                                                        name: 'service_id',
                                                                         value: isService
                                                                     };
                                                                     handleServiceChange(fieldsServices.length - 1, parameter);
@@ -914,7 +951,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                         setServiceListModal(true)
                                     // } else {
                                     //     // const serviceValues = [...fieldsServices];
-                                    //     serviceValues.push({ serviceId: null, serviceName: null, rate: null, quantity: null, discount: 0, applicableDiscount: 0, totalForThisService: null });
+                                    //     serviceValues.push({ service_id: null, serviceName: null, rate: null, qty: null, discount: 0, applicableDiscount: 0, amount: null });
                                     //     setFieldsServices(serviceValues);
                                     //     setServiceListModal(true);
                                     //     setFirstServiceField(false);
@@ -961,7 +998,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                                                     value: e,
                                                                 };
                                                                 handlePartChange(idx, parameter);
-                                                                // console.log(fieldsParts[idx]['totalForThisService']);
+                                                                // console.log(fieldsParts[idx]['amount']);
                                                             }
                                                         }
                                                     />
@@ -976,7 +1013,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                                         onChangeText={
                                                             e => {
                                                                 let parameter = {
-                                                                    name: 'quantity',
+                                                                    name: 'qty',
                                                                     value: e,
                                                                 };
                                                                 handlePartChange(idx, parameter);
@@ -1012,7 +1049,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                                         style={styles.textEntryInput}
                                                         placeholder="Total Amount for this Part"
                                                         // editable={false}
-                                                        value={fieldsParts[idx]['totalForThisService']}
+                                                        value={fieldsParts[idx]['amount']}
                                                         // onChangeText={(text) => setIsName(text)}
                                                         // onChangeText=
                                                         // {
@@ -1029,7 +1066,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                                 {/* </View> */}
                                                 <View style={{flexDirection: 'row'}}>
                                                     <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 0, fontWeight: '600'}}>Total for this Part: </Text>
-                                                    <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 5 }}>{(fieldsParts[idx]) ? fieldsParts[idx].totalForThisPart : 0}</Text>
+                                                    <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 5 }}>{(fieldsParts[idx]) ? fieldsParts[idx].amount : 0}</Text>
                                                 </View>
                                             
                                             </View>
@@ -1064,7 +1101,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                                                 if(firstPartField === false) {
                                                                     // console.log('case 1');                                                          
                                                                     let parameter = {
-                                                                        name: 'partId',
+                                                                        name: 'parts_id',
                                                                         value: isPart
                                                                     };
                                                                     handlePartChange(fieldsParts.length - 1, parameter);
@@ -1269,7 +1306,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                         setPartListModal(true);
                                 //     } else {
                                 //         const partValues = [...fieldsParts];
-                                //         partValues.push({ partId: null, partName: null, rate: null, quantity: null, discount: 0, applicableDiscount: 0, totalForThisPart: null });
+                                //         partValues.push({ parts_id: null, partName: null, rate: null, qty: null, discount: 0, applicableDiscount: 0, amount: null });
                                 //         setFieldsParts(partValues);
                                 //         setAddPartModal(true);
                                 //         setFirstPartField(false);
@@ -1498,7 +1535,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                                                         // handlePartAdd();
 
                                                                         let parameter = {
-                                                                            partId: item.id,
+                                                                            parts_id: item.id,
                                                                             partName: item.name
                                                                         };
                                                                         handlePartAdd(parameter);
@@ -1569,7 +1606,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                                                         // handleServiceAdd();
 
                                                                         let parameter = {
-                                                                            serviceId: item.id,
+                                                                            service_id: item.id,
                                                                             serviceName: item.name
                                                                         };
                                                                         handleServiceAdd(parameter);

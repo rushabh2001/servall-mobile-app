@@ -14,11 +14,11 @@ const Services = ({ navigation }) => {
         
         <View style= {styles.customSurface}>
           <ScrollView>
-           <Searchbar
+           {/* <Searchbar
             placeholder="Search here..."
             onChangeText={onChangeSearch}
             value={searchQuery}
-          />
+          /> */}
 
           {/* Create Repair Order Card */}
 
@@ -76,7 +76,7 @@ const Services = ({ navigation }) => {
 
               <View style={{flex:0.08}}/>
 
-              <TouchableOpacity style={[styles.verticleCardContainer, {flex:1, elevation: 2}]} onPress={ () => navigation.navigate("OrderList") }>
+              <TouchableOpacity style={[styles.verticleCardContainer, {flex:1, elevation: 2}]} onPress={ () => navigation.navigate("WIPOrderList") }>
                 <View  style={{alignItems:'center'}}>
                   <Image resizeMode={'cover'} style={styles.verticleImage} source={require('../assets/images/icons/in-progress.png')} />
                 </View>

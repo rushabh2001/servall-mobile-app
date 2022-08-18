@@ -26,6 +26,9 @@ import PurchaseOrder from "./PurchaseOrder";
 import PurchaseOrderSelectOrder from "./PurchaseOrderSelectOrder";
 import EditRepairOrder from "./EditRepairOrder";
 import OpenOrderList from "./OpenOrderList";
+import OrderWorkInProgress from './OrderWorkInProgress';
+import WIPOrderList from './WIPOrderList';
+import OrderSearch from './OrderSearch';
 
 export {
     Accounts,
@@ -56,4 +59,7 @@ export {
     PurchaseOrderSelectOrder,
     EditRepairOrder,
     OpenOrderList,
+    WIPOrderList,
+    OrderWorkInProgress,
+    OrderSearch,
 }

@@ -1,22 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { Modal, Portal, Button, TextInput } from 'react-native-paper';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, FlatList } from 'react-native';
+import { Modal, Portal, Button, TextInput, Searchbar, Divider, List } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { colors } from '../constants';
 import { API_URL } from '../constants/config';
 import InputScrollView from 'react-native-input-scroll-view';
 import { Picker } from '@react-native-picker/picker';
 
-const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken }) => {
+const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, route, garageId }) => {
 
     // User / Customer Fields
-    const [isPrice, setIsName] = useState('');
-    const [isMRP, setIsMRP] = useState('');
-    const [isCurrentStock, setIsCurrentStock] = useState('');
-    const [isMinStock, setIsMinStock] = useState('');
-    const [isMaxStock, setIsMaxStock] = useState('');
-    const [isRackId, setIsRackId] = useState('');
-    const [isComment, setIsComment] = useState('');
+    const [isPart, setIsPart] = useState(route?.params?.data?.parts?.id);
+    const [isPartName, setIsPartName] = useState(route?.params?.data?.parts?.name);
+    const [isStockId, setIsStockId] = useState(route?.params?.data?.id);
+    const [isPrice, setIsPrice] = useState(JSON.stringify(route?.params?.data?.purchase_price));
+    const [isMRP, setIsMRP] = useState(JSON.stringify(route?.params?.data?.mrp));
+    const [isCurrentStock, setIsCurrentStock] = useState(JSON.stringify(route?.params?.data?.current_stock));
+    const [isMinStock, setIsMinStock] = useState(JSON.stringify(route?.params?.data?.min_stock));
+    const [isMaxStock, setIsMaxStock] = useState(JSON.stringify(route?.params?.data?.max_stock));
+    const [isRackId, setIsRackId] = useState(route?.params?.data?.rack_id);
+    const [isComment, setIsComment] = useState(route?.params?.data?.comment);
     const [priceError, setPriceError] = useState('');     // Error States
     const [mrpError, setMrpError] = useState('');
     const [currentStockError, setCurrentStockError] = useState('');
@@ -30,19 +33,80 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken })
     const [isVendorName, setIsVendorName] = useState();
     const [vendorError, setVendorError] = useState('');   // Error State
 
-    const [isGarageId, setIsGarageId] = useState();
-    const [garageIdError, setGarageIdError] = useState();
+    // const [isGarageId, setIsGarageId] = useState();
 
-    const [garageList, setGarageList] = useState([]);
+    // const [garageList, setGarageList] = useState([]);
     const [vendorList, setVendorList] = useState([]);
 
     const [addVendorModal, setAddVendorModal] = useState(false);
     const [newVendor, setNewVendor] = useState();
     const [newVendorError, setNewVendorError] = useState();
+
+    // States for Garage Dropdown
+    const [isGarage, setIsGarage] = useState(route?.params?.data?.garage?.id);
+    const [isGarageName, setIsGarageName] = useState(route?.params?.data?.garage?.garage_name);
+    const [garageList, setGarageList] = useState([]);
+    const [garageListModal, setGarageListModal] = useState(false);
+    const [isLoadingGarageList, setIsLoadingGarageList] = useState(false);
+    const [filteredGarageData, setFilteredGarageData] = useState([]);
+    const [searchQueryForGarages, setSearchQueryForGarages] = useState(); 
+    const [garageError, setGarageError] = useState();
   
     const [isLoading, setIsLoading] = useState(false);
 
     const scroll1Ref = useRef();
+
+    //    useEffect(() => {
+    //     console.log('route', route?.params);
+    // }, [route?.params]);
+
+    // Functions Dropdown
+    const searchFilterForGarages = (text) => {
+        if (text) {
+            let newData = garageList.filter(
+                function (listData) {
+                // let arr2 = listData.phone_number ? listData.phone_number : ''.toUpperCase() 
+                let itemData = listData.garage_name ? listData.garage_name.toUpperCase() : ''.toUpperCase()
+                // let itemData = arr1.concat(arr2);
+                // console.log(itemData);
+                let textData = text.toUpperCase();
+                return itemData.indexOf(textData) > -1;
+                }
+            );
+            setFilteredGarageData(newData);
+            setSearchQueryForGarages(text);
+        } else {
+            setFilteredGarageData(garageList);
+            setSearchQueryForGarages(text);
+        }
+    };
+
+    const getGarageList = async () => {
+        setIsLoadingGarageList(true);
+        try {
+            const res = await fetch(`${API_URL}fetch_owner_garages?user_id=${userId}&user_role=${userRole}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+            });
+            const json = await res.json();
+            // console.log(json);
+            if (json !== undefined) {
+                // console.log('setGarageList', json.data);
+                setGarageList(json.garage_list);
+                setFilteredGarageData(json.garage_list);
+            }
+        } catch (e) {
+            console.log(e);
+        } finally {
+            // setIsLoading2(false);
+            setIsLoadingGarageList(false)
+
+        }
+    };
 
     // const addNewBrand = async () => {
     //     let data = { 'name': newVendor }
@@ -146,28 +210,28 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken })
         }
     };
 
-    const getGarageList = async () => {
-        try {
-            const res = await fetch(`${API_URL}fetch_owner_garages?user_id=${userId}&user_role=${userRole}`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + userToken
-                },
-            });
-            const json = await res.json();
-            if (json !== undefined) {
-                setGarageList(json.garage_list);
-                // console.log(json);
-            }
-        } catch (e) {
-            console.log(e);
-        } finally {
-            setIsLoading(false);
-            setIsGarageId(selectedGarageId);
-        }
-    };
+    // const getGarageList = async () => {
+    //     try {
+    //         const res = await fetch(`${API_URL}fetch_owner_garages?user_id=${userId}&user_role=${userRole}`, {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Accept': 'application/json',
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': 'Bearer ' + userToken
+    //             },
+    //         });
+    //         const json = await res.json();
+    //         if (json !== undefined) {
+    //             setGarageList(json.garage_list);
+    //             // console.log(json);
+    //         }
+    //     } catch (e) {
+    //         console.log(e);
+    //     } finally {
+    //         setIsLoading(false);
+    //         setIsGarageId(selectedGarageId);
+    //     }
+    // };
 
     useEffect(() => {
         getBrandList();
@@ -190,31 +254,41 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken })
                 >
                     <View style={{ flex: 1 }}>
                         <Text style={[styles.headingStyle, { marginTop: 20 }]}>Stock Details:</Text>
-                        <View style={styles.dropDownContainer}>
-                            <Picker
+                        {/* <View style={styles.dropDownContainer}> */}
+                        <TextInput
+                                mode="outlined"
+                                label='Part'
+                                style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                placeholder="Select Part"
+                                value={isPartName}
+      				            right={<TextInput.Icon name="menu-down" />}
+                                // editable={false}
+                                disabled={true}
+                            />
+                            {/* <Picker
                                 enabled={false}
                                 // key={brandRef}
-                                selectedValue={isVendor}
-                                onValueChange={(optionId) => { setIsVendor(optionId); if (optionId == "new_vendor") setAddVendorModal(true) }}
+                                selectedValue={isPart}
+                                onValueChange={(optionId) => { setIsPart(optionId); if (optionId == "new_part") setAddPartModal(true) }}
                                 style={styles.dropDownField}
                                 itemStyle={{ padding: 0 }}
                             >
                                 <Picker.Item label="Select Part" value="0" />
-                                {vendorList.map((vendorList, i) => {
+                                {partList.map((partList, i) => {
                                     return (
                                         <Picker.Item
-                                            key={'vendor'+i}
-                                            label={vendorList.name}
-                                            value={vendorList.id}
+                                            key={'part'+i}
+                                            label={partList.name}
+                                            value={partList.id}
                                         />
                                     );
                                 })}
-                                <Picker.Item label="Add New Part" value="new_vendor" />
-                            </Picker>
-                        </View>
-                        {vendorError?.length > 0 &&
-                            <Text style={styles.errorTextStyle}>{vendorError}</Text>
-                        }
+                                <Picker.Item label="Add New Part" value="new_part" />
+                            </Picker> */}
+                        {/* </View> */}
+                        {/* {partError?.length > 0 &&
+                            <Text style={styles.errorTextStyle}>{partError}</Text>
+                        } */}
 
                         <View style={styles.dropDownContainer}>
                             <Picker
@@ -346,7 +420,29 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken })
 
                         {(userRole == "Super Admin" || garageId?.length > 1) &&
                             <View>
-                                <View style={styles.dropDownContainer}>
+                                <TouchableOpacity 
+                                    style={styles.garageDropDownField} 
+                                    onPress={() => {
+                                        setGarageListModal(true);
+                                    }}
+                                >
+                                </TouchableOpacity>
+                                <TextInput
+                                    mode="outlined"
+                                    label='Garage'
+                                    style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                    placeholder="Select Garage"
+                                    value={isGarageName}
+                                    right={<TextInput.Icon name="menu-down" />}
+                                />
+                                {garageError?.length > 0 &&
+                                    <Text style={styles.errorTextStyle}>{garageError}</Text>
+                                }
+                            </View>
+                        }
+
+                            {/* <View> 
+                                 <View style={styles.dropDownContainer}>
                                     <Picker
                                         selectedValue={isGarageId}
                                         onValueChange={(option) => setIsGarageId(option)}
@@ -363,15 +459,14 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken })
                                                 />
                                             );
                                         })}
-                                        {/* <Picker.Item label="Add New Insurance Company" value="new_insurance_company" /> */}
+                                        <Picker.Item label="Add New Insurance Company" value="new_insurance_company" />
                                     </Picker>
-                                </View>
-                                {garageIdError?.length > 0 &&
-                                    <Text style={styles.errorTextStyle}>{garageIdError}</Text>
+                                </View> 
+                                {garageError?.length > 0 &&
+                                    <Text style={styles.errorTextStyle}>{garageError}</Text>
                                 }
-                            </View>
-                        }
-
+                            </View> */}
+              
                         <Button
                             style={{ marginTop: 15 }}
                             mode={'contained'}
@@ -414,6 +509,58 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken })
                         </Button>
                     </View>
                 </Modal>
+
+                {/* Garages List Modal */}
+                <Modal visible={garageListModal} onDismiss={() => { setGarageListModal(false); setIsGarage(0); setIsGarageName(''); setGarageError(''); setSearchQueryForGarages('');  searchFilterForGarages();}} contentContainerStyle={styles.modalContainerStyle}>
+                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Garage</Text>
+                    {(isLoadingGarageList == true) ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator>
+                        :
+                        <>
+                            <View style={{marginTop: 20, marginBottom: 10}}>
+                                <Searchbar
+                                    placeholder="Search here..."
+                                    onChangeText={(text) => { if(text != null) searchFilterForGarages(text)}}
+                                    value={searchQueryForGarages}
+                                    elevation={0}
+                                    style={{ elevation: 0.8, marginBottom: 10}}
+                                />
+                                {filteredGarageData?.length > 0 ?  
+                                    <FlatList
+                                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                        data={filteredGarageData}
+                                        // onEndReachedThreshold={1}
+                                        style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
+                                        keyExtractor={item => item.id}
+                                        renderItem={({item}) => (
+                                            <>
+                                                <List.Item
+                                                    title={
+                                                        // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setGarageListModal(false);  setAddGarageModal(true); }}>
+                                                            <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                                <Text style={{fontSize:16, color: colors.black}}>{item.garage_name}</Text>
+                                                            </View>
+                                                        // </TouchableOpacity> 
+                                                    }
+                                                    onPress={() => {
+                                                            setIsGarageName(item.garage_name); 
+                                                            setIsGarage(item.id); 
+                                                            setGarageError('');
+                                                            setGarageListModal(false);  
+                                                        }
+                                                    }
+                                                />
+                                            </>
+                                        )} 
+                                    />
+                                    :
+                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
+                                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such garage is associated!</Text>
+                                    </View>
+                                }
+                            </View>
+                        </>
+                    }
+                </Modal>
             </Portal>
 
         </View>
@@ -423,6 +570,17 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken })
 
 
 const styles = StyleSheet.create({
+    garageDropDownField: {
+        fontSize: 16,
+        color: colors.black,
+        position: 'absolute',
+        marginTop: 15,
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '80%',
+        zIndex: 2,
+    },
     pageContainer: {
         padding: 20,
         flex: 1,
@@ -470,6 +628,7 @@ const mapStateToProps = state => ({
     userRole: state.role.user_role,
     userId: state.user?.user?.id,
     selectedGarageId: state.garage.selected_garage_id,
+    garageId: state.garage.garage_id
 })
 
 export default connect(mapStateToProps)(AddStock);

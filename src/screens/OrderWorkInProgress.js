@@ -9,7 +9,7 @@ import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
 import moment from "moment";
 import { API_URL } from "../constants/config";
 
-const OrderCreated = ({ navigation, userRole, route, userToken }) => {
+const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
 
     // const isFocused = useIsFocused();
     const [partData, setPartData] = useState([]);
@@ -119,8 +119,6 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
         } catch (e) {
             console.log(e);
         } finally {
-            // let keyExist = serviceData.keys(obj).some(key => key === keyName);
-            // if(serviceData[index]['is_done']);
             // setIsLoading(false);
         }
     }
@@ -344,7 +342,7 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
                                         </View>
                                         <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center"}}>
                                             <Text style={{color: colors.danger2, fontSize: 16}}>Discount</Text>
-                                            <Text style={{color: colors.danger2, fontSize: 16}}>₹ {isApplicableDiscount}</Text>
+                                            <Text style={{color: colors.danger2, fontSize: 16}}>{isApplicableDiscount}</Text>
                                         </View>
                                     </View>
                                     <View style={{flexDirection:"row", marginTop: 15, alignSelf:"center", justifyContent:'center'}}>
@@ -369,56 +367,47 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
                                         <TouchableOpacity onPress={changeServicesStatus} style={[styles.smallButton, {paddingHorizontal: 8, borderColor: colors.white}]}><IconX name={"edit"} size={16} color={colors.white} /><Text style={{marginLeft:4, color:colors.white}}>Save Progress</Text></TouchableOpacity>
                                     </View>
                                     <View style={{flexDirection:'column', backgroundColor: colors.white}}>
-                                        <>
-                                            {serviceData.length ==  0 ? 
-                                            <View style={{justifyContent: 'center', alignItems: 'center', height: 50}}>
-                                                <Text>No Services associated with Order!</Text>
-                                            </View>
-                                            :
-                                                <FlatList
-                                                    ItemSeparatorComponent= {() => (<Divider />)}
-                                                    data={serviceData}
-                                                    // onEndReachedThreshold={1}
-                                                    keyExtractor={item => `services-${item.id}`}
-                                                    renderItem={({item, index}) => (
-                                                        <TouchableOpacity  
-                                                            onPress={() => {
-                                                                if(serviceData[index]['is_done'] == 0) {
-                                                                    let serviceValues2 = [...serviceData];
-                                                                    serviceValues2[index]['is_done'] = 1;
-                                                                    setServiceData(serviceValues2);
-                                                                } else {                                                          
-                                                                    // item.is_done = 0 
-                                                                    let serviceValues2 = [...serviceData];
-                                                            
-                                                                    // serviceValues2[index][value.name] = value.value;
-                                                                    serviceValues2[index]['is_done'] = 0;
-                                    
-                                                                    setServiceData(serviceValues2);
-                                                                    // serviceData[index]['is_done'] = 0
-                                                                    // setorderStatusArray([
-                                                                    //     ...orderStatusArray, 
-                                                                    //     {"order_service_id": item.id, "is_done": 0},
-                                                                    //     // {"order_service_id": item,"is_done":1}
-                                                                    // ])  
-                                                                }
-                                                                console.log(serviceData);
-                                                                // setChecked(!checked);
-                                                            }}
-                                                            style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 7, paddingHorizontal: 10}}
-                                                            activeOpacity={1}
-                                                        >
-                                                            <Text style={{fontSize: 18, color: colors.black}}>- {item?.service?.name}</Text>
-                                                            <Checkbox
-                                                                // checked
-                                                                status={serviceData[index]['is_done'] == 1 ? 'checked' : 'unchecked'}
-                                                            />
-                                                        </TouchableOpacity>
-                                                    )}
-                                                />
-                                            }
-                                        </>
-                                        
+                                        <FlatList
+                                            ItemSeparatorComponent= {() => (<Divider />)}
+                                            data={serviceData}
+                                            // onEndReachedThreshold={1}
+                                            keyExtractor={item => `services-${item.id}`}
+                                            renderItem={({item, index}) => (
+                                                <TouchableOpacity  
+                                                    onPress={() => {
+                                                        if(serviceData[index]['is_done'] == 0) {
+                                                            let serviceValues2 = [...serviceData];
+                                                            serviceValues2[index]['is_done'] = 1;
+                                                            setServiceData(serviceValues2);
+                                                        } else {                                                          
+                                                              // item.is_done = 0 
+                                                            let serviceValues2 = [...serviceData];
+                                                    
+                                                            // serviceValues2[index][value.name] = value.value;
+                                                            serviceValues2[index]['is_done'] = 0;
+                            
+                                                            setServiceData(serviceValues2);
+                                                            // serviceData[index]['is_done'] = 0
+                                                            // setorderStatusArray([
+                                                            //     ...orderStatusArray, 
+                                                            //     {"order_service_id": item.id, "is_done": 0},
+                                                            //     // {"order_service_id": item,"is_done":1}
+                                                            // ])  
+                                                        }
+                                                        console.log(serviceData);
+                                                        // setChecked(!checked);
+                                                    }}
+                                                    style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 7, paddingHorizontal: 10}}
+                                                    activeOpacity={1}
+                                                >
+                                                    <Text style={{fontSize: 18, color: colors.black}}>- {item?.service?.name}</Text>
+                                                    <Checkbox
+                                                        // checked
+                                                        status={serviceData[index]['is_done'] == 1 ? 'checked' : 'unchecked'}
+                                                    />
+                                                </TouchableOpacity>
+                                            )}
+                                        />
                                         {/* <TouchableOpacity  
                                             onPress={() => {
                                                 setChecked(!checked);
@@ -440,43 +429,35 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
                                         <TouchableOpacity onPress={changePartsStatus} style={[styles.smallButton, {paddingHorizontal: 8, borderColor: colors.white}]}><IconX name={"edit"} size={16} color={colors.white} /><Text style={{marginLeft:4, color:colors.white}}>Save Progress</Text></TouchableOpacity>
                                     </View>
                                     <View style={{flexDirection:'column', backgroundColor: colors.white}}>
-                                        <>
-                                            {serviceData.length ==  0 ? 
-                                                <View style={{justifyContent: 'center', alignItems: 'center', height: 50}}>
-                                                    <Text>No Parts associated with Order!</Text>
-                                                </View>
-                                            :
-                                                <FlatList
-                                                    ItemSeparatorComponent= {() => (<Divider />)}
-                                                    data={partData}
-                                                    // onEndReachedThreshold={1}
-                                                    keyExtractor={item => `parts-${item.id}`}
-                                                    renderItem={({item, index}) => (
-                                                        <TouchableOpacity  
-                                                            onPress={() => {
-                                                                if(partData[index]['is_done'] == 0) {
-                                                                    let partValues2 = [...partData];
-                                                                    partValues2[index]['is_done'] = 1;
-                                                                    setPartData(partValues2);
-                                                                } else {                                                          
-                                                                    let partValues2 = [...partData];
-                                                                    partValues2[index]['is_done'] = 0;
-                                                                    setPartData(partValues2);
-                                                                }
-                                                                console.log(partData);
-                                                            }}
-                                                            style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 5, paddingHorizontal: 10}}
-                                                            activeOpacity={1}
-                                                        >
-                                                            <Text style={{fontSize: 18, color: colors.black}}>- {item?.parts?.name}</Text>
-                                                            <Checkbox
-                                                                status={item.is_done == 1 ? 'checked' : 'unchecked'}
-                                                            />
-                                                        </TouchableOpacity>
-                                                    )}
+                                    <FlatList
+                                        ItemSeparatorComponent= {() => (<Divider />)}
+                                        data={partData}
+                                        // onEndReachedThreshold={1}
+                                        keyExtractor={item => `parts-${item.id}`}
+                                        renderItem={({item, index}) => (
+                                            <TouchableOpacity  
+                                                onPress={() => {
+                                                    if(partData[index]['is_done'] == 0) {
+                                                        let partValues2 = [...partData];
+                                                        partValues2[index]['is_done'] = 1;
+                                                        setPartData(partValues2);
+                                                    } else {                                                          
+                                                        let partValues2 = [...partData];
+                                                        partValues2[index]['is_done'] = 0;
+                                                        setPartData(partValues2);
+                                                    }
+                                                    console.log(partData);
+                                                }}
+                                                style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 5, paddingHorizontal: 10}}
+                                                activeOpacity={1}
+                                            >
+                                                <Text style={{fontSize: 18, color: colors.black}}>- {item?.parts?.name}</Text>
+                                                <Checkbox
+                                                    status={item.is_done == 1 ? 'checked' : 'unchecked'}
                                                 />
-                                            }
-                                        </>
+                                            </TouchableOpacity>
+                                        )}
+                                    />
                                         {/* // <TouchableOpacity  
                                         //     onPress={() => {
                                         //         setChecked(!checked);
@@ -612,4 +593,4 @@ const mapStateToProps = state => ({
     userToken: state.user.userToken,
 })
 
-export default connect(mapStateToProps)(OrderCreated);
+export default connect(mapStateToProps)(OrderWorkInProgress);

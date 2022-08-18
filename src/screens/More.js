@@ -41,11 +41,12 @@ const More = ({ navigation, signOut}) => {
               title="Order Search"
               // description="Item description"
               style={{paddingVertical:15}}
+              onPress={() => navigation.navigate("OrderSearch")}
               left={() => (<Icon name="search" style={{marginRight:20, alignSelf:"center", width: 30}} color={colors.black} size={21} />)}
               right={() => (<Icon name="caret-right" style={{marginRight:20, alignSelf:"center"}} color={colors.gray} size={18} />)}
             />
             <Divider />
-            <List.Item
+            {/* <List.Item
               title="Settings"
               // description="Item description"
               style={{paddingVertical:15}}
@@ -68,7 +69,7 @@ const More = ({ navigation, signOut}) => {
               left={() => (<Icon name="comments" style={{marginRight:20, alignSelf:"center", width: 30}} color={colors.black} size={21} />)}
               right={() => (<Icon name="caret-right" style={{marginRight:20, alignSelf:"center"}} color={colors.gray} size={18} />)}
             />
-            <Divider />
+            <Divider /> */}
 
             <List.Item
               title="Vehicle Search"
@@ -79,7 +80,7 @@ const More = ({ navigation, signOut}) => {
               right={() => (<Icon name="caret-right" style={{marginRight:20, alignSelf:"center"}} color={colors.gray} size={18} />)}
             />
             <Divider />
-            <List.Item
+            {/* <List.Item
               title="Insurance Due"
               // description="Item description"
               style={{paddingVertical:15}}
@@ -102,7 +103,7 @@ const More = ({ navigation, signOut}) => {
               left={() => (<Icon name="file-invoice" style={{marginRight:20, alignSelf:"center", width: 30}} color={colors.black} size={21} />)}
               right={() => (<Icon name="caret-right" style={{marginRight:20, alignSelf:"center"}} color={colors.gray} size={18} />)}
             />
-            <Divider />
+            <Divider /> */}
             <List.Item
               title="Cancelled Orders"
               // description="Item description"

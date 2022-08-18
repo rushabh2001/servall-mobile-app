@@ -556,7 +556,7 @@ const CounterSaleStep2 = ({ route, userToken }) => {
                                                         label='Total Amount for this Part'
                                                         style={styles.textEntryInput}
                                                         placeholder="Total Amount for this Part"
-                                                        // editable={false}
+                                                        editable={false}
                                                         value={fieldsParts[idx]['totalForThisService']}
                                                         // onChangeText={(text) => setIsName(text)}
                                                         // onChangeText=
