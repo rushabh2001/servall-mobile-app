@@ -1,13 +1,8 @@
-/**
- * @format
- */
-
  import React, { useEffect } from 'react';
  import { SafeAreaView, StatusBar } from 'react-native';
  import AppContainer from './AppContainer';
  import { DefaultTheme, Provider as PaperProvider, configureFonts } from 'react-native-paper';
  import { colors, gStyle } from './constants';
- // import SplashScreen from 'react-native-splash-screen';
  import { NetInfoProvider } from './lib/NetInfo/Context';
  import { Provider } from 'react-redux';
  import { appInit } from './actions/app';
@@ -23,13 +18,8 @@
  };
  
 export default function App() {
-     // useEffect(() => {
-     //     SplashScreen.hide()
-     // }, [])
- 
      useEffect(() => {
         store.dispatch(appInit())
-        //  setTimeout(() => store.dispatch(appInit()), 2000)
      }, [])
  
      return (

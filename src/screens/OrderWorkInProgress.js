@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Linking, FlatList } from "react-native";
-import { Checkbox, Button, Divider } from "react-native-paper";
+import { Checkbox, Divider } from "react-native-paper";
 import { colors } from "../constants";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import IconX from "react-native-vector-icons/FontAwesome5";
@@ -11,10 +11,8 @@ import { API_URL } from "../constants/config";
 
 const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
 
-    // const isFocused = useIsFocused();
     const [partData, setPartData] = useState([]);
     const [serviceData, setServiceData] = useState([]);
-
     const [isOrderId, setIsOrderId] = useState(route?.params?.data?.order_id);
     const [isGarageId, setIsGarageId] = useState(route?.params?.data?.garage_id);
     const [isUserId, setIsUserId] = useState(route?.params?.data?.user_id);
@@ -36,8 +34,6 @@ const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
     const [isTotal, setIsTotal] = useState(route?.params?.data?.total);
     const [isApplicableDiscount, setIsApplicableDiscount] = useState(route?.params?.data?.applicable_discount);
 
-    // const [orderStatusArray, setOrderStatusArray] = useState([]);
-
     const [isCreatedAt, setIsCreatedAt] = useState(route?.params?.data?.created_at);
     const [createdAt, setCreatedAt] = useState(moment(route?.params?.data?.created_at, 'YYYY-MM-DD hh:mm:ss').fromNow());
 
@@ -49,49 +45,17 @@ const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
 
     const [servicesTotal, setServicesTotal] = useState(route?.params?.data?.labor_total);
     const [partsTotal, setPartsTotal] = useState(route?.params?.data?.parts_total);
-    // const [isTotal, setIsTotal] = useState(route?.params?.data?.total);
-    // const [isApplicableDiscount, setIsApplicableDiscount] = useState(route?.params?.data?.applicable_discount);
     const [isTotalServiceDiscount, setIsTotalServiceDiscount] = useState(0);
     const [isTotalPartDiscount, setIsTotalPartDiscount] = useState(0);
     
     const [fieldsServices, setFieldsServices] = useState([]);
     const [fieldsParts, setFieldsParts] = useState([]);
 
-    // const getCustomerDetails = async () => {
-    //     try {
-    //         const res = await fetch(`${API_URL}fetch_customer_details?id=${route?.params?.userId}`, {
-    //             method: 'GET',
-    //             headers: {
-    //                 'Accept': 'application/json',
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': 'Bearer ' + userToken
-    //             },
-    //         });
-    //         const json = await res.json();
-    //         // console.log(res);
-    //         if (json !== undefined) {
-    //             // console.log(json);
-    //             setIsCustomerData(json?.user_details);
-    //             if(json.user_details.profile_image != null) {
-    //                 setImageUri( WEB_URL + 'uploads/profile_image/' + json?.user_details.profile_image);
-    //             } else {
-    //                 setImageUri( WEB_URL + 'img/placeolder_servall.jpg');
-    //             }
-    //         }
-    //     } catch (e) {
-    //         console.log(e);
-    //     } finally {
-    //         setIsLoading(false);
-    //     }
-    // };
-
     const changeServicesStatus = async () => {
         let orderStatusArray = [];
         serviceData.forEach(item => {
             orderStatusArray.push({ order_service_id: item.id, is_done: item.is_done });
-            // setFieldsServices(serviceValues);
         });
-        console.log('orderStatusArray',orderStatusArray);
         try {
             const res = await fetch(`${API_URL}service_status/update`, {
                 method: 'POST',
@@ -106,20 +70,11 @@ const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
                 }),
             });
             const json = await res.json();
-            // console.log(res);
             if (json !== undefined) {
                 console.log(json);
-                // setIsCustomerData(json?.user_details);
-                // if(json.user_details.profile_image != null) {
-                //     setImageUri( WEB_URL + 'uploads/profile_image/' + json?.user_details.profile_image);
-                // } else {
-                //     setImageUri( WEB_URL + 'img/placeolder_servall.jpg');
-                // }
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            // setIsLoading(false);
         }
     }
 
@@ -127,9 +82,7 @@ const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
         let orderStatusArray = [];
         partData.forEach(item => {
             orderStatusArray.push({ order_part_id: item.id, is_done: item.is_done });
-            // setFieldsParts(partValues);
         });
-        console.log('orderStatusArray',orderStatusArray);
         try {
             const res = await fetch(`${API_URL}part_status/update`, {
                 method: 'POST',
@@ -144,138 +97,19 @@ const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
                 }),
             });
             const json = await res.json();
-            // console.log(res);
             if (json !== undefined) {
-                console.log(json);
                 {(partData.length != 0 && serviceData.length != 0) && navigation.navigate('OrderWorkInProgress')}
-                // setIsCustomerData(json?.user_details);
-                // if(json.user_details.profile_image != null) {
-                //     setImageUri( WEB_URL + 'uploads/profile_image/' + json?.user_details.profile_image);
-                // } else {
-                //     setImageUri( WEB_URL + 'img/placeolder_servall.jpg');
-                // }
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            // setIsLoading(false);
         }
     }
-
-   
-    // const changeProfileImage = async () => {
-    //     try {
-    //         const res = await DocumentPicker.pick({
-    //         type: [DocumentPicker.types.images],
-    //         });
-    //         // console.log('res : ' + JSON.stringify(res));
-    //         setSingleFile(res[0]);
-    //     } catch (err) {
-    //         setSingleFile(null);
-    //         if (DocumentPicker.isCancel(err)) {
-    //         alert('Canceled');
-    //         } else {
-    //         alert('Unknown Error: ' + JSON.stringify(err));
-    //         throw err;
-    //         }
-    //     } 
-    // };
 
     useEffect(() => {
         setServiceData(route?.params?.data?.services_list);
         setPartData(route?.params?.data?.parts_list);
-        // console.log(route?.params?.data?.parts_list);
     }, [route?.params?.data]);
 
-    // useEffect(() => {
-    //     // setAddPartModal(false);
-    //     let values = [...fieldsServices];
-    //     route?.params?.data?.services_list.forEach(item => {
-    //         values.push({ 
-    //             serviceId: item.service.id, 
-    //             serviceName:item.service.name,
-    //             rate: JSON.stringify(item.rate),
-    //             quantity: JSON.stringify(item.qty),
-    //             discount: JSON.stringify(item.discount),
-    //             applicableDiscountForItem: (item.rate * item.qty) * (item.discount / 100),
-    //             totalForThisService: item.amount,
-    //             isDone: 0
-    //         });
-    //         // fieldsParts[idx].rate
-    //     });
-    //     setServiceData(values);
-    //     // setFieldsServices(values);
-
-    //     let values2 = [...fieldsParts];
-    //     route?.params?.data?.parts_list.forEach(item => {
-    //         values2.push({ 
-    //             partId: item.parts.id, 
-    //             partName:item.parts.name, 
-    //             rate: JSON.stringify(item.rate), 
-    //             quantity: JSON.stringify(item.qty), 
-    //             discount: JSON.stringify(item.discount),  
-    //             applicableDiscountForItem: (item.rate * item.qty) * (item.discount / 100),
-    //             totalForThisPart: item.amount,
-    //             isDone: 0
-    //         });
-    //     });
-    //     setPartData(values2);
-    //     // setFieldsParts(values2);
-
-    //     // let servicesList =  [...fieldsServices];
-    //     // route?.params?.data?.parts_list.forEach(item => {
-    //     //     servicesList.push({ 
-    //     //         partId: item.parts.id, 
-    //     //         partName:item.parts.name, 
-    //     //         rate: JSON.stringify(item.rate), 
-    //     //         quantity: JSON.stringify(item.qty), 
-    //     //         discount: JSON.stringify(item.discount),  
-    //     //         applicableDiscountForItem: (item.rate * item.qty) * (item.discount / 100),
-    //     //         totalForThisPart: item.amount
-    //     //     });
-    //     // });
-    //     // setFieldsParts(values2);
-
-    //     // setServiceData(route?.params?.data?.services_list);
-    //     // setPartData(route?.params?.data?.parts_list);
-
-
-    //     // setFieldsServices = 
-    //     // route?.params?.data?.services_list
-    //     // handlePartAdd();
-    // }, [route?.params?.data]);
-
-
-    // const uploadImage = async () => {
-    //     if (singleFile != null) {
-    //         const fileToUpload = singleFile;
-    //         const data = new FormData();
-    //         data.append('profile_image', fileToUpload);
-    //         let res = await fetch(`${API_URL}update_profile_image/${route?.params?.userId}`, {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Accept': 'application/json',
-    //                 'Content-Type': 'multipart/form-data; ',
-    //                 'Authorization': 'Bearer ' + userToken
-    //             },
-    //             body: data
-    //         });
-    //         let responseJson = await res.json();
-    //         // console.log(responseJson);
-    //         if (responseJson.message == true) {
-    //             getCustomerDetails();
-    //         }
-    //     } else {
-    //         console.log('Please Select File first');
-    //     }
-    // };
-    
-    // useEffect(() => {
-    //     // setImageUri('http://demo2.webstertech.in/servall_garage_api/public/img/placeolder_servall.jpg');
-    //     getCustomerDetails();
-    //     console.log(userRole);
-    // }, [isFocused]);
-    
     return (
         <View style={styles.surfaceContainer}>
             <ScrollView>
@@ -283,7 +117,6 @@ const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
                     <View style={styles.stepLables}>
                         <View style={{justifyContent: 'flex-start'}}>
                             <Text style={{lineHeight: 20}}>Created {'\n'}{createdAt}
-                            {/* Created {'\n'}5 Minutes Ago */}
                             </Text>
                         </View>
                         <View style={{justifyContent: 'flex-end'}}>
@@ -305,12 +138,9 @@ const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
                                 <View>
                                     <View style={{flexDirection: "row", alignItems:"center", justifyContent: 'center'}}>
                                         <Text style={styles.customerName}>{isName}</Text>
-                                        {/* <Text style={styles.customerName}>{ isCustomerData != null ? isCustomerData.name : '' }</Text> */}
-                                        {/* <Icon onPress={() => {}} name={"pencil"} size={20} color={colors.gray} /> */}
                                     </View>
                                     <View style={{flexDirection: "row", alignItems:"center", justifyContent: 'center'}}>
                                         <Text style={styles.customerPhonenumber}>{isPhoneNumber}</Text>
-                                        {/* <Text style={styles.customerPhonenumber}>{ isCustomerData != null ? isCustomerData?.phone_number : '' }</Text> */}
                                     </View>
                                     <View style={{flexDirection: "row", alignItems:"center", justifyContent: 'center'}}>
                                         <Text style={styles.customerVehicle}>{isBrandName} ({isVehicleRegistrationNumber})</Text>
@@ -321,11 +151,8 @@ const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
                                                 <TouchableOpacity onPress={()=> Linking.openURL(`tel:${isPhoneNumber}`) } style={styles.smallButton}><Icon name={"phone"} size={20} color={colors.primary} /></TouchableOpacity>
                                                 <TouchableOpacity onPress={()=> Linking.openURL(`sms:${isPhoneNumber}?&body=Hello%20ServAll`) } style={styles.smallButton}><Icon name={"comment-multiple"} size={20} color={colors.primary} /></TouchableOpacity>
                                                 <TouchableOpacity onPress={()=> Linking.openURL(`https://wa.me/${isPhoneNumber}`) } style={styles.smallButton}><Icon name={"whatsapp"} size={20} color={colors.primary} /></TouchableOpacity>
-                                                {/* <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Icon name={"bell"} size={20} color={colors.primary} /><Text style={{marginLeft:4, color:colors.primary}}>Reminders</Text></TouchableOpacity> */}
                                             </>
                                         : null }
-                                        {/* <TouchableOpacity onPress={()=>{}} style={styles.smallButton}><Text style={{color:colors.primary}}>Vehicles</Text></TouchableOpacity>
-                                        <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Text style={{color:colors.primary}}>Appointments</Text></TouchableOpacity> */}
                                     </View>
                                     <View style={styles.cardContainer}>
                                         <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center", marginRight: 10}}>
@@ -348,14 +175,9 @@ const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
                                     <View style={{flexDirection:"row", marginTop: 15, alignSelf:"center", justifyContent:'center'}}>
                                         <TouchableOpacity 
                                             onPress={()=> Linking.openURL(`tel:${isPhoneNumber}`) } 
-                                            // style={{marginRight: 10}}
                                         >
                                             <IconX name={"file-pdf"} size={28} color={colors.primary} />
                                         </TouchableOpacity>
-                                        {/* <TouchableOpacity onPress={()=> Linking.openURL(`sms:${isPhoneNumber}?&body=Hello%20ServAll`) } style={{}}><IconX name={"share-alt-square"} size={28} color={colors.primary} /></TouchableOpacity> */}
-
-                                        {/* <TouchableOpacity onPress={()=> Linking.openURL(`https://wa.me/Text`) } style={styles.smallButton}><Icon name={"whatsapp"} size={20} color={colors.primary} /></TouchableOpacity>
-                                        <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Icon name={"bell"} size={20} color={colors.primary} /><Text style={{marginLeft:4, color:colors.primary}}>Reminders</Text></TouchableOpacity> */}
                                     </View>
                                     <View style={{marginTop: 5, alignSelf:"center", justifyContent:'center'}}>
                                         <Text style={{color: colors.black}}>Repair Order</Text>
@@ -370,7 +192,6 @@ const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
                                         <FlatList
                                             ItemSeparatorComponent= {() => (<Divider />)}
                                             data={serviceData}
-                                            // onEndReachedThreshold={1}
                                             keyExtractor={item => `services-${item.id}`}
                                             renderItem={({item, index}) => (
                                                 <TouchableOpacity  
@@ -380,48 +201,21 @@ const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
                                                             serviceValues2[index]['is_done'] = 1;
                                                             setServiceData(serviceValues2);
                                                         } else {                                                          
-                                                              // item.is_done = 0 
                                                             let serviceValues2 = [...serviceData];
-                                                    
-                                                            // serviceValues2[index][value.name] = value.value;
                                                             serviceValues2[index]['is_done'] = 0;
-                            
-                                                            setServiceData(serviceValues2);
-                                                            // serviceData[index]['is_done'] = 0
-                                                            // setorderStatusArray([
-                                                            //     ...orderStatusArray, 
-                                                            //     {"order_service_id": item.id, "is_done": 0},
-                                                            //     // {"order_service_id": item,"is_done":1}
-                                                            // ])  
+                                                            setServiceData(serviceValues2); 
                                                         }
-                                                        console.log(serviceData);
-                                                        // setChecked(!checked);
                                                     }}
                                                     style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 7, paddingHorizontal: 10}}
                                                     activeOpacity={1}
                                                 >
                                                     <Text style={{fontSize: 18, color: colors.black}}>- {item?.service?.name}</Text>
                                                     <Checkbox
-                                                        // checked
                                                         status={serviceData[index]['is_done'] == 1 ? 'checked' : 'unchecked'}
                                                     />
                                                 </TouchableOpacity>
                                             )}
                                         />
-                                        {/* <TouchableOpacity  
-                                            onPress={() => {
-                                                setChecked(!checked);
-                                            }}
-                                            style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 7, paddingHorizontal: 10}}
-                                            activeOpacity={1}
-                                        >
-                                            <Text style={{fontSize: 18, color: colors.black}}>- Air filter hose Cleaning</Text>
-                                            <Checkbox
-                                                status={checked ? 'checked' : 'unchecked'}
-
-                                            />
-                                        </TouchableOpacity> */}
-                                        {/* <Checkbox.Item label="- Item" status="checked" /> */}
                                     </View>
 
                                     <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 25, backgroundColor: colors.secondary, padding: 10}}>
@@ -429,59 +223,35 @@ const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
                                         <TouchableOpacity onPress={changePartsStatus} style={[styles.smallButton, {paddingHorizontal: 8, borderColor: colors.white}]}><IconX name={"edit"} size={16} color={colors.white} /><Text style={{marginLeft:4, color:colors.white}}>Save Progress</Text></TouchableOpacity>
                                     </View>
                                     <View style={{flexDirection:'column', backgroundColor: colors.white}}>
-                                    <FlatList
-                                        ItemSeparatorComponent= {() => (<Divider />)}
-                                        data={partData}
-                                        // onEndReachedThreshold={1}
-                                        keyExtractor={item => `parts-${item.id}`}
-                                        renderItem={({item, index}) => (
-                                            <TouchableOpacity  
-                                                onPress={() => {
-                                                    if(partData[index]['is_done'] == 0) {
-                                                        let partValues2 = [...partData];
-                                                        partValues2[index]['is_done'] = 1;
-                                                        setPartData(partValues2);
-                                                    } else {                                                          
-                                                        let partValues2 = [...partData];
-                                                        partValues2[index]['is_done'] = 0;
-                                                        setPartData(partValues2);
-                                                    }
-                                                    console.log(partData);
-                                                }}
-                                                style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 5, paddingHorizontal: 10}}
-                                                activeOpacity={1}
-                                            >
-                                                <Text style={{fontSize: 18, color: colors.black}}>- {item?.parts?.name}</Text>
-                                                <Checkbox
-                                                    status={item.is_done == 1 ? 'checked' : 'unchecked'}
-                                                />
-                                            </TouchableOpacity>
-                                        )}
-                                    />
-                                        {/* // <TouchableOpacity  
-                                        //     onPress={() => {
-                                        //         setChecked(!checked);
-                                        //     }}
-                                        //     style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 7, paddingHorizontal: 10}}
-                                        //     activeOpacity={1}
-                                        // >
-                                        //     <Text style={{fontSize: 18, color: colors.black}}>- Air filter hose Cleaning</Text>
-                                        //     <Checkbox
-                                        //         status={checked ? 'checked' : 'unchecked'}
-
-                                        //     />
-                                        // </TouchableOpacity>
-                                        // <Checkbox.Item label="- Item" status="checked" /> */}
+                                        <FlatList
+                                            ItemSeparatorComponent= {() => (<Divider />)}
+                                            data={partData}
+                                            keyExtractor={item => `parts-${item.id}`}
+                                            renderItem={({item, index}) => (
+                                                <TouchableOpacity  
+                                                    onPress={() => {
+                                                        if(partData[index]['is_done'] == 0) {
+                                                            let partValues2 = [...partData];
+                                                            partValues2[index]['is_done'] = 1;
+                                                            setPartData(partValues2);
+                                                        } else {                                                          
+                                                            let partValues2 = [...partData];
+                                                            partValues2[index]['is_done'] = 0;
+                                                            setPartData(partValues2);
+                                                        }
+                                                    }}
+                                                    style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 5, paddingHorizontal: 10}}
+                                                    activeOpacity={1}
+                                                >
+                                                    <Text style={{fontSize: 18, color: colors.black}}>- {item?.parts?.name}</Text>
+                                                    <Checkbox
+                                                        status={item.is_done == 1 ? 'checked' : 'unchecked'}
+                                                    />
+                                                </TouchableOpacity>
+                                            )}
+                                        />
                                     </View>
                                 </View>
-
-                                {/* <Button
-                                    mode={'contained'}
-                                    style={{marginTop:15}}
-                                    onPress={() => navigation.navigate('ServicesStack', { screen: 'AddPayment' })}
-                                >
-                                    Add Payment
-                                </Button> */}
 
                             </ProgressStep>
                             <ProgressStep 
@@ -506,10 +276,7 @@ const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
                             </ProgressStep>
                         </ProgressSteps>
                     </View>
-                    
                 </View>
-                {/* <View style={styles.lowerContainer}>
-                </View> */}
             </ScrollView>
         </View>
     )
@@ -519,17 +286,10 @@ const styles = StyleSheet.create({
     surfaceContainer: {
         flex:1,
         padding:15,
-        // marginBottom: 35
     },
     stepLables: {
-        // flexDirection: 'row',
-        // width: '100%',
-        // alignContent: 'space-between'
         flexDirection: "row", 
         alignItems:"center", 
-        // elevation: 3, 
-        // backgroundColor: colors.white,
-        // padding: 8,
         marginBottom: -15,
         justifyContent:"space-between",
         width: "100%",
@@ -565,7 +325,6 @@ const styles = StyleSheet.create({
     smallButton: {
         fontSize: 16,
         color: colors.primary,
-        // flex: 1,
         flexDirection: 'row',
         justifyContent: 'center',
         borderRadius: 2,
@@ -574,7 +333,6 @@ const styles = StyleSheet.create({
         padding: 3,
         marginHorizontal: 4,
         marginTop: 3,
-        // alignSelf: 'space-between'
     },
     cardContainer: {
         flexDirection: "row", 

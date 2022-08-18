@@ -1,18 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View , Text, StyleSheet, TextInput, Keyboard, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View , Text, StyleSheet, TextInput, Keyboard, ActivityIndicator } from 'react-native';
 import { connect } from 'react-redux';
 import { colors } from '../constants';
 import { API_URL } from '../constants/config';
 import { Button } from 'react-native-paper';
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import InputScrollView from 'react-native-input-scroll-view';
 import { Picker } from '@react-native-picker/picker';
 
 const CustomerInfo = ({ navigation, userToken, route }) => {
     
     // User / Customer Fields
-    const [isUserDetails, setIsUserDetails] = useState('');
-
     const [isName, setIsName] = useState('');
     const [isEmail, setIsEmail] = useState('');
     const [isPhoneNumber, setIsPhoneNumber] = useState('');
@@ -22,7 +19,6 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
     const [nameError, setNameError] = useState('');
     const [emailError, setEmailError] = useState('');
     const [phoneNumberError, setPhoneNumberError] = useState('');
-    const [addressError, setAddressError] = useState('');
     const [cityError, setCityError] = useState('');
     const [stateError, setStateError] = useState('');
 
@@ -30,7 +26,6 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
     const [StateList, setStateList] =  useState([]);
 
     const [isLoading, setIsLoading] = useState(true);
-
     const scroll1Ref = useRef();
 
     const validate = () => {
@@ -44,9 +39,7 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
     }
 
     const submit = () => {
-     
         Keyboard.dismiss();  
-
         if (!validate()) {
             if (!isName) setNameError("Customer Name is required");
             if (!isPhoneNumber) setPhoneNumberError("Phone Number is required");
@@ -56,25 +49,18 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
             else if (isEmail?.indexOf('@') < 0) setEmailError('Invalid Email Format');
             return;
         }
-        
-        // let dataCheck = ({'email': isEmail, 'phone_number': isPhoneNumber});
-        // let userVerified = userCheck(dataCheck);
-        // console.log(userVerified);
-        // if (userVerified === undefined)  { return; }
-        // else if(userVerified.statusCode == 200 ) {
-            const data = {
-                "name" : isName,
-                "email" : isEmail,
-                "phone_number" : isPhoneNumber,
-                "city" : isCity, 
-                "state" : isState, 
-                "address" : isAddress,
-                "vehicle_option" : "no_vehicle"
-            };
 
-            // console.log(data);
-            updateUser(data);
-        // }
+        const data = {
+            "name" : isName,
+            "email" : isEmail,
+            "phone_number" : isPhoneNumber,
+            "city" : isCity, 
+            "state" : isState, 
+            "address" : isAddress,
+            "vehicle_option" : "no_vehicle"
+        };
+        
+        updateUser(data);
     }
 
     const updateUser = async (data) => {
@@ -103,19 +89,10 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
                   { res.data.message.phone_number && setPhoneNumberError(res.data.message.phone_number); }
                   return;
                 } else if(res.statusCode == 201) {
-                    console.log(res);
                     console.log("Customer Updated SuccessFully");
                     navigation.navigate('AllStack', { screen: 'CustomerDetails', params: { userId: route?.params?.userId } });
                 }
-            });;
-            // console.log(res);
-
-            // const json = await res.json();
-            // if (json !== undefined) {
-            //     console.log(json);
-            //     console.log("Customer Updated SuccessFully");
-            //     navigation.navigate('AllStack', { screen: 'CustomerDetails', params: { userId: route?.params?.userId } });
-            // }
+            });
         } catch (e) {
             console.log(e);
         } finally {
@@ -164,13 +141,10 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
             });
             const json = await res.json();
             if (json !== undefined) {
-                // console.log(json.states);
                 setStateList(json.states);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            // setIsLoading(false);
         }
     };
 
@@ -186,14 +160,11 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
             });
             const json = await res.json();
             if (json !== undefined) {
-                // console.log(json);
                 setCityList(json.cities);
             }
         } catch (e) {
             console.log(e);
             return alert(e);
-        } finally {
-            // setIsLoading(false);
         }
     };
     
@@ -208,9 +179,7 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
                 },
             });
             const json = await res.json();
-            // console.log(res);
             if (json !== undefined) {
-                // console.log(json.user_details);
                 setIsName(json?.user_details?.name);
                 setIsEmail(json?.user_details?.email);
                 setIsPhoneNumber(json?.user_details?.phone_number);
@@ -218,7 +187,7 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
                 setIsState(parseInt(json?.user_details?.state));
                 setTimeout(function () {
                     setIsCity(parseInt(json?.user_details?.city))
-                  }, 200);
+                }, 200);
             }
         } catch (e) {
             console.log(e);
@@ -248,7 +217,6 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
                         keyboardShouldPersistTaps={'handled'}
                         showsVerticalScrollIndicator={false}
                         scrollEventThrottle={8}
-                        // keyboardOffset={160}
                         behavior="padding"
                     >
                         <View style={{flex:1}}>
@@ -263,6 +231,7 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
                             {nameError?.length > 0 &&
                                 <Text style={{color: colors.danger}}>{nameError}</Text>
                             }
+
                             <TextInput
                                 label='Email Address'
                                 style={styles.input}
@@ -273,6 +242,7 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
                             {emailError?.length > 0 &&
                                 <Text style={{color: colors.danger}}>{emailError}</Text>
                             }
+
                             <TextInput
                                 label='Phone Number'
                                 style={styles.input}
@@ -284,6 +254,7 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
                             {phoneNumberError?.length > 0 &&
                                 <Text style={{color: colors.danger}}>{phoneNumberError}</Text>
                             }
+
                             <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 20}}>
                                 <Picker
                                     selectedValue={isState}
@@ -306,6 +277,7 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
                             {stateError?.length > 0 &&
                                 <Text style={{color: colors.danger}}>{stateError}</Text>
                             }
+
                             <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 20}}>
                                 <Picker
                                     selectedValue={isCity}
@@ -329,6 +301,7 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
                             {cityError?.length > 0 &&
                                 <Text style={{color: colors.danger}}>{cityError}</Text>
                             }
+
                             <TextInput
                                 label='Address'
                                 style={styles.input}
@@ -336,9 +309,7 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
                                 value={isAddress}
                                 onChangeText={(text) => setIsAddress(text)}
                             />
-                            {addressError?.length > 0 &&
-                                <Text style={{color: colors.danger}}>{addressError}</Text>
-                            }
+
                             <Button
                                 style={{marginTop:15}}
                                 mode={'contained'}

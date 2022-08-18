@@ -8,7 +8,6 @@
  import { LogBox } from 'react-native';
  
  LogBox.ignoreLogs([
-    'VirtualizedLists should never be nested inside plain ScrollViews with the same orientation because it can break windowing and other functionality - use another VirtualizedList-backed container instead.',
     '`new NativeEventEmitter()` was called with a non-null argument',
     'Found screens with the same name nested inside one another.',
     "[react-native-gesture-handler] Seems like you're using an old API with gesture components, check out new Gestures system!",

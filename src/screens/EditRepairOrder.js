@@ -6,9 +6,7 @@ import { colors } from '../constants';
 import { API_URL } from '../constants/config';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import InputScrollView from 'react-native-input-scroll-view';
-import { Picker } from '@react-native-picker/picker';
 import moment from 'moment';
-import { useIsFocused } from "@react-navigation/native";
 import DocumentPicker from 'react-native-document-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { SliderPicker } from 'react-native-slider-picker';
@@ -69,16 +67,7 @@ const EditRepairOrder = ({ route, userToken }) => {
     const [estimateDeliveryDateError, setEstimateDeliveryDateError] = useState();
 
     const [isLoading, setIsLoading] = useState(false);
-    // const [isLoading2, setIsLoading2] = useState(true);
 
-    // const [addPartModal, setAddPartModal] = useState(false);
-    // const [addServiceModal, setAddServiceModal] = useState(false);
-
-    // const [firstPartField, setFirstPartField] = useState(false);
-    // const [firstServiceField, setFirstServiceField] = useState(false);
-    
-    // const [newBrandName, setNewBrandName] = useState();
-    // const [addNewBrand, setAddNewBrand] = useState();
     const [serviceError, setServiceError] = useState();
     const [serviceList, setServiceList] = useState([]);
     const [partList, setPartList] = useState([]);
@@ -95,8 +84,6 @@ const EditRepairOrder = ({ route, userToken }) => {
     const [isTotalServiceDiscount, setIsTotalServiceDiscount] = useState(0);
     const [isTotalPartDiscount, setIsTotalPartDiscount] = useState(0);
 
-    const isFocused = useIsFocused();
-
     const [fieldsServices, setFieldsServices] = useState([]);
     const [fieldsParts, setFieldsParts] = useState([]);
 
@@ -110,118 +97,54 @@ const EditRepairOrder = ({ route, userToken }) => {
     const [serviceListModal, setServiceListModal] = useState(false);
     const [isLoadingServiceList, setIsLoadingServiceList] = useState(false);
 
-    useEffect(() => {
-        // setAddPartModal(false);
-        let values = [...fieldsServices];
-        route?.params?.data?.services_list.forEach(item => {
-            values.push({ 
-                serviceId: item.service.id, 
-                serviceName:item.service.name, 
-                rate: JSON.stringify(item.rate),
-                quantity: JSON.stringify(item.qty),
-                discount: JSON.stringify(item.discount),
-                applicableDiscountForItem: (item.rate * item.qty) * (item.discount / 100),
-                totalForThisService: item.amount
-            });
-            // fieldsParts[idx].rate
-        });
-        setFieldsServices(values);
-
-        let values2 = [...fieldsParts];
-        route?.params?.data?.parts_list.forEach(item => {
-            values2.push({ 
-                partId: item.parts.id, 
-                partName:item.parts.name, 
-                rate: JSON.stringify(item.rate), 
-                quantity: JSON.stringify(item.qty), 
-                discount: JSON.stringify(item.discount),  
-                applicableDiscountForItem: (item.rate * item.qty) * (item.discount / 100),
-                totalForThisPart: item.amount
-            });
-        });
-        setFieldsParts(values2);
-
-
-        // setFieldsServices = 
-        // route?.params?.data?.services_list
-        // handlePartAdd();
-    }, [route?.params?.data]);
-
-    
-    // useEffect(() => {
-    //     console.log('string', moment(route?.params?.data?.estimated_delivery_time, 'YYYY-MM-DD hh:mm:ss').format('DD-MM-YYYY hh:mm A'));
-    //     console.log('date', new Date(route?.params?.data?.estimated_delivery_time));
-    //     console.log('datebase', route?.params?.data?.estimated_delivery_time);
-
-    //     // getPartList();
-    // // console.log(route?.params?.data);
-    // }, [route?.params?.data]);
-
-
     function handleServiceChange(i, value) {
         const values = [...fieldsServices];
-        values[i][value.name] = value.value;
-        // calculateServicePrice
-        values[i]['totalForThisService'] = (values[i]['rate'] * values[i]['quantity']) - ((values[i]['rate'] * values[i]['quantity']) * (values[i]['discount'] / 100))
-        // values[i] = ({ key: serviceName, key: rate, key: quantity });
-        // values[i] = { key: value };
 
-        // values[i].push({key: value});
-        // values[i].rate = value.rate;
-        // values[i].quantity = value.quantity;
-        // values[i].serviceName = value.serviceName;
-        // values[i].value = value.rate;
-        // console.log(i);
-        // setFieldsServices(values);
-        // console.log(fieldsServices);
+        // Calculation of Specific Part's total
+        values[i][value.name] = value.value;
+        values[i]['totalForThisService'] = (values[i]['rate'] * values[i]['quantity']) - ((values[i]['rate'] * values[i]['quantity']) * (values[i]['discount'] / 100))
         serviceTotals[i] = values[i]['totalForThisService'];
 
+        // Calculation of Total of all Parts
         let total = 0;
         values.forEach(item => {
             total += item.totalForThisService;
-            // console.log(total);
         });
         setServicesTotal(total);
-
         setIsTotal(total + partsTotal);
 
+        // Calculate Total of Order
         values[i]['applicableDiscountForItem'] = (values[i]['rate'] * values[i]['quantity']) * (values[i]['discount'] / 100);
         let discountTotal = 0;
         values.forEach(item => {
             discountTotal += item.applicableDiscountForItem;
         });
-
         setIsTotalServiceDiscount(discountTotal);
-
         setIsApplicableDiscount(discountTotal + isTotalPartDiscount);
-        console.log(values);
     }
 
     function handleServiceAdd(data) {
         const values = [...fieldsServices];
         values.push({ serviceId: data.serviceId, serviceName: data.serviceName, rate: 0, quantity: 0, discount: 0, applicableDiscountForItem: 0, totalForThisService: 0 });
         setFieldsServices(values);
-        console.log(fieldsServices);
-
-        // setIsService(0);
-        // setIsServiceName(null);
-        // setServiceError('');
         setServiceListModal(false);
     }
 
     function handleServiceRemove(i) {
+        // Remove Field from Array Javascript
         const values = [...fieldsServices];
         values.splice(i, 1);
         setFieldsServices(values);
 
+        // Recalculation of Totals
         let total = 0;
         values.forEach(item => {
             total += item.totalForThisService;
-            // console.log(total);
         });
         setServicesTotal(total);
         setIsTotal(total + partsTotal);
 
+        // Calculate Total of Order
         let discountTotal = 0;
         values.forEach(item => {
             discountTotal += item.applicableDiscountForItem;
@@ -231,52 +154,37 @@ const EditRepairOrder = ({ route, userToken }) => {
     }
 
     // Function for Parts Fields
-
     function handlePartChange(i, value) {
         const partValues = [...fieldsParts];
 
         // Calculation of Specific Part's total
         partValues[i][value.name] = value.value;
         partValues[i]['totalForThisPart'] = (partValues[i]['rate'] * partValues[i]['quantity']) - ((partValues[i]['rate'] * partValues[i]['quantity']) * (partValues[i]['discount'] / 100))
-        // console.log(i);
         setFieldsParts(partValues);
         partTotals[i] = partValues[i]['totalForThisPart'];
-        // console.log(fieldsParts);
 
         // Calculation of Total of all Parts
         let total = 0;
         partValues.forEach(item => {
             total += item.totalForThisPart;
-            // console.log(total);
         });
         setPartsTotal(total);
 
         // Calculate Total of Order
         setIsTotal(total + servicesTotal);
-
         partValues[i]['applicableDiscountForItem'] = (partValues[i]['rate'] * partValues[i]['quantity']) * (partValues[i]['discount'] / 100);
         let discountTotal = 0;
         partValues.forEach(item => {
             discountTotal += item.applicableDiscountForItem;
         });
-        // serviceTotals[i] = partValues[i]['applicableDiscountForItem'];
-        // discountTotal += partValues[i]['applicableDiscountForItem'];
-
         setIsTotalPartDiscount(discountTotal);
-
         setIsApplicableDiscount(discountTotal + isTotalServiceDiscount);
-        // console.log(partValues);
     }
 
     function handlePartAdd(data) {
-        // console.log('isPart:', isPart, 'isPartName:', isPartName, 'fieldsParts.length - 1:', fieldsParts.length - 1);
         const partValues = [...fieldsParts];
         partValues.push({ partId: data.partId, partName: data.partName, rate: 0, quantity: 0, discount: 0, applicableDiscount: 0, totalForThisPart: 0 });
         setFieldsParts(partValues);
-        
-        // setIsPart(0);
-        // setIsPartName(null);
-        // setPartError('');
         setPartListModal(false);
     }
 
@@ -301,8 +209,6 @@ const EditRepairOrder = ({ route, userToken }) => {
         });
         setIsTotalPartDiscount(discountTotal);
         setIsApplicableDiscount(discountTotal + isTotalServiceDiscount);
-
-        console.log(fieldsParts.length);
     }
 
 
@@ -313,7 +219,6 @@ const EditRepairOrder = ({ route, userToken }) => {
                 type: [DocumentPicker.types.images],
                 allowMultiSelection: true,
             });
-            console.log(res);
             setIsVehicleImg(res);
         } catch (err) {
             setIsVehicleImg(null);
@@ -328,78 +233,36 @@ const EditRepairOrder = ({ route, userToken }) => {
 
     const changeEstimateDeliverySelectedDate = (event, selectedDate) => {
         if (selectedDate != null) {
-         
             let currentDate = selectedDate || isEstimatedDeliveryDateTime;
             let formattedDate = moment(currentDate, 'YYYY MMMM D', true).format('DD-MM-YYYY');
-            
             setDisplayDeliveryDateCalender(false);
-
             let formattedDate2 = new Date(currentDate);
             setIsDeliveryDate(formattedDate2);
             setIsDeliveryDate1(formattedDate);
-
             setDisplayDeliveryTimeClock(true);
         }
     };
 
-    // useEffect(() => {
-    //     setAddPartModal(false);
-    //     // handlePartAdd();
-    // }, [fieldsParts]);
-
-    // useEffect(() => {
-
-    // }, [estimatedDeliveryDateTime]);
-
     const changeSelectedTime = (event, selectedTime) => {
         if (selectedTime != null) {
-            // setDisplayDeliveryDateCalender(false);
-            
             let currentTime = selectedTime || isEstimatedDeliveryDateTime;
             let convertToTime = moment(currentTime, 'YYYY-MM-DD"T"hh:mm ZZ').format('hh:mm A');
-            // console.log(isDeliveryDate1 + ' ' + convertToTime);
             var formattedDate = isDeliveryDate1 + ' ' + convertToTime;
-            
             setDisplayDeliveryTimeClock(false);
-
             setEstimatedDeliveryDateTime(formattedDate);            
             setIsDeliveryTime(new Date(currentTime));
-            // setIsDeliveryTime(moment(currentTime, 'HH:mmallowMultiSelection: true, A').format('YYYY-MM-DD"T"HH:mm ZZ'));
-            console.log({'setIsDeliveryTime': isDeliveryTime, 'Delivery Date': isDeliveryDate, 'Delivery Date1': isDeliveryDate1,'convertToTime': convertToTime, 'selectedTime': selectedTime, 'currentTime': currentTime });
-
-            // let formateDateForDatabase = moment(isDeliveryDate1 + ' ' + currentTime, 'DD-MM-YYYY HH:mm A', "Asia/Kolkata").format('YYYY-MM-DD HH:mm:ss');
-
         }
     };
 
     const validate = () => {
         return !(
-            // !isName || isName?.trim().length === 0  || 
-            // !isPhoneNumber || isPhoneNumber?.trim().length === 0 || 
-            // !isBrand || isBrand === 0 ||
-            // !isModel || isModel === 0 ||
-            // !isGarageId || isGarageId === 0 ||
             !estimatedDeliveryDateTime || estimatedDeliveryDateTime?.trim().length === 0 
         )
     }
 
     const submit = () => {
-     
         Keyboard.dismiss();  
-
         if (!validate()) {
-            // if (!isName) setNameError("Customer Name is required"); else setNameError('');
-            // if (!isPhoneNumber) setPhoneNumberError("Phone Number is required"); else setPhoneNumberError('');
-            // if (!isEmail) setEmailError("Email is required");
-            // else if (isEmail.length < 6) setEmailError("Email should be minimum 6 characters");
-            // else if (isEmail?.indexOf(' ') >= 0) setEmailError('Email cannot contain spaces');
-            // else if (isEmail?.indexOf('@') < 0) setEmailError('Invalid Email Format');
-            // else setEmailError('');
-            // if (!isBrand || isBrand === 0) setBrandError('Brand is required'); else setBrandError('');
-            // if (!isModel || isModel === 0) setModelError('Model is required'); else setModelError('');
-            // if (!isCity || isCity === 0) setCityError("City is required"); else setCityError('');
-            // if (!isState || isState === 0) setStateError("State is required"); else setStateError('');
-            // if (!isGarageId || isGarageId == 0) setGarageIdError("Customer Belongs to Garage Field is required"); else setGarageIdError('');
             if (!estimatedDeliveryDateTime || estimatedDeliveryDateTime?.trim().length === 0) setEstimateDeliveryDateError("Estimate Delivery Date is required"); else setEstimateDeliveryDateError('');
             return;
         }
@@ -411,7 +274,6 @@ const EditRepairOrder = ({ route, userToken }) => {
         data.append('fuel_level', isFuelLevel);
         data.append('order_service', fieldsServices);
         data.append('order_parts', fieldsParts);
-        // if(isAddress) data.append('address', isAddress?.trim());
         data.append('estimated_delivery_time', moment(estimatedDeliveryDateTime, 'DD-MM-YYYY hh:mm A').format('YYYY-MM-DD hh:mm:ss'));
         data.append('labor_total', servicesTotal);
         data.append('parts_total', partsTotal);
@@ -421,14 +283,11 @@ const EditRepairOrder = ({ route, userToken }) => {
         data.append('comment', isComment?.trim());
 
         // editOrder(data);
-        console.log(JSON.stringify(data));
-        // console.log(isRegistrationCertificateImg);  
+        console.log(JSON.stringify(data)); 
     }
 
     const editOrder = async (data) => {
         try {
-            // console.log("working fine till here");
-            // console.log(data);
             await fetch(`${API_URL}add_order`, {
                 method: 'POST',
                 headers: {
@@ -448,8 +307,6 @@ const EditRepairOrder = ({ route, userToken }) => {
             })
             .then((res) => {
                 if(res.statusCode == 400) {
-                //   { res.data.message.email && setEmailError(res.data.message.email); }
-                //   { res.data.message.phone_number && setPhoneNumberError(res.data.message.phone_number); }
                   { res.data.message.estimated_delivery_time && setEstimateDeliveryDateError(res.data.message.vehicle_registration_number); }
                   return;
                 } else if(res.statusCode == 201 || res.statusCode == 200) {
@@ -461,65 +318,9 @@ const EditRepairOrder = ({ route, userToken }) => {
         } catch (e) {
             console.log(e);
         } finally {
-            // setIsLoading(false);
             navigation.navigate('OrderList');
         }
     };
-
-    // const changeEstimateDeliverySelectedDate = (event, selectedDate) => {
-       
-    //     if (selectedDate != null) {
-    //         let currentDate = selectedDate;
-    //         // let formattedDate = moment(currentDate, 'YYYY MMMM D').format('DD-MM-YYYY');
-    //         let formattedDate = moment(currentDate, 'YYYY MMMM D', true).format('DD-MM-YYYY');
-          
-    //         // setEstimatedDeliveryDateTime(currentDate);
-    //         // setEstimateDeliveryTime(formattedDate);
-    //         // let formateDateForDatabase = moment(currentDate, 'YYYY MMMM D').format('YYYY-MM-DD');
-    //         setIsDeliveryDate1(formattedDate);
-    //         setIsDeliveryDate(currentDate);
-    //         // console.log('formated date', formattedDate);
-    //         // console.log('Delivery Date', isDeliveryDate1);
-    //         setDisplayDeliveryDateCalender(false);
-    //         setDisplayDeliveryTimeClock(true);
-    //     }
-    // };
-
-    // const changeSelectedTime = (event, selectedTime) => {
-    //     // console.log(selectedTime);
-    //     if (selectedTime != null) {
-    //         let currentTime = selectedTime;
-    //         let convertToTime = moment(currentTime, 'YYYY-MM-DD"T"HH:mm ZZ').format('HH:mm A');
-    //         console.log({'setIsDeliveryTime': new Date(convertToTime) ,'Delivery Date': isDeliveryDate, 'Delivery Date1': isDeliveryDate1,'convertToTime': convertToTime, 'selectedTime': selectedTime, 'currentTime': currentTime });
-    //         console.log(isDeliveryDate1 + ' ' + convertToTime);
-    //         // let formattedDate = moment(currentDate, 'YYYY MMMM D').format('DD-MM-YYYY');
-    //         // let date = moment(isDeliveryDate, 'YYYY MMMM D').format('YYYY-MM-DD');
-    //         // let time = moment(convertToTime, 'YYYY MMMM D').format('DD-MM-YYYY');
-    //         // var formattedDate = moment(date + ' ' + time, 'YYYY-MM-DD HH:mm ZZ', true).format();
-    //         var formattedDate = isDeliveryDate1 + ' ' + convertToTime;
-    //         // var formattedDate = moment(isDeliveryDate1 + ' ' + convertToTime, 'YYYY-MM-DD HH:mm ZZ', true).format('DD-MM-YYYY HH:mm ZZ');
-    //         // console.log('formated Date', formattedDate, typeof(formattedDate));
-    //         setEstimatedDeliveryDateTime(formattedDate);
-      
-    //         setIsDeliveryTime(new Date(convertToTime));
-
-    //         // setEstimatedDeliveryDateTime(currentDate);
-    //         // const utcDate = moment(str, new Date(formattedDate));
-    //         // setEstimatedDeliveryDateTime(formattedDate);
-    //         let formateDateForDatabase = moment(isDeliveryDate1 + ' ' + currentTime, 'DD-MM-YYYY HH:mm A', "Asia/Kolkata").format('YYYY-MM-DD HH:mm:ss');
-    //         // console.log(formateDateForDatabase0)
-    //         // setEstimatedDeliveryDateTime(formateDateForDatabase);
-    //         setDisplayDeliveryDateCalender(false);
-    //         setDisplayDeliveryTimeClock(false);
-    //         // setDisplayDeliveryTimeClock(true);
-    //     }
-    // };
-
-
-
-
-
-    // Parts Functions ----- End Here
 
     const getPartList = async () => {
         setIsLoadingPartList(true);
@@ -533,17 +334,13 @@ const EditRepairOrder = ({ route, userToken }) => {
                 },
             });
             const json = await res.json();
-            // console.log(json);
             if (json !== undefined) {
-                // console.log('setPartList', json.data);
                 setPartList(json.data);
                 setFilteredPartData(json.data);
-                // handleServiceAdd();
             }
         } catch (e) {
             console.log(e);
         } finally {
-            // setIsLoading2(false);
             setIsLoadingPartList(false)
 
         }
@@ -560,22 +357,13 @@ const EditRepairOrder = ({ route, userToken }) => {
                 },
             });
             const json = await res.json();
-            // console.log(json);
             if (json !== undefined) {
-                // console.log('setServiceList', json.data);
                 setServiceList(json.data);
                 setFilteredServiceData(json.data);
-                // let data = {
-                //     serviceId: json.data.id,
-                //     serviceName: json.data.name,
-                // }
-                // handleServiceAdd(data)
-                // handleServiceAdd();
             }
         } catch (e) {
             console.log(e);
         } finally {
-            // setIsLoading2(false);
             setIsLoadingServiceList(false)
         }
     };
@@ -593,10 +381,7 @@ const EditRepairOrder = ({ route, userToken }) => {
                 body: JSON.stringify(data)
             });
             const json = await res.json();
-            // console.log(json);
             if (json !== undefined) {
-                // console.log('setServiceList', json.data);
-                // setIsLoading2(true);
                 getServiceList();
                 setIsService(parseInt(json.data.id));
                 setIsServiceName(json.data.name);
@@ -605,15 +390,9 @@ const EditRepairOrder = ({ route, userToken }) => {
                     serviceName: json.data.name,
                 }
                 handleServiceAdd(data)
-                // setTimeout(function(){setIsService(parseInt(json.data.id));}, 1000);
-                // setServiceList([...serviceList, json.data]);
-                // handleServiceAdd();
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            // setIsLoading2(true);
-            // setAddServiceModal(true);
         }
     }
 
@@ -630,10 +409,7 @@ const EditRepairOrder = ({ route, userToken }) => {
                 body: JSON.stringify(data)
             });
             const json = await res.json();
-            // console.log(json);
             if (json !== undefined) {
-                // console.log('setPartList', json.data);
-                // setIsLoading2(true);
                 getPartList();
                 setIsPart(parseInt(json.data.id));
                 setIsPartName(json.data.name);
@@ -642,15 +418,9 @@ const EditRepairOrder = ({ route, userToken }) => {
                     partName: json.data.name,
                 }
                 handlePartAdd(data)
-                // setTimeout(function(){setIsPart(parseInt(json.data.id));}, 1000);
-                // setPartList([...partList, json.data]);
-                // handlePartAdd();
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            // setIsLoading2(true);
-            // setAddPartModal(true);
         }
     }
 
@@ -658,10 +428,7 @@ const EditRepairOrder = ({ route, userToken }) => {
         if (text) {
             let newData = partList.filter(
                 function (listData) {
-                // let arr2 = listData.phone_number ? listData.phone_number : ''.toUpperCase() 
                 let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
-                // let itemData = arr1.concat(arr2);
-                // console.log(itemData);
                 let textData = text.toUpperCase();
                 return itemData.indexOf(textData) > -1;
                 }
@@ -678,10 +445,7 @@ const EditRepairOrder = ({ route, userToken }) => {
         if (text) {
             let newData = serviceList.filter(
                 function (listData) {
-                // let arr2 = listData.phone_number ? listData.phone_number : ''.toUpperCase() 
                 let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
-                // let itemData = arr1.concat(arr2);
-                // console.log(itemData);
                 let textData = text.toUpperCase();
                 return itemData.indexOf(textData) > -1;
                 }
@@ -695,39 +459,51 @@ const EditRepairOrder = ({ route, userToken }) => {
     };
 
     useEffect(() => {
+        let values = [...fieldsServices];
+        route?.params?.data?.services_list.forEach(item => {
+            values.push({ 
+                serviceId: item.service.id, 
+                serviceName:item.service.name, 
+                rate: JSON.stringify(item.rate),
+                quantity: JSON.stringify(item.qty),
+                discount: JSON.stringify(item.discount),
+                applicableDiscountForItem: (item.rate * item.qty) * (item.discount / 100),
+                totalForThisService: item.amount
+            });
+        });
+        setFieldsServices(values);
+        let values2 = [...fieldsParts];
+        route?.params?.data?.parts_list.forEach(item => {
+            values2.push({ 
+                partId: item.parts.id, 
+                partName:item.parts.name, 
+                rate: JSON.stringify(item.rate), 
+                quantity: JSON.stringify(item.qty), 
+                discount: JSON.stringify(item.discount),  
+                applicableDiscountForItem: (item.rate * item.qty) * (item.discount / 100),
+                totalForThisPart: item.amount
+            });
+        });
+        setFieldsParts(values2);
+    }, [route?.params?.data]);
+
+    useEffect(() => {
         getServiceList();
         getPartList();
-    // console.log(route?.params?.data);
     }, []);
-
-    // useEffect(() => {
-    //     setIsLoading2(true);
-    //     if (isFocused) {
-    //         getBrandList2();
-    //     }
-    // }, [isFocused]);
 
     return (
         <View style={styles.pageContainer}>
             {(isLoading == true) ? <ActivityIndicator></ActivityIndicator> :
                 <InputScrollView
-                    // ref={scroll1Ref}
                     contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
                     keyboardShouldPersistTaps={'handled'}
                     showsVerticalScrollIndicator={false}
                     scrollEventThrottle={8}
-                    // keyboardOffset={160}
                     behavior="padding"
                 >
                     <View style={{ flex: 1 }}>
                         <Text style={[styles.headingStyle, { marginTop: 20 }]}>Order Details: </Text>
-                        {/* <Button
-                            style={{ marginTop: 15 }}
-                            mode={'contained'}
-                            // onPress={() => changeStep(1)}
-                        >
-                            Back
-                        </Button> */}
                         <View style={styles.cardContainer}>
                             <View style={[styles.cardRightContent, { flex: 0.5 }]}>
                                 <Text style={styles.cardMainTitle}>Customer Details:</Text>
@@ -755,18 +531,15 @@ const EditRepairOrder = ({ route, userToken }) => {
                         {odometerKMsError?.length > 0 &&
                             <Text style={styles.errorTextStyle}>{odometerKMsError}</Text>
                         }
+
                         <View style={styles.odometerContainer}>
                             <SliderPicker
                                 minLabel={"Empty"}
-                                // minLabel={(color) => {<IconX name={'temperature-empty'} size={16} color={colors.secondary} />}} 
-                                // midLabel={'mid'}
                                 maxLabel={"Full"}
-                                // maxLabel={(color) => <IconX name={'temperature-full'} size={16} color={colors.secondary} />}
                                 minValue={0}
                                 maxValue={10}
                                 callback={(position) => {
                                     setIsFuelLevel(position);
-                                    // console.log(isFuelLevel);
                                 }}
                                 defaultValue={5}
                                 showFill={true}
@@ -793,207 +566,130 @@ const EditRepairOrder = ({ route, userToken }) => {
                         {fieldsServices.map((field, idx) => {
                             return (
                                 <>
-                                    {/* {(firstServiceField == true) && */}
-                                        <View style={styles.addFieldContainerGroup} key={`service-${field}-${idx}`}>
-                                            {/* <Text></Text> */}
-                                    
-                                            <TouchableOpacity style={styles.removeEntryIconContainer} onPress={() => handleServiceRemove(idx)}>
-                                                <Icon style={styles.removeEntryIcon} name="close" size={30} color="#000" />
-                                            </TouchableOpacity>
-                                            
-                                            <View style={[styles.cardRightContent, { flex: 1, flexDirection: 'row', marginTop: 10, marginBottom: 0 }]}>
-                                                <Text style={[styles.partNameContent, {fontWeight: '600'}]}>Service Name: </Text>
-                                                <Text style={styles.serviceNameContent}>{fieldsServices[idx].serviceName}</Text>
+                                    <View style={styles.addFieldContainerGroup} key={`service-${field}-${idx}`}>
+
+                                        <TouchableOpacity style={styles.removeEntryIconContainer} onPress={() => handleServiceRemove(idx)}>
+                                            <Icon style={styles.removeEntryIcon} name="close" size={30} color="#000" />
+                                        </TouchableOpacity>
+                                        
+                                        <View style={[styles.cardRightContent, { flex: 1, flexDirection: 'row', marginTop: 10, marginBottom: 0 }]}>
+                                            <Text style={[styles.partNameContent, {fontWeight: '600'}]}>Service Name: </Text>
+                                            <Text style={styles.serviceNameContent}>{fieldsServices[idx].serviceName}</Text>
+                                        </View>
+
+                                        <View style={[styles.cardRightContent, { flex: 1 }]}>
+                                            <View style={styles.addFieldContainer}>
+                                                <TextInput
+                                                    mode="outlined"
+                                                    label='Rate'
+                                                    style={styles.textEntryInput}
+                                                    placeholder="Rate"
+                                                    keyboardType="numeric"
+                                                    value={fieldsServices[idx]['rate']}
+                                                    onChangeText={
+                                                        e => {
+                                                            let parameter = {
+                                                                name: 'rate',
+                                                                value: e,
+                                                            };
+                                                            handleServiceChange(idx, parameter);
+                                                        }
+                                                    }
+                                                />
+                                                <TextInput
+                                                    mode="outlined"
+                                                    label='Quantity'
+                                                    style={styles.textEntryInput}
+                                                    placeholder="Quantity"
+                                                    keyboardType="numeric"
+                                                    value={fieldsServices[idx].quantity}
+                                                    onChangeText={
+                                                        e => {
+                                                            let parameter = {
+                                                                name: 'quantity',
+                                                                value: e,
+                                                            };
+                                                            handleServiceChange(idx, parameter);
+                                                        }
+                                                    }
+                                                />
+                                                <TextInput
+                                                    mode="outlined"
+                                                    label='Discount'
+                                                    style={styles.textEntryInput}
+                                                    placeholder="Discount"
+                                                    keyboardType="numeric"
+                                                    value={fieldsServices[idx].discount}
+                                                    onChangeText=
+                                                    {
+                                                        e => {
+                                                            let parameter = {
+                                                                name: 'discount',
+                                                                value: e,
+                                                            };
+                                                            handleServiceChange(idx, parameter);
+                                                        }
+                                                    }
+                                                />
+                                        
                                             </View>
-                                            <View style={[styles.cardRightContent, { flex: 1 }]}>
-                                                <View style={styles.addFieldContainer}>
-                                                    <TextInput
-                                                        mode="outlined"
-                                                        label='Rate'
-                                                        style={styles.textEntryInput}
-                                                        placeholder="Rate"
-                                                        keyboardType="numeric"
-                                                        // defaultValue={fieldsServices[idx].rate}
-                                                        value={fieldsServices[idx]['rate']}
-                                                        // onChangeText={(text) => setIsName(text)}
-                                                        onChangeText={
-                                                            e => {
-                                                                let parameter = {
-                                                                    name: 'rate',
-                                                                    value: e,
-                                                                };
-                                                                handleServiceChange(idx, parameter);
-                                                            }
-                                                        }
-                                                    />
-                                                    <TextInput
-                                                        mode="outlined"
-                                                        label='Quantity'
-                                                        style={styles.textEntryInput}
-                                                        placeholder="Quantity"
-                                                        keyboardType="numeric"
-                                                        value={fieldsServices[idx].quantity}
-                                                        // onChangeText={(text) => setIsName(text)}
-                                                        onChangeText={
-                                                            e => {
-                                                                let parameter = {
-                                                                    name: 'quantity',
-                                                                    value: e,
-                                                                };
-                                                                handleServiceChange(idx, parameter);
-                                                            }
-                                                        }
-                                                    />
-                                                    <TextInput
-                                                        mode="outlined"
-                                                        label='Discount'
-                                                        style={styles.textEntryInput}
-                                                        placeholder="Discount"
-                                                        keyboardType="numeric"
-                                                        value={fieldsServices[idx].discount}
-                                                        // onChangeText={(text) => setIsName(text)}
-                                                        onChangeText=
-                                                        {
-                                                            e => {
-                                                                let parameter = {
-                                                                    name: 'discount',
-                                                                    value: e,
-                                                                };
-                                                                handleServiceChange(idx, parameter);
-                                                            }
-                                                        }
-                                                    />
-                                            
-                                                </View>
-                                                <View style={{flexDirection: 'row'}}>
-                                                    <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 0, fontWeight: '600'}}>Total for this Service: </Text>
-                                                    <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 5 }}>{(fieldsServices[idx]) ? fieldsServices[idx].totalForThisService : 0}</Text>
-                                                </View>
+
+                                            <View style={{flexDirection: 'row'}}>
+                                                <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 0, fontWeight: '600'}}>Total for this Service: </Text>
+                                                <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 5 }}>{(fieldsServices[idx]) ? fieldsServices[idx].totalForThisService : 0}</Text>
                                             </View>
                                         </View>
-                                    {/* } */}
+                                    </View>
 
-                                        <Portal>
-                                            {/* <Modal visible={addServiceModal} onDismiss={() => { setAddServiceModal(false); setIsService(0); setIsServiceName(''); setServiceError('');}} contentContainerStyle={styles.modalContainerStyle}>
-                                                <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add Service</Text>
-                                                <View>
-                                                    <TouchableOpacity style={styles.repairOrderField} onPress={() => { setAddServiceModal(false); setServiceListModal(true); }}>
-                                                    </TouchableOpacity>
-                                                    <TextInput
-                                                        mode="outlined"
-                                                        label='Service'
-                                                        style={{marginTop: 10, backgroundColor: colors.white, width:'100%' }}
-                                                        placeholder="Select Service"
-                                                        value={isServiceName}
-                                                    />
-                                                </View>
-                                       
-                                                {serviceError?.length > 0 &&
-                                                    <Text style={styles.errorTextStyle}>{serviceError}</Text>
-                                                }
-                                                <View style={{ flexDirection: "row", }}>
-                                                    <Button
-                                                        style={{ marginTop: 15, flex: 1, marginRight: 10 }}
-                                                        mode={'contained'}
-                                                        onPress={() => {
-                                                            if(isService == 0) {
-                                                                (setServiceError('Please Select Any Service'))
-                                                            } else {
-                                                                // console.log(fieldsServices.length);
-                                                                if(firstServiceField === false) {
-                                                                    // console.log('case 1');                                                          
-                                                                    let parameter = {
-                                                                        name: 'serviceId',
-                                                                        value: isService
-                                                                    };
-                                                                    handleServiceChange(fieldsServices.length - 1, parameter);
+                                    <Portal>
+                                        <Modal visible={addNewServiceModal} onDismiss={() => { setAddNewServiceModal(false); setServiceListModal(true);  setIsNewService(0); setNewServiceError(''); }} contentContainerStyle={styles.modalContainerStyle}>
+                                            <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Service</Text>
+                                            <View>
+                                                <TextInput
+                                                    mode="outlined"
+                                                    label='Service Name'
+                                                    style={styles.input}
+                                                    placeholder="Service Name"
+                                                    value={isNewService}
+                                                    onChangeText={(text) => setIsNewService(text)}
+                                                />
+                                            </View>
+                                            {newServiceError?.length > 0 &&
+                                                <Text style={styles.errorTextStyle}>{newServiceError}</Text>
+                                            }
 
-                                                                    // if(itemIndex != 0) {
-                                                                    let parameter2 = {
-                                                                        name: 'serviceName',
-                                                                        value: isServiceName,
-                                                                    };
-                                                                    handleServiceChange(fieldsServices.length - 1, parameter2);
-
-                                                                    // console.log('case 1');
-                                                                    setFirstServiceField(true);
-                                                                    setIsService(0);
-                                                                    setIsServiceName('');
-                                                                    setServiceError('');
-                                                                    setAddServiceModal(false);
-                                                                } else {
-                                                                    // console.log('case 2');
-                                                                    handleServiceAdd();
-                                                                }
-                                                            }
-                                                        }}
-                                                    // onPress={addNewBrand}
-                                                    >
-                                                        Add
-                                                    </Button>
-                                                    <Button
-                                                        style={{ marginTop: 15, flex: 1 }}
-                                                        mode={'contained'}
-                                                        onPress={() => {
-                                                            setAddServiceModal(false);
-                                                            setIsService(0);
-                                                            setIsServiceName(null);
-                                                            setServiceError('');
-                                                        }}
-                                                    >
-                                                        Close
-                                                    </Button>
-                                                </View>
-                                            </Modal> */}
-
-                                            <Modal visible={addNewServiceModal} onDismiss={() => { setAddNewServiceModal(false); setServiceListModal(true);  setIsNewService(0); setNewServiceError(''); }} contentContainerStyle={styles.modalContainerStyle}>
-                                                <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Service</Text>
-                                                <View>
-                                                    <TextInput
-                                                        mode="outlined"
-                                                        label='Service Name'
-                                                        style={styles.input}
-                                                        placeholder="Service Name"
-                                                        value={isNewService}
-                                                        onChangeText={(text) => setIsNewService(text)}
-                                                    />
-                                                </View>
-                                                {newServiceError?.length > 0 &&
-                                                    <Text style={styles.errorTextStyle}>{newServiceError}</Text>
-                                                }
-                                                <View style={{ flexDirection: "row", marginTop: 10}}>
-                                                    <Button
-                                                        style={{ marginTop: 15, flex: 1, marginRight: 10 }}
-                                                        mode={'contained'}
-                                                        onPress={() => {
-                                                            if(isNewService == "") {
-                                                                setNewServiceError("Please Enter Service Name");
-                                                            } else {
-                                                                setAddNewServiceModal(false);
-                                                                setIsNewService('');
-                                                                setNewServiceError('');
-                                                                addNewService();
-                                                            }
-                                                        }}
-                                                    >
-                                                        Add
-                                                    </Button>
-                                                    <Button
-                                                        style={{ marginTop: 15, flex: 1 }}
-                                                        mode={'contained'}
-                                                        onPress={() => {
+                                            <View style={{ flexDirection: "row", marginTop: 10}}>
+                                                <Button
+                                                    style={{ marginTop: 15, flex: 1, marginRight: 10 }}
+                                                    mode={'contained'}
+                                                    onPress={() => {
+                                                        if(isNewService == "") {
+                                                            setNewServiceError("Please Enter Service Name");
+                                                        } else {
                                                             setAddNewServiceModal(false);
-                                                            setServiceListModal(true);
                                                             setIsNewService('');
                                                             setNewServiceError('');
-                                                            // setAddServiceModal(true);
-                                                        }}
-                                                    >
-                                                        Close
-                                                    </Button>
-                                                </View>
-                                            </Modal>
-                                        </Portal>
+                                                            addNewService();
+                                                        }
+                                                    }}
+                                                >
+                                                    Add
+                                                </Button>
+                                                <Button
+                                                    style={{ marginTop: 15, flex: 1 }}
+                                                    mode={'contained'}
+                                                    onPress={() => {
+                                                        setAddNewServiceModal(false);
+                                                        setServiceListModal(true);
+                                                        setIsNewService('');
+                                                        setNewServiceError('');
+                                                    }}
+                                                >
+                                                    Close
+                                                </Button>
+                                            </View>
+                                        </Modal>
+                                    </Portal>
                                 </>
                             );
                         })}
@@ -1002,18 +698,8 @@ const EditRepairOrder = ({ route, userToken }) => {
                                 style={{ marginTop: 15, flex: 0.3 }}
                                 mode={'contained'}
                                 icon="plus"
-                                // onPress={submit}
                                 onPress={() => 
-                                    // if(fieldsServices.length!=0) {
                                         setServiceListModal(true)
-                                    // } else {
-                                    //     // const serviceValues = [...fieldsServices];
-                                    //     serviceValues.push({ serviceId: null, serviceName: null, rate: null, quantity: null, discount: 0, applicableDiscount: 0, totalForThisService: null });
-                                    //     setFieldsServices(serviceValues);
-                                    //     setServiceListModal(true);
-                                    //     setFirstServiceField(false);
-                                    //     console.log(serviceValues);
-                                    // }
                                     }
                             >
                                 Add Service
@@ -1046,7 +732,6 @@ const EditRepairOrder = ({ route, userToken }) => {
                                                     placeholder="Rate"
                                                     keyboardType="numeric"
                                                     value={fieldsParts[idx].rate}
-                                                    // onChangeText={(text) => setIsName(text)}
                                                     onChangeText={
                                                         e => {
                                                             let parameter = {
@@ -1054,7 +739,6 @@ const EditRepairOrder = ({ route, userToken }) => {
                                                                 value: e,
                                                             };
                                                             handlePartChange(idx, parameter);
-                                                            // console.log(fieldsParts[idx]['totalForThisService']);
                                                         }
                                                     }
                                                 />
@@ -1065,7 +749,6 @@ const EditRepairOrder = ({ route, userToken }) => {
                                                     placeholder="Quantity"
                                                     keyboardType="numeric"
                                                     value={fieldsParts[idx].quantity}
-                                                    // onChangeText={(text) => setIsName(text)}
                                                     onChangeText={
                                                         e => {
                                                             let parameter = {
@@ -1083,7 +766,6 @@ const EditRepairOrder = ({ route, userToken }) => {
                                                     placeholder="Discount"
                                                     keyboardType="numeric"
                                                     value={fieldsParts[idx].discount}
-                                                    // onChangeText={(text) => setIsName(text)}
                                                     onChangeText=
                                                     {
                                                         e => {
@@ -1096,11 +778,11 @@ const EditRepairOrder = ({ route, userToken }) => {
                                                     }
                                                 />
                                             </View>
+
                                             <View style={{flexDirection: 'row'}}>
                                                 <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 0, fontWeight: '600'}}>Total for this Part: </Text>
                                                 <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 5 }}>{(fieldsParts[idx]) ? fieldsParts[idx].totalForThisPart : 0}</Text>
                                             </View>
-                                        
                                         </View>
                                     </View>
 
@@ -1120,6 +802,7 @@ const EditRepairOrder = ({ route, userToken }) => {
                                             {newPartError?.length > 0 &&
                                                 <Text style={styles.errorTextStyle}>{newPartError}</Text>
                                             }
+
                                             <View style={{ flexDirection: "row", marginTop: 10}}>
                                                 <Button
                                                     style={{ marginTop: 15, flex: 1, marginRight: 10 }}
@@ -1145,7 +828,6 @@ const EditRepairOrder = ({ route, userToken }) => {
                                                         setPartListModal(true);
                                                         setIsNewPart('');
                                                         setNewPartError('');
-                                                        // setAddPartModal(true);
                                                     }}
                                                 >
                                                     Close
@@ -1215,7 +897,6 @@ const EditRepairOrder = ({ route, userToken }) => {
                                     </View>
                                 </View>
                             </View>
-                           
                         </View>
 
                         <Text style={[styles.headingStyle, { marginTop: 20 }]}>Vehicle Images:</Text>
@@ -1268,7 +949,6 @@ const EditRepairOrder = ({ route, userToken }) => {
                                         is24Hour={true}
                                         display="spinner"
                                         onChange={changeEstimateDeliverySelectedDate}
-                                        // display="spinner"
                                     />}
                                 {displayDeliveryTimeClock && (
                                     <DateTimePicker
@@ -1276,7 +956,6 @@ const EditRepairOrder = ({ route, userToken }) => {
                                         mode={'time'}
                                         is24Hour={false}
                                         display="spinner"
-                                        // display="default"
                                         onChange={changeSelectedTime}
                                     />
                                 )}

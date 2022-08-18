@@ -5,7 +5,6 @@ import { connect } from 'react-redux';
 import { colors } from '../constants';
 import { API_URL } from '../constants/config';
 import InputScrollView from 'react-native-input-scroll-view';
-import { Picker } from '@react-native-picker/picker';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, garageId }) => {
@@ -20,7 +19,6 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
     const [isComment, setIsComment] = useState('');
 
     // Error States
-    // const [partError, setPartError] = useState('');     
     const [priceError, setPriceError] = useState('');     
     const [mrpError, setMrpError] = useState('');
     const [currentStockError, setCurrentStockError] = useState('');
@@ -30,17 +28,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
     const [commentError, setCommentError] = useState('');
 
     // Vehicle Fields
-    // const [isVendorName, setIsVendorName] = useState();
-
-    // const [isGarageId, setIsGarageId] = useState();
     const [garageIdError, setGarageIdError] = useState();
-
-    // const [garageList, setGarageList] = useState([]);
-    // const [vendorList, setVendorList] = useState([]);
-
-    // const [addVendorModal, setAddVendorModal] = useState(false);
-    // const [newVendor, setNewVendor] = useState();
-    // const [newVendorError, setNewVendorError] = useState();
 
     const [isPart, setIsPart] = useState('');
     const [isPartName, setIsPartName] = useState('');
@@ -70,7 +58,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
     const [addNewVendorModal, setAddNewVendorModal] = useState(false);
 
     // Property Vendor Dropdown
-    const [isGarageId, setIsGarageId] = useState();
+    const [isGarageId, setIsGarageId] = useState(selectedGarageId);
     const [isGarageName, setIsGarageName] = useState('');
     const [garageList, setGarageList] = useState([]);
     const [garageListModal, setGarageListModal] = useState(false);
@@ -80,34 +68,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
     const [garageError, setGarageError] = useState('');   // Error State
     
     const [isLoading, setIsLoading] = useState(false);
-
     const scroll1Ref = useRef();
-
-    // const addNewBrand = async () => {
-    //     let data = { 'name': newVendor }
-    //     try {
-    //         const res = await fetch(`${API_URL}create_brand`, {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Accept': 'application/json',
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': 'Bearer ' + userToken
-    //             },
-    //             body: JSON.stringify(data)
-    //         });
-    //         const json = await res.json();
-    //         if (json !== undefined) {
-    //             await getBrandList();
-    //         }
-    //     } catch (e) {
-    //         console.log(e);
-    //     } finally {
-    //         // setIsLoading(false);
-    //         setAddVendorModal(false);
-    //         setNewVendor("");
-    //         setIsVendor(0);
-    //     }
-    // };
 
     const validate = () => {
         return !(
@@ -124,9 +85,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
     }
 
     const submit = () => {
-
         Keyboard.dismiss();
-
         if (!validate()) {
             if (!isPart) setPriceError("Part is required"); else setPartError('');
             if (!isPrice) setPriceError("Price is required"); else setPriceError('');
@@ -153,10 +112,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
             'comment': isComment?.trim(),
         }
 
-        addStock(data);
-        // setIsUserVehicleDetails(data);
-        // console.log(JSON.stringify(data));
-        // console.log(isRegistrationCertificateImg);  
+        addStock(data); 
     }
 
     const addStock = async (data) => {
@@ -171,20 +127,11 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                 body: JSON.stringify(data)
             });
             const json = await res.json();
-            // console.log(json);
             if (json !== undefined) {
-                console.log('addStock', json.data);
                 navigation.navigate('Parts');
-                // setIsLoading2(true);
-                // getPartList();
-                // setIsPart(parseInt(json.data.id));
-                // setIsPartName(json.data.name);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            // setIsLoading2(true);
-            // setAddPartModal(true);
         }
     }
 
@@ -201,19 +148,13 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                 body: JSON.stringify(data)
             });
             const json = await res.json();
-            // console.log(json);
             if (json !== undefined) {
-                console.log('setPartList', json.data);
-                // setIsLoading2(true);
                 getPartList();
                 setIsPart(parseInt(json.data.id));
                 setIsPartName(json.data.name);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            // setIsLoading2(true);
-            // setAddPartModal(true);
         }
     }
 
@@ -221,10 +162,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
         if (text) {
             let newData = partList.filter(
                 function (listData) {
-                // let arr2 = listData.phone_number ? listData.phone_number : ''.toUpperCase() 
                 let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
-                // let itemData = arr1.concat(arr2);
-                // console.log(itemData);
                 let textData = text.toUpperCase();
                 return itemData.indexOf(textData) > -1;
                 }
@@ -249,18 +187,14 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                 },
             });
             const json = await res.json();
-            // console.log(json);
             if (json !== undefined) {
-                // console.log('setPartList', json.data);
                 setPartList(json.data);
                 setFilteredPartData(json.data);
             }
         } catch (e) {
             console.log(e);
         } finally {
-            // setIsLoading2(false);
             setIsLoadingPartList(false)
-
         }
     };
 
@@ -268,10 +202,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
         if (text) {
             let newData = vendorList.filter(
                 function (listData) {
-                // let arr2 = listData.phone_number ? listData.phone_number : ''.toUpperCase() 
                 let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
-                // let itemData = arr1.concat(arr2);
-                // console.log(itemData);
                 let textData = text.toUpperCase();
                 return itemData.indexOf(textData) > -1;
                 }
@@ -296,18 +227,14 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                 },
             });
             const json = await res.json();
-            // console.log(json);
             if (json !== undefined) {
-                // console.log('setVendorList', json.data);
                 setVendorList(json.data);
                 setFilteredVendorData(json.data);
             }
         } catch (e) {
             console.log(e);
         } finally {
-            // setIsLoading2(false);
             setIsLoadingVendorList(false)
-
         }
     };
 
@@ -324,19 +251,14 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                 body: JSON.stringify(data)
             });
             const json = await res.json();
-            // console.log(json);
             if (json !== undefined) {
                 console.log('setVendorList', json.data);
-                // setIsLoading2(true);
                 getVendorList();
                 setIsVendor(parseInt(json.data.id));
                 setIsVendorName(json.data.name);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            // setIsLoading2(true);
-            // setAddVendorModal(true);
         }
     }
 
@@ -344,10 +266,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
         if (text) {
             let newData = garageList.filter(
                 function (listData) {
-                // let arr2 = listData.phone_number ? listData.phone_number : ''.toUpperCase() 
                 let itemData = listData.garage_name ? listData.garage_name.toUpperCase() : ''.toUpperCase()
-                // let itemData = arr1.concat(arr2);
-                // console.log(itemData);
                 let textData = text.toUpperCase();
                 return itemData.indexOf(textData) > -1;
                 }
@@ -372,74 +291,21 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                 },
             });
             const json = await res.json();
-            // console.log(json);
             if (json !== undefined) {
-                //  console.log(json.);
                 setGarageList(json.garage_list);
                 setFilteredGarageData(json.garage_list);
             }
         } catch (e) {
             console.log(e);
         } finally {
-            // setIsLoading2(false);
             setIsLoadingGarageList(false)
-
         }
     };
-
-
-    const getBrandList = async () => {
-        try {
-            const res = await fetch(`${API_URL}fetch_brand`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + userToken
-                },
-            });
-            const json = await res.json();
-            if (json !== undefined) {
-                // console.log(json.states);
-                setVendorList(json.brand_list);
-            }
-        } catch (e) {
-            console.log(e);
-        } finally {
-            // setIsLoading(false);
-        }
-    };
-
-    // const getGarageList = async () => {
-    //     try {
-    //         const res = await fetch(`${API_URL}fetch_owner_garages?user_id=${userId}&user_role=${userRole}`, {
-    //             method: 'GET',
-    //             headers: {
-    //                 'Accept': 'application/json',
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': 'Bearer ' + userToken
-    //             },
-    //         });
-    //         const json = await res.json();
-    //         if (json !== undefined) {
-    //             setGarageList(json.garage_list);
-    //             // console.log(json);
-    //         }
-    //     } catch (e) {
-    //         console.log(e);
-    //     } finally {
-    //         setIsLoading(false);
-    //         setIsGarageId(selectedGarageId);
-    //     }
-    // };
 
     useEffect(() => {
         getVendorList();
-        // getBrandList();
         getGarageList();
         getPartList();
-        // console.log('garageId:', garageId);
-        // console.log('selectedGarageId:',  selectedGarageId == 0 ? console.log('option1') : parseInt(garageId));
     }, []);
 
     return (
@@ -451,35 +317,10 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                     keyboardShouldPersistTaps={'handled'}
                     showsVerticalScrollIndicator={false}
                     scrollEventThrottle={8}
-                    // keyboardOffset={160}
                     behavior="padding"
                 >
                     <View style={{ flex: 1 }}>
                         <Text style={[styles.headingStyle, { marginTop: 20 }]}>New Stock Details:</Text>
-                        {/* <View style={styles.dropDownContainer}>
-                            <Picker
-                                // key={brandRef}
-                                selectedValue={isVendor}
-                                onValueChange={(optionId) => { setIsVendor(optionId); if (optionId == "new_vendor") setAddVendorModal(true) }}
-                                style={styles.dropDownField}
-                                itemStyle={{ padding: 0 }}
-                            >
-                                <Picker.Item label="Select Part" value="0" />
-                                {vendorList.map((vendorList, i) => {
-                                    return (
-                                        <Picker.Item
-                                            key={'vendor'+i}
-                                            label={vendorList.name}
-                                            value={vendorList.id}
-                                        />
-                                    );
-                                })}
-                                <Picker.Item label="Add New Part" value="new_vendor" />
-                            </Picker>
-                        </View>
-                        {vendorError?.length > 0 &&
-                            <Text style={styles.errorTextStyle}>{vendorError}</Text>
-                        } */}
 
                         <View>
                             <TouchableOpacity 
@@ -497,7 +338,6 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                                 value={isPartName}
                                 right={<TextInput.Icon name="menu-down" />}
                             />
-                            {/* <Icon style={{color: colors.black, marginRight: 4, position: "absolute", right: 8, top: '43%'}} name="menu-down" size={28} /> */}
                         </View>
 
                         <View>
@@ -516,33 +356,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                                 value={isVendorName}
                                 right={<TextInput.Icon name="menu-down" />}
                             />
-                            {/* <Icon style={{color: colors.black, marginRight: 4, position: "absolute", right: 8, top: '43%'}} name="menu-down" size={28} /> */}
                         </View>
-
-                        {/* <View style={styles.dropDownContainer}>
-                            <Picker
-                                // key={brandRef}
-                                selectedValue={isVendor}
-                                onValueChange={(optionId) => { setIsVendor(optionId); if (optionId == "new_vendor") setAddVendorModal(true) }}
-                                style={styles.dropDownField}
-                                itemStyle={{ padding: 0 }}
-                            >
-                                <Picker.Item label="Select Vendor" value="0" />
-                                {vendorList.map((vendorList, i) => {
-                                    return (
-                                        <Picker.Item
-                                            key={'vendor'+i}
-                                            label={vendorList.name}
-                                            value={vendorList.id}
-                                        />
-                                    );
-                                })}
-                                <Picker.Item label="Add New Vendor" value="new_vendor" />
-                            </Picker>
-                        </View>
-                        {vendorError?.length > 0 &&
-                            <Text style={styles.errorTextStyle}>{vendorError}</Text>
-                        } */}
 
                         <TextInput
                             mode="outlined"
@@ -592,19 +406,6 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                         {currentStockError?.length > 0 &&
                             <Text style={styles.errorTextStyle}>{currentStockError}</Text>
                         }
-
-                        {/* <TextInput
-                            mode="outlined"
-                            label='Current Stock'
-                            style={styles.input}
-                            placeholder="Current Stock"
-                            value={isCurrentStock}
-                            onChangeText={(text) => setIsCurrentStock(text)}
-                            keyboardType={"phone-pad"}
-                        />
-                        {currentStockError?.length > 0 &&
-                            <Text style={styles.errorTextStyle}>{currentStockError}</Text>
-                        } */}
 
                         <TextInput
                             mode="outlined"
@@ -663,35 +464,8 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                                     value={isGarageName}
                                     right={<TextInput.Icon name="menu-down" />}
                                 />
-                                {/* <Icon style={{color: colors.black, marginRight: 4, position: "absolute", right: 8, top: '43%'}} name="menu-down" size={28} /> */}
                             </View>
                         }
-                            {/* <View>
-                                <View style={styles.dropDownContainer}>
-                                    <Picker
-                                        selectedValue={isGarageId}
-                                        onValueChange={(option) => setIsGarageId(option)}
-                                        style={styles.dropDownField}
-                                        itemStyle={{ padding: 0 }}
-                                    >
-                                        <Picker.Item label="Customer Belongs To Garage" value="0" />
-                                        {garageList.map((garageList, i) => {
-                                            return (
-                                                <Picker.Item
-                                                    key={'garage'+i}
-                                                    label={garageList.garage_name}
-                                                    value={garageList.id}
-                                                />
-                                            );
-                                        })}
-                                        <Picker.Item label="Add New Insurance Company" value="new_insurance_company" />
-                                    </Picker>
-                                </View>
-                                {garageIdError?.length > 0 &&
-                                    <Text style={styles.errorTextStyle}>{garageIdError}</Text>
-                                }
-                            </View> */}
-                   
 
                         <Button
                             style={{ marginTop: 15 }}
@@ -724,18 +498,15 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                                     <FlatList
                                         ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
                                         data={filteredPartData}
-                                        // onEndReachedThreshold={1}
                                         style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
                                         keyExtractor={item => item.id}
                                         renderItem={({item}) => (
                                             <>
                                                 <List.Item
                                                     title={
-                                                        // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setPartListModal(false);  setAddPartModal(true); }}>
-                                                            <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
-                                                                <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
-                                                            </View>
-                                                        // </TouchableOpacity> 
+                                                        <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                            <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
+                                                        </View>
                                                     }
                                                     onPress={() => {
                                                             setIsPartName(item.name); 
@@ -748,7 +519,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                                             </>
                                         )} 
                                     />
-                                    :
+                                :
                                     <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
                                         <Text style={{ color: colors.black, textAlign: 'center'}}>No such part is associated!</Text>
                                     </View>
@@ -763,6 +534,8 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                         </>
                     }
                 </Modal>
+
+                {/* Add New Part Model */}
                 <Modal visible={addNewPartModal} onDismiss={() => { setAddNewPartModal(false); setPartListModal(true);  setIsNewPart(0); setNewPartError(''); }} contentContainerStyle={styles.modalContainerStyle}>
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Part</Text>
                     <View>
@@ -808,12 +581,11 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                     </View>
                 </Modal>
 
-
                 {/* Vendors List Modal */}
                 <Modal visible={vendorListModal} onDismiss={() => { setVendorListModal(false); setIsVendor(0); setIsVendorName(''); setVendorError(''); setSearchQueryForVendors('');  searchFilterForVendors();}} contentContainerStyle={styles.modalContainerStyle}>
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Vendor</Text>
                     {(isLoadingVendorList == true) ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator>
-                        :
+                    :
                         <>
                             <View style={{marginTop: 20, marginBottom: 10}}>
                                 <Searchbar
@@ -827,18 +599,15 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                                     <FlatList
                                         ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
                                         data={filteredVendorData}
-                                        // onEndReachedThreshold={1}
                                         style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
                                         keyExtractor={item => item.id}
                                         renderItem={({item}) => (
                                             <>
                                                 <List.Item
                                                     title={
-                                                        // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setVendorListModal(false);  setAddVendorModal(true); }}>
-                                                            <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
-                                                                <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
-                                                            </View>
-                                                        // </TouchableOpacity> 
+                                                        <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                            <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
+                                                        </View>
                                                     }
                                                     onPress={() => {
                                                             setIsVendorName(item.name); 
@@ -853,7 +622,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                                             </>
                                         )} 
                                     />
-                                    :
+                                :
                                     <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
                                         <Text style={{ color: colors.black, textAlign: 'center'}}>No such vendor is associated!</Text>
                                     </View>
@@ -868,6 +637,8 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                         </>
                     }
                 </Modal>
+
+                {/* Add New Vendor Modal */}
                 <Modal visible={addNewVendorModal} onDismiss={() => { setAddNewVendorModal(false); setVendorListModal(true);  setIsNewVendor(0); setNewVendorError(''); }} contentContainerStyle={styles.modalContainerStyle}>
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Vendor</Text>
                     <View>
@@ -883,6 +654,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                     {newVendorError?.length > 0 &&
                         <Text style={styles.errorTextStyle}>{newVendorError}</Text>
                     }
+
                     <View style={{ flexDirection: "row", marginTop: 10}}>
                         <Button
                             style={{ marginTop: 15, flex: 1, marginRight: 10 }}
@@ -919,7 +691,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                 <Modal visible={garageListModal} onDismiss={() => { setGarageListModal(false); setIsGarageId(0); setIsGarageName(''); setGarageError(''); setSearchQueryForGarages('');  searchFilterForGarages();}} contentContainerStyle={styles.modalContainerStyle}>
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Garage</Text>
                     {(isLoadingGarageList == true) ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator>
-                        :
+                    :
                         <>
                             <View style={{marginTop: 20, marginBottom: 10}}>
                                 <Searchbar
@@ -933,18 +705,15 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                                     <FlatList
                                         ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
                                         data={filteredGarageData}
-                                        // onEndReachedThreshold={1}
                                         style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
                                         keyExtractor={item => item.id}
                                         renderItem={({item}) => (
                                             <>
                                                 <List.Item
                                                     title={
-                                                        // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setGarageListModal(false);  setAddGarageModal(true); }}>
-                                                            <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
-                                                                <Text style={{fontSize:16, color: colors.black}}>{item.garage_name}</Text>
-                                                            </View>
-                                                        // </TouchableOpacity> 
+                                                        <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                            <Text style={{fontSize:16, color: colors.black}}>{item.garage_name}</Text>
+                                                        </View>
                                                     }
                                                     onPress={() => {
                                                             setIsGarageName(item.garage_name); 
@@ -967,39 +736,6 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                     }
                 </Modal>
             </Portal>
-            {/* <Portal>
-                <Modal visible={addVendorModal} onDismiss={() => { setAddVendorModal(false); setNewVendor(""); setIsVendor(0); }} contentContainerStyle={styles.modalContainerStyle}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Brand</Text>
-                    <TextInput
-                        mode="outlined"
-                        label='Vendor Name'
-                        style={styles.input}
-                        placeholder="Vendor Name"
-                        value={newVendor}
-                        onChangeText={(text) => setNewVendor(text)}
-                    />
-                    {newVendorError?.length > 0 &&
-                        <Text style={styles.errorTextStyle}>{newVendorError}</Text>
-                    }
-                    <View style={{ flexDirection: "row", }}>
-                        <Button
-                            style={{ marginTop: 15, flex: 1, marginRight: 10 }}
-                            mode={'contained'}
-                            // onPress={addNewBrand}
-                        >
-                            Add
-                        </Button>
-                        <Button
-                            style={{ marginTop: 15, flex: 1 }}
-                            mode={'contained'}
-                            onPress={() => setAddVendorModal(false)}
-                        >
-                            Close
-                        </Button>
-                    </View>
-                </Modal>
-            </Portal> */}
-
         </View>
     )
 }
@@ -1008,11 +744,9 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
 
 const styles = StyleSheet.create({
     partDropDownField: {
-        // padding: 15,
         fontSize: 16,
         color: colors.black,
         position: 'absolute',
-        // backgroundColor: colors.black,
         marginTop: 15,
         left: 0,
         top: 0,

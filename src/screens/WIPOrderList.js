@@ -15,39 +15,9 @@ const WIPOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =>
     const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState(); 
     const [filteredData, setFilteredData] = useState([]);
-    // const [orderDetailsLoading, setOrderDetailsLoading] = useState(false);s
     const [orderDataModal, setOrderDataModal] = useState(false);
-    // const [VehicleData, setVehicleData] = useState('');
-    // const [vehicleDataLoading, setVehicleDataLoading] = useState(true);
-    // const refRBSheet = useRef();
-    
-    // const getVehicleDetails = async (vehicleId) => {
-    //     try {
-    //         const res = await fetch(`${API_URL}fetch_vehicle_data?id=${vehicleId}`, {
-    //             method: 'GET',
-    //             headers: {
-    //                 'Accept': 'application/json',
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': 'Bearer ' + userToken
-    //             },
-    //         });
-    //         const json = await res.json();
-    //         if (json !== undefined) {
-    //             console.log(json);
-    //             setVehicleData(json.vehicle_details);
-    //         }
-    //     } catch (e) {
-    //         console.log(e);
-    //     } finally {
-    //         setVehicleDataLoading(false);
-    //     }
-    // };
 
     const getOrderList = async () => {
-    //     let orderStatus = new FormData();
-    //     orderStatus.append('status', 'Vehicle received');
-        // let data2 =  {'': };
-        // { '':  }
         try {
             const res = await fetch(`${API_URL}fetch_garage_order/status/${isGarageId}`, {
                 method: 'POST',
@@ -60,13 +30,10 @@ const WIPOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =>
                     status: 'Work In Progress',
                 }),
             });
-            // console.log(res);
             const json = await res.json();
             if (json !== undefined) {
-                console.log(json.data);
                 setData(json.data);
                 setFilteredData(json.data);
-                // console.log(typeof(filteredData));
             }
         } catch (e) {
             console.log(e);
@@ -79,13 +46,11 @@ const WIPOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =>
         if (text) {
             const newData = data.filter(
                 function (listData) {
-                let arr2 = listData.user.name ? listData.user.name.toUpperCase() : ''.toUpperCase();
-                let arr1 = listData.id ?  listData.id : ''.toUpperCase()
-                let itemData = arr2.concat(arr1);
-                // let itemData = listData.vehicle_registration_number ? listData.vehicle_registration_number.toUpperCase() : ''.toUpperCase()
-                // console.log(itemData);
-                const textData = text.toUpperCase();
-                return itemData.indexOf(textData) > -1;
+                    let arr2 = listData.user.name ? listData.user.name.toUpperCase() : ''.toUpperCase();
+                    let arr1 = listData.id ?  listData.id : ''.toUpperCase()
+                    let itemData = arr2.concat(arr1);
+                    const textData = text.toUpperCase();
+                    return itemData.indexOf(textData) > -1;
                 }
             );
             setFilteredData(newData);
@@ -96,19 +61,9 @@ const WIPOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =>
         }
     };
 
-    //  useEffect(() => {
-    //    console.log(customerId);
-    // }, [customerId]);
-
     useEffect(() => {
-        // setIsLoading(false);
         getOrderList();
-        // console.log(isGarageId);
     }, []);
-
-    // useEffect(() => {
-    //    console.log(isGarageId);
-    // }, [isGarageId]);
 
     return (
         <View style={styles.surfaceContainer}>
@@ -124,7 +79,6 @@ const WIPOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =>
                             <FlatList
                                 ItemSeparatorComponent= {() => (<Divider />)}
                                 data={filteredData}
-                                // onEndReachedThreshold={1}
                                 keyExtractor={item => item.id}
                                 renderItem={({item, index}) => (
                                     <>
@@ -165,7 +119,6 @@ const WIPOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =>
                                                 <View style={styles.btnAction}>
                                                     <Button
                                                         onPress={() => Linking.openURL(`tel:${item.user.phone_number}`) }
-                                                        // style={styles.buttonStyle}
                                                         color={colors.white}
                                                         icon={ (color) => <Icon name={'phone'} size={24} color={colors.white}  /> }
                                                         uppercase={false} 
@@ -174,7 +127,6 @@ const WIPOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =>
                                                 <View style={[styles.btnAction, {borderColor: "#ffffff20", borderWidth: 1, borderTopWidth: 0, borderBottomWidth: 0 }]}>
                                                     <Button
                                                         onPress={() => Linking.openURL(`sms:${item.user.phone_number}`) }
-                                                        // style={styles.buttonStyle}
                                                         color={colors.white}
                                                         icon={ (color) => <Icon name={'message'} size={24} color={colors.white}  /> }
                                                         uppercase={false} 
@@ -183,7 +135,6 @@ const WIPOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =>
                                                 <View style={styles.btnAction}>
                                                     <Button
                                                         onPress={() => Linking.openURL(`https://wa.me/${item.user.phone_number}`) }
-                                                        // style={styles.buttonStyle}
                                                         color={colors.white}
                                                         icon={ (color) => <Icon name={'whatsapp'} size={24} color={colors.white}  /> }
                                                         uppercase={false} 
@@ -201,13 +152,6 @@ const WIPOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =>
                                             openDuration={250}
                                             >
                                             <View style={{flexDirection:"column", flex:1}}>
-                                                {/* <List.Item
-                                                    title="View Order Details"
-                                                    style={{paddingVertical:15}}
-                                                    onPress={() => { setOrderDataModal(true);  this[RBSheet + index].close(); }}
-                                                    left={() => (<Icon type={"MaterialCommunityIcons"} name="eye" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
-                                                />
-                                                <Divider /> */}
                                                 <List.Item
                                                     title="Change Order Status"
                                                     style={{paddingVertical:15}}
@@ -239,7 +183,7 @@ const WIPOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =>
                                                         }
                                                         navigation.navigate('OrderCreated', {'data': arrData});  
                                                         this[RBSheet + index].close(); 
-                                                        }}
+                                                    }}
                                                     left={() => (<Icon type={"MaterialCommunityIcons"} name="clipboard-list-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
                                                 />
                                                 <Divider />
@@ -271,7 +215,6 @@ const WIPOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =>
                                                             'total': item?.total,
                                                             'applicable_discount': item?.discount
                                                         }
-                                                        console.log('data:', arrData);
                                                         navigation.navigate('EditRepairOrder', {'data': arrData}); 
                                                         this[RBSheet + index].close(); 
                                                     }}
@@ -295,7 +238,6 @@ const WIPOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =>
         </View>
     );
 }
-
 
 const styles = StyleSheet.create({
     surfaceContainer: {
@@ -348,7 +290,6 @@ const styles = StyleSheet.create({
         color: colors.primary,
         justifyContent: 'center',
         alignItems: 'center',
-        // textAlign: 'center',
         padding: 3,
         marginHorizontal: 4,
         marginTop: 3,
@@ -357,7 +298,6 @@ const styles = StyleSheet.create({
     },
     btnActions: {
         width: '100%',
-        // flex: 1,
         flexDirection: 'row',
     },
     btnAction: {
@@ -367,7 +307,6 @@ const styles = StyleSheet.create({
         backgroundColor: colors.secondary, 
         alignItems: 'center', 
         justifyContent: 'center'
-        // marginTop:8,
     },
     btnActionText: {
         color: colors.white,
@@ -460,7 +399,6 @@ const styles = StyleSheet.create({
     smallButton: {
         fontSize: 16,
         color: colors.primary,
-        // flex: 1,
         flexDirection: 'row',
         justifyContent: 'center',
         borderRadius: 2,
@@ -469,26 +407,20 @@ const styles = StyleSheet.create({
         padding: 3,
         marginHorizontal: 4,
         marginTop: 3,
-        // alignSelf: 'space-between'
     },
     verticleImage: {
         height: 150,
-        // width: 150,
-        // width: '100%',
-        // height: '100%',
         resizeMode: 'contain',  
         flex: 1, 
     }, 
     lightBoxWrapper: {
         width: 150,
-        // height: 250,
     },
    
 })
 
 const mapStateToProps = state => ({
     userToken: state.user.userToken,
-    // garageId: state.garage.garage_id,
     selectedGarageId: state.garage.selected_garage_id,
 })
 

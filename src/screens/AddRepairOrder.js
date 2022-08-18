@@ -7,15 +7,12 @@ import { API_URL } from '../constants/config';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
+
     const [isLoading, setIsLoading] = useState(true);
     const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState(); 
     const [filteredData, setFilteredData] = useState([]);
-
-    // const [viewVehicleDetailsModal, setViewVehicleDetailsModal] = useState(false);
-    // const [VehicleData, setVehicleData] = useState('');
-    // const [vehicleDataLoading, setVehicleDataLoading] = useState(true);
 
     const getVehicleList = async () => {
         try {
@@ -29,7 +26,6 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
             });
             const json = await res.json();
             if (json !== undefined) {
-                // console.log(json.vehicle_list);
                 setData(json.vehicle_list);
                 setFilteredData(json.vehicle_list);
             }
@@ -44,11 +40,7 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
         if (text) {
             const newData = data.filter(
                 function (listData) {
-                // let arr2 = listData.vehicle_registration_number ? listData.vehicle_registration_number : ''.toUpperCase() 
-                // let arr1 = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
-                // let itemData = arr1.concat(arr2);
                 let itemData = listData.vehicle_registration_number ? listData.vehicle_registration_number.toUpperCase() : ''.toUpperCase()
-                // console.log(itemData);
                 const textData = text.toUpperCase();
                 return itemData.indexOf(textData) > -1;
                 }
@@ -62,8 +54,6 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
     };
 
     const sendVehicleData = (index) => {
-        // console.log(index);
-        // console.log('sentData', filteredData[index]);
         const vehicleData = {
             'isVehicleId': filteredData[index]?.id,
             'isUserId': filteredData[index]?.users[0].id,
@@ -94,18 +84,9 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
         navigation.navigate('AddRepairOrderStep2', { 'data': vehicleData } );
     }
 
-    //  useEffect(() => {
-    //    console.log(customerId);
-    // }, [customerId]);
-
     useEffect(() => {
         getVehicleList();
-        // console.log(isGarageId);
     }, []);
-
-    // useEffect(() => {
-    //    console.log(isGarageId);
-    // }, [isGarageId]);
 
     return (
             <View style={styles.surfaceContainer}>
@@ -121,14 +102,9 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
                                 <FlatList
                                     ItemSeparatorComponent= {() => (<Divider />)}
                                     data={filteredData}
-                                    // onEndReachedThreshold={1}
                                     keyExtractor={item => item.id}
                                     renderItem={({item, index}) => (
                                         <View style={styles.cards}>
-                                            {/* <View style={styles.cardOrderDetails}>
-                                                <Text style={styles.orderID}>Last Order ID: 11469</Text>
-                                                <Text style={styles.orderStatus}>Completed</Text>
-                                            </View> */}
                                             <View>
                                                 <Text style={styles.cardCustomerName}>Owner Name: {item.users[0] ? item?.users[0].name : null}</Text>
                                                 <Divider />
@@ -145,7 +121,6 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
                                             </View>
                                         </View>
                                     )}
-                                    // // keyExtractor={(item, index) => index.toString()}
                                 />     
                             </View>
                         :
@@ -288,7 +263,6 @@ const styles = StyleSheet.create({
     smallButton: {
         fontSize: 16,
         color: colors.primary,
-        // flex: 1,
         flexDirection: 'row',
         justifyContent: 'center',
         borderRadius: 2,
@@ -297,19 +271,14 @@ const styles = StyleSheet.create({
         padding: 3,
         marginHorizontal: 4,
         marginTop: 3,
-        // alignSelf: 'space-between'
     },
     verticleImage: {
         height: 150,
-        // width: 150,
-        // width: '100%',
-        // height: '100%',
         resizeMode: 'contain',  
         flex: 1, 
     }, 
     lightBoxWrapper: {
         width: 150,
-        // height: 250,
     },
 })
 

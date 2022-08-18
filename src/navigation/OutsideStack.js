@@ -9,9 +9,6 @@ export default function OutsideStack() {
     return (
         <Stack.Navigator 
         screenOptions={{ headerShown: false }}>
-            {/* <Stack.Screen
-                name={'intro'}
-                component={Intro} /> */}
             <Stack.Screen
                 name={'login'}
                 component={Login} />

@@ -1,16 +1,12 @@
-// Libraries which uses to build our component
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList } from "react-native";
 import { useIsFocused  } from '@react-navigation/native';
 import { connect } from "react-redux";
-import { Divider, List, useTheme } from "react-native-paper";
+import { Divider, List } from "react-native-paper";
 import { colors } from "../constants";
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { API_URL } from "../constants/config";
 import { setSelectedGarage } from '../actions/garage';
-// import LinearGradient from 'react-native-linear-gradient';
-
-// What we have display
 
 const ChooseGarage = ({ navigation, userToken, userRole, setSelectedGarage, userId, selectedGarageId }) => {
 
@@ -31,7 +27,6 @@ const ChooseGarage = ({ navigation, userToken, userRole, setSelectedGarage, user
             const json = await res.json();
             if (json !== undefined) {
                 setData(json.garage_list);
-                // console.log(json);
             }
         } catch (e) {
             console.log(e);
@@ -41,8 +36,6 @@ const ChooseGarage = ({ navigation, userToken, userRole, setSelectedGarage, user
     };
 
     useEffect(() => {
-        // console.log('Choose garage', userRole);
-        // console.log('Choose garage', userId);
         setIsLoading(true);
         if(isFocused) {
             setData([]);
@@ -55,7 +48,6 @@ const ChooseGarage = ({ navigation, userToken, userRole, setSelectedGarage, user
     return (
         <View style={styles.surfaceContainer}>
             {isLoading ? <ActivityIndicator style={{paddingVertical: 20}}></ActivityIndicator> : 
-            // <View style={{flexDirection: "column", backgroundColor:colors.white, marginVertical:15 }}>
                 <View style={[styles.mainContainer, userRole == "Super Admin" && {marginBottom: 70}]}>
                     {userRole == "Super Admin" &&
                         <List.Item
@@ -70,24 +62,20 @@ const ChooseGarage = ({ navigation, userToken, userRole, setSelectedGarage, user
                     }
                     <FlatList
                         ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
-                        // style={userRole == "Super Admin" && {marginBottom: 100}}
                         data={data}
                         keyExtractor={item => item.id}
                         renderItem={({item}) => {
                             if (item != 0) {
                                 return (
-                                    // (selectedGarageId == item.id ? <LinearGradient colors={['#4c669f', '#3b5998', '#192f6a']}> : '')
-                                        <List.Item
-                                            title={item.garage_name}
-                                            // title={item.garage_name + (selectedGarageId == item.id ? " - Selected" : '') }
-                                            description={item.owner_garage.name}
-                                            right={()=> (selectedGarageId == item.id ? <Icon name={'check'} size={14} style={{alignSelf:'center', marginRight: 8}} color={colors.white} /> : <Icon name={'chevron-right'} size={14} style={{alignSelf:'center'}} color={colors.gray} />)}
-                                            onPress={() => { setSelectedGarage({ selected_garage: item, selected_garage_id: item.id }); navigation.goBack(null); }}
-                                            style={selectedGarageId == item.id && {backgroundColor:colors.primary, borderRadius: 5} }
-                                            titleStyle={selectedGarageId == item.id && {color:colors.white} }
-                                            descriptionStyle={selectedGarageId == item.id && {color:colors.white} }
-                                        />
-                                    // (selectedGarageId == item.id ? </LinearGradient> : '')
+                                    <List.Item
+                                        title={item.garage_name}
+                                        description={item.owner_garage.name}
+                                        right={()=> (selectedGarageId == item.id ? <Icon name={'check'} size={14} style={{alignSelf:'center', marginRight: 8}} color={colors.white} /> : <Icon name={'chevron-right'} size={14} style={{alignSelf:'center'}} color={colors.gray} />)}
+                                        onPress={() => { setSelectedGarage({ selected_garage: item, selected_garage_id: item.id }); navigation.goBack(null); }}
+                                        style={selectedGarageId == item.id && {backgroundColor:colors.primary, borderRadius: 5} }
+                                        titleStyle={selectedGarageId == item.id && {color:colors.white} }
+                                        descriptionStyle={selectedGarageId == item.id && {color:colors.white} }
+                                    />
                                 )
                             } else {
                                 return (
@@ -98,14 +86,6 @@ const ChooseGarage = ({ navigation, userToken, userRole, setSelectedGarage, user
                     />
                 </View>
             }
-                {/* <Divider />
-                <Divider />
-                <List.Item
-                    title='Add Garage'
-                    // description='hello'
-                    right={()=> (<Icon name={'plus'} size={14} style={{alignSelf:'center'}} color={colors.gray} />)}
-                    onPress={() => navigation.navigate('AllStack', {screen: "AddGarage"} )}
-                /> */}
         </View>
     )
 }

@@ -95,18 +95,13 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                     'Authorization': 'Bearer ' + userToken
                 },
             });
-            // console.log(res);
             const json = await res.json();
             if (json !== undefined) {
-                // console.log(json);
-                setSelectedVehicleData(json.vehicle_details);
-                // setIsLoading(false);
+                setSelectedVehicleData(json.vehicle_details);;
             }
         } catch (e) {
             console.log(e);
             return alert(e);
-        } finally {
-            // setIsLoading(false);
         }
     };
 
@@ -129,7 +124,6 @@ const EditVehicle = ({ navigation, userToken, route }) => {
         } catch (e) {
             console.log(e);
         } finally {
-            // setIsLoading(false);
             setAddInsuranceCompanyModal(false);
             setNewInsuranceCompanyName("");
             setIsInsuranceProvider(0);
@@ -155,7 +149,6 @@ const EditVehicle = ({ navigation, userToken, route }) => {
         } catch (e) {
             console.log(e);
         } finally {
-            // setIsLoading(false);
             setAddBrandModal(false);
             setNewBrandName("");
             setIsBrand(0);
@@ -181,7 +174,6 @@ const EditVehicle = ({ navigation, userToken, route }) => {
         } catch (e) {
             console.log(e);
         } finally {
-            // setIsLoading(false);
             setAddModelModal(false);
             setNewModelName("");
             setIsModel(0);
@@ -194,10 +186,8 @@ const EditVehicle = ({ navigation, userToken, route }) => {
         const res = await DocumentPicker.pick({
             type: [DocumentPicker.types.images],
         });
-        // console.log(res);
         setIsNewRegistrationCertificateImg(res[0]);
         setIsRegistrationCrtImgLoading(true);
-        // fetchRegistrationCrtImg();
         } catch (err) {
             setIsNewRegistrationCertificateImg(null);
             if (DocumentPicker.isCancel(err)) {
@@ -207,8 +197,6 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                 setRegistrationCertificateImgError('Unknown Error: ' + JSON.stringify(err));
                 throw err;
             }
-        } finally {
-            // uploadRegistrationCrtImage();
         }
     };
 
@@ -235,9 +223,7 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                 body: data
             });
             let responseJson = await res.json();
-            console.log(responseJson);
             if (responseJson.message == true) {
-                // getVehicleDetails();
                 fetchRegistrationCrtImg();
             }
         } else {
@@ -255,18 +241,14 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                     'Authorization': 'Bearer ' + userToken
                 },
             });
-            // console.log(res);
             const json = await res.json();
             if (json !== undefined) {
-                // console.log(json);
-                await setIsRegistrationCertificateImg(json.vehicle_details.registration_certificate_img);
-                // setIsLoading(false);
+               setIsRegistrationCertificateImg(json.vehicle_details.registration_certificate_img);
             }
         } catch (e) {
             console.log(e);
             return alert(e);
         } finally {
-            // setIsLoading(false);
             setIsRegistrationCrtImgLoading(false);
         }
     };
@@ -277,7 +259,6 @@ const EditVehicle = ({ navigation, userToken, route }) => {
             const res = await DocumentPicker.pick({
                 type: [DocumentPicker.types.images],
             });
-            // console.log(res);
             setIsNewInsuranceImg(res[0]);
             setIsInsurancePolicyImgLoading(true);
             
@@ -289,8 +270,6 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                 setInsuranceImgError('Unknown Error: ' + JSON.stringify(err));
                 throw err;
             }
-        } finally {
-            // uploadInsurancePolicyImage();
         }
     };
 
@@ -309,9 +288,7 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                 body: data
             });
             let responseJson = await res.json();
-            // console.log(responseJson);
             if (responseJson.message == true) {
-                // getVehicleDetails();
                 fetchInsurancePolicyImage();
             } else {
                 
@@ -376,12 +353,10 @@ const EditVehicle = ({ navigation, userToken, route }) => {
             !isModel || isModel === 0 ||
             !isVehicleRegistrationNumber || isVehicleRegistrationNumber?.trim().length === 0 
         )
-    }
+    };
 
     const submit = () => {
-        console.log(isVehicleRegistrationNumber);
         Keyboard.dismiss();  
-
         if (!validate()) {
             if (!isBrand || isBrand === 0) setBrandError('Brand is required');
             if (!isModel || isModel === 0) setModelError('Model is required');
@@ -405,29 +380,8 @@ const EditVehicle = ({ navigation, userToken, route }) => {
             'user_id': parseInt(route?.params?.userId)
         }
 
-        // const data = new FormData();
-        // data.append('brand_id', JSON.stringify(isBrand));
-        // data.append('model_id', JSON.stringify(isModel));
-        // data.append('vehicle_registration_number', isVehicleRegistrationNumber?.trim());
-        // if(isPurchaseDate) data.append('purchase_date', isPurchaseDate);
-        // if(isManufacturingDate) data.append('manufacturing_date', isManufacturingDate);
-        // if(isEngineNumber) data.append('engine_number', isEngineNumber?.trim());
-        // if(isChasisNumber) data.append('chasis_number', isChasisNumber?.trim());
-        // if(isInsuranceProvider) data.append('insurance_id', isInsuranceProvider);
-        // if(isInsurerGstin) data.append('insurer_gstin', isInsurerGstin?.trim());
-        // if(isInsurerAddress) data.append('insurer_address', isInsurerAddress?.trim());
-        // if(isPolicyNumber) data.append('policy_number', isPolicyNumber?.trim());
-        // if(isInsuranceExpiryDate) data.append('insurance_expiry_date', isInsuranceExpiryDate);
-        // // if(isRegistrationCertificateImg != null) data.append('registration_certificate_img', { uri: isRegistrationCertificateImg.uri, type: isRegistrationCertificateImg.type, name: isRegistrationCertificateImg.name });
-        // // if(isInsuranceImg != null) data.append('insurance_img', {uri: isInsuranceImg.uri, type: isInsuranceImg.type, name: isInsuranceImg.name });
-        // data.append('user_id', parseInt(route?.params?.userId));
-
         UpdateVehicle(data);
-        // console.log(JSON.stringify(data));
-        // console.log(data);
-
-        // console.log(isRegistrationCertificateImg);  
-    }
+    };
 
     const UpdateVehicle = async (data) => {
         try {

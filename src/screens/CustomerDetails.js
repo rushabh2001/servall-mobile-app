@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { Image, Text, View, StyleSheet, TouchableOpacity, ScrollView, Linking } from "react-native";
-import { useTheme, Badge, Divider, Modal, Portal, Button, List } from "react-native-paper";
+import { Badge, Divider, Modal, Portal, Button, List } from "react-native-paper";
 import { colors } from "../constants";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
@@ -16,13 +16,10 @@ const customerTopTabs = createMaterialTopTabNavigator();
 const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
 
     const [isCustomerData, setIsCustomerData] = useState('');
-    const [isLoading, setIsLoading] = useState(true);
     const [imageUri, setImageUri] = useState(`${WEB_URL}img/placeolder_servall.jpg`);
     const [singleFile, setSingleFile] = useState(null);
     const [resizeImage, setResizeImage] = useState("cover");
-    const refRBSheet = useRef();
     const [viewVehicleDetailsModal, setViewVehicleDetailsModal] = useState(false);
-
     const isFocused = useIsFocused();
 
     const getCustomerDetails = async () => {
@@ -36,9 +33,7 @@ const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
                 },
             });
             const json = await res.json();
-            // console.log(res);
             if (json !== undefined) {
-                // console.log(json);
                 setIsCustomerData(json?.user_details);
                 if(json.user_details.profile_image != null) {
                     setImageUri( WEB_URL + 'uploads/profile_image/' + json?.user_details.profile_image);
@@ -48,34 +43,25 @@ const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            setIsLoading(false);
         }
     };
 
     const changeProfileImage = async () => {
         try {
             const res = await DocumentPicker.pick({
-            type: [DocumentPicker.types.images],
+                type: [DocumentPicker.types.images],
             });
-            // console.log('res : ' + JSON.stringify(res));
             setSingleFile(res[0]);
         } catch (err) {
             setSingleFile(null);
             if (DocumentPicker.isCancel(err)) {
-            alert('Canceled');
+                alert('Canceled');
             } else {
-            alert('Unknown Error: ' + JSON.stringify(err));
-            throw err;
+                alert('Unknown Error: ' + JSON.stringify(err));
+                throw err;
             }
         } 
     };
-
-    useEffect(() => {
-        if (singleFile != null) {
-            uploadImage();
-        }
-    }, [singleFile]);
 
     const uploadImage = async () => {
         if (singleFile != null) {
@@ -92,7 +78,6 @@ const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
                 body: data
             });
             let responseJson = await res.json();
-            // console.log(responseJson);
             if (responseJson.message == true) {
                 getCustomerDetails();
             }
@@ -101,78 +86,14 @@ const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
         }
     };
 
-    // const changeProfileImage = async (data) => {
-    //     try {
-    //         const res = await DocumentPicker.pick({
-    //             type: [DocumentPicker.types.images],
-    //         });
-    //         // console.log(res);
-    //         setImageFile(res[0]);
-            
-    //         } 
-    //     catch (err) {
-    //             setImageFile(null);
-    //         if (DocumentPicker.isCancel(err)) {
-    //             alert('Canceled');
-    //         } else {
-    //             // For Unknown Error
-    //             alert('Unknown Error: ' + JSON.stringify(err));
-    //             throw err;
-    //         }
-    //     } 
-    //     finally {
-    //         if(imageFile != null) { 
-    //             const formData = new FormData();
-    //             // const fileToUpload = imageFile;
-    //             formData.append('profile_image', imageFile);
-    //             console.log("formdata" , formData);        
-    //             uploadFileToServer(formData)
-    //         }
-    //     }
-    // };
-
-    // const uploadFileToServer = async(formData) => {
-    //     try {
-    //         console.log(1);
-    //         const res = await fetch(`${API_URL}update_profile_image/${route?.params?.userId}`, {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Accept': 'application/json',
-    //                 'Content-Type': 'multipart/form-data; ',
-    //                 'Authorization': 'Bearer ' + userToken
-    //             },
-    //             body: formData
-    //         })
-    //         // .then(response => {
-    //         //     const statusCode = response.status;
-    //         //     let data;
-    //         //     return response.json().then(obj => {
-    //         //         data = obj;
-    //         //         return { statusCode, data };
-    //         //     });
-    //         // });
-    //         console.log(2);
-    //         const json = await res.json();
-    //         if (json !== undefined) {
-    //             console.log(json);
-    //             // if()
-    //             console.log("Profile Image Updated SuccessFully");
-    //             // setStateList(json.states);
-    //             // navigation.navigate('AllStack', { screen: 'ChooseGarage'});
-    //         }
-    //     } catch (e) {
-    //         console.log(e);
-    //     } finally {
-    //         setIsLoading(false);
-    //     }
-    // }
-    
-  
-    
     useEffect(() => {
-        // setImageUri('http://demo2.webstertech.in/servall_garage_api/public/img/placeolder_servall.jpg');
+        if (singleFile != null) {
+            uploadImage();
+        }
+    }, [singleFile]);
+
+    useEffect(() => {
         getCustomerDetails();
-        console.log(userRole);
     }, [isFocused]);
     
     return (
@@ -184,12 +105,10 @@ const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
                 </View>
                 <View style={{flexDirection: "row", alignItems:"center",}}>
                     <Text style={styles.customerName}>{ isCustomerData != null ? isCustomerData.name : null }</Text>
-                    {/* <Text style={styles.customerName}>{ isCustomerData != null ? isCustomerData.name : '' }</Text> */}
                     <Icon onPress={() => navigation.navigate('CustomerInfo', { userId: route?.params?.userId })} name={"pencil"} size={20} color={colors.gray} />
                 </View>
                 <View>
                     <Text style={styles.customerPhonenumber}>{ isCustomerData != null ? isCustomerData?.phone_number : '' }</Text>
-                    {/* <Text style={styles.customerPhonenumber}>{ isCustomerData != null ? isCustomerData?.phone_number : '' }</Text> */}
                 </View>
                 <View style={{flexDirection:"row", marginTop: 15, flexWrap:"wrap", alignSelf:"center", justifyContent:'center', width:"80%",   flexFlow: "row wrap" }}>
                     {userRole == "Super Admin" || userRole == "Admin" ?
@@ -251,78 +170,60 @@ const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
             <Portal>
                 <Modal visible={viewVehicleDetailsModal} onDismiss={() => {}} contentContainerStyle={styles.modalContainerStyle}>
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Order Details</Text>
-                    {/* {vehicleDataLoading 
-                    ? 
-                        <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> 
-                    : */}
                         <ScrollView>
-                        <Text style={styles.cardDetailsHeading}>Vehicle Owner Name:</Text>
-                        <Text style={styles.cardDetailsData}>Test</Text>
-                        <Divider />
-                        <Text style={styles.cardDetailsHeading}>Vehicle Owner`s Phone Number:</Text>
-                        <Text style={styles.cardDetailsData}>Test</Text>
-                        <Divider />
-                        <Text style={styles.cardDetailsHeading}>Vehicle Owner`s Email:</Text>
-                        <Text style={styles.cardDetailsData}>Test</Text>
-                        <Divider />
-                        <Text style={styles.cardDetailsHeading}>Vehicle Registration Number:</Text>
-                        <Text style={styles.cardDetailsData}>Test</Text>
-                        <Divider />
-                        <Text style={styles.cardDetailsHeading}>Vehicle Brand:</Text>
-                        <Text style={styles.cardDetailsData}>Test</Text>
-                        <Divider />
-                        <Text style={styles.cardDetailsHeading}>Vehicle Model:</Text>
-                        <Text style={styles.cardDetailsData}>Test</Text>
-                        <Divider />
-                        <Text style={styles.cardDetailsHeading}>Purchase Date:</Text>
-                        <Text style={styles.cardDetailsData}>Test</Text>
-                        <Divider />
-                        <Text style={styles.cardDetailsHeading}>Manufacturing Date:</Text>
-                        <Text style={styles.cardDetailsData}>Test</Text>
-                        <Divider />
-                        <Text style={styles.cardDetailsHeading}>Engine Number:</Text>
-                        <Text style={styles.cardDetailsData}>Test</Text>
-                        <Divider />
-                        <Text style={styles.cardDetailsHeading}>Chasis Number:</Text>
-                        <Text style={styles.cardDetailsData}>Test</Text>
-                        <Divider />
-                        <Text style={styles.cardDetailsHeading}>Insurance Provider Company:</Text>
-                        <Text style={styles.cardDetailsData}>Test</Text>
-                        <Divider />
-                        <Text style={styles.cardDetailsHeading}>Insurer GSTIN:</Text>
-                        <Text style={styles.cardDetailsData}>Test</Text>
-                        <Divider />
-                        <Text style={styles.cardDetailsHeading}>Insurer Address:</Text>
-                        <Text style={styles.cardDetailsData}>Test</Text>
-                        <Divider />
-                        <Text style={styles.cardDetailsHeading}>Policy Number:</Text>
-                        <Text style={styles.cardDetailsData}>Test</Text>
-                        <Divider />
-                        <Text style={styles.cardDetailsHeading}>Insurance Expiry Date:</Text>
-                        <Text style={styles.cardDetailsData}>Test</Text>
-                        <Divider />
-                        <Text style={styles.cardDetailsHeading}>Registration Certificate:</Text>
-                        {/* {VehicleData?.registration_certificate_img !== null ? */}
-                            {/* <Lightbox navigator={navigator} style={styles.lightBoxWrapper}>
-                                <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/registration_certificate_img/' + VehicleData?.registration_certificate_img }} /> 
-                            </Lightbox> */}
-                        {/* : */}
+                            <Text style={styles.cardDetailsHeading}>Vehicle Owner Name:</Text>
+                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Vehicle Owner`s Phone Number:</Text>
+                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Vehicle Owner`s Email:</Text>
+                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Vehicle Registration Number:</Text>
+                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Vehicle Brand:</Text>
+                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Vehicle Model:</Text>
+                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Purchase Date:</Text>
+                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Manufacturing Date:</Text>
+                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Engine Number:</Text>
+                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Chasis Number:</Text>
+                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Insurance Provider Company:</Text>
+                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Insurer GSTIN:</Text>
+                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Insurer Address:</Text>
+                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Policy Number:</Text>
+                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Insurance Expiry Date:</Text>
+                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Registration Certificate:</Text>
                             <Text style={styles.cardDetailsData}>Not Uploaded Registration Certificate</Text>
-                        {/* } */}
-                        <Divider />
-                        <Text style={styles.cardDetailsHeading}>Insurance Policy:</Text>
-                        {/* {VehicleData?.insurance_img !== null ? */}
-                            {/* <Lightbox navigator={navigator} style={styles.lightBoxWrapper}>
-                                <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/insurance_img/' + VehicleData?.insurance_img }} />
-                            </Lightbox> */}
-                        {/* : */}
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Insurance Policy:</Text>
                             <Text style={styles.cardDetailsData}>Not Uploaded Insurance Policy</Text>
-                        {/* } */}
-    
                         </ScrollView>
-                    {/* } */}
+
                     <View style={{flexDirection: "row",}}>
-            
                         <View style={{flex: 1}}></View>
                         <Button
                             style={{marginTop:15, flex: 1.4, alignSelf: 'center'}}
@@ -424,7 +325,6 @@ const refRBSheet = useRef();
             <View style={styles.cards}>
                 <View style={{right: 30, top: 35,position: 'absolute'}} >
                     <Icon onPress={() => {refRBSheet.current.open();}} type={"MaterialCommunityIcons"} name={'dots-vertical'} size={22}  color={colors.gray} />
-                    {/* <Icon onPress={() => {refRBSheet.current.open();}} type={"MaterialCommunityIcons"} style={{right: 5, top: 8,position: 'absolute'}} name={'dots-vertical'} size={22}  color={colors.gray} /> */}
                 </View>
                 <View style={styles.cardTags} >
                     <Text style={styles.tags}>Running Repair</Text>
@@ -468,12 +368,6 @@ const refRBSheet = useRef();
                             left={() => (<Icon type={"MaterialCommunityIcons"} name="clipboard-list-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
                         />
                         <Divider />
-                        {/* <List.Item
-                            title="Add Note"
-                            style={{paddingVertical:15}}
-                            onPress={() => { navigation.navigate("MyCustomers"); refRBSheet.current.close(); }}
-                            left={() => (<Icon type={"MaterialCommunityIcons"} name="notebook-plus-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
-                        /> */}
                     </View>
                 </RBSheet>
             </View>
@@ -532,7 +426,6 @@ const refRBSheet = useRef();
 const styles = StyleSheet.create({
     surfaceContainer: {
         flexDirection: "column",
-        // padding: 10,
         flex: 1,
     },
     upperContainer: {
@@ -543,8 +436,6 @@ const styles = StyleSheet.create({
     },
     lowerContainer: {
         flex: 1,
-        // justifyContent: "center",
-        // alignItems: "center",
     },
     customerName: {
         fontSize: 18,
@@ -559,7 +450,6 @@ const styles = StyleSheet.create({
     smallButton: {
         fontSize: 16,
         color: colors.primary,
-        // flex: 1,
         flexDirection: 'row',
         justifyContent: 'center',
         borderRadius: 2,
@@ -568,7 +458,6 @@ const styles = StyleSheet.create({
         padding: 3,
         marginHorizontal: 4,
         marginTop: 3,
-        // alignSelf: 'space-between'
     },
     cardContainer: {
         flexDirection: "row", 
@@ -596,9 +485,7 @@ const styles = StyleSheet.create({
         position: "absolute",
     },
     badgeBtn: {
-        // paddingTop: 8,
         fontSize: 16,
-        // paddingTop: 10,
         left: -15,
         color: colors.black
     },
@@ -676,27 +563,19 @@ const styles = StyleSheet.create({
     imageContainer: {
         width: 80,
         height: 80,
-        borderRadius: 500,
-        // resizeMode: 'cover',    
+        borderRadius: 500,  
         marginBottom: 10
     },
     verticleImage: {
         width: '100%',
         height: '100%',
-        // flex:1,
-        // borderRadius: 500,
-        // overflow: "hidden",
-        // resizeMode: 'contain',
-        // resizeMode: 'cover',
     }, 
     activeImage: {
         width: '100%',
         height: null,
         resizeMode: 'contain',
         borderRadius: 0,
-        // marginBottom: 0,
         flex: 1,
-        // display: 'none',
     }, 
     lightBoxWrapper: {
         width: 80,

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View , Text, StyleSheet, TextInput, Keyboard, ActivityIndicator, TouchableOpacity, Pressable } from 'react-native';
+import { View , Text, StyleSheet, TextInput, Keyboard, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Modal, Portal } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { colors } from '../constants';
@@ -14,19 +14,18 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 
 const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId, garageId }) => {
     
-    // User / Customer Fields
-    // const [isUserDetails, setIsUserDetails] = useState('');
-    
+    // Customer Fields
     const [isName, setIsName] = useState('');
     const [isEmail, setIsEmail] = useState('');
     const [isPhoneNumber, setIsPhoneNumber] = useState('');
     const [isCity, setIsCity] = useState();
     const [isState, setIsState] = useState();
     const [isAddress, setIsAddress] = useState('');
-    const [nameError, setNameError] = useState('');     // Error States
+
+    // Error States
+    const [nameError, setNameError] = useState(''); 
     const [emailError, setEmailError] = useState('');
     const [phoneNumberError, setPhoneNumberError] = useState('');
-    const [addressError, setAddressError] = useState('');
     const [cityError, setCityError] = useState('');
     const [stateError, setStateError] = useState('');
 
@@ -49,18 +48,10 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
     const [isRegistrationCertificateImg, setIsRegistrationCertificateImg] = useState(null);
     const [isInsuranceImg, setIsInsuranceImg] = useState(null);
 
-    const [brandError, setBrandError] = useState('');   // Error States
+    // Error States
+    const [brandError, setBrandError] = useState('');
     const [modelError, setModelError] = useState('');
     const [vehicleRegistrationNumberError, setVehicleRegistrationNumberError] = useState('');
-    const [purchaseDateError, setPurchaseDateError] = useState('');
-    const [manufacturingDateError, setManufacturingDateError] = useState('');
-    const [engineNumberError, setEngineNumberError] = useState('');
-    const [chasisNumberError, setChasisNumberError] = useState('');
-    const [insuranceProviderError, setInsuranceProviderError] = useState('');
-    const [insurerGstinError, setInsurerGstinError] = useState('');
-    const [insurerAddressError, setinsurerAddressError] = useState('');
-    const [policyNumberError, setPolicyNumberError] = useState('');
-    const [insuranceExpiryDateError, setInsuranceExpiryDateError] = useState('');
     const [registrationCertificateImgError, setRegistrationCertificateImgError] = useState('');
     const [insuranceImgError, setInsuranceImgError] = useState('');
 
@@ -85,13 +76,10 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
 
     const [addBrandModal, setAddBrandModal] = useState(false);
     const [newBrandName, setNewBrandName] = useState();
-    const [newBrandNameError, setNewBrandNameError] = useState();
     const [addModelModal, setAddModelModal] = useState(false);
     const [newModelName, setNewModelName] = useState();
-    const [newModelNameError, setNewModelNameError] = useState();
     const [addInsuranceCompanyModal, setAddInsuranceCompanyModal] = useState(false);
     const [newInsuranceCompanyName, setNewInsuranceCompanyName] = useState();
-    const [newInsuranceCompanyNameError, setNewInsuranceCompanyNameError] = useState();
 
     const [isLoading, setIsLoading] = useState(false);
     
@@ -116,7 +104,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
         } catch (e) {
             console.log(e);
         } finally {
-            // setIsLoading(false);
             setAddInsuranceCompanyModal(false);
             setNewInsuranceCompanyName("");
             setIsInsuranceProvider(0);
@@ -142,7 +129,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
         } catch (e) {
             console.log(e);
         } finally {
-            // setIsLoading(false);
             setAddBrandModal(false);
             setNewBrandName("");
             setIsBrand(0);
@@ -168,7 +154,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
         } catch (e) {
             console.log(e);
         } finally {
-            // setIsLoading(false);
             setAddModelModal(false);
             setNewModelName("");
             setIsModel(0);
@@ -182,7 +167,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
         const res = await DocumentPicker.pick({
             type: [DocumentPicker.types.images],
         });
-        // console.log(res);
         setIsRegistrationCertificateImg(res[0]);
         } catch (err) {
             setIsRegistrationCertificateImg(null);
@@ -202,7 +186,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
         const res = await DocumentPicker.pick({
             type: [DocumentPicker.types.images],
         });
-        // console.log(res);
         setIsInsuranceImg(res[0]);
         } catch (err) {
             setIsInsuranceImg(null);
@@ -263,7 +246,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
     }
 
     const submit = () => {
-     
+    
         Keyboard.dismiss();  
 
         if (!validate()) {
@@ -282,13 +265,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
             if (!isVehicleRegistrationNumber || isVehicleRegistrationNumber?.trim().length === 0) setVehicleRegistrationNumberError("Vehicle Registration Number is required"); else setVehicleRegistrationNumberError('');
             return;
         }
-        
-        // let dataCheck = ({'email': isEmail, 'phone_number': isPhoneNumber, 'vehicle_registration_number': isVehicleRegistrationNumber});
-        // setEmailError("");
-        // setPhoneNumberError("");
-        // setVehicleRegistrationNumberError("");
-
-        // userVehicleCheck(dataCheck);
 
         const data = new FormData();
         data.append('name', isName?.trim());
@@ -315,15 +291,10 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
         data.append('garage_id', isGarageId);
 
         addCustomer(data);
-        // console.log(JSON.stringify(data));
-        // console.log(isRegistrationCertificateImg);  
     }
 
     const addCustomer = async (data) => {
         try {
-            // console.log("working fine till here");
-            // console.log(isRegistrationCertificateImg[0]);  
-            // console.log(data);
             await fetch(`${API_URL}add_new_customer`, {
                 method: 'POST',
                 headers: {
@@ -353,48 +324,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                     navigation.navigate('MyCustomers');
                 }
             });
-            // let responseJson = await res.json();
-            // console.log(responseJson);
-
-            // fetch(`${API_URL}add_new_customer`, {
-            //     method: 'POST',
-            //     mode: 'cors',
-            //     headers: {
-            //         'Accept': 'application/json, */*',
-            //         'Content-Type': 'multipart/form-data; boundary=6ff46e0b6b5148d984f148b6542e5a5d',
-            //     },
-            //     // ContentType: 'multipart/form-data',
-            //     body: data
-            // }).then(res => {console.log('abea', res); return res.json();})
-            // .then(
-            //     (result) => {
-            //         console.log("res:" , result);
-            //     }).catch(function(error) {
-            //         console.log('There has been a problem with your fetch operation: ' + error.message);
-            //           throw error;
-            //         });
-            
-            // let responseJson = await res.json();
-
-            // .then(res => {
-            //     const statusCode = res.status;
-            //     let data;
-            //     return res.json().then(obj => {
-            //         data = obj;
-            //         return { statusCode, data };
-            //     });
-            // });
-            // .then((res) => {
-                // console.log(responseJson);
-                // if(res.statusCode == 201) {
-                // console.log("Customer Added SuccessFully");
-                // navigation.navigate('MyCustomers');
-                // } else if(res.statusCode == 400) {
-                //     console.log("Some Other 400");
-                // } else if(res.statusCode == 401) {
-                //     console.log("Some Other 401!");
-                // }
-            // });
         } catch (e) {
             console.log(e);
         } finally {
@@ -402,35 +331,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
             navigation.navigate('MyCustomers');
         }
     };
-
-    // const userVehicleCheck = (dataCheck) => { 
-    //     fetch(`${API_URL}user_vehicle_check`,
-    //     {
-    //         method: 'POST',
-    //         headers: {
-    //             Accept: 'application/json',
-    //             'Content-Type': 'application/json',
-    //             'Authorization': 'Bearer ' + userToken
-    //         },
-    //         body: JSON.stringify(dataCheck)
-    //     })
-    //     .then(res => {
-    //         const statusCode = res.status;
-    //         let data;
-    //         return res.json().then(obj => {
-    //             data = obj;
-    //             return { statusCode, data };
-    //         });
-    //     })
-    //     .then((res) => {
-    //         if(res.statusCode == 400) {
-    //           { res.data.message.email && setEmailError(res.data.message.email); }
-    //           { res.data.message.phone_number && setPhoneNumberError(res.data.message.phone_number); }
-    //           { res.data.message.vehicle_registration_number && setVehicleRegistrationNumberError(res.data.message.vehicle_registration_number); }
-    //           return;
-    //         } 
-    //     });
-    // }
 
     const getStatesList = async () => {
         try {
@@ -444,13 +344,10 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
             });
             const json = await res.json();
             if (json !== undefined) {
-                // console.log(json.states);
                 setStateList(json.states);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            // setIsLoading(false);
         }
     };
 
@@ -472,8 +369,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
         } catch (e) {
             console.log(e);
             return alert(e);
-        } finally {
-            // setIsLoading(false);
         }
     };
 
@@ -489,14 +384,11 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
             });
             const json = await res.json();
             if (json !== undefined) {
-                // console.log(json.states);
                 setBrandList(json.brand_list);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            // setIsLoading(false);
-        }
+        } 
     };
 
     const getModelList = async () => {
@@ -517,8 +409,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
         } catch (e) {
             console.log(e);
             return alert(e);
-        } finally {
-            // setIsLoading(false);
         }
     };
 
@@ -534,13 +424,10 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
             });
             const json = await res.json();
             if (json !== undefined) {
-                // console.log(json.states);
                 setInsuranceProviderList(json.insurance_provider_list);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            // setIsLoading(false);
         }
     };
 
@@ -557,7 +444,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
             const json = await res.json();
             if (json !== undefined) {
                 setGarageList(json.garage_list);
-                // console.log(json);
             }
         } catch (e) {
             console.log(e);
@@ -565,26 +451,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
             setIsLoading(false);
             setIsGarageId(selectedGarageId);
         }
-
-        // try {
-        //     const res = await fetch(`${API_URL}fetch_garages`, {
-        //         method: 'GET',
-        //         headers: {
-        //             'Accept': 'application/json',
-        //             'Content-Type': 'application/json',
-        //             'Authorization': 'Bearer ' + userToken
-        //         },
-        //     });
-        //     const json = await res.json();
-        //     if (json !== undefined) {
-        //         // console.log(json.states);
-        //         setGarageList(json.data);
-        //     }
-        // } catch (e) {
-        //     console.log(e);
-        // } finally {
-        //     // setIsLoading(false);
-        // }
     };
 
     useEffect(() => {
@@ -592,8 +458,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
         getBrandList();
         getGarageList();
         getInsuranceProviderList();
-        // console.log('garageId:', garageId);
-        // console.log('selectedGarageId:',  selectedGarageId == 0 ? console.log('option1') : parseInt(garageId));
     }, []);
 
     useEffect(() => {
@@ -604,10 +468,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
         if(isBrand != undefined) getModelList();
     }, [isBrand]);
 
-    // useEffect(() => {
-    //     console.log('garageId:', isGarageId);
-    // }, [isGarageId]);
-
     return (
         <View style={styles.pageContainer}>
                 { (isLoading == true) ? <ActivityIndicator></ActivityIndicator> :
@@ -617,7 +477,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                         keyboardShouldPersistTaps={'handled'}
                         showsVerticalScrollIndicator={false}
                         scrollEventThrottle={8}
-                        // keyboardOffset={160}
                         behavior="padding"
                     >
                         <View style={{flex:1}}>
@@ -632,6 +491,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                             {nameError?.length > 0 &&
                                 <Text style={styles.errorTextStyle}>{nameError}</Text>
                             }
+
                             <TextInput
                                 label='Email Address'
                                 style={styles.input}
@@ -642,6 +502,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                             {emailError?.length > 0 &&
                                 <Text style={styles.errorTextStyle}>{emailError}</Text>
                             }
+
                             <TextInput
                                 label='Phone Number'
                                 style={styles.input}
@@ -653,6 +514,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                             {phoneNumberError?.length > 0 &&
                                 <Text style={styles.errorTextStyle}>{phoneNumberError}</Text>
                             }
+
                             <View style={styles.dropDownContainer}>
                                 <Picker
                                     selectedValue={isState}
@@ -675,6 +537,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                             {stateError?.length > 0 &&
                                 <Text style={styles.errorTextStyle}>{stateError}</Text>
                             }
+
                             <View style={styles.dropDownContainer}>
                                 <Picker
                                     selectedValue={isCity}
@@ -699,6 +562,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                             {cityError?.length > 0 &&
                                 <Text style={styles.errorTextStyle}>{cityError}</Text>
                             }
+
                             <TextInput
                                 label='Address'
                                 style={styles.input}
@@ -706,9 +570,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                 value={isAddress}
                                 onChangeText={(text) => setIsAddress(text)}
                             />
-                            {addressError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{addressError}</Text>
-                            }
 
                             {(userRole == "Super Admin" || garageId?.length > 1)  &&
                                 <View>
@@ -729,7 +590,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                                     />
                                                 );
                                             })}
-                                                {/* <Picker.Item label="Add New Insurance Company" value="new_insurance_company" /> */}
                                         </Picker>
                                     </View>
                                     {garageIdError?.length > 0 &&
@@ -762,6 +622,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                 {brandError?.length > 0 &&
                                     <Text style={styles.errorTextStyle}>{brandError}</Text>
                                 }
+                                
                                 <View style={styles.dropDownContainer}>
                                     <Picker
                                         selectedValue={isModel}
@@ -786,6 +647,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                 {modelError?.length > 0 &&
                                     <Text style={styles.errorTextStyle}>{modelError}</Text>
                                 }
+
                                 <TextInput
                                     label='Vehicle Registration Number'
                                     style={styles.input}
@@ -796,6 +658,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                 {vehicleRegistrationNumberError?.length > 0 &&
                                     <Text style={styles.errorTextStyle}>{vehicleRegistrationNumberError}</Text>
                                 }
+
                                 <TouchableOpacity style={{flex:1}} onPress={() => setDisplayPurchaseCalender(true)} activeOpacity={1}>
                                     <View style={styles.datePickerContainer} pointerEvents='none'>
                                         <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
@@ -814,9 +677,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                         /> }
                                     </View>
                                 </TouchableOpacity>
-                                {purchaseDateError?.length > 0 &&
-                                    <Text style={styles.errorTextStyle}>{purchaseDateError}</Text>
-                                }
+
                                 <TouchableOpacity style={{flex:1}} onPress={() => setDisplayManufacturingCalender(true)} activeOpacity={1}>
                                     <View style={styles.datePickerContainer} pointerEvents='none'>
                                         <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
@@ -835,9 +696,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                         /> }
                                     </View>
                                 </TouchableOpacity>
-                                {manufacturingDateError?.length > 0 &&
-                                    <Text style={styles.errorTextStyle}>{manufacturingDateError}</Text>
-                                }
+                               
                                 <TextInput
                                     label='Engine Number'
                                     style={styles.input}
@@ -845,9 +704,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                     value={isEngineNumber}
                                     onChangeText={(text) => setIsEngineNumber(text)}
                                 />
-                                {engineNumberError?.length > 0 &&
-                                    <Text style={styles.errorTextStyle}>{engineNumberError}</Text>
-                                }
+                              
                                 <TextInput
                                     label='Chasis Number'
                                     style={styles.input}
@@ -855,9 +712,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                     value={isChasisNumber}
                                     onChangeText={(text) => setIsChasisNumber(text)}
                                 />
-                                {chasisNumberError?.length > 0 &&
-                                    <Text style={styles.errorTextStyle}>{chasisNumberError}</Text>
-                                }
+                               
                                 <View style={styles.dropDownContainer}>
                                     <Picker
                                         selectedValue={isInsuranceProvider}
@@ -878,9 +733,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                          <Picker.Item label="Add New Insurance Company" value="new_insurance_company" />
                                     </Picker>
                                 </View>
-                                {insuranceProviderError?.length > 0 &&
-                                    <Text style={styles.errorTextStyle}>{insuranceProviderError}</Text>
-                                }
+                                
                                 <TextInput
                                     label='Insurer GSTIN'
                                     style={styles.input}
@@ -888,9 +741,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                     value={isInsurerGstin}
                                     onChangeText={(text) => setIsInsurerGstin(text)}
                                 />
-                                {insurerGstinError?.length > 0 &&
-                                    <Text style={styles.errorTextStyle}>{insurerGstinError}</Text>
-                                }
+                              
                                 <TextInput
                                     label='Insurer Address'
                                     style={styles.input}
@@ -898,9 +749,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                     value={isInsurerAddress}
                                     onChangeText={(text) => setIsInsurerAddress(text)}
                                 />
-                                {insurerAddressError?.length > 0 &&
-                                    <Text style={styles.errorTextStyle}>{insurerAddressError}</Text>
-                                }
+                              
                                 <TextInput
                                     label='Policy Number'
                                     style={styles.input}
@@ -908,9 +757,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                     value={isPolicyNumber}
                                     onChangeText={(text) => setIsPolicyNumber(text)}
                                 />
-                                {policyNumberError?.length > 0 &&
-                                    <Text style={styles.errorTextStyle}>{policyNumberError}</Text>
-                                }
+                             
                                 <TouchableOpacity style={{flex:1}} onPress={() => setDisplayInsuranceExpiryCalender(true)} activeOpacity={1}>
                                     <View style={styles.datePickerContainer} pointerEvents='none'>
                                         <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
@@ -929,9 +776,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                         /> }
                                     </View>
                                 </TouchableOpacity>
-                                {insuranceExpiryDateError?.length > 0 &&
-                                    <Text style={styles.errorTextStyle}>{insuranceExpiryDateError}</Text>
-                                }
                                 
                                 <View>
                                     <TouchableOpacity
@@ -952,6 +796,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                 {registrationCertificateImgError?.length > 0 &&
                                     <Text style={styles.errorTextStyle}>{registrationCertificateImgError}</Text>
                                 }
+
                                 <View>
                                     <TouchableOpacity
                                         activeOpacity={0.5}
@@ -992,9 +837,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                         value={newBrandName}
                         onChangeText={(text) => setNewBrandName(text)}
                     />
-                    {newBrandNameError?.length > 0 &&
-                        <Text style={styles.errorTextStyle}>{newBrandNameError}</Text>
-                    }
+           
                     <View style={{flexDirection: "row",}}>
                         <Button
                             style={{marginTop:15, flex: 1, marginRight: 10}}
@@ -1023,9 +866,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                         value={newModelName}
                         onChangeText={(text) => setNewModelName(text)}
                     />
-                    {newModelNameError?.length > 0 &&
-                        <Text style={styles.errorTextStyle}>{newModelNameError}</Text>
-                    }
+              
                     <View style={{flexDirection: "row",}}>
                         <Button
                             style={{marginTop:15, flex: 1, marginRight: 10}}
@@ -1054,9 +895,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                         value={newInsuranceCompanyName}
                         onChangeText={(text) => setNewInsuranceCompanyName(text)}
                     />
-                    {newInsuranceCompanyNameError?.length > 0 &&
-                        <Text style={styles.errorTextStyle}>{newInsuranceCompanyNameError}</Text>
-                    }
+                 
                     <View style={{flexDirection: "row",}}>
                         <Button
                             style={{marginTop:15, flex: 1, marginRight: 10}}
@@ -1090,7 +929,7 @@ const styles = StyleSheet.create({
         marginTop: 20,
         padding: 15,
         height: 55,
-        borderColor: colors.light_gray, // 7a42f4
+        borderColor: colors.light_gray,
         borderWidth: 1,
         borderRadius: 5,
         backgroundColor: colors.white,
@@ -1121,7 +960,7 @@ const styles = StyleSheet.create({
     },
     datePickerField: {
         flex: 1,
-        borderColor: colors.light_gray, // 7a42f4
+        borderColor: colors.light_gray,
         borderWidth: 1,
         borderRadius: 5,
         backgroundColor: '#fff',

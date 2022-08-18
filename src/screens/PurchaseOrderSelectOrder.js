@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, ScrollView, Image } from "react-native";
 import { connect } from 'react-redux';
-import { Button, Divider, Searchbar, Badge, Modal, Portal, List } from "react-native-paper";
+import { Button, Divider, Searchbar, Modal, Portal, List } from "react-native-paper";
 import { colors } from  "../constants";
 import  { API_URL, WEB_URL } from "../constants/config"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -17,7 +17,6 @@ const OrderList = ({navigation, userToken, selectedGarageId, navigator  }) => {
     const [filteredData, setFilteredData] = useState([]);
     const [orderDataModal, setOrderDataModal] = useState(false);
     const [orderData, setOrderData] = useState('');
-    // const [orderDataLoading, setOrderDataLoading] = useState(true);
     const refRBSheet = useRef();
 
     const getOrderList = async () => {
@@ -32,7 +31,6 @@ const OrderList = ({navigation, userToken, selectedGarageId, navigator  }) => {
             });
             const json = await res.json();
             if (json !== undefined) {
-                // console.log(json.vehicle_list);
                 setData(json.data);
                 setFilteredData(json.data);
             }
@@ -47,12 +45,10 @@ const OrderList = ({navigation, userToken, selectedGarageId, navigator  }) => {
         if (text) {
             const newData = data.filter(
                 function (listData) {
-                let arr2 = listData.user.name ? listData.user.name.toUpperCase() : ''.toUpperCase();
-                let arr1 = listData.id ?  listData.id : ''.toUpperCase()
-                let itemData = arr2.concat(arr1);
-                // let itemData = listData.vehicle_registration_number ? listData.vehicle_registration_number.toUpperCase() : ''.toUpperCase()
-                // console.log(itemData);
-                const textData = text.toUpperCase();
+                    let arr2 = listData.user.name ? listData.user.name.toUpperCase() : ''.toUpperCase();
+                    let arr1 = listData.id ?  listData.id : ''.toUpperCase()
+                    let itemData = arr2.concat(arr1);
+                    const textData = text.toUpperCase();
                 return itemData.indexOf(textData) > -1;
                 }
             );
@@ -64,19 +60,9 @@ const OrderList = ({navigation, userToken, selectedGarageId, navigator  }) => {
         }
     };
 
-    //  useEffect(() => {
-    //    console.log(customerId);
-    // }, [customerId]);
-
     useEffect(() => {
-        // setIsLoading(false);
         getOrderList();
-        // console.log(isGarageId);
     }, []);
-
-    // useEffect(() => {
-    //    console.log(isGarageId);
-    // }, [isGarageId]);
 
     return (
         <View style={styles.surfaceContainer}>
@@ -342,8 +328,6 @@ const OrderList = ({navigation, userToken, selectedGarageId, navigator  }) => {
     );
 }
 
-
-
 const styles = StyleSheet.create({
 
     surfaceContainer: {
@@ -388,13 +372,9 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         marginBottom: 10,
     },
-    // cardActions: {
-    //     alignItems: 'left'
-    // },
     smallActionButton: {
         fontSize: 16,
         color: colors.primary,
-        // flex: 1,
         flexDirection: 'row',
         justifyContent: 'center',
         borderRadius: 2,
@@ -407,7 +387,6 @@ const styles = StyleSheet.create({
     },
     btnActions: {
         width: '100%',
-        // flex: 1,
         flexDirection: 'row',
     },
     btnAction: {
@@ -417,7 +396,6 @@ const styles = StyleSheet.create({
         backgroundColor: colors.secondary, 
         alignItems: 'center', 
         justifyContent: 'center'
-        // marginTop:8,
     },
     btnActionText: {
         color: colors.white,
@@ -510,7 +488,6 @@ const styles = StyleSheet.create({
     smallButton: {
         fontSize: 16,
         color: colors.primary,
-        // flex: 1,
         flexDirection: 'row',
         justifyContent: 'center',
         borderRadius: 2,
@@ -519,26 +496,20 @@ const styles = StyleSheet.create({
         padding: 3,
         marginHorizontal: 4,
         marginTop: 3,
-        // alignSelf: 'space-between'
     },
     verticleImage: {
         height: 150,
-        // width: 150,
-        // width: '100%',
-        // height: '100%',
         resizeMode: 'contain',  
         flex: 1, 
     }, 
     lightBoxWrapper: {
         width: 150,
-        // height: 250,
     },
    
 })
 
 const mapStateToProps = state => ({
     userToken: state.user.userToken,
-    // garageId: state.garage.garage_id,
     selectedGarageId: state.garage.selected_garage_id,
 })
 

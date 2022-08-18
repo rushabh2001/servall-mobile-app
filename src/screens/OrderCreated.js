@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Linking, FlatList } from "react-native";
-import { Checkbox, Button, Divider } from "react-native-paper";
+import { Checkbox, Divider } from "react-native-paper";
 import { colors } from "../constants";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import IconX from "react-native-vector-icons/FontAwesome5";
@@ -36,8 +36,6 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
     const [isTotal, setIsTotal] = useState(route?.params?.data?.total);
     const [isApplicableDiscount, setIsApplicableDiscount] = useState(route?.params?.data?.applicable_discount);
 
-    // const [orderStatusArray, setOrderStatusArray] = useState([]);
-
     const [isCreatedAt, setIsCreatedAt] = useState(route?.params?.data?.created_at);
     const [createdAt, setCreatedAt] = useState(moment(route?.params?.data?.created_at, 'YYYY-MM-DD hh:mm:ss').fromNow());
 
@@ -49,47 +47,17 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
 
     const [servicesTotal, setServicesTotal] = useState(route?.params?.data?.labor_total);
     const [partsTotal, setPartsTotal] = useState(route?.params?.data?.parts_total);
-    // const [isTotal, setIsTotal] = useState(route?.params?.data?.total);
-    // const [isApplicableDiscount, setIsApplicableDiscount] = useState(route?.params?.data?.applicable_discount);
+
     const [isTotalServiceDiscount, setIsTotalServiceDiscount] = useState(0);
     const [isTotalPartDiscount, setIsTotalPartDiscount] = useState(0);
     
     const [fieldsServices, setFieldsServices] = useState([]);
     const [fieldsParts, setFieldsParts] = useState([]);
 
-    // const getCustomerDetails = async () => {
-    //     try {
-    //         const res = await fetch(`${API_URL}fetch_customer_details?id=${route?.params?.userId}`, {
-    //             method: 'GET',
-    //             headers: {
-    //                 'Accept': 'application/json',
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': 'Bearer ' + userToken
-    //             },
-    //         });
-    //         const json = await res.json();
-    //         // console.log(res);
-    //         if (json !== undefined) {
-    //             // console.log(json);
-    //             setIsCustomerData(json?.user_details);
-    //             if(json.user_details.profile_image != null) {
-    //                 setImageUri( WEB_URL + 'uploads/profile_image/' + json?.user_details.profile_image);
-    //             } else {
-    //                 setImageUri( WEB_URL + 'img/placeolder_servall.jpg');
-    //             }
-    //         }
-    //     } catch (e) {
-    //         console.log(e);
-    //     } finally {
-    //         setIsLoading(false);
-    //     }
-    // };
-
     const changeServicesStatus = async () => {
         let orderStatusArray = [];
         serviceData.forEach(item => {
             orderStatusArray.push({ order_service_id: item.id, is_done: item.is_done });
-            // setFieldsServices(serviceValues);
         });
         console.log('orderStatusArray',orderStatusArray);
         try {
@@ -106,22 +74,11 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
                 }),
             });
             const json = await res.json();
-            // console.log(res);
             if (json !== undefined) {
                 console.log(json);
-                // setIsCustomerData(json?.user_details);
-                // if(json.user_details.profile_image != null) {
-                //     setImageUri( WEB_URL + 'uploads/profile_image/' + json?.user_details.profile_image);
-                // } else {
-                //     setImageUri( WEB_URL + 'img/placeolder_servall.jpg');
-                // }
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            // let keyExist = serviceData.keys(obj).some(key => key === keyName);
-            // if(serviceData[index]['is_done']);
-            // setIsLoading(false);
         }
     }
 
@@ -129,9 +86,7 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
         let orderStatusArray = [];
         partData.forEach(item => {
             orderStatusArray.push({ order_part_id: item.id, is_done: item.is_done });
-            // setFieldsParts(partValues);
         });
-        console.log('orderStatusArray',orderStatusArray);
         try {
             const res = await fetch(`${API_URL}part_status/update`, {
                 method: 'POST',
@@ -146,21 +101,11 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
                 }),
             });
             const json = await res.json();
-            // console.log(res);
             if (json !== undefined) {
-                console.log(json);
                 {(partData.length != 0 && serviceData.length != 0) && navigation.navigate('OrderWorkInProgress')}
-                // setIsCustomerData(json?.user_details);
-                // if(json.user_details.profile_image != null) {
-                //     setImageUri( WEB_URL + 'uploads/profile_image/' + json?.user_details.profile_image);
-                // } else {
-                //     setImageUri( WEB_URL + 'img/placeolder_servall.jpg');
-                // }
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            // setIsLoading(false);
         }
     }
 

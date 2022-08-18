@@ -17,21 +17,6 @@ const MyCustomer = ({navigation, userToken, selectedGarageId, selectedGarage }) 
     const [searchQuery, setSearchQuery] = useState(); 
     const [filteredData, setFilteredData] = useState([]);
     const isFocused = useIsFocused();
-    // const [isGarageIds, setGarageIds] = useState(garageId);
-    // const [isUser, setUser] = useState(userId);
-
-    useEffect(() => {
-        // setSearchQuery();
-        // setFilteredData([]);
-        // setData([]);
-        getCustomerList();
-    }, []);
-
-    useEffect(() => {
-        setIsLoading(true);
-        getCustomerList();
-    }, [isFocused]);
-
 
     const getCustomerList = async () => {
         try {
@@ -60,12 +45,11 @@ const MyCustomer = ({navigation, userToken, selectedGarageId, selectedGarage }) 
         if (text) {
             const newData = data.filter(
                 function (listData) {
-                let arr2 = listData.phone_number ? listData.phone_number : ''.toUpperCase() 
-                let arr1 = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
-                let itemData = arr1.concat(arr2);
-                // console.log(itemData);
-                const textData = text.toUpperCase();
-                return itemData.indexOf(textData) > -1;
+                    let arr2 = listData.phone_number ? listData.phone_number : ''.toUpperCase() 
+                    let arr1 = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
+                    let itemData = arr1.concat(arr2);
+                    const textData = text.toUpperCase();
+                    return itemData.indexOf(textData) > -1;
                 }
             );
             setFilteredData(newData);
@@ -76,16 +60,14 @@ const MyCustomer = ({navigation, userToken, selectedGarageId, selectedGarage }) 
         }
     };
 
-    //  useEffect(() => {
-    //    console.log(userToken);
-    // }, [userToken]);
+    useEffect(() => {
+        getCustomerList();
+    }, []);
 
     useEffect(() => {
-    //    console.log(isGarageId);
-       console.log(selectedGarage);
-       console.log(isGarageId);
-     
-    }, [isGarageId]);
+        setIsLoading(true);
+        getCustomerList();
+    }, [isFocused]);
 
     return (
         <View style={styles.surfaceContainer}>

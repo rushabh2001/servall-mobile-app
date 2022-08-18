@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View , Text, StyleSheet, Image, TextInput, Keyboard, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View , Text, StyleSheet, TextInput, Keyboard, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { connect } from 'react-redux';
 import { colors } from '../constants';
 import { API_URL } from '../constants/config';
@@ -7,10 +7,9 @@ import { Button } from 'react-native-paper';
 import { IconX, ICON_TYPE } from '../icons';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import InputScrollView from 'react-native-input-scroll-view';
-// import DropDownPicker from 'react-native-dropdown-picker';
 import DocumentPicker from 'react-native-document-picker';
 import { Picker } from '@react-native-picker/picker';
-import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from 'react-native-simple-radio-button';
+import RadioForm from 'react-native-simple-radio-button';
 
 
 const AddGarage = ({navigation, userToken}) => {
@@ -21,6 +20,8 @@ const AddGarage = ({navigation, userToken}) => {
     const [isCity, setIsCity] = useState();
     const [isState, setIsState] = useState();
     const [isLocation, setIsLocation] = useState('');
+
+    // Error States
     const [garageNameError, setGarageNameError] = useState('');
     const [garageContactNumberError, setGarageContactNumberError] = useState('');
     const [cityError, setCityError] = useState('');
@@ -36,10 +37,11 @@ const AddGarage = ({navigation, userToken}) => {
     const [isAddress, setIsAddress] = useState('');
     const [isProfileImage, setIsProfileImage] = useState(null);
     const [imageFile, setImageFile] = useState(null);
+    
+    // Error States
     const [nameError, setNameError] = useState('');
     const [emailError, setEmailError] = useState('');
     const [phoneNumberError, setPhoneNumberError] = useState('');
-    const [addressError, setAddressError] = useState('');
 
     const [CityList, setCityList] =  useState([]);
     const [StateList, setStateList] =  useState([]);
@@ -55,11 +57,6 @@ const AddGarage = ({navigation, userToken}) => {
 
     const scroll1Ref = useRef();
 
-    // const res = await DocumentPicker.pick({
-    //     type: [DocumentPicker.types.allFiles],
-    // });
-
-
     const submit = () => {
         setIsLoading(true);
         Keyboard.dismiss();
@@ -71,18 +68,14 @@ const AddGarage = ({navigation, userToken}) => {
         if(isName.length == 0){ setNameError("Owner Name is required"); }    
         if(isPhoneNumber.length == 0){ setPhoneNumberError("Phone Number is required"); }
         else if(isPhoneNumber.length < 9){ setPhoneNumberError("Phone Number should be minimum 10 characters"); }       
-        if(isAddress.length == 0){ setAddressError("Address is required"); }    
   
         if(isEmail.length == 0){ setEmailError("Email is required"); }    
         else if(isEmail.length < 6){ setEmailError("Email should be minimum 6 characters"); }      
         else if(isEmail?.indexOf(' ') >= 0){ setEmailError('Email cannot contain spaces'); }    
         else if(isEmail?.indexOf('@') < 0){ setEmailError('Invalid Email Format'); }
         else{
-            // let formOTP = ({'email': isEmail, 'phone_number': isPhoneNumber});
-            // userCheck(formOTP);
             setEmailError("");
             setPhoneNumberError("");
-            // console.log('All Fields are Valid');
         }
     
         const data = new FormData();
@@ -103,18 +96,11 @@ const AddGarage = ({navigation, userToken}) => {
             }
         } else if(ownerOption == "existing_user") {
             data.append('user_owner_id', ownerId);
-            // console.log(ownerId);
         } else {
             console.log('owner options is not working');
         }
-        // if(imageFile != null) { 
-        //     const fileToUpload = imageFile;
-        //     formData.append('filename', 'Image Upload');
-        //     formData.append('profile_image', fileToUpload);
-        // }
-        // console.log(isProfileImage);
+
         addGarage(data);
-        // console.log(data);
     }
 
     const addGarage = async (data) => {
@@ -124,11 +110,9 @@ const AddGarage = ({navigation, userToken}) => {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'multipart/form-data; ',
-                    // 'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + userToken
                 },
                 body: data
-                // body: JSON.stringify(formData)
             }).then(res => {
                 const statusCode = res.status;
                 let data;
@@ -146,13 +130,6 @@ const AddGarage = ({navigation, userToken}) => {
                     navigation.navigate('AllStack', { screen: 'ChooseGarage'});
                 }
             });
-            // const json = await res.json();
-            // if (json !== undefined) {
-            //     console.log(json);
-            //     // console.log("Garage Added SuccessFully");
-            //     // setStateList(json.states);
-            //     navigation.navigate('AllStack', { screen: 'ChooseGarage'});
-            // }
         } catch (e) {
             console.log(e);
         } finally {
@@ -200,13 +177,10 @@ const AddGarage = ({navigation, userToken}) => {
             });
             const json = await res.json();
             if (json !== undefined) {
-                // console.log(json.states);
                 setStateList(json.states);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            // setIsLoading(false);
         }
     };
 
@@ -222,15 +196,12 @@ const AddGarage = ({navigation, userToken}) => {
             });
             const json = await res.json();
             if (json !== undefined) {
-                // console.log(json);
                 setCityList(json.cities);
                 setCityFieldToggle(true);
             }
         } catch (e) {
             console.log(e);
             return alert(e);
-        } finally {
-            // setIsLoading(false);
         }
     };
 
@@ -246,16 +217,12 @@ const AddGarage = ({navigation, userToken}) => {
             });
             const json = await res.json();
             if (json !== undefined) {
-                // console.log(json.admin_user_list);
                 setAdminList(json.admin_user_list);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            // setIsLoading(false);
         }
     };
-
  
     const selectFile = async () => {
         // Opening Document Picker to select one file
@@ -271,12 +238,10 @@ const AddGarage = ({navigation, userToken}) => {
             alert('Canceled');
         } else {
             // For Unknown Error
-            alert('Unknown Error: ' + JSON.stringify(err));
             throw err;
         }
         }
     };
-
 
     useEffect(() => {
         if(isState != undefined) getCityList();
@@ -286,238 +251,210 @@ const AddGarage = ({navigation, userToken}) => {
         getStatesList();
         getAdminList();
     }, []);
-    
 
     return (
     <View style={styles.pageContainer}>
-        {/* <View> */}
-            {/* <KeyboardAvoidingView
-                style={styles.container}
+        { (isLoading == true) ? <ActivityIndicator></ActivityIndicator> :
+            <InputScrollView
+                ref={scroll1Ref}
+                contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+                keyboardShouldPersistTaps={'handled'}
+                showsVerticalScrollIndicator={false}
+                scrollEventThrottle={8}
                 behavior="padding"
-            > */}
-            { (isLoading == true) ? <ActivityIndicator></ActivityIndicator> :
-                <InputScrollView
-                    // style={{ ...styles.container }}
-                    ref={scroll1Ref}
-                    contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
-                    keyboardShouldPersistTaps={'handled'}
-                    showsVerticalScrollIndicator={false}
-                    scrollEventThrottle={8}
-                    // keyboardOffset={160}
-                    behavior="padding"
-                >
-                    <View style={{flex:1}}>
-                        <Text style={styles.headingStyle}>Garage Details:</Text>
-                        <TextInput
-                            label='Garage Name'
-                            style={styles.input}
-                            // innerRef={passwordRef}
-                            placeholder="Garage Name"
-                            textContentType="telephoneNumber"
-                            value={isGarageName}
-                            onChangeText={(text) => setIsGarageName(text)}
-                            rightIcon={<IconX color={colors.dark_black} size={24} name="closecircle" origin={ICON_TYPE.ANT_ICON} />}
-                            // left={<IconX color={colors.dark_black} size={24} name="closecircle" origin={ICON_TYPE.ANT_ICON} />}
-                        />
-                        {garageNameError?.length > 0 &&
-                            <Text style={{color: colors.danger}}>{garageNameError}</Text>
-                        }
-                        <TextInput
-                            label='Garage Contact Number'
-                            style={styles.input}
-                            placeholder="Garage Contact Number"
-                            value={isGarageContactNumber}
-                            onChangeText={(text) => setIsGarageContactNumber(text)}
-                            keyboardType={"phone-pad"}
-                        />
-                        {garageContactNumberError?.length > 0 &&
-                            <Text style={{color: colors.danger}}>{garageContactNumberError}</Text>
-                        }
-                        {/* <Picker
+            >
+                <View style={{flex:1}}>
+                    <Text style={styles.headingStyle}>Garage Details:</Text>
+                    <TextInput
+                        label='Garage Name'
+                        style={styles.input}
+                        placeholder="Garage Name"
+                        textContentType="telephoneNumber"
+                        value={isGarageName}
+                        onChangeText={(text) => setIsGarageName(text)}
+                        rightIcon={<IconX color={colors.dark_black} size={24} name="closecircle" origin={ICON_TYPE.ANT_ICON} />}
+                    />
+                    {garageNameError?.length > 0 &&
+                        <Text style={{color: colors.danger}}>{garageNameError}</Text>
+                    }
+
+                    <TextInput
+                        label='Garage Contact Number'
+                        style={styles.input}
+                        placeholder="Garage Contact Number"
+                        value={isGarageContactNumber}
+                        onChangeText={(text) => setIsGarageContactNumber(text)}
+                        keyboardType={"phone-pad"}
+                    />
+                    {garageContactNumberError?.length > 0 &&
+                        <Text style={{color: colors.danger}}>{garageContactNumberError}</Text>
+                    }
+
+                    <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 20}}>
+                        <Picker
                             selectedValue={isState}
-                            onValueChange={(itemValue, itemIndex) =>
-                                setIsState(itemValue)
-                            }>
-                            <Picker.Item label="Java" value="java" />
-                            <Picker.Item label="JavaScript" value="js" />
-                        </Picker> */}
-                        <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 20}}>
+                            onValueChange={(v) => setIsState(v)}
+                            style={{padding: 0}}
+                            itemStyle={{padding: 0}}
+                        >
+                            <Picker.Item label="Select State" value="0" />
+                            {StateList.map((StateList, i) => {
+                                return (
+                                    <Picker.Item
+                                        key={i}
+                                        label={StateList.name}
+                                        value={StateList.id}
+                                    />
+                                );
+                            })}
+                        </Picker>
+                    </View>
+                    {stateError?.length > 0 &&
+                        <Text style={{color: colors.danger}}>{stateError}</Text>
+                    }
+
+                    <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 20}}>
+                        <Picker
+                            selectedValue={isCity}
+                            onValueChange={(v) => setIsCity(v) }
+                            style={{padding: 0}}
+                            itemStyle={{padding: 0}}
+                            enabled={cityFieldToggle}
+                        >
+                            <Picker.Item label="Select City" value="0" />
+                            {CityList.map((CityList, i) => {
+                                return (
+                                    <Picker.Item
+                                        key={i}
+                                        label={CityList.name}
+                                        value={CityList.id}
+                                    />
+                                );
+                            })} 
+                        </Picker>
+                    </View>
+                    {cityError?.length > 0 &&
+                        <Text style={{color: colors.danger}}>{cityError}</Text>
+                    }
+
+                    <TextInput
+                        label='Location'
+                        style={styles.input}
+                        placeholder="Location"
+                        value={isLocation}
+                        onChangeText={(text) => setIsLocation(text)}
+                    />
+                    {locationError?.length > 0 &&
+                        <Text style={{color: colors.danger}}>{locationError}</Text>
+                    }
+                    
+                    <View style={{marginTop: 15}}>
+                        <RadioForm
+                            radio_props={radio_props}
+                            initial={ownerOption}
+                            onPress={(value) => setOwnerOption(value)}
+                            animation={true}
+                            formHorizontal={true}
+                            labelHorizontal={true}
+                            buttonWrapStyle={{marginLeft: 10}}
+                            labelStyle={{marginRight: 40}}
+                        />
+                    </View>
+
+                    { ownerOption == "existing_user" ? 
+                        <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 10}}>
                             <Picker
-                                selectedValue={isState}
-                                onValueChange={(v) => setIsState(v)}
+                                selectedValue={ownerId}
+                                onValueChange={(value) => setOwnerId(value)}
                                 style={{padding: 0}}
-                                // itemStyle={{height: 44, paddingTop:0, marginTop: 0}}
                                 itemStyle={{padding: 0}}
                             >
-                                <Picker.Item label="Select State" value="0" />
-                                {StateList.map((StateList, i) => {
+                                <Picker.Item label="Select Admin User" value="0" />
+                                {adminList.map((List, i) => {
                                     return (
                                         <Picker.Item
                                             key={i}
-                                            label={StateList.name}
-                                            value={StateList.id}
-                                        />
-                                    );
-                                })}
-                                
-                            </Picker>
-                        </View>
-                        {stateError?.length > 0 &&
-                            <Text style={{color: colors.danger}}>{stateError}</Text>
-                        }
-                        <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 20}}>
-                            <Picker
-                                selectedValue={isCity}
-                                onValueChange={(v) => setIsCity(v) }
-                                style={{padding: 0}}
-                                // itemStyle={{height: 44, paddingTop:0, marginTop: 0}}
-                                itemStyle={{padding: 0}}
-                                enabled={cityFieldToggle}
-                            >
-                                <Picker.Item label="Select City" value="0" />
-                                {CityList.map((CityList, i) => {
-                                    return (
-                                        <Picker.Item
-                                            key={i}
-                                            label={CityList.name}
-                                            value={CityList.id}
+                                            label={List.name}
+                                            value={List.id}
                                         />
                                     );
                                 })} 
                             </Picker>
                         </View>
-                        {cityError?.length > 0 &&
-                            <Text style={{color: colors.danger}}>{cityError}</Text>
-                        }
-                        <TextInput
-                            label='Location'
-                            style={styles.input}
-                            placeholder="Location"
-                            value={isLocation}
-                            onChangeText={(text) => setIsLocation(text)}
-                        />
-                        {locationError?.length > 0 &&
-                            <Text style={{color: colors.danger}}>{locationError}</Text>
-                        }
-                     
-                        <View style={{marginTop: 15}}>
-                            <RadioForm
-                                radio_props={radio_props}
-                                initial={ownerOption}
-                                onPress={(value) => setOwnerOption(value)}
-                                animation={true}
-                                formHorizontal={true}
-                                labelHorizontal={true}
-                                buttonWrapStyle={{marginLeft: 10}}
-                                labelStyle={{marginRight: 40}}
+                    : 
+                        <>
+                            <Text style={[styles.headingStyle, { marginTop:20 }]}>Owner Details:</Text>
+                            <TextInput
+                                label='Owner Name'
+                                style={styles.input}
+                                placeholder="Owner Name"
+                                value={isName}
+                                onChangeText={(text) => setIsName(text)}
                             />
-                        </View>
-
-                            { ownerOption == "existing_user" ? 
-                                    <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 10}}>
-                                        <Picker
-                                            selectedValue={ownerId}
-                                            onValueChange={(value) => setOwnerId(value)}
-                                            style={{padding: 0}}
-                                            // itemStyle={{height: 44, paddingTop:0, marginTop: 0}}
-                                            itemStyle={{padding: 0}}
-                                        >
-                                            <Picker.Item label="Select Admin User" value="0" />
-                                            {adminList.map((List, i) => {
-                                                return (
-                                                    <Picker.Item
-                                                        key={i}
-                                                        label={List.name}
-                                                        value={List.id}
-                                                    />
-                                                );
-                                            })} 
-                                        </Picker>
-                                    </View>
-                                : 
-                                <>
-                                    <Text style={[styles.headingStyle, { marginTop:20 }]}>Owner Details:</Text>
-                                    <TextInput
-                                        label='Owner Name'
-                                        style={styles.input}
-                                        placeholder="Owner Name"
-                                        value={isName}
-                                        onChangeText={(text) => setIsName(text)}
-                                    />
-                                    {nameError?.length > 0 &&
-                                        <Text style={{color: colors.danger}}>{nameError}</Text>
-                                    }
-                                    <TextInput
-                                        label='Email Address'
-                                        style={styles.input}
-                                        placeholder="Email Address"
-                                        value={isEmail}
-                                        onChangeText={(text) => setIsEmail(text)}
-                                    />
-                                    {emailError?.length > 0 &&
-                                        <Text style={{color: colors.danger}}>{emailError}</Text>
-                                    }
-                                    <TextInput
-                                        label='Phone Number'
-                                        style={styles.input}
-                                        placeholder="Phone Number"
-                                        value={isPhoneNumber}
-                                        onChangeText={(text) => setIsPhoneNumber(text)}
-                                        keyboardType={"phone-pad"}
-                                    />
-                                    {phoneNumberError?.length > 0 &&
-                                        <Text style={{color: colors.danger}}>{phoneNumberError}</Text>
-                                    }
-                                    <TextInput
-                                        label='Address'
-                                        style={styles.input}
-                                        placeholder="Address"
-                                        value={isAddress}
-                                        onChangeText={(text) => setIsAddress(text)}
-                                    />
-                                    {addressError?.length > 0 &&
-                                        <Text style={{color: colors.danger}}>{addressError}</Text>
-                                    }
-                                    <View>
-                                        <TouchableOpacity
-                                            activeOpacity={0.5}
-                                            style={styles.uploadButtonStyle}
-                                            onPress={selectFile
-                                                // (imageFile) => {
-                                                //     DocumentPicker.pick({
-                                                //         type: [DocumentPicker.types.images],
-                                                //     });
-                                                //     setIsProfileImage(imageFile)
-                                                //     // console.log(isProfileImage);
-                                                // }
-                                            }>
-                                            <Icon name="upload" size={18} color={colors.primary} style={styles.downloadIcon} />
-                                            <Text style={{marginRight: 10, fontSize: 18, color: "#000"}}>
-                                            Upload Profile Image
-                                            </Text>
-                                            {imageFile != null ? (
-                                                <Text style={styles.textStyle}>
-                                                File Name: {imageFile.name ? imageFile.name : ''}
-                                                </Text>
-                                            ) : null}
-                                            {/* { (isProfileImage?.length > 0) &&
-                                                {isProfileImage}} */}
-                                        </TouchableOpacity>
-                                    </View>
-                                </>
+                            {nameError?.length > 0 &&
+                                <Text style={{color: colors.danger}}>{nameError}</Text>
                             }
-                        <Button
-                            style={{marginTop:15}}
-                            mode={'contained'}
-                            onPress={submit}
-                        >
-                            Submit
-                        </Button>
-                    </View>
-                </InputScrollView>
-            }
-            {/* </KeyboardAvoidingView> */}
-        {/* </> */}
+
+                            <TextInput
+                                label='Email Address'
+                                style={styles.input}
+                                placeholder="Email Address"
+                                value={isEmail}
+                                onChangeText={(text) => setIsEmail(text)}
+                            />
+                            {emailError?.length > 0 &&
+                                <Text style={{color: colors.danger}}>{emailError}</Text>
+                            }
+
+                            <TextInput
+                                label='Phone Number'
+                                style={styles.input}
+                                placeholder="Phone Number"
+                                value={isPhoneNumber}
+                                onChangeText={(text) => setIsPhoneNumber(text)}
+                                keyboardType={"phone-pad"}
+                            />
+                            {phoneNumberError?.length > 0 &&
+                                <Text style={{color: colors.danger}}>{phoneNumberError}</Text>
+                            }
+
+                            <TextInput
+                                label='Address'
+                                style={styles.input}
+                                placeholder="Address"
+                                value={isAddress}
+                                onChangeText={(text) => setIsAddress(text)}
+                            />
+
+                            <View>
+                                <TouchableOpacity
+                                    activeOpacity={0.5}
+                                    style={styles.uploadButtonStyle}
+                                    onPress={selectFile}
+                                >
+                                    <Icon name="upload" size={18} color={colors.primary} style={styles.downloadIcon} />
+                                    <Text style={{marginRight: 10, fontSize: 18, color: "#000"}}>
+                                        Upload Profile Image
+                                    </Text>
+                                    {imageFile != null ? (
+                                        <Text style={styles.textStyle}>
+                                        File Name: {imageFile.name ? imageFile.name : ''}
+                                        </Text>
+                                    ) : null}
+                                </TouchableOpacity>
+                            </View>
+                        </>
+                    }
+                    <Button
+                        style={{marginTop:15}}
+                        mode={'contained'}
+                        onPress={submit}
+                    >
+                        Submit
+                    </Button>
+                </View>
+            </InputScrollView>
+        }
     </View>
     )
 }
@@ -533,7 +470,7 @@ const styles = StyleSheet.create({
         marginTop: 20,
         padding: 15,
         height: 55,
-        borderColor: colors.light_gray, // 7a42f4
+        borderColor: colors.light_gray, 
         borderWidth: 1,
         borderRadius: 5,
         backgroundColor: colors.white,
@@ -560,5 +497,4 @@ const mapStateToProps = state => ({
     userToken: state.user.userToken,
 })
 
-// export default AddGarage;
 export default connect(mapStateToProps)(AddGarage);

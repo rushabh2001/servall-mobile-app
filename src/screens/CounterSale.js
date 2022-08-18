@@ -4,7 +4,6 @@ import { Searchbar, Divider } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { colors } from '../constants';
 import { API_URL } from '../constants/config';
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const CounterSale = ({navigation, userToken, selectedGarageId }) => {
     const [isLoading, setIsLoading] = useState(true);
@@ -12,10 +11,6 @@ const CounterSale = ({navigation, userToken, selectedGarageId }) => {
     const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState(); 
     const [filteredData, setFilteredData] = useState([]);
-
-    // const [viewVehicleDetailsModal, setViewVehicleDetailsModal] = useState(false);
-    // const [VehicleData, setVehicleData] = useState('');
-    // const [vehicleDataLoading, setVehicleDataLoading] = useState(true);
 
     const getUserList = async () => {
         try {
@@ -29,7 +24,6 @@ const CounterSale = ({navigation, userToken, selectedGarageId }) => {
             });
             const json = await res.json();
             if (json !== undefined) {
-                // console.log(json.user_list);
                 setData(json.user_list);
                 setFilteredData(json.user_list);
             }
@@ -44,11 +38,9 @@ const CounterSale = ({navigation, userToken, selectedGarageId }) => {
         if (text) {
             const newData = data.filter(
                 function (listData) {
-                    let arr3 = listData.email ? listData.email : ''.toUpperCase() 
                     let arr2 = listData.phone_number ? listData.phone_number : ''.toUpperCase() 
                     let arr1 = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
                     let itemData = arr1.concat(arr2);
-                    // console.log(itemData);
                     const textData = text.toUpperCase();
                     return itemData.indexOf(textData) > -1;
                 }
@@ -62,8 +54,6 @@ const CounterSale = ({navigation, userToken, selectedGarageId }) => {
     };
 
     const sendUserData = (index) => {
-        console.log(index);
-        console.log('sentData', filteredData[index]);
         const userData = {
             'user_id': filteredData[index]?.id,
             'garage_id': isGarageId,
@@ -77,18 +67,9 @@ const CounterSale = ({navigation, userToken, selectedGarageId }) => {
         navigation.navigate('CounterSaleStep2', { 'data': userData } );
     }
 
-    //  useEffect(() => {
-    //    console.log(customerId);
-    // }, [customerId]);
-
     useEffect(() => {
         getUserList();
-        // console.log(isGarageId);
     }, []);
-
-    // useEffect(() => {
-    //    console.log(isGarageId);
-    // }, [isGarageId]);
 
     return (
             <View style={styles.surfaceContainer}>
@@ -104,37 +85,26 @@ const CounterSale = ({navigation, userToken, selectedGarageId }) => {
                                 <FlatList
                                     ItemSeparatorComponent= {() => (<Divider />)}
                                     data={filteredData}
-                                    // onEndReachedThreshold={1}
                                     keyExtractor={item => item.id}
                                     renderItem={({item, index}) => (
                                         <View style={styles.cards}>
-                                            {/* <View style={styles.cardOrderDetails}>
-                                                <Text style={styles.orderID}>Last Order ID: 11469</Text>
-                                                <Text style={styles.orderStatus}>Completed</Text>
-                                            </View> */}
                                             <View>
                                                 <Text style={styles.cardCustomerName}>Customer Name: {item ? item?.name : null}</Text>
                                                 <Divider />
                                                 <Text style={styles.cardCustomerName}>Phone Number: {item ? item?.phone_number : null}</Text>
                                                 <Divider />
                                                 <Text style={styles.cardCustomerName}>Email Address: {item.email}</Text>
-                                                {/* <Divider />
-                                                <Text style={styles.cardCustomerName}>Model: {item.User_model.model_name}</Text>
-                                                <Divider /> 
-                                                <Text style={styles.cardCustomerName}>Registration Number: {item.User_registration_number}</Text> */}
                                             </View>
                                             <View style={styles.cardActions}>
                                                 <TouchableOpacity onPress={()=> sendUserData(index)} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>Select User</Text></TouchableOpacity>
                                             </View>
                                         </View>
                                     )}
-                                    // // keyExtractor={(item, index) => index.toString()}
                                 />     
                             </View>
                         :
                             <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 50,  backgroundColor:colors.white,}}>
                                 <Text style={{ color: colors.black, textAlign: 'center'}}>No Users are associated with this Garage!</Text>
-                                {/* <TouchableOpacity style={styles.buttonStyle} onPress={ () => navigation.navigate('CounterSaleStep2')}><Text><Icon name={'plus'} size={16} color={colors.secondary} /> Add New User</Text></TouchableOpacity> */}
                             </View>
                         )
                     }
@@ -145,7 +115,6 @@ const CounterSale = ({navigation, userToken, selectedGarageId }) => {
 }
 
 const styles = StyleSheet.create({
-    // Vehicle Search Css
     surfaceContainer: {
         flex:1,
         padding:15,
@@ -271,7 +240,6 @@ const styles = StyleSheet.create({
     smallButton: {
         fontSize: 16,
         color: colors.primary,
-        // flex: 1,
         flexDirection: 'row',
         justifyContent: 'center',
         borderRadius: 2,
@@ -280,28 +248,20 @@ const styles = StyleSheet.create({
         padding: 3,
         marginHorizontal: 4,
         marginTop: 3,
-        // alignSelf: 'space-between'
     },
     verticleImage: {
         height: 150,
-        // width: 150,
-        // width: '100%',
-        // height: '100%',
         resizeMode: 'contain',  
         flex: 1, 
     }, 
     lightBoxWrapper: {
         width: 150,
-        // height: 250,
     },
 })
 
 const mapStateToProps = state => ({
     userToken: state.user.userToken,
-    userRole: state.role.user_role,
-    userId: state.user?.user?.id,
     selectedGarageId: state.garage.selected_garage_id,
-    garageId: state.garage.garage_id,
 })
 
 export default connect(mapStateToProps)(CounterSale);

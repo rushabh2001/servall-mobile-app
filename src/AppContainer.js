@@ -1,4 +1,3 @@
-// Libraries to build app
 import React  from 'react';
 import { connect } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
@@ -6,16 +5,11 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { ROOT_OUTSIDE, ROOT_LOADING, ROOT_INSIDE, INTRO } from './actions/app';
 import OutsideStack from './navigation/OutsideStack';
 import { InsideStack, InsideCustomerStack } from './navigation/InsideStack';
-// import {} from './navigation/InsideStack';
 import Splash from './screens/Splash';
 
-// What to display in app
 const Stack = createStackNavigator();
 
 const AppContainer = ({ root, userRole }) => {
-    console.log("app container", userRole);
-    console.log("app container", root);
-
     return (
         <NavigationContainer>
             <Stack.Navigator screenOptions={{ headerShown: false }}>

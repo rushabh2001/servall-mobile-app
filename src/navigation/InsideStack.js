@@ -12,10 +12,7 @@ import { connect, useSelector, useDispatch } from "react-redux";
 import { 
   signOut as signOutAction,
 } from '../actions/login';
-// import MyTabBar from './components/MyTabBar';
 import {
-  // DashboardStack,
-  // AllStack,
   EditStock,
   AddStock,
   AddPayment,
@@ -48,7 +45,6 @@ import {
   OrderSearch,
 } from '../screens';
 
-// const MainStack = createNativeStackNavigator();
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const MoreStack = createNativeStackNavigator();
@@ -57,11 +53,10 @@ const TopTab = createMaterialTopTabNavigator();
 const ServicesStack = ({ navigation }) => {
   const userRole = useSelector((state) => state.role.user_role);
   const garageId = useSelector((state) => state.garage.garage_id);
-  // console.log('ServicesStack:', userRole, garageId);
+
   return (
     <Stack.Navigator
       initialRouteName={'Services'}
-      // screenOptions={{ headerShown: false }}
       >
       <Stack.Screen
         name={'Services'}
@@ -71,7 +66,6 @@ const ServicesStack = ({ navigation }) => {
             <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
               {(userRole == "Super Admin" || garageId?.length > 1) ? 
                 <Button
-                  // onPress={() => navigation.navigate('ChooseGarage')}
                   onPress={() => navigation.navigate('ServicesStack', { screen: 'ChooseGarage' })}
                   style={[styles.buttonStyle, { marginRight: 15 }]}
                   color={colors.secondary}
@@ -94,7 +88,6 @@ const ServicesStack = ({ navigation }) => {
             <View style={{ flexDirection: "row", justifyContent: "flex-end", marginRight: 15 }}>
               {userRole == "Super Admin" &&
                 <Button
-                  // onPress={() => navigation.navigate('AddGarage')}
                   onPress={() => navigation.navigate('ServicesStack', { screen: 'AddGarage' })}
                   style={styles.buttonStyle}
                   color={colors.secondary}
@@ -121,7 +114,6 @@ const ServicesStack = ({ navigation }) => {
           headerRight: () => (
             <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
                 <Button
-                  // onPress={() => navigation.navigate('ChooseGarage')}
                   onPress={() => navigation.navigate('AddRepairOrderStep2')}
                   style={[styles.buttonStyle, { marginRight: 15 }]}
                   color={colors.secondary}
@@ -197,16 +189,6 @@ const ServicesStack = ({ navigation }) => {
         }}
       />
       
-      
-      {/* <Stack.Screen
-        name={'survey-intro'}
-        component={SurveyIntroScreen}
-      />
-      <Stack.Screen
-        name={'survey-submitted'}
-        component={SurveySubmittedScreen}
-        options={{ gestureEnabled: false }}
-      /> */}
     </Stack.Navigator>
   )
 }
@@ -214,11 +196,10 @@ const ServicesStack = ({ navigation }) => {
 const PartsStack = ({ navigation }) => {
   const userRole = useSelector((state) => state.role.user_role);
   const garageId = useSelector((state) => state.garage.garage_id);
-  // console.log('ServicesStack:', userRole, garageId);
+
   return (
     <Stack.Navigator
       initialRouteName={'Parts'}
-      // screenOptions={{ headerShown: false }}
       >
       <Stack.Screen
         name={'Parts'}
@@ -228,7 +209,6 @@ const PartsStack = ({ navigation }) => {
             <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
               {(userRole == "Super Admin" || garageId?.length > 1) ? 
                 <Button
-                  // onPress={() => navigation.navigate('ChooseGarage')}
                   onPress={() => navigation.navigate('ServicesStack', { screen: 'ChooseGarage' })}
                   style={[styles.buttonStyle, { marginRight: 15 }]}
                   color={colors.secondary}
@@ -292,11 +272,10 @@ const PartsStack = ({ navigation }) => {
 const AccountsStack = ({ navigation }) => {
   const userRole = useSelector((state) => state.role.user_role);
   const garageId = useSelector((state) => state.garage.garage_id);
-  // console.log('ServicesStack:', userRole, garageId);
+
   return (
     <Stack.Navigator
       initialRouteName={'Accounts'}
-      // screenOptions={{ headerShown: false }}
       >
       <Stack.Screen
         name={'Accounts'}
@@ -342,16 +321,6 @@ const UserVehicleTab = ({ route }) => {
     </TopTab.Navigator>
   );
 }
-// <MainStack.Navigator
-//   initialRouteName="MainTab"
-//   screenOptions={{
-//     headerShown: false,
-//   }}
-// >
-//     <MainStack.Screen name="Login" component={Login} />
-//     <MainStack.Screen name="MainTab" component={MainTab} />
-// </MainStack.Navigator>
-
 
 const AllStack = ({ navigation }) => {
 
@@ -360,7 +329,7 @@ const AllStack = ({ navigation }) => {
   const closeMenu = () => setVisible(false);
   const userRole = useSelector((state) => state.role.user_role);
   const garageId = useSelector((state) => state.garage.garage_id);
-  // console.log('AllStack', garageId?.length);
+
   return (
     <MoreStack.Navigator
       initialRouteName="More"
@@ -378,7 +347,6 @@ const AllStack = ({ navigation }) => {
               {(userRole == "Super Admin" || garageId?.length > 1) ? 
                 <Button
                   onPress={() => navigation.navigate('ChooseGarage')}
-                  // onPress={() => navigation.navigate('AllStack', { screen: 'ChooseGarage', initial: false })}
                   style={styles.buttonStyle}
                   color={colors.secondary}
                   icon={(color) => <Icon name={'edit'} size={16} color={colors.secondary} />}
@@ -399,7 +367,6 @@ const AllStack = ({ navigation }) => {
             <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
               {userRole == "Super Admin" &&
                 <Button
-                  // onPress={() => navigation.navigate('MoreStack', { screen: 'AddGarage' })}
                   onPress={() => navigation.navigate('AddGarage')}
                   style={styles.buttonStyle}
                   color={colors.secondary}
@@ -409,27 +376,6 @@ const AllStack = ({ navigation }) => {
               }
             </View>
           ),
-          // headerLeft: () => (
-          //   <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
-          //     <Icon
-          //       style={{ paddingRight: 15 }}
-          //       name={'arrow-left'} size={16}
-          //       color={colors.secondary}
-          //       onPress={() => { navigation.goBack() }}
-          //     />
-          //   </View>
-          // ),
-          // headerLeft: () => (
-          //   <View style={{flexDirection: "row",justifyContent: "flex-end"}}>
-          //     <Icon
-          //       onPress={() => navigation.pop(2)}
-          //       style={styles.buttonStyle}
-          //       color={colors.secondary}
-          //       icon={ (color) => <Icon name={'plus'} size={16} color={colors.secondary}  /> }
-          //       uppercase={false} 
-          //     ><Text style={{fontSize:12, padding:0}}>Add Garage</Text></Button>
-          //   </View>
-          // ),
         }}
       />
       <MoreStack.Screen
@@ -523,7 +469,6 @@ const AllStack = ({ navigation }) => {
     </MoreStack.Navigator>
   )
 }
-// connect(mapStateToProps)(AllStack);
 
 const AllCustomerStack = ({ navigation }) => {
 
@@ -532,9 +477,8 @@ const AllCustomerStack = ({ navigation }) => {
   const onLogOut = async () => dispatch(signOutAction());
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
-  // const userRole = useSelector((state) => state.role.user_role);
   const userId = useSelector((state) => state.user.user.id);
-  // console.log('AllStack', userId);
+
   return (
     <Stack.Navigator
       initialRouteName="CustomerDetails"
@@ -582,17 +526,6 @@ const AllCustomerStack = ({ navigation }) => {
             </View>
           ),
           title: "My Profile",
-          // headerRight: () => (
-          //   <View style={{ flexDirection: "row", justifyContent: "flex-end", marginRight: 15 }}>
-          //     <Button
-          //       onPress={() => navigation.navigate('CustomerInfo', { userId })}
-          //       style={styles.buttonStyle}
-          //       color={colors.secondary}
-          //       icon={(color) => <IconX name={'pencil'} size={16} color={colors.secondary} />}
-          //       uppercase={false}
-          //     ><Text style={{ fontSize: 12, padding: 0 }}>Edit</Text></Button>
-          //   </View>
-          // ),
         }}
         initialParams={{ userId: userId }}
       />
@@ -616,9 +549,8 @@ const AllCustomerStack = ({ navigation }) => {
 }
 
 const InsideCustomerStack = () => {
-  // console.log('Inside Stack', 'Inside Customer Stack');
   const userId = useSelector((state) => state.user.user.id);
-  // console.log('Inside Stack', userId);
+
   return (
     <Tab.Navigator
       initialRouteName="ServicesStack"
@@ -673,34 +605,10 @@ const InsideCustomerStack = () => {
           ),
           headerShown: false,
         }}
-       
-        // listeners={({ navigation }) => ({
-        //   tabPress: (event) => {
-        //     event.preventDefault();
-        //     navigation.navigate("AllStack", { screen: "More" });
-        //   }
-        // })}
       />
     </Tab.Navigator>
-    // <MainStack.Navigator
-    //   initialRouteName="MainTab"
-    //   screenOptions={{
-    //     headerShown: false,
-    //   }}
-    // >
-    //     <MainStack.Screen name="Login" component={Login} />
-    //     <MainStack.Screen name="MainTab" component={MainTab} />
-    // </MainStack.Navigator>
   )
 }
-
-// const mapStateToProps = state => ({
-//   userRole: state.role.user_role,
-//   garageId: state.garage.garage_id,
-// })
-// export default connect(mapStateToProps)(InsideCustomerStack);
-// export InsideCustomerStack;
-// console.log('Inside Stack', garageId);
 
 const InsideStack = ({ navigation }) => {
   return (
@@ -713,9 +621,6 @@ const InsideStack = ({ navigation }) => {
         tabBarLabelStyle: { fontSize: 14 },
         keyboardHidesTabBar: true
       }}
-      // tabBarOptions={{
-      
-      // }}
     >
       <Tab.Screen
         name="ServicesStack"
@@ -739,18 +644,6 @@ const InsideStack = ({ navigation }) => {
           headerShown: false
         }}
       />
-      {/* <Tab.Screen
-        name="AccountsStack"
-        component={AccountsStack}
-        options={{
-          tabBarLabel: 'Accounts',
-          tabBarIcon: ({ color }) => (
-            <Icon name={'calculator'} size={20} color={color} />
-          ),
-          headerShown: false
-        }}
-      /> */}
-
       <Tab.Screen
         name="AllStack"
         component={AllStack}
@@ -769,25 +662,8 @@ const InsideStack = ({ navigation }) => {
         })}
       />
     </Tab.Navigator>
-    // <MainStack.Navigator
-    //   initialRouteName="MainTab"
-    //   screenOptions={{
-    //     headerShown: false,
-    //   }}
-    // >
-    //     <MainStack.Screen name="Login" component={Login} />
-    //     <MainStack.Screen name="MainTab" component={MainTab} />
-    // </MainStack.Navigator>
   )
 }
-
-// const mapStateToProps = state => ({
-//   userRole: state.role.user_role,
-//   garageId: state.garage.garage_id,
-// })
-// export default connect(mapStateToProps)(InsideStack);
-// export default InsideStack;
-
 
 const styles = StyleSheet.create({
   buttonStyle: {

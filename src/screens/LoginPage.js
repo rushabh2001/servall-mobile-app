@@ -1,23 +1,19 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { View , Text, StyleSheet, Image, TextInput, Keyboard, KeyboardAvoidingView, } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View , Text, StyleSheet, Image, TextInput, KeyboardAvoidingView, } from 'react-native';
 import { connect } from 'react-redux';
-import { colors, gStyle } from '../constants';
+import { colors } from '../constants';
 import { API_URL } from '../constants/config';
 import {Button} from 'react-native-paper';
 import Toast from 'react-native-toast-message';
-// import { IconX, ICON_TYPE } from '../icons';
-// import InputScrollView from 'react-native-input-scroll-view';
 import { loginRequest, resetLogin } from '../actions/login';
-// import { getValue } from '../../lib/storage';
 
-const Login = ({navigation, loginRequest, loginError, error, authenticating, resetLogin}) => {
+const Login = ({loginRequest, error }) => {
     
     const [otpField, setField] = useState(false);
     const [email, setEmail] = useState("");
     const [otp, setOtp] = useState("");
     const [emailError, setEmailError] = useState();
     const [OtpError, setOtpError] = useState();
-    // const [isPassword, setIsPassword] = useState("12345678");
     
     const submit = () => {
          if(email.length == 0){
@@ -49,11 +45,6 @@ const Login = ({navigation, loginRequest, loginError, error, authenticating, res
             return setOtpError('OTP Should be 4 digit');
         };
         loginRequest({'email': email, 'otp': otp});
-        // if(error) setOtpError(error)
-        // console.log(loginError);
-      
-        // resetLogin();
-        // navigation.navigate('inside');
     }
 
 
@@ -99,42 +90,6 @@ const Login = ({navigation, loginRequest, loginError, error, authenticating, res
     useEffect(() => {
         if(error) setOtpError(error)
     }, [error]);
-
-    // const loginWithOtp = (formOTP) => { 
-    //     fetch(`${API_URL}loginWithOtp`, 
-    //     {
-    //         method: 'POST',
-    //         headers: {
-    //             Accept: 'application/json',
-    //             'Content-Type': 'application/json'
-    //         },
-    //         body: JSON.stringify(formOTP)
-    //     }).then((res) => res.json())
-    //       .then((res)  => {
-    //         console.log(res);
-    //         console.log("321");
-    //         if(res[1]?.message == true) {
-    //             if (authenticating) return;
-    //             console.log("321");
-               
-    //             navigation.navigate('DashboardStack');
-    //             console.log("321")
-    //         } else if(res[0]?.message == false) {
-    //             setOtpError('Invalid OTP Code');
-    //             return; 
-    //         } else {
-    //             setOtpError('Invalid OTP Code');
-    //             return; 
-    //         }
-    //         // setData(data);
-    //         // setLoading(false);
-    //         // this.setData({users: result, setLoading: false})
-    //       }).catch((error) => {
-    //         setOtpError(error)
-    //     });
-    // }
-
-  
     
     return (
 
@@ -163,6 +118,7 @@ const Login = ({navigation, loginRequest, loginError, error, authenticating, res
                         {emailError?.length > 0 &&
                             <Text style={{color: colors.danger}}>{emailError}</Text>
                         }
+
                         <Button
                             style={{marginTop:15}}
                             mode={'contained'}
@@ -177,7 +133,6 @@ const Login = ({navigation, loginRequest, loginError, error, authenticating, res
                             label='OTP'
                             placeholder="Your OTP"
                             style={styles.input}
-                            // innerRef={otpRef}
                             keyboardType="numeric"
                             textContentType="oneTimeCode"
                             value={otp}
@@ -186,7 +141,7 @@ const Login = ({navigation, loginRequest, loginError, error, authenticating, res
                         />
                         {OtpError?.length > 0 ?
                             <Text style={{color: colors.danger}}>{OtpError}</Text>
-                            :
+                        :
                             null
                         }
                         <Button
@@ -197,7 +152,6 @@ const Login = ({navigation, loginRequest, loginError, error, authenticating, res
                             Verify OTP
                         </Button>
                         <Text
-                            // mode={'text'}
                             style={styles.smallBtn}
                             onPress={() => {
                                 submit();
@@ -207,7 +161,6 @@ const Login = ({navigation, loginRequest, loginError, error, authenticating, res
                             Resend OTP
                         </Text>
                         <Text
-                            // mode={'text'}
                             style={styles.smallBtn}
                             onPress={() => {
                                 setField(false);
@@ -259,7 +212,7 @@ const styles = StyleSheet.create({
         marginBottom: 5,
         padding: 10,
         height: 40,
-        borderColor: colors.light_gray, // 7a42f4
+        borderColor: colors.light_gray,
         borderWidth: 1,
         borderRadius: 5,
         backgroundColor: colors.white,
@@ -292,5 +245,4 @@ const mapDispatchToProps = dispatch => ({
     resetLogin: () => dispatch(resetLogin())
 });
 
-// export default Login;
 export default connect(mapStateToProps, mapDispatchToProps)(Login);

@@ -1,14 +1,13 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, ScrollView, Image } from "react-native";
 import { connect } from 'react-redux';
-import { Button, Divider, Searchbar, Badge, Modal, Portal } from "react-native-paper";
+import { Button, Divider, Searchbar, Modal, Portal } from "react-native-paper";
 import { colors } from  "../constants";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import moment from 'moment';
 import Lightbox from 'react-native-lightbox-v2';
 import  { API_URL, WEB_URL } from "../constants/config";
 
-const VehicleSearch = ({navigation, userToken, selectedGarageId, navigator  }) => {
+const VehicleSearch = ({ userToken, selectedGarageId, navigator  }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [data, setData] = useState([]);
@@ -30,7 +29,6 @@ const VehicleSearch = ({navigation, userToken, selectedGarageId, navigator  }) =
             });
             const json = await res.json();
             if (json !== undefined) {
-                console.log(json);
                 setVehicleData(json.vehicle_details);
             }
         } catch (e) {
@@ -52,7 +50,6 @@ const VehicleSearch = ({navigation, userToken, selectedGarageId, navigator  }) =
             });
             const json = await res.json();
             if (json !== undefined) {
-                // console.log(json.vehicle_list);
                 setData(json.vehicle_list);
                 setFilteredData(json.vehicle_list);
             }
@@ -67,13 +64,9 @@ const VehicleSearch = ({navigation, userToken, selectedGarageId, navigator  }) =
         if (text) {
             const newData = data.filter(
                 function (listData) {
-                // let arr2 = listData.vehicle_registration_number ? listData.vehicle_registration_number : ''.toUpperCase() 
-                // let arr1 = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
-                // let itemData = arr1.concat(arr2);
-                let itemData = listData.vehicle_registration_number ? listData.vehicle_registration_number.toUpperCase() : ''.toUpperCase()
-                // console.log(itemData);
-                const textData = text.toUpperCase();
-                return itemData.indexOf(textData) > -1;
+                    let itemData = listData.vehicle_registration_number ? listData.vehicle_registration_number.toUpperCase() : ''.toUpperCase()
+                    const textData = text.toUpperCase();
+                    return itemData.indexOf(textData) > -1;
                 }
             );
             setFilteredData(newData);
@@ -84,18 +77,9 @@ const VehicleSearch = ({navigation, userToken, selectedGarageId, navigator  }) =
         }
     };
 
-    //  useEffect(() => {
-    //    console.log(customerId);
-    // }, [customerId]);
-
     useEffect(() => {
         getVehicleList();
-        // console.log(isGarageId);
     }, []);
-
-    // useEffect(() => {
-    //    console.log(isGarageId);
-    // }, [isGarageId]);
 
     return (
         <View style={styles.surfaceContainer}>
@@ -111,13 +95,11 @@ const VehicleSearch = ({navigation, userToken, selectedGarageId, navigator  }) =
                             <FlatList
                                 ItemSeparatorComponent= {() => (<Divider />)}
                                 data={filteredData}
-                                // onEndReachedThreshold={1}
                                 keyExtractor={item => item.id}
                                 renderItem={({item}) => (
                                     <View style={styles.cards}>
                                         <View style={styles.cardOrderDetails}>
                                             <Text style={styles.orderID}>Last Order ID: 11469</Text>
-                                            {/* <Text style={styles.orderStatus}>Completed</Text> */}
                                         </View>
                                         <View>
                                             <Text style={styles.cardCustomerName}>Owner Name: {item.users[0].name}</Text>
@@ -135,90 +117,80 @@ const VehicleSearch = ({navigation, userToken, selectedGarageId, navigator  }) =
                                         </View>
                                     </View>
                                 )}
-                                // // keyExtractor={(item, index) => index.toString()}
                             />     
                             <Portal>
                                 <Modal visible={viewVehicleDetailsModal} onDismiss={() => { setVehicleDataLoading(true); setViewVehicleDetailsModal(false); }} contentContainerStyle={styles.modalContainerStyle}>
                                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Vehicle Details</Text>
-                                    {vehicleDataLoading 
-                                    ? 
+                                    {vehicleDataLoading ? 
                                         <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> 
                                     :
                                         <ScrollView>
-                                        <Text style={styles.cardDetailsHeading}>Vehicle Owner Name:</Text>
-                                        <Text style={styles.cardDetailsData}>{VehicleData?.users[0]?.name ? VehicleData?.users[0]?.name : null}</Text>
-                                        <Divider />
-                                        <Text style={styles.cardDetailsHeading}>Vehicle Owner`s Phone Number:</Text>
-                                        <Text style={styles.cardDetailsData}>{VehicleData?.users[0]?.phone_number ? VehicleData?.users[0]?.phone_number : null}</Text>
-                                        <Divider />
-                                        <Text style={styles.cardDetailsHeading}>Vehicle Owner`s Email:</Text>
-                                        <Text style={styles.cardDetailsData}>{VehicleData?.users[0]?.email ? VehicleData?.users[0]?.email : null}</Text>
-                                        <Divider />
-                                        <Text style={styles.cardDetailsHeading}>Vehicle Registration Number:</Text>
-                                        <Text style={styles.cardDetailsData}>{VehicleData?.vehicle_registration_number ? VehicleData?.vehicle_registration_number : null}</Text>
-                                        <Divider />
-                                        <Text style={styles.cardDetailsHeading}>Vehicle Brand:</Text>
-                                        <Text style={styles.cardDetailsData}>{VehicleData?.brand?.name ? VehicleData?.brand?.name : null}</Text>
-                                        <Divider />
-                                        <Text style={styles.cardDetailsHeading}>Vehicle Model:</Text>
-                                        <Text style={styles.cardDetailsData}>{VehicleData?.vehicle_model?.model_name ? VehicleData?.vehicle_model?.model_name : null}</Text>
-                                        <Divider />
-                                        <Text style={styles.cardDetailsHeading}>Purchase Date:</Text>
-                                        <Text style={styles.cardDetailsData}>{VehicleData?.purchase_date ? moment(VehicleData?.purchase_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
-                                        <Divider />
-                                        <Text style={styles.cardDetailsHeading}>Manufacturing Date:</Text>
-                                        <Text style={styles.cardDetailsData}>{VehicleData?.manufacturing_date ? moment(VehicleData?.manufacturing_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
-                                        <Divider />
-                                        <Text style={styles.cardDetailsHeading}>Engine Number:</Text>
-                                        <Text style={styles.cardDetailsData}>{VehicleData?.engine_number ? VehicleData?.engine_number : null}</Text>
-                                        <Divider />
-                                        <Text style={styles.cardDetailsHeading}>Chasis Number:</Text>
-                                        <Text style={styles.cardDetailsData}>{VehicleData?.chasis_number ? VehicleData?.chasis_number : null}</Text>
-                                        <Divider />
-                                        <Text style={styles.cardDetailsHeading}>Insurance Provider Company:</Text>
-                                        <Text style={styles.cardDetailsData}>{VehicleData?.insurance_provider?.name ? VehicleData?.insurance_provider?.name : null}</Text>
-                                        <Divider />
-                                        <Text style={styles.cardDetailsHeading}>Insurer GSTIN:</Text>
-                                        <Text style={styles.cardDetailsData}>{VehicleData?.insurer_gstin ? VehicleData?.insurer_gstin : null}</Text>
-                                        <Divider />
-                                        <Text style={styles.cardDetailsHeading}>Insurer Address:</Text>
-                                        <Text style={styles.cardDetailsData}>{VehicleData?.insurer_address ? VehicleData?.insurer_address : null}</Text>
-                                        <Divider />
-                                        <Text style={styles.cardDetailsHeading}>Policy Number:</Text>
-                                        <Text style={styles.cardDetailsData}>{VehicleData?.policy_number ? VehicleData?.policy_number : null}</Text>
-                                        <Divider />
-                                        <Text style={styles.cardDetailsHeading}>Insurance Expiry Date:</Text>
-                                        <Text style={styles.cardDetailsData}>{VehicleData?.insurance_expiry_date ? moment(VehicleData?.insurance_expiry_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
-                                        <Divider />
-                                        <Text style={styles.cardDetailsHeading}>Registration Certificate:</Text>
-                                        {VehicleData?.registration_certificate_img !== null ?
-                                            <Lightbox navigator={navigator} style={styles.lightBoxWrapper}>
-                                                <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/registration_certificate_img/' + VehicleData?.registration_certificate_img }} /> 
-                                            </Lightbox>
-                                        :
-                                            <Text style={styles.cardDetailsData}>Not Uploaded Registration Certificate</Text>
-                                        }
-                                        <Divider />
-                                        <Text style={styles.cardDetailsHeading}>Insurance Policy:</Text>
-                                        {VehicleData?.insurance_img !== null ?
-                                            <Lightbox navigator={navigator} style={styles.lightBoxWrapper}>
-                                                <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/insurance_img/' + VehicleData?.insurance_img }} />
-                                            </Lightbox>
-                                        :
-                                            <Text style={styles.cardDetailsData}>Not Uploaded Insurance Policy</Text>
-                                        }
-                                        {/* <Text style={styles.cardDetailsData}>Rushabh Patel</Text> */}
-                                        {/* {console.log(WEB_URL + 'uploads/insurance_img/' + VehicleData?.insurance_img)} */}
-                                        </ScrollView>
+                                            <Text style={styles.cardDetailsHeading}>Vehicle Owner Name:</Text>
+                                            <Text style={styles.cardDetailsData}>{VehicleData?.users[0]?.name ? VehicleData?.users[0]?.name : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Vehicle Owner`s Phone Number:</Text>
+                                            <Text style={styles.cardDetailsData}>{VehicleData?.users[0]?.phone_number ? VehicleData?.users[0]?.phone_number : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Vehicle Owner`s Email:</Text>
+                                            <Text style={styles.cardDetailsData}>{VehicleData?.users[0]?.email ? VehicleData?.users[0]?.email : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Vehicle Registration Number:</Text>
+                                            <Text style={styles.cardDetailsData}>{VehicleData?.vehicle_registration_number ? VehicleData?.vehicle_registration_number : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Vehicle Brand:</Text>
+                                            <Text style={styles.cardDetailsData}>{VehicleData?.brand?.name ? VehicleData?.brand?.name : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Vehicle Model:</Text>
+                                            <Text style={styles.cardDetailsData}>{VehicleData?.vehicle_model?.model_name ? VehicleData?.vehicle_model?.model_name : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Purchase Date:</Text>
+                                            <Text style={styles.cardDetailsData}>{VehicleData?.purchase_date ? moment(VehicleData?.purchase_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Manufacturing Date:</Text>
+                                            <Text style={styles.cardDetailsData}>{VehicleData?.manufacturing_date ? moment(VehicleData?.manufacturing_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Engine Number:</Text>
+                                            <Text style={styles.cardDetailsData}>{VehicleData?.engine_number ? VehicleData?.engine_number : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Chasis Number:</Text>
+                                            <Text style={styles.cardDetailsData}>{VehicleData?.chasis_number ? VehicleData?.chasis_number : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Insurance Provider Company:</Text>
+                                            <Text style={styles.cardDetailsData}>{VehicleData?.insurance_provider?.name ? VehicleData?.insurance_provider?.name : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Insurer GSTIN:</Text>
+                                            <Text style={styles.cardDetailsData}>{VehicleData?.insurer_gstin ? VehicleData?.insurer_gstin : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Insurer Address:</Text>
+                                            <Text style={styles.cardDetailsData}>{VehicleData?.insurer_address ? VehicleData?.insurer_address : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Policy Number:</Text>
+                                            <Text style={styles.cardDetailsData}>{VehicleData?.policy_number ? VehicleData?.policy_number : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Insurance Expiry Date:</Text>
+                                            <Text style={styles.cardDetailsData}>{VehicleData?.insurance_expiry_date ? moment(VehicleData?.insurance_expiry_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Registration Certificate:</Text>
+                                            {VehicleData?.registration_certificate_img !== null ?
+                                                <Lightbox navigator={navigator} style={styles.lightBoxWrapper}>
+                                                    <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/registration_certificate_img/' + VehicleData?.registration_certificate_img }} /> 
+                                                </Lightbox>
+                                            :
+                                                <Text style={styles.cardDetailsData}>Not Uploaded Registration Certificate</Text>
+                                            }
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Insurance Policy:</Text>
+                                            {VehicleData?.insurance_img !== null ?
+                                                <Lightbox navigator={navigator} style={styles.lightBoxWrapper}>
+                                                    <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/insurance_img/' + VehicleData?.insurance_img }} />
+                                                </Lightbox>
+                                            :
+                                                <Text style={styles.cardDetailsData}>Not Uploaded Insurance Policy</Text>
+                                            }
+                                       </ScrollView>
                                     }
+
                                     <View style={{flexDirection: "row",}}>
-                                        {/* <Button
-                                            style={{marginTop:15, flex: 1, marginRight: 10}}
-                                            mode={'contained'}
-                                            onPress={addNewInsuranceCompany}
-                                        >
-                                            Add
-                                        </Button> */}
                                         <View style={{flex: 1}}></View>
                                         <Button
                                             style={{marginTop:15, flex: 1.4, alignSelf: 'center'}}
@@ -369,7 +341,6 @@ const styles = StyleSheet.create({
     smallButton: {
         fontSize: 16,
         color: colors.primary,
-        // flex: 1,
         flexDirection: 'row',
         justifyContent: 'center',
         borderRadius: 2,
@@ -378,26 +349,19 @@ const styles = StyleSheet.create({
         padding: 3,
         marginHorizontal: 4,
         marginTop: 3,
-        // alignSelf: 'space-between'
     },
     verticleImage: {
         height: 150,
-        // width: 150,
-        // width: '100%',
-        // height: '100%',
         resizeMode: 'contain',  
         flex: 1, 
     }, 
     lightBoxWrapper: {
         width: 150,
-        // height: 250,
     },
-   
 })
 
 const mapStateToProps = state => ({
     userToken: state.user.userToken,
-    // garageId: state.garage.garage_id,
     selectedGarageId: state.garage.selected_garage_id,
 })
 
