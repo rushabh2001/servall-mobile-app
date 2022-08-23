@@ -222,7 +222,7 @@ const AddVehicle = ({ navigation, userToken, route, userRole }) => {
             setDisplayPurchaseCalender(false);
             setDatePurchase(formattedDate);
             let formateDateForDatabase = moment(currentDate, 'YYYY MMMM D').format('YYYY-MM-DD');
-            setIsPurchaseDate(formateDateForDatabase);
+            setIsPurchaseDate(new Date(formateDateForDatabase));
         }
      };
 
@@ -233,7 +233,7 @@ const AddVehicle = ({ navigation, userToken, route, userRole }) => {
             setDisplayManufacturingCalender(false);
             setDateManufacturing(formattedDate);
             let formateDateForDatabase = moment(currentDate, 'YYYY MMMM D').format('YYYY-MM-DD');
-            setIsManufacturingDate(formateDateForDatabase);
+            setIsManufacturingDate(new Date(formateDateForDatabase));
         }
     };
 
@@ -244,7 +244,7 @@ const AddVehicle = ({ navigation, userToken, route, userRole }) => {
             setDisplayInsuranceExpiryCalender(false);
             setDateInsuranceExpiry(formattedDate);
             let formateDateForDatabase = moment(currentDate, 'YYYY MMMM D').format('YYYY-MM-DD');
-            setIsInsuranceExpiryDate(formateDateForDatabase);  
+            setIsInsuranceExpiryDate(new Date(formateDateForDatabase));  
         }   
     };
 

@@ -9,9 +9,10 @@ import InputScrollView from 'react-native-input-scroll-view';
 import moment from 'moment';
 import DocumentPicker from 'react-native-document-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { SliderPicker } from 'react-native-slider-picker';
+import { Picker } from '@react-native-picker/picker';
 
 // Step - 2 for Repair Order
-
 const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
 
     // User / Customer Fields
@@ -27,8 +28,16 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
     const [isModelName, setIsModelName] = useState(route?.params?.userVehicleDetails?.model_name);
     const [isVehicleRegistrationNumber, setIsVehicleRegistrationNumber] = useState(route?.params?.userVehicleDetails?.vehicle_registration_number);
 
-    const [isOdometerKMs, setIsOdometerKMs] = useState(route?.params?.userVehicleDetails?.odometer);
-    const [isFuelLevel, setIsFuelLevel] = useState(route?.params?.userVehicleDetails?.fuel_level);
+    const [isOdometerKMs, setIsOdometerKMs] = useState('');
+    const [odometerKMsError, setOdometerKMsError] = useState('');
+    const [isFuelLevel, setIsFuelLevel] = useState(5);
+    // const [odometerKMsError, setOdometerKMsError] = useState();
+
+    // const [isOdometerKMs, setIsOdometerKMs] = useState(route?.params?.userVehicleDetails?.odometer);
+    // const [isFuelLevel, setIsFuelLevel] = useState(route?.params?.userVehicleDetails?.fuel_level);
+
+    const [isOrderStatus, setIsOrderStatus] = useState("Vehicle Received");
+    const [orderStatusError, setOrderStatusError] = useState();
 
     const [isVehicleImg, setIsVehicleImg] = useState();
 
@@ -62,7 +71,6 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
     const [serviceList, setServiceList] = useState([]);
 
     const [partError, setPartError] = useState();
-    const [odometerKMsError, setOdometerKMsError] = useState();
 
     const [partTotals, setPartTotals] = useState([]);
     const [serviceTotals, setSeviceTotals] = useState([]);
@@ -90,16 +98,18 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
 
     const validate = () => {
         return !(
+            !isOdometerKMs || isOdometerKMs?.trim().length === 0 ||
             (!fieldsServices && !fieldsParts) || (fieldsServices.length === 0 && fieldsParts.length === 0  ) || 
             !estimatedDeliveryDateTime || estimatedDeliveryDateTime?.trim().length === 0 
         )
     }
 
     const submit = () => {
-     
+        console.log('working fine');
         Keyboard.dismiss();  
 
         if (!validate()) {
+            if (!isOdometerKMs) setOdometerKMsError("Odometer Kilometer is required"); else setOdometerKMsError('');
             if (!estimatedDeliveryDateTime || estimatedDeliveryDateTime?.trim().length === 0) setEstimateDeliveryDateError("Estimate Delivery Date is required"); else setEstimateDeliveryDateError('');
             return;
         }
@@ -121,9 +131,11 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
         data.append('comment', isComment?.trim());
 
         addOrder(data);
+        console.log('data', data);
     }
 
     const addOrder = async (data) => {
+        console.log('addOrder');
         try {
             await fetch(`${API_URL}add_order`, {
                 method: 'POST',
@@ -143,6 +155,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                 });
             })
             .then((res) => {
+                console.log('res', res);
                 if(res.statusCode == 400) {
                   { res.data.message.estimated_delivery_time && setEstimateDeliveryDateError(res.data.message.estimated_delivery_time); }
                   return;
@@ -851,7 +864,69 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                             </TouchableOpacity>
                         </View>
 
+                        {/* Additional Information */}
                         <Text style={[styles.headingStyle, { marginTop: 20 }]}>Additional Information:</Text>
+
+                        <View style={{borderBottomWidth:1, borderColor: colors.light_gray, borderRadius: 4, marginTop: 20, backgroundColor: '#F0F2F5'}}>
+                            <Picker
+                                selectedValue={isOrderStatus}
+                                onValueChange={(v) => {setIsOrderStatus(v)}}
+                                style={{padding: 0}}
+                                itemStyle={{padding: 0}}
+                            >
+                                <Picker.Item key={1} label="Select Order Status" value="0" />
+                                <Picker.Item key={2} label="Vehicle Received" value="Vehicle Received" />
+                                <Picker.Item key={3} label="Work in Progress Order" value="Work in Progress Order" />
+                                <Picker.Item key={4} label="Vehicle Ready" value="Vehicle Ready" />
+                                <Picker.Item key={5} label="Completed Order" value="Completed Order" />
+                            </Picker>
+                        </View>
+                        {orderStatusError?.length > 0 &&
+                            <Text style={{color: colors.danger}}>{orderStatusError}</Text>
+                        }
+
+                        {/* <Text style={[styles.headingStyle, { marginTop: 20 }]}>Additional Information:</Text> */}
+                        <TextInput
+                            mode="outlined"
+                            label='Odometer (in KMs)'
+                            style={styles.input}
+                            placeholder="Odometer (in KMs)"
+                            value={isOdometerKMs}
+                            onChangeText={(text) => setIsOdometerKMs(text)}
+                        />
+                        {odometerKMsError?.length > 0 &&
+                            <Text style={styles.errorTextStyle}>{odometerKMsError}</Text>
+                        }
+
+                        <View style={styles.odometerContainer}>
+                            <SliderPicker
+                                minLabel={"Empty"}
+                                maxLabel={"Full"}
+                                minValue={0}
+                                maxValue={10}
+                                callback={(position) => {
+                                    setIsFuelLevel(position);
+                                }}
+                                defaultValue={5}
+                                showFill={true}
+                                fillColor={'green'}
+                                labelFontWeight={'500'}
+                                labelFontSize={14}
+                                labelFontColor={colors.default_theme.black}
+                                showNumberScale={false}
+                                showSeparatorScale={true}
+                                buttonBackgroundColor={'#fff'}
+                                buttonBorderColor={"#6c7682"}
+                                buttonBorderWidth={1}
+                                scaleNumberFontWeight={'300'}
+                                buttonDimensionsPercentage={6}
+                                heightPercentage={1}
+                                widthPercentage={80}
+                                labelStylesOverride={{ marginTop: 25 }}
+                            />
+                            <Text style={{ fontWeight: "600", fontSize: 18, color: colors.black }}>Fuel Level: {isFuelLevel}</Text>
+                        </View>
+
                         <TextInput
                             mode="outlined"
                             label='Comment'

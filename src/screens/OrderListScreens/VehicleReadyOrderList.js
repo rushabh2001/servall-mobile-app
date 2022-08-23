@@ -2,28 +2,34 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, Linking } from "react-native";
 import { connect } from 'react-redux';
 import { Button, Divider, Searchbar, List } from "react-native-paper";
-import { colors } from  "../constants";
-import  { API_URL } from "../constants/config"
+import { colors } from  "../../constants";
+import  { API_URL } from "../../constants/config"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import moment from 'moment';
 import RBSheet from "react-native-raw-bottom-sheet";
+import { useIsFocused } from "@react-navigation/native";
 
-const OrderSearch = ({navigation, userToken, selectedGarageId, navigator  }) => {
+const VehicleReadyOrderList = ({navigation, userToken, selectedGarageId }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState(); 
     const [filteredData, setFilteredData] = useState([]);
+    const isFocused = useIsFocused();
 
     const getOrderList = async () => {
+        setIsLoading(true);
         try {
-            const res = await fetch(`${API_URL}fetch_garage_order/${isGarageId}`, {
-                method: 'GET',
+            const res = await fetch(`${API_URL}fetch_garage_order/status/${isGarageId}`, {
+                method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + userToken
                 },
+                body: JSON.stringify({
+                    status: 'Vehicle Ready',
+                }),
             });
             const json = await res.json();
             if (json !== undefined) {
@@ -41,10 +47,10 @@ const OrderSearch = ({navigation, userToken, selectedGarageId, navigator  }) => 
         if (text) {
             const newData = data.filter(
                 function (listData) {
-                    let arr2 = listData.user.name ? listData.user.name.toUpperCase() : ''.toUpperCase();
-                    let arr1 = listData.id ?  listData.id : ''.toUpperCase()
-                    let itemData = arr2.concat(arr1);
-                    const textData = text.toUpperCase();
+                        let arr2 = listData.user.name ? listData.user.name.toUpperCase() : ''.toUpperCase();
+                        let arr1 = listData.id ?  listData.id : ''.toUpperCase()
+                        let itemData = arr2.concat(arr1);
+                        const textData = text.toUpperCase();
                     return itemData.indexOf(textData) > -1;
                 }
             );
@@ -58,7 +64,7 @@ const OrderSearch = ({navigation, userToken, selectedGarageId, navigator  }) => 
 
     useEffect(() => {
         getOrderList();
-    }, []);
+    }, [isFocused]);
 
     return (
         <View style={styles.surfaceContainer}>
@@ -67,7 +73,7 @@ const OrderSearch = ({navigation, userToken, selectedGarageId, navigator  }) => 
                 onChangeText={(text) => searchFilter(text)}
                 value={searchQuery}
             />
-            <View style={{ flexDirection: "column", marginVertical: 30 }}>
+            <View style={{flexDirection: "column", marginVertical: 30}}>
                 {isLoading ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> :
                     (filteredData.length != 0 ?             
                         <View>
@@ -142,6 +148,7 @@ const OrderSearch = ({navigation, userToken, selectedGarageId, navigator  }) => 
                                             ref={ref => {
                                                 this[RBSheet + index] = ref;
                                             }}
+                                        
                                             height={126}
                                             openDuration={250}
                                             >
@@ -169,25 +176,16 @@ const OrderSearch = ({navigation, userToken, selectedGarageId, navigator  }) => 
                                                             'estimated_delivery_time': item?.estimated_delivery_time,
                                                             'labor_total': item?.labor_total,
                                                             'parts_total': item?.parts_total,
+                                                            'status': item?.status,
                                                             'services_list': item?.orderservice,
                                                             'parts_list': item?.orderparts,
-                                                            'status': item?.status,
                                                             'created_at': item?.created_at,
                                                             'total': item?.total,
                                                             'applicable_discount': item?.discount
                                                         }
-                                                        if (item?.status == "Vehicle Received") {
-                                                            navigation.navigate('OrderCreated', {'data': arrData});
-                                                        } else if(item?.status == "Work in Progress Order") {
-                                                            navigation.navigate('OrderWorkInProgress', {'data': arrData});
-                                                        } else if(item?.status == "Vehicle Ready") {
-                                                            navigation.navigate('OrderVehicleReady', {'data': arrData});
-                                                        } else if(item?.status == "Completed Order") {
-                                                            navigation.navigate('OrderCompleted', {'data': arrData});
-                                                        }
-                                                        // navigation.navigate('OrderCreated', {'data': arrData});  
+                                                        navigation.navigate('OrderVehicleReady', {'data': arrData});  
                                                         this[RBSheet + index].close(); 
-                                                    }}
+                                                        }}
                                                     left={() => (<Icon type={"MaterialCommunityIcons"} name="clipboard-list-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
                                                 />
                                                 <Divider />
@@ -216,8 +214,9 @@ const OrderSearch = ({navigation, userToken, selectedGarageId, navigator  }) => 
                                                             'parts_total': item?.parts_total,
                                                             'services_list': item?.orderservice,
                                                             'parts_list': item?.orderparts,
-                                                            'status': item?.status,
+                                                            'created_at': item?.created_at,
                                                             'total': item?.total,
+                                                            'status': item?.status,
                                                             'applicable_discount': item?.discount
                                                         }
                                                         console.log('data:', arrData);
@@ -244,6 +243,7 @@ const OrderSearch = ({navigation, userToken, selectedGarageId, navigator  }) => 
         </View>
     );
 }
+
 
 const styles = StyleSheet.create({
     surfaceContainer: {
@@ -422,6 +422,7 @@ const styles = StyleSheet.create({
     lightBoxWrapper: {
         width: 150,
     },
+   
 })
 
 const mapStateToProps = state => ({
@@ -429,4 +430,4 @@ const mapStateToProps = state => ({
     selectedGarageId: state.garage.selected_garage_id,
 })
 
-export default connect(mapStateToProps)(OrderSearch);
+export default connect(mapStateToProps)(VehicleReadyOrderList);

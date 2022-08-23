@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, FlatList, Keyboard } from 'react-native';
 import { Modal, Portal, Button, TextInput, Searchbar, Divider, List } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { colors } from '../constants';
@@ -7,17 +7,17 @@ import { API_URL } from '../constants/config';
 import InputScrollView from 'react-native-input-scroll-view';
 import { Picker } from '@react-native-picker/picker';
 
-const AddStock = ({ userRole, userId, userToken, route, garageId }) => {
+const EditStock = ({ navigation, userRole, userId, userToken, route, garageId }) => {
 
     // User / Customer Fields
     const [isPart, setIsPart] = useState(route?.params?.data?.parts?.id);
     const [isPartName, setIsPartName] = useState(route?.params?.data?.parts?.name);
     const [isStockId, setIsStockId] = useState(route?.params?.data?.id);
-    const [isPrice, setIsPrice] = useState(JSON.stringify(route?.params?.data?.purchase_price));
-    const [isMRP, setIsMRP] = useState(JSON.stringify(route?.params?.data?.mrp));
-    const [isCurrentStock, setIsCurrentStock] = useState(JSON.stringify(route?.params?.data?.current_stock));
-    const [isMinStock, setIsMinStock] = useState(JSON.stringify(route?.params?.data?.min_stock));
-    const [isMaxStock, setIsMaxStock] = useState(JSON.stringify(route?.params?.data?.max_stock));
+    const [isPrice, setIsPrice] = useState(route?.params?.data?.purchase_price);
+    const [isMRP, setIsMRP] = useState(route?.params?.data?.mrp);
+    const [isCurrentStock, setIsCurrentStock] = useState(route?.params?.data?.current_stock);
+    const [isMinStock, setIsMinStock] = useState(route?.params?.data?.min_stock);
+    const [isMaxStock, setIsMaxStock] = useState(route?.params?.data?.max_stock);
     const [isRackId, setIsRackId] = useState(route?.params?.data?.rack_id);
     const [isComment, setIsComment] = useState(route?.params?.data?.comment);
     
@@ -31,17 +31,17 @@ const AddStock = ({ userRole, userId, userToken, route, garageId }) => {
     const [commentError, setCommentError] = useState('');
 
     // Vendor Fields
-    const [isVendor, setIsVendor] = useState();
-    const [isVendorName, setIsVendorName] = useState();
-    const [vendorError, setVendorError] = useState('');
-    const [vendorList, setVendorList] = useState([]);
-    const [addVendorModal, setAddVendorModal] = useState(false);
-    const [newVendor, setNewVendor] = useState();
-    const [newVendorError, setNewVendorError] = useState();
+    // const [isVendor, setIsVendor] = useState();
+    // const [isVendorName, setIsVendorName] = useState();
+    // const [vendorError, setVendorError] = useState('');
+    // const [vendorList, setVendorList] = useState([]);
+    // const [addVendorModal, setAddVendorModal] = useState(false);
+    // const [newVendor, setNewVendor] = useState();
+    // const [newVendorError, setNewVendorError] = useState();
 
     // States for Garage Dropdown
     const [isGarage, setIsGarage] = useState(route?.params?.data?.garage?.id);
-    const [isGarageName, setIsGarageName] = useState(route?.params?.data?.garage?.garage_name);
+    const [isGarageName, setIsGarageName] = useState(!route?.params?.data?.garage?.garage_name ? "" : route?.params?.data?.garage?.garage_name);
     const [garageList, setGarageList] = useState([]);
     const [garageListModal, setGarageListModal] = useState(false);
     const [isLoadingGarageList, setIsLoadingGarageList] = useState(false);
@@ -94,27 +94,74 @@ const AddStock = ({ userRole, userId, userToken, route, garageId }) => {
         }
     };
 
-    const getBrandList = async () => {
+    const validate = () => {
+        return !(
+            !isPart || isPart === 0 ||
+            !isPrice || isPrice?.trim().length === 0 ||
+            !isCurrentStock || isCurrentStock?.trim().length === 0 ||
+            !isMRP || isMRP?.trim().length === 0 ||
+            !isRackId || isRackId?.trim().length === 0 ||
+            !isMinStock || isMinStock?.trim().length === 0 ||
+            !isMaxStock || isMaxStock?.trim().length === 0 ||
+            // !isVendor || isVendor === 0 ||
+            !isGarage || isGarage === 0 
+        )
+    }
+
+    const submit = () => {
+        Keyboard.dismiss();
+        if (!validate()) {
+            if (!isPart) setPartError("Part is required"); else setPartError('');
+            if (!isPrice) setPriceError("Price is required"); else setPriceError('');
+            if (!isMRP) setMrpError("MRP is required"); else setMrpError('');
+            if (!isRackId) setRackIdError("Rack ID is required"); else setRackIdError('');
+            if (!isCurrentStock) setCurrentStockError("Current Stock is required"); else setCurrentStockError('');
+            if (!isMinStock) setMinStockError("Minimum Stock is required"); else setMinStockError('');
+            if (!isMaxStock) setMaxStockError("Maximum Stock is required"); else setMaxStockError('');
+            // if (!isVendor || isVendor === 0) setVendorError('Brand is required'); else setVendorError('');
+            if (!isGarage || isGarage == 0) setGarageError("Customer Belongs to Garage Field is required"); else setGarageError('');
+            return;
+        }
+
+        const data = {
+            'parts_id': isPart,
+            'garage_id': isGarage,
+            // 'vendor_id': isVendor,
+            'purchase_price': isPrice?.trim(),
+            'mrp': isMRP?.trim(),
+            'rack_id': isRackId?.trim(),
+            'current_stock': isCurrentStock?.trim(),
+            'min_stock': isMinStock?.trim(),
+            'max_stock': isMaxStock?.trim(),
+            'comment': isComment?.trim(),
+        }
+
+        addStock(data); 
+    }
+
+    const addStock = async (data) => {
         try {
-            const res = await fetch(`${API_URL}fetch_brand`, {
-                method: 'GET',
+            const res = await fetch(`${API_URL}add_inventory`, {
+                method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + userToken
                 },
+                body: JSON.stringify(data)
             });
             const json = await res.json();
             if (json !== undefined) {
-                setVendorList(json.brand_list);
+                console.log(json);
+                navigation.navigate('Parts');
             }
         } catch (e) {
             console.log(e);
         }
-    };
+    }
 
     useEffect(() => {
-        getBrandList();
+        // getBrandList();
         getGarageList();
     }, []);
 
@@ -141,7 +188,7 @@ const AddStock = ({ userRole, userId, userToken, route, garageId }) => {
                             disabled={true}
                         />
 
-                        <View style={styles.dropDownContainer}>
+                        {/* <View style={styles.dropDownContainer}>
                             <Picker
                                 selectedValue={isVendor}
                                 onValueChange={(optionId) => { setIsVendor(optionId); if (optionId == "new_vendor") setAddVendorModal(true) }}
@@ -163,7 +210,7 @@ const AddStock = ({ userRole, userId, userToken, route, garageId }) => {
                         </View>
                         {vendorError?.length > 0 &&
                             <Text style={styles.errorTextStyle}>{vendorError}</Text>
-                        }
+                        } */}
 
                         <TextInput
                             mode="outlined"
@@ -283,16 +330,16 @@ const AddStock = ({ userRole, userId, userToken, route, garageId }) => {
                         <Button
                             style={{ marginTop: 15 }}
                             mode={'contained'}
-                            // onPress={submit}
+                            onPress={submit}
                         >
-                            Next
+                            Update
                         </Button>
                      
                     </View>
                 </InputScrollView>
             }
             <Portal>
-                <Modal visible={addVendorModal} onDismiss={() => { setAddVendorModal(false); setNewVendor(""); setIsVendor(0); }} contentContainerStyle={styles.modalContainerStyle}>
+                {/* <Modal visible={addVendorModal} onDismiss={() => { setAddVendorModal(false); setNewVendor(""); setIsVendor(0); }} contentContainerStyle={styles.modalContainerStyle}>
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Vendor</Text>
                     <TextInput
                         mode="outlined"
@@ -321,7 +368,7 @@ const AddStock = ({ userRole, userId, userToken, route, garageId }) => {
                             Close
                         </Button>
                     </View>
-                </Modal>
+                </Modal> */}
 
                 {/* Garages List Modal */}
                 <Modal visible={garageListModal} onDismiss={() => { setGarageListModal(false); setIsGarage(0); setIsGarageName(''); setGarageError(''); setSearchQueryForGarages('');  searchFilterForGarages();}} contentContainerStyle={styles.modalContainerStyle}>
@@ -439,4 +486,4 @@ const mapStateToProps = state => ({
     garageId: state.garage.garage_id
 })
 
-export default connect(mapStateToProps)(AddStock);
+export default connect(mapStateToProps)(EditStock);

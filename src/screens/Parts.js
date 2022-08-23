@@ -10,7 +10,7 @@ import { useIsFocused  } from '@react-navigation/native';
 import { Table, Row, Cell } from 'react-native-table-component';
 import { FlatList } from 'react-native-gesture-handler';
 
-const Parts = ({ navigation, userToken }) => {
+const Parts = ({ navigation, userToken, selectedGarageId }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [singleFile, setSingleFile] = useState('');
   const [partList, setPartList] = useState([]);
@@ -18,6 +18,7 @@ const Parts = ({ navigation, userToken }) => {
   const isFocused = useIsFocused();
   const tableHead = ['(P No.) Name', 'Stock', 'MRP','Rack No', 'Action'];
   const [tableData, setTableData] = useState([]);
+  const [isGarageId, setIsGarageId] = useState(selectedGarageId);
 
   const [filteredPartData, setFilteredPartData] = useState([]);
   const [searchQueryForParts, setSearchQueryForParts] = useState(); 
@@ -46,7 +47,7 @@ const Parts = ({ navigation, userToken }) => {
   const getPartList = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`${API_URL}fetch_inventory`, {
+      const res = await fetch(`${API_URL}fetch_garage_inventory/${isGarageId}`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -107,19 +108,19 @@ const Parts = ({ navigation, userToken }) => {
 
       <View style={{flexDirection:'row',  marginTop: 15}}>
         <View style={{flex:1}}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             activeOpacity={0.5}
             style={styles.buttonStyle}
             onPress={selectOneFile}>
-            {/*Single file selection button*/}
+            Single file selection button
             <Icon name="upload" size={18} color={colors.primary} style={styles.downloadIcon} />
             <Text style={{marginRight: 10, fontSize: 18, color: "#000"}}>
               Upload CSV
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
         <View style={{flex:0.7}}>
-          <Button
+          {/* <Button
               style={styles.buttonBlue}
               color="#123038"
               icon={({color}) => (<Icon name="plus" color={color} size={18} />) }
@@ -127,7 +128,7 @@ const Parts = ({ navigation, userToken }) => {
               onPress={() => navigation.navigate('PartsStack', {screen: 'AddStock'})}
               uppercase={false} 
             > Add Stock
-          </Button>
+          </Button> */}
         </View>
 
       </View>
@@ -233,6 +234,8 @@ const styles = StyleSheet.create({
 const mapStateToProps = state => ({
   userRole: state.role.user_role,
   userToken: state.user.userToken,
+  selectedGarageId: state.garage.selected_garage_id,
+  garageId: state.garage.garage_id,
 })
 
 export default connect(mapStateToProps)(Parts);

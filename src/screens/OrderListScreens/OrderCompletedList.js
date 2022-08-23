@@ -2,20 +2,23 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, Linking } from "react-native";
 import { connect } from 'react-redux';
 import { Button, Divider, Searchbar, List } from "react-native-paper";
-import { colors } from  "../constants";
-import  { API_URL } from "../constants/config"
+import { colors } from  "../../constants";
+import  { API_URL } from "../../constants/config"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import moment from 'moment';
 import RBSheet from "react-native-raw-bottom-sheet";
+import { useIsFocused } from "@react-navigation/native";
 
-const OpenOrderList = ({navigation, userToken, selectedGarageId, navigator  }) => {
+const OrderCompletedList = ({navigation, userToken, selectedGarageId }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState(); 
     const [filteredData, setFilteredData] = useState([]);
+    const isFocused = useIsFocused();
 
     const getOrderList = async () => {
+        setIsLoading(true);
         try {
             const res = await fetch(`${API_URL}fetch_garage_order/status/${isGarageId}`, {
                 method: 'POST',
@@ -25,7 +28,7 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =
                     'Authorization': 'Bearer ' + userToken
                 },
                 body: JSON.stringify({
-                    status: 'Vehicle received',
+                    status: 'Completed Order',
                 }),
             });
             const json = await res.json();
@@ -44,10 +47,10 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =
         if (text) {
             const newData = data.filter(
                 function (listData) {
-                    let arr2 = listData.user.name ? listData.user.name.toUpperCase() : ''.toUpperCase();
-                    let arr1 = listData.id ?  listData.id : ''.toUpperCase()
-                    let itemData = arr2.concat(arr1);
-                    const textData = text.toUpperCase();
+                        let arr2 = listData.user.name ? listData.user.name.toUpperCase() : ''.toUpperCase();
+                        let arr1 = listData.id ?  listData.id : ''.toUpperCase()
+                        let itemData = arr2.concat(arr1);
+                        const textData = text.toUpperCase();
                     return itemData.indexOf(textData) > -1;
                 }
             );
@@ -61,7 +64,7 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =
 
     useEffect(() => {
         getOrderList();
-    }, []);
+    }, [isFocused]);
 
     return (
         <View style={styles.surfaceContainer}>
@@ -107,7 +110,7 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =
                                                     </View>
                                                     <Divider />
                                                     <View style={{flexDirection: 'row'}}>
-                                                        <Text style={styles.cardCustomerName}>Estimate Delivery Date: </Text><Text style={styles.cardCustomerName}>{moment(item.estimated_delivery_time, 'YYYY-MM-DD HH:mm:ss').format('DD-MM-YYYY HH:mm:ss')}</Text>
+                                                        <Text style={styles.cardCustomerName}>Estimate Delivery Date: </Text><Text style={styles.cardCustomerName}>{moment(item.estimated_delivery_time, 'YYYY-MM-DD HH:mm:ss').format('DD-MM-YYYY hh:mm A')}</Text>
                                                     </View>
                                                  </View>
                                                 <View style={styles.cardActions}>
@@ -173,13 +176,14 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =
                                                             'estimated_delivery_time': item?.estimated_delivery_time,
                                                             'labor_total': item?.labor_total,
                                                             'parts_total': item?.parts_total,
+                                                            'status': item?.status,
                                                             'services_list': item?.orderservice,
                                                             'parts_list': item?.orderparts,
                                                             'created_at': item?.created_at,
                                                             'total': item?.total,
                                                             'applicable_discount': item?.discount
                                                         }
-                                                        navigation.navigate('OrderCreated', {'data': arrData});  
+                                                        navigation.navigate('OrderCompleted', {'data': arrData});  
                                                         this[RBSheet + index].close(); 
                                                         }}
                                                     left={() => (<Icon type={"MaterialCommunityIcons"} name="clipboard-list-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
@@ -212,6 +216,7 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId, navigator  }) =
                                                             'parts_list': item?.orderparts,
                                                             'created_at': item?.created_at,
                                                             'total': item?.total,
+                                                            'status': item?.status,
                                                             'applicable_discount': item?.discount
                                                         }
                                                         console.log('data:', arrData);
@@ -425,4 +430,4 @@ const mapStateToProps = state => ({
     selectedGarageId: state.garage.selected_garage_id,
 })
 
-export default connect(mapStateToProps)(OpenOrderList);
+export default connect(mapStateToProps)(OrderCompletedList);

@@ -28,13 +28,6 @@ const More = ({ navigation, signOut}) => {
               />
               <Divider />
               <List.Item
-                title="My Vendors"
-                style={{paddingVertical:15}}
-                left={() => (<Icon name="user-friends" style={{marginRight:20, alignSelf:"center", width: 30}} color={colors.black} size={21} />)}
-                right={() => (<Icon name="caret-right" style={{marginRight:20, alignSelf:"center"}} color={colors.gray} size={18} />)}
-              />
-              <Divider />
-              <List.Item
                 title="Order Search"
                 style={{paddingVertical:15}}
                 onPress={() => navigation.navigate("OrderSearch")}

@@ -10,14 +10,16 @@ import moment from 'moment';
 import DocumentPicker from 'react-native-document-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { SliderPicker } from 'react-native-slider-picker';
+import { Picker } from '@react-native-picker/picker';
 
-// Step - 2 for Repair Order
-
-const EditRepairOrder = ({ route, userToken }) => {
+// Edit Repair Order
+const EditRepairOrder = ({ navigation, route, userToken }) => {
 
     // User / Customer Fields
     const [isUserDetails, setIsUserDetails] = useState();
 
+    const [isGarageId, setIsGarageId] = useState(route?.params?.data?.garage_id);
+    const [isOrderId, setIsOrderId] = useState(route?.params?.data?.order_id);
     const [isUserId, setIsUserId] = useState(route?.params?.data?.user_id);
     const [isVehicleId, setIsVehicleId] = useState(route?.params?.data?.vehicle_id);
     const [isName, setIsName] = useState(route?.params?.data?.name);
@@ -31,7 +33,7 @@ const EditRepairOrder = ({ route, userToken }) => {
     const [isModelName, setIsModelName] = useState(route?.params?.data?.model_name);
     const [isVehicleRegistrationNumber, setIsVehicleRegistrationNumber] = useState(route?.params?.data?.vehicle_registration_number);
 
-    const [isOdometerKMs, setIsOdometerKMs] = useState(JSON.stringify(route?.params?.data?.odometer));
+    const [isOdometerKMs, setIsOdometerKMs] = useState(route?.params?.data?.odometer);
     const [isFuelLevel, setIsFuelLevel] = useState(route?.params?.data?.fuel_level);
 
     const [isVehicleImg, setIsVehicleImg] = useState(route?.params?.data?.orderimage);
@@ -46,6 +48,8 @@ const EditRepairOrder = ({ route, userToken }) => {
     const [isPartName, setIsPartName] = useState('');
     const [isService, setIsService] = useState('');
     const [isServiceName, setIsServiceName] = useState('');
+
+    const [isOrderStatus, setIsOrderStatus] = useState(route?.params?.data?.status);
 
     const [isNewService, setIsNewService] = useState('');
     const [newServiceError, setNewServiceError] = useState();
@@ -73,14 +77,15 @@ const EditRepairOrder = ({ route, userToken }) => {
     const [partList, setPartList] = useState([]);
 
     const [partError, setPartError] = useState();
+    const [orderStatusError, setOrderStatusError] = useState();
 
     const [partTotals, setPartTotals] = useState([]);
     const [serviceTotals, setSeviceTotals] = useState([]);
 
-    const [servicesTotal, setServicesTotal] = useState(route?.params?.data?.labor_total);
-    const [partsTotal, setPartsTotal] = useState(route?.params?.data?.parts_total);
-    const [isTotal, setIsTotal] = useState(route?.params?.data?.total);
-    const [isApplicableDiscount, setIsApplicableDiscount] = useState(route?.params?.data?.applicable_discount);
+    const [servicesTotal, setServicesTotal] = useState(parseInt(route?.params?.data?.labor_total));
+    const [partsTotal, setPartsTotal] = useState(parseInt(route?.params?.data?.parts_total));
+    const [isTotal, setIsTotal] = useState(parseInt(route?.params?.data?.total));
+    const [isApplicableDiscount, setIsApplicableDiscount] = useState(parseInt(route?.params?.data?.applicable_discount));
     const [isTotalServiceDiscount, setIsTotalServiceDiscount] = useState(0);
     const [isTotalPartDiscount, setIsTotalPartDiscount] = useState(0);
 
@@ -102,30 +107,30 @@ const EditRepairOrder = ({ route, userToken }) => {
 
         // Calculation of Specific Part's total
         values[i][value.name] = value.value;
-        values[i]['totalForThisService'] = (values[i]['rate'] * values[i]['quantity']) - ((values[i]['rate'] * values[i]['quantity']) * (values[i]['discount'] / 100))
-        serviceTotals[i] = values[i]['totalForThisService'];
+        values[i]['amount'] = (values[i]['rate'] * values[i]['qty']) - ((values[i]['rate'] * values[i]['qty']) * (values[i]['discount'] / 100))
+        serviceTotals[i] = values[i]['amount'];
 
         // Calculation of Total of all Parts
         let total = 0;
         values.forEach(item => {
-            total += item.totalForThisService;
+            total += parseInt(item.amount);
         });
-        setServicesTotal(total);
-        setIsTotal(total + partsTotal);
+        setServicesTotal(parseInt(total));
+        setIsTotal(parseInt(total) + parseInt(partsTotal));
 
         // Calculate Total of Order
-        values[i]['applicableDiscountForItem'] = (values[i]['rate'] * values[i]['quantity']) * (values[i]['discount'] / 100);
+        values[i]['applicableDiscountForItem'] = (values[i]['rate'] * values[i]['qty']) * (values[i]['discount'] / 100);
         let discountTotal = 0;
         values.forEach(item => {
             discountTotal += item.applicableDiscountForItem;
         });
-        setIsTotalServiceDiscount(discountTotal);
-        setIsApplicableDiscount(discountTotal + isTotalPartDiscount);
+        setIsTotalServiceDiscount(parseInt(discountTotal));
+        setIsApplicableDiscount(parseInt(discountTotal) + parseInt(isTotalPartDiscount));
     }
 
     function handleServiceAdd(data) {
         const values = [...fieldsServices];
-        values.push({ serviceId: data.serviceId, serviceName: data.serviceName, rate: 0, quantity: 0, discount: 0, applicableDiscountForItem: 0, totalForThisService: 0 });
+        values.push({ service_id: data.service_id, serviceName: data.serviceName, rate: 0, qty: 0, discount: 0, applicableDiscountForItem: 0, amount: 0 });
         setFieldsServices(values);
         setServiceListModal(false);
     }
@@ -139,10 +144,10 @@ const EditRepairOrder = ({ route, userToken }) => {
         // Recalculation of Totals
         let total = 0;
         values.forEach(item => {
-            total += item.totalForThisService;
+            total += parseInt(item.amount);
         });
         setServicesTotal(total);
-        setIsTotal(total + partsTotal);
+        setIsTotal(parseInt(total) + parseInt(partsTotal));
 
         // Calculate Total of Order
         let discountTotal = 0;
@@ -150,7 +155,7 @@ const EditRepairOrder = ({ route, userToken }) => {
             discountTotal += item.applicableDiscountForItem;
         });
         setIsTotalServiceDiscount(discountTotal);
-        setIsApplicableDiscount(discountTotal + isTotalPartDiscount);
+        setIsApplicableDiscount(parseInt(discountTotal) + parseInt(isTotalPartDiscount));
     }
 
     // Function for Parts Fields
@@ -159,31 +164,31 @@ const EditRepairOrder = ({ route, userToken }) => {
 
         // Calculation of Specific Part's total
         partValues[i][value.name] = value.value;
-        partValues[i]['totalForThisPart'] = (partValues[i]['rate'] * partValues[i]['quantity']) - ((partValues[i]['rate'] * partValues[i]['quantity']) * (partValues[i]['discount'] / 100))
+        partValues[i]['amount'] = (partValues[i]['rate'] * partValues[i]['qty']) - ((partValues[i]['rate'] * partValues[i]['qty']) * (partValues[i]['discount'] / 100))
         setFieldsParts(partValues);
-        partTotals[i] = partValues[i]['totalForThisPart'];
+        partTotals[i] = partValues[i]['amount'];
 
         // Calculation of Total of all Parts
         let total = 0;
         partValues.forEach(item => {
-            total += item.totalForThisPart;
+            total += parseInt(item.amount);
         });
-        setPartsTotal(total);
+        setPartsTotal(parseInt(total));
 
         // Calculate Total of Order
-        setIsTotal(total + servicesTotal);
-        partValues[i]['applicableDiscountForItem'] = (partValues[i]['rate'] * partValues[i]['quantity']) * (partValues[i]['discount'] / 100);
+        setIsTotal(parseInt(total) + parseInt(servicesTotal));
+        partValues[i]['applicableDiscountForItem'] = (partValues[i]['rate'] * partValues[i]['qty']) * (partValues[i]['discount'] / 100);
         let discountTotal = 0;
         partValues.forEach(item => {
             discountTotal += item.applicableDiscountForItem;
         });
-        setIsTotalPartDiscount(discountTotal);
-        setIsApplicableDiscount(discountTotal + isTotalServiceDiscount);
+        setIsTotalPartDiscount(parseInt(discountTotal));
+        setIsApplicableDiscount(parseInt(discountTotal) + parseInt(isTotalServiceDiscount));
     }
 
     function handlePartAdd(data) {
         const partValues = [...fieldsParts];
-        partValues.push({ partId: data.partId, partName: data.partName, rate: 0, quantity: 0, discount: 0, applicableDiscount: 0, totalForThisPart: 0 });
+        partValues.push({ parts_id: data.parts_id, partName: data.partName, rate: 0, qty: 0, discount: 0, applicableDiscount: 0, amount: 0 });
         setFieldsParts(partValues);
         setPartListModal(false);
     }
@@ -197,18 +202,18 @@ const EditRepairOrder = ({ route, userToken }) => {
         // Recalculation of Totals
         let total = 0;
         partValues.forEach(item => {
-            total += item.totalForThisPart;
+            total += item.amount;
         });
-        setPartsTotal(total);
+        setPartsTotal(parseInt(total));
 
         // Calculate Total of Order
-        setIsTotal(total + servicesTotal);
+        setIsTotal(parseInt(total) + parseInt(servicesTotal));
         let discountTotal = 0;
         partValues.forEach(item => {
             discountTotal += item.applicableDiscountForItem;
         });
         setIsTotalPartDiscount(discountTotal);
-        setIsApplicableDiscount(discountTotal + isTotalServiceDiscount);
+        setIsApplicableDiscount(parseInt(discountTotal) + parseInt(isTotalServiceDiscount));
     }
 
 
@@ -256,6 +261,7 @@ const EditRepairOrder = ({ route, userToken }) => {
 
     const validate = () => {
         return !(
+            !isOrderStatus || isOrderStatus === 0 ||
             !estimatedDeliveryDateTime || estimatedDeliveryDateTime?.trim().length === 0 
         )
     }
@@ -264,31 +270,35 @@ const EditRepairOrder = ({ route, userToken }) => {
         Keyboard.dismiss();  
         if (!validate()) {
             if (!estimatedDeliveryDateTime || estimatedDeliveryDateTime?.trim().length === 0) setEstimateDeliveryDateError("Estimate Delivery Date is required"); else setEstimateDeliveryDateError('');
+            if (!isOrderStatus || isOrderStatus?.trim().length === 0) setOrderStatusError("Order Status is required"); else setOrderStatusError('');
+            
             return;
         }
 
         const data = new FormData();
-        data.append('user_id', isUserId);
-        data.append('vehicle_id', isVehicleId);
-        data.append('odometer', isOdometerKMs);
-        data.append('fuel_level', isFuelLevel);
-        data.append('order_service', fieldsServices);
-        data.append('order_parts', fieldsParts);
+        data.append('garage_id', parseInt(isGarageId));
+        data.append('user_id', parseInt(isUserId));
+        data.append('vehicle_id', parseInt(isVehicleId));
+        data.append('odometer', parseInt(isOdometerKMs));
+        data.append('fuel_level', parseInt(isFuelLevel));
+        data.append('order_service', JSON.stringify(fieldsServices));
+        data.append('order_parts', JSON.stringify(fieldsParts));    
         data.append('estimated_delivery_time', moment(estimatedDeliveryDateTime, 'DD-MM-YYYY hh:mm A').format('YYYY-MM-DD hh:mm:ss'));
-        data.append('labor_total', servicesTotal);
-        data.append('parts_total', partsTotal);
-        data.append('discount', isApplicableDiscount);
+        data.append('status', isOrderStatus);    
+        data.append('labor_total', parseInt(servicesTotal));
+        data.append('parts_total', parseInt(partsTotal));
+        data.append('discount', parseInt(isApplicableDiscount));
         if(isVehicleImg != null) data.append('orderimage', isVehicleImg);
-        data.append('total', isTotal);
+        data.append('total', parseInt(isTotal));
         data.append('comment', isComment?.trim());
 
-        // editOrder(data);
+        editOrder(data);
         console.log(JSON.stringify(data)); 
     }
 
     const editOrder = async (data) => {
         try {
-            await fetch(`${API_URL}add_order`, {
+            await fetch(`${API_URL}update_order/${isOrderId}`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -306,19 +316,20 @@ const EditRepairOrder = ({ route, userToken }) => {
                 });
             })
             .then((res) => {
+                console.log('res', JSON.stringify(res)); 
                 if(res.statusCode == 400) {
                   { res.data.message.estimated_delivery_time && setEstimateDeliveryDateError(res.data.message.vehicle_registration_number); }
                   return;
                 } else if(res.statusCode == 201 || res.statusCode == 200) {
-                    navigation.navigate('OrderList');
+                    navigation.navigate('OpenOrderList');
                 } else {
-                    navigation.navigate('OrderList');
+                    navigation.navigate('OpenOrderList');
                 }
             });
         } catch (e) {
             console.log(e);
         } finally {
-            navigation.navigate('OrderList');
+            navigation.navigate('OpenOrderList');
         }
     };
 
@@ -386,7 +397,7 @@ const EditRepairOrder = ({ route, userToken }) => {
                 setIsService(parseInt(json.data.id));
                 setIsServiceName(json.data.name);
                 let data = {
-                    serviceId: json.data.id,
+                    service_id: json.data.id,
                     serviceName: json.data.name,
                 }
                 handleServiceAdd(data)
@@ -414,7 +425,7 @@ const EditRepairOrder = ({ route, userToken }) => {
                 setIsPart(parseInt(json.data.id));
                 setIsPartName(json.data.name);
                 let data = {
-                    partId: json.data.id,
+                    parts_id: json.data.id,
                     partName: json.data.name,
                 }
                 handlePartAdd(data)
@@ -462,26 +473,28 @@ const EditRepairOrder = ({ route, userToken }) => {
         let values = [...fieldsServices];
         route?.params?.data?.services_list.forEach(item => {
             values.push({ 
-                serviceId: item.service.id, 
+                id: item.id,
+                service_id: item.service_id, 
                 serviceName:item.service.name, 
-                rate: JSON.stringify(item.rate),
-                quantity: JSON.stringify(item.qty),
-                discount: JSON.stringify(item.discount),
+                rate: item.rate,
+                qty: item.qty,
+                discount: item.discount,
                 applicableDiscountForItem: (item.rate * item.qty) * (item.discount / 100),
-                totalForThisService: item.amount
+                amount: item.amount
             });
         });
         setFieldsServices(values);
         let values2 = [...fieldsParts];
         route?.params?.data?.parts_list.forEach(item => {
             values2.push({ 
-                partId: item.parts.id, 
+                id: item.id,
+                parts_id: item.parts_id, 
                 partName:item.parts.name, 
-                rate: JSON.stringify(item.rate), 
-                quantity: JSON.stringify(item.qty), 
-                discount: JSON.stringify(item.discount),  
+                rate: item.rate, 
+                qty: item.qty, 
+                discount: item.discount,  
                 applicableDiscountForItem: (item.rate * item.qty) * (item.discount / 100),
-                totalForThisPart: item.amount
+                amount: item.amount
             });
         });
         setFieldsParts(values2);
@@ -517,48 +530,6 @@ const EditRepairOrder = ({ route, userToken }) => {
                                 <Text style={styles.cardTitle}>{isModelName}</Text>
                                 <Text style={styles.cardTitle}>{isVehicleRegistrationNumber}</Text>
                             </View>
-                        </View>
-
-
-                        <TextInput
-                            mode="outlined"
-                            label='Odometer (in KMs)'
-                            style={styles.input}
-                            placeholder="Odometer (in KMs)"
-                            value={isOdometerKMs}
-                            onChangeText={(text) => setIsOdometerKMs(text)}
-                        />
-                        {odometerKMsError?.length > 0 &&
-                            <Text style={styles.errorTextStyle}>{odometerKMsError}</Text>
-                        }
-
-                        <View style={styles.odometerContainer}>
-                            <SliderPicker
-                                minLabel={"Empty"}
-                                maxLabel={"Full"}
-                                minValue={0}
-                                maxValue={10}
-                                callback={(position) => {
-                                    setIsFuelLevel(position);
-                                }}
-                                defaultValue={5}
-                                showFill={true}
-                                fillColor={'green'}
-                                labelFontWeight={'500'}
-                                labelFontSize={14}
-                                labelFontColor={colors.default_theme.black}
-                                showNumberScale={false}
-                                showSeparatorScale={true}
-                                buttonBackgroundColor={'#fff'}
-                                buttonBorderColor={"#6c7682"}
-                                buttonBorderWidth={1}
-                                scaleNumberFontWeight={'300'}
-                                buttonDimensionsPercentage={6}
-                                heightPercentage={1}
-                                widthPercentage={80}
-                                labelStylesOverride={{ marginTop: 25 }}
-                            />
-                            <Text style={{ fontWeight: "600", fontSize: 18, color: colors.black }}>Fuel Level: {isFuelLevel}</Text>
                         </View>
 
                         <Text style={[styles.headingStyle, { marginTop: 20 }]}>Service:</Text>
@@ -602,11 +573,11 @@ const EditRepairOrder = ({ route, userToken }) => {
                                                     style={styles.textEntryInput}
                                                     placeholder="Quantity"
                                                     keyboardType="numeric"
-                                                    value={fieldsServices[idx].quantity}
+                                                    value={fieldsServices[idx].qty}
                                                     onChangeText={
                                                         e => {
                                                             let parameter = {
-                                                                name: 'quantity',
+                                                                name: 'qty',
                                                                 value: e,
                                                             };
                                                             handleServiceChange(idx, parameter);
@@ -631,12 +602,11 @@ const EditRepairOrder = ({ route, userToken }) => {
                                                         }
                                                     }
                                                 />
-                                        
                                             </View>
 
                                             <View style={{flexDirection: 'row'}}>
                                                 <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 0, fontWeight: '600'}}>Total for this Service: </Text>
-                                                <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 5 }}>{(fieldsServices[idx]) ? fieldsServices[idx].totalForThisService : 0}</Text>
+                                                <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 5 }}>{(fieldsServices[idx]) ? fieldsServices[idx].amount : 0}</Text>
                                             </View>
                                         </View>
                                     </View>
@@ -748,11 +718,11 @@ const EditRepairOrder = ({ route, userToken }) => {
                                                     style={styles.textEntryInput}
                                                     placeholder="Quantity"
                                                     keyboardType="numeric"
-                                                    value={fieldsParts[idx].quantity}
+                                                    value={fieldsParts[idx].qty}
                                                     onChangeText={
                                                         e => {
                                                             let parameter = {
-                                                                name: 'quantity',
+                                                                name: 'qty',
                                                                 value: e,
                                                             };
                                                             handlePartChange(idx, parameter);
@@ -781,7 +751,7 @@ const EditRepairOrder = ({ route, userToken }) => {
 
                                             <View style={{flexDirection: 'row'}}>
                                                 <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 0, fontWeight: '600'}}>Total for this Part: </Text>
-                                                <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 5 }}>{(fieldsParts[idx]) ? fieldsParts[idx].totalForThisPart : 0}</Text>
+                                                <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 5 }}>{(fieldsParts[idx]) ? fieldsParts[idx].amount : 0}</Text>
                                             </View>
                                         </View>
                                     </View>
@@ -922,6 +892,66 @@ const EditRepairOrder = ({ route, userToken }) => {
                         </View>
 
                         <Text style={[styles.headingStyle, { marginTop: 20 }]}>Additional Information:</Text>
+
+                        <View style={{borderBottomWidth:1, borderColor: colors.light_gray, borderRadius: 4, marginTop: 20, backgroundColor: '#F0F2F5'}}>
+                            <Picker
+                                selectedValue={isOrderStatus}
+                                onValueChange={(v) => {setIsOrderStatus(v)}}
+                                style={{padding: 0}}
+                                itemStyle={{padding: 0}}
+                            >
+                                <Picker.Item key={1} label="Select Order Status" value="0" />
+                                <Picker.Item key={2} label="Vehicle Received" value="Vehicle Received" />
+                                <Picker.Item key={3} label="Work in Progress Order" value="Work in Progress Order" />
+                                <Picker.Item key={4} label="Vehicle Ready" value="Vehicle Ready" />
+                                <Picker.Item key={5} label="Completed Order" value="Completed Order" />
+                            </Picker>
+                        </View>
+                        {orderStatusError?.length > 0 &&
+                            <Text style={{color: colors.danger}}>{orderStatusError}</Text>
+                        }
+
+                        <TextInput
+                            mode="outlined"
+                            label='Odometer (in KMs)'
+                            style={styles.input}
+                            placeholder="Odometer (in KMs)"
+                            value={isOdometerKMs}
+                            onChangeText={(text) => setIsOdometerKMs(text)}
+                        />
+                        {odometerKMsError?.length > 0 &&
+                            <Text style={styles.errorTextStyle}>{odometerKMsError}</Text>
+                        }
+
+                        <View style={styles.odometerContainer}>
+                            <SliderPicker
+                                minLabel={"Empty"}
+                                maxLabel={"Full"}
+                                minValue={0}
+                                maxValue={10}
+                                callback={(position) => {
+                                    setIsFuelLevel(position);
+                                }}
+                                defaultValue={parseInt(isFuelLevel)}
+                                showFill={true}
+                                fillColor={'green'}
+                                labelFontWeight={'500'}
+                                labelFontSize={14}
+                                labelFontColor={colors.default_theme.black}
+                                showNumberScale={false}
+                                showSeparatorScale={true}
+                                buttonBackgroundColor={'#fff'}
+                                buttonBorderColor={"#6c7682"}
+                                buttonBorderWidth={1}
+                                scaleNumberFontWeight={'300'}
+                                buttonDimensionsPercentage={6}
+                                heightPercentage={1}
+                                widthPercentage={80}
+                                labelStylesOverride={{ marginTop: 25 }}
+                            />
+                            <Text style={{ fontWeight: "600", fontSize: 18, color: colors.black }}>Fuel Level: {isFuelLevel}</Text>
+                        </View>
+
                         <TextInput
                             mode="outlined"
                             label='Comment'
@@ -1012,7 +1042,7 @@ const EditRepairOrder = ({ route, userToken }) => {
                                                                         // handlePartAdd();
 
                                                                         let parameter = {
-                                                                            partId: item.id,
+                                                                            parts_id: item.id,
                                                                             partName: item.name
                                                                         };
                                                                         handlePartAdd(parameter);
@@ -1083,7 +1113,7 @@ const EditRepairOrder = ({ route, userToken }) => {
                                                                         // handleServiceAdd();
 
                                                                         let parameter = {
-                                                                            serviceId: item.id,
+                                                                            service_id: item.id,
                                                                             serviceName: item.name
                                                                         };
                                                                         handleServiceAdd(parameter);

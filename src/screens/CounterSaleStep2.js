@@ -423,7 +423,6 @@ const CounterSaleStep2 = ({ route, userToken }) => {
                                     </View>
                                 </View>
                             </View>
-                           
                         </View>
 
                         <Button

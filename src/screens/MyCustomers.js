@@ -8,7 +8,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import RBSheet from "react-native-raw-bottom-sheet";
 import { useIsFocused  } from '@react-navigation/native';
  
-const MyCustomer = ({navigation, userToken, selectedGarageId, selectedGarage }) => {
+const MyCustomer = ({ navigation, userToken, selectedGarageId, selectedGarage }) => {
     const [isLoading, setIsLoading] = useState(true);
     const refRBSheet = useRef();
     const [isGarageId, setGarageId] = useState(selectedGarageId);
@@ -30,7 +30,6 @@ const MyCustomer = ({navigation, userToken, selectedGarageId, selectedGarage }) 
             });
             const json = await res.json();
             if (json !== undefined) {
-                // console.log(json);
                 setData(json.user_list);
                 setFilteredData(json.user_list);
             }
@@ -130,7 +129,7 @@ const MyCustomer = ({navigation, userToken, selectedGarageId, selectedGarage }) 
             </View>
             <RBSheet
                 ref={refRBSheet}
-                height={190}
+                height={63}
                 openDuration={250}
                 >
                 <View style={{flexDirection:"column", flex:1}}>
@@ -140,8 +139,8 @@ const MyCustomer = ({navigation, userToken, selectedGarageId, selectedGarage }) 
                         onPress={() => { navigation.navigate("CustomerDetails", { userId: customerId });  refRBSheet.current.close(); }}
                         left={() => (<Icon type={"MaterialCommunityIcons"} name="eye" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
                     />
-                    <Divider />
-                    <List.Item
+                    {/* <Divider /> */}
+                    {/* <List.Item
                         title="Activity Log"
                         style={{paddingVertical:15}}
                         onPress={() =>  { navigation.navigate("MyCustomers");  refRBSheet.current.close(); }}
@@ -153,7 +152,7 @@ const MyCustomer = ({navigation, userToken, selectedGarageId, selectedGarage }) 
                         style={{paddingVertical:15}}
                         onPress={() => { navigation.navigate("MyCustomers");  refRBSheet.current.close(); }}
                         left={() => (<Icon type={"MaterialCommunityIcons"} name="notebook-plus-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
-                    />
+                    /> */}
                 </View>
             </RBSheet>
         </View>

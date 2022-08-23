@@ -40,9 +40,9 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
         if (text) {
             const newData = data.filter(
                 function (listData) {
-                let itemData = listData.vehicle_registration_number ? listData.vehicle_registration_number.toUpperCase() : ''.toUpperCase()
-                const textData = text.toUpperCase();
-                return itemData.indexOf(textData) > -1;
+                    let itemData = listData.vehicle_registration_number ? listData.vehicle_registration_number.toUpperCase() : ''.toUpperCase()
+                    const textData = text.toUpperCase();
+                    return itemData.indexOf(textData) > -1;
                 }
             );
             setFilteredData(newData);
@@ -54,21 +54,21 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
     };
 
     const sendVehicleData = (index) => {
-        const vehicleData = {
-            'isVehicleId': filteredData[index]?.id,
-            'isUserId': filteredData[index]?.users[0].id,
-            'isGarageId': filteredData[index]?.users[0].garage_customers[0].id,
-            'isName': filteredData[index]?.users[0].name,
-            'isEmail': filteredData[index]?.users[0].email,
-            'isPhoneNumber': filteredData[index]?.users[0].phone_number,
+        const userVehicleDetails = {
+            'vehicle_id': filteredData[index]?.id,
+            'user_id': filteredData[index]?.users[0].id,
+            'garage_id': filteredData[index]?.users[0].garage_customers[0].id,
+            'name': filteredData[index]?.users[0].name,
+            'email': filteredData[index]?.users[0].email,
+            'phone_number': filteredData[index]?.users[0].phone_number,
             'isCity': filteredData[index]?.users[0].city,
             'isState': filteredData[index]?.users[0].state,
             'isAddress': filteredData[index]?.users[0].address,
             'isBrand': filteredData[index]?.brand_id,
-            'isBrandName': filteredData[index]?.brand.name,
+            'brand_name': filteredData[index]?.brand.name,
             'isModel': filteredData[index]?.model_id,
-            'isModelName': filteredData[index]?.vehicle_model?.model_name,
-            'isVehicleRegistrationNumber': filteredData[index]?.vehicle_registration_number,
+            'model_name': filteredData[index]?.vehicle_model?.model_name,
+            'vehicle_registration_number': filteredData[index]?.vehicle_registration_number,
             'isPurchaseDate': filteredData[index]?.purchase_date,
             'isManufacturingDate': filteredData[index]?.manufacturing_date,
             'isEngineNumber': filteredData[index]?.engine_number,
@@ -81,7 +81,7 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
             'isRegistrationCertificateImg': filteredData[index]?.registration_certificate_img,
             'isInsuranceImg': filteredData[index]?.insurance_img,
         }
-        navigation.navigate('AddRepairOrderStep2', { 'data': vehicleData } );
+        navigation.navigate('AddRepairOrderStep3', { 'userVehicleDetails': userVehicleDetails } );
     }
 
     useEffect(() => {

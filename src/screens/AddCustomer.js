@@ -205,7 +205,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
             setDisplayPurchaseCalender(false);
             setDatePurchase(formattedDate);
             let formateDateForDatabase = moment(currentDate, 'YYYY MMMM D').format('YYYY-MM-DD');
-            setIsPurchaseDate(formateDateForDatabase);
+            setIsPurchaseDate(new Date(formateDateForDatabase));
         }
      };
 
@@ -216,7 +216,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
             setDisplayManufacturingCalender(false);
             setDateManufacturing(formattedDate);
             let formateDateForDatabase = moment(currentDate, 'YYYY MMMM D').format('YYYY-MM-DD');
-            setIsManufacturingDate(formateDateForDatabase);
+            setIsManufacturingDate(new Date(formateDateForDatabase));
         }
     };
 
@@ -227,7 +227,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
             setDisplayInsuranceExpiryCalender(false);
             setDateInsuranceExpiry(formattedDate);
             let formateDateForDatabase = moment(currentDate, 'YYYY MMMM D').format('YYYY-MM-DD');
-            setIsInsuranceExpiryDate(formateDateForDatabase);  
+            setIsInsuranceExpiryDate(new Date(formateDateForDatabase));  
         }   
     };
 

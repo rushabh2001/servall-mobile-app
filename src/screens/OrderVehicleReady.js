@@ -9,7 +9,7 @@ import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
 import moment from "moment";
 import { API_URL } from "../constants/config";
 
-const OrderCreated = ({ navigation, userRole, route, userToken }) => {
+const OrderVehicleReady = ({ navigation, userRole, route, userToken }) => {
 
     const [partData, setPartData] = useState([]);
     const [serviceData, setServiceData] = useState([]);
@@ -55,7 +55,6 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
     // const [fieldsParts, setFieldsParts] = useState([]);
 
     const changeOrderStatus = async () => {
-        console.log('working');
 
         // Data to call API 
         let orderServicesArray = [];
@@ -66,11 +65,11 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
         partData.forEach(item => {
             orderPartsArray.push({ order_part_id: item.id, is_done: item.is_done });
         });
-        console.log('orderStatusArray', isOrderData);
+        // console.log('orderStatusArray',orderStatusArray);
 
         // Data to send for next screen 
-        isOrderData['parts_list'] = partData;
-        isOrderData['services_list'] = serviceData;
+        isOrderData.parts_list = partData;
+        isOrderData.services_list = serviceData;
 
         try {
             const res = await fetch(`${API_URL}order_status/update`, {
@@ -90,11 +89,11 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
             if (json !== undefined) {
                 console.log(json);
                 if (json.order_status == "Vehicle Received") {
-                    // navigation.navigate('OrderCreated', {'data': isOrderData});
+                    navigation.navigate('OrderCreated', {'data': isOrderData});
                 } else if(json.order_status == "Work in Progress Order") {
                     navigation.navigate('OrderWorkInProgress', {'data': isOrderData});
                 } else if(json.order_status == "Vehicle Ready") {
-                    navigation.navigate('OrderVehicleReady', {'data': isOrderData});
+                    // navigation.navigate('OrderVehicleReady', {'data': isOrderData});
                 } else if(json.order_status == "Completed Order") {
                     navigation.navigate('OrderCompleted', {'data': isOrderData});
                 }
@@ -154,7 +153,7 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
                     <View>
                         <ProgressSteps
                             labelFontSize={12}
-                            activeStep={0}
+                            activeStep={2}
                             disabledStepIconColor="#616161"
                             labelColor="#616161"
                             progressBarColor="#616161"
@@ -163,6 +162,17 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
                                 label="Created"
                                 removeBtnRow={true}
                             >   
+                            </ProgressStep>
+                            <ProgressStep 
+                                label="In Progress"
+                                removeBtnRow={true}
+                            >
+    
+                            </ProgressStep>
+                            <ProgressStep 
+                                label="Vehicle Ready"
+                                removeBtnRow={true}
+                            >
                                 <View>
                                     <View style={{flexDirection: "row", alignItems:"center", justifyContent: 'center'}}>
                                         <Text style={styles.customerName}>{isName}</Text>
@@ -300,7 +310,7 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
                                     </View>
                                     <View style={{flexDirection:'column', backgroundColor: colors.white}}>
                                         <>
-                                            {partData.length ==  0 ? 
+                                            {serviceData.length ==  0 ? 
                                                 <View style={{justifyContent: 'center', alignItems: 'center', height: 50}}>
                                                     <Text>No Parts associated with Order!</Text>
                                                 </View>
@@ -360,17 +370,6 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
                                 >
                                     Update Status
                                 </Button>
-
-                            </ProgressStep>
-                            <ProgressStep 
-                                label="In Progress"
-                                removeBtnRow={true}
-                            >
-                            </ProgressStep>
-                            <ProgressStep 
-                                label="Vehicle Ready"
-                                removeBtnRow={true}
-                            >
                             </ProgressStep>
                             <ProgressStep 
                                 label="Completed Order"
@@ -468,4 +467,4 @@ const mapStateToProps = state => ({
     userToken: state.user.userToken,
 })
 
-export default connect(mapStateToProps)(OrderCreated);
+export default connect(mapStateToProps)(OrderVehicleReady);

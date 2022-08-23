@@ -7,7 +7,7 @@ import { API_URL } from '../constants/config';
 import InputScrollView from 'react-native-input-scroll-view';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
-const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, garageId }) => {
+const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, garageId, selectedGarage }) => {
 
     // User / Customer Fields
     const [isPrice, setIsPrice] = useState('');
@@ -44,22 +44,22 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
     const [addNewPartModal, setAddNewPartModal] = useState(false);
 
     // Property Vendor Dropdown
-    const [isVendor, setIsVendor] = useState();
-    const [isVendorName, setIsVendorName] = useState('');
-    const [vendorList, setVendorList] = useState([]);
-    const [vendorListModal, setVendorListModal] = useState(false);
-    const [isLoadingVendorList, setIsLoadingVendorList] = useState(true);
-    const [filteredVendorData, setFilteredVendorData] = useState([]);
-    const [searchQueryForVendors, setSearchQueryForVendors] = useState(); 
-    const [vendorError, setVendorError] = useState('');   // Error State
+    // const [isVendor, setIsVendor] = useState();
+    // const [isVendorName, setIsVendorName] = useState('');
+    // const [vendorList, setVendorList] = useState([]);
+    // const [vendorListModal, setVendorListModal] = useState(false);
+    // const [isLoadingVendorList, setIsLoadingVendorList] = useState(true);
+    // const [filteredVendorData, setFilteredVendorData] = useState([]);
+    // const [searchQueryForVendors, setSearchQueryForVendors] = useState(); 
+    // const [vendorError, setVendorError] = useState('');   // Error State
     
-    const [isNewVendor, setIsNewVendor] = useState('');
-    const [newVendorError, setNewVendorError] = useState();
-    const [addNewVendorModal, setAddNewVendorModal] = useState(false);
+    // const [isNewVendor, setIsNewVendor] = useState('');
+    // const [newVendorError, setNewVendorError] = useState();
+    // const [addNewVendorModal, setAddNewVendorModal] = useState(false);
 
-    // Property Vendor Dropdown
+    // Property Garage Dropdown
     const [isGarageId, setIsGarageId] = useState(selectedGarageId);
-    const [isGarageName, setIsGarageName] = useState('');
+    const [isGarageName, setIsGarageName] = useState(!selectedGarage ? "" : selectedGarage.garage_name);
     const [garageList, setGarageList] = useState([]);
     const [garageListModal, setGarageListModal] = useState(false);
     const [isLoadingGarageList, setIsLoadingGarageList] = useState(false);
@@ -79,7 +79,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
             !isRackId || isRackId?.trim().length === 0 ||
             !isMinStock || isMinStock?.trim().length === 0 ||
             !isMaxStock || isMaxStock?.trim().length === 0 ||
-            !isVendor || isVendor === 0 ||
+            // !isVendor || isVendor === 0 ||
             !isGarageId || isGarageId === 0 
         )
     }
@@ -87,14 +87,14 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
     const submit = () => {
         Keyboard.dismiss();
         if (!validate()) {
-            if (!isPart) setPriceError("Part is required"); else setPartError('');
+            if (!isPart) setPartError("Part is required"); else setPartError('');
             if (!isPrice) setPriceError("Price is required"); else setPriceError('');
             if (!isMRP) setMrpError("MRP is required"); else setMrpError('');
             if (!isRackId) setRackIdError("Rack ID is required"); else setRackIdError('');
             if (!isCurrentStock) setCurrentStockError("Current Stock is required"); else setCurrentStockError('');
             if (!isMinStock) setMinStockError("Minimum Stock is required"); else setMinStockError('');
             if (!isMaxStock) setMaxStockError("Maximum Stock is required"); else setMaxStockError('');
-            if (!isVendor || isVendor === 0) setVendorError('Brand is required'); else setVendorError('');
+            // if (!isVendor || isVendor === 0) setVendorError('Brand is required'); else setVendorError('');
             if (!isGarageId || isGarageId == 0) setGarageIdError("Customer Belongs to Garage Field is required"); else setGarageIdError('');
             return;
         }
@@ -102,7 +102,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
         const data = {
             'parts_id': isPart,
             'garage_id': isGarageId,
-            'vendor_id': isVendor,
+            // 'vendor_id': isVendor,
             'purchase_price': isPrice?.trim(),
             'mrp': isMRP?.trim(),
             'rack_id': isRackId?.trim(),
@@ -198,77 +198,77 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
         }
     };
 
-    const searchFilterForVendors = (text) => {
-        if (text) {
-            let newData = vendorList.filter(
-                function (listData) {
-                let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
-                let textData = text.toUpperCase();
-                return itemData.indexOf(textData) > -1;
-                }
-            );
-            setFilteredVendorData(newData);
-            setSearchQueryForVendors(text);
-        } else {
-            setFilteredVendorData(vendorList);
-            setSearchQueryForVendors(text);
-        }
-    };
+    // const searchFilterForVendors = (text) => {
+    //     if (text) {
+    //         let newData = vendorList.filter(
+    //             function (listData) {
+    //             let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
+    //             let textData = text.toUpperCase();
+    //             return itemData.indexOf(textData) > -1;
+    //             }
+    //         );
+    //         setFilteredVendorData(newData);
+    //         setSearchQueryForVendors(text);
+    //     } else {
+    //         setFilteredVendorData(vendorList);
+    //         setSearchQueryForVendors(text);
+    //     }
+    // };
 
-    const getVendorList = async () => {
-        setIsLoadingVendorList(true);
-        try {
-            const res = await fetch(`${API_URL}fetch_vendors`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + userToken
-                },
-            });
-            const json = await res.json();
-            if (json !== undefined) {
-                setVendorList(json.data);
-                setFilteredVendorData(json.data);
-            }
-        } catch (e) {
-            console.log(e);
-        } finally {
-            setIsLoadingVendorList(false)
-        }
-    };
+    // const getVendorList = async () => {
+    //     setIsLoadingVendorList(true);
+    //     try {
+    //         const res = await fetch(`${API_URL}fetch_vendors`, {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Accept': 'application/json',
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': 'Bearer ' + userToken
+    //             },
+    //         });
+    //         const json = await res.json();
+    //         if (json !== undefined) {
+    //             setVendorList(json.data);
+    //             setFilteredVendorData(json.data);
+    //         }
+    //     } catch (e) {
+    //         console.log(e);
+    //     } finally {
+    //         setIsLoadingVendorList(false)
+    //     }
+    // };
 
-    const addNewVendor = async () => {
-        let data = { 'name': isNewVendor }
-        try {
-            const res = await fetch(`${API_URL}add_vendor`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + userToken
-                },
-                body: JSON.stringify(data)
-            });
-            const json = await res.json();
-            if (json !== undefined) {
-                console.log('setVendorList', json.data);
-                getVendorList();
-                setIsVendor(parseInt(json.data.id));
-                setIsVendorName(json.data.name);
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    }
+    // const addNewVendor = async () => {
+    //     let data = { 'name': isNewVendor }
+    //     try {
+    //         const res = await fetch(`${API_URL}add_vendor`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Accept': 'application/json',
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': 'Bearer ' + userToken
+    //             },
+    //             body: JSON.stringify(data)
+    //         });
+    //         const json = await res.json();
+    //         if (json !== undefined) {
+    //             // console.log('setVendorList', json.data);
+    //             getVendorList();
+    //             setIsVendor(parseInt(json.data.id));
+    //             setIsVendorName(json.data.name);
+    //         }
+    //     } catch (e) {
+    //         console.log(e);
+    //     }
+    // }
 
     const searchFilterForGarages = (text) => {
         if (text) {
             let newData = garageList.filter(
                 function (listData) {
-                let itemData = listData.garage_name ? listData.garage_name.toUpperCase() : ''.toUpperCase()
-                let textData = text.toUpperCase();
-                return itemData.indexOf(textData) > -1;
+                    let itemData = listData.garage_name ? listData.garage_name.toUpperCase() : ''.toUpperCase()
+                    let textData = text.toUpperCase();
+                    return itemData.indexOf(textData) > -1;
                 }
             );
             setFilteredGarageData(newData);
@@ -302,11 +302,44 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
         }
     };
 
+    const getInvetoryData = async () => {
+        try {
+            const res = await fetch(`${API_URL}fetch_parts_inventory?parts_id=${isPart}&garage_id=${isGarageId}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+            });
+            const json = await res.json();
+            if (json !== undefined) {
+                console.log('getInvetoryData', res);
+                // setIsVendor(parseInt(json.data.id));
+                // setIsVendorName(json.data.name);
+        
+                setIsCurrentStock(json.data.current_stock);
+                setIsMaxStock(json.data.max_stock);
+                setIsMinStock(json.data.min_stock);
+                setIsMRP(json.data.mrp);
+                setIsRackId(json.data.rack_id);
+                setIsPrice(json.data.purchase_price);
+                // setIsComment(json.data.comment);
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
     useEffect(() => {
-        getVendorList();
+        // getVendorList();
         getGarageList();
         getPartList();
     }, []);
+
+    useEffect(() => {
+        getInvetoryData();
+      }, [isPart, isGarageId]);
 
     return (
         <View style={styles.pageContainer}>
@@ -333,14 +366,14 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                             <TextInput
                                 mode="outlined"
                                 label='Part'
-                                style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                style={{marginTop: 18, backgroundColor: '#f1f1f1', width:'100%' }}
                                 placeholder="Select Part"
                                 value={isPartName}
                                 right={<TextInput.Icon name="menu-down" />}
                             />
                         </View>
 
-                        <View>
+                        {/* <View>
                             <TouchableOpacity 
                                 style={styles.partDropDownField} 
                                 onPress={() => {
@@ -351,12 +384,12 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                             <TextInput
                                 mode="outlined"
                                 label='Vendor'
-                                style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                style={{marginTop: 18, backgroundColor: '#f1f1f1', width:'100%' }}
                                 placeholder="Select Vendor"
                                 value={isVendorName}
                                 right={<TextInput.Icon name="menu-down" />}
                             />
-                        </View>
+                        </View> */}
 
                         <TextInput
                             mode="outlined"
@@ -370,6 +403,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                         {priceError?.length > 0 &&
                             <Text style={styles.errorTextStyle}>{priceError}</Text>
                         }
+
                         <TextInput
                             mode="outlined"
                             label='MRP'
@@ -382,6 +416,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                         {mrpError?.length > 0 &&
                             <Text style={styles.errorTextStyle}>{mrpError}</Text>
                         }
+                        
                         <TextInput
                             mode="outlined"
                             label='Rack ID'
@@ -582,7 +617,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                 </Modal>
 
                 {/* Vendors List Modal */}
-                <Modal visible={vendorListModal} onDismiss={() => { setVendorListModal(false); setIsVendor(0); setIsVendorName(''); setVendorError(''); setSearchQueryForVendors('');  searchFilterForVendors();}} contentContainerStyle={styles.modalContainerStyle}>
+                {/* <Modal visible={vendorListModal} onDismiss={() => { setVendorListModal(false); setIsVendor(0); setIsVendorName(''); setVendorError(''); setSearchQueryForVendors('');  searchFilterForVendors();}} contentContainerStyle={styles.modalContainerStyle}>
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Vendor</Text>
                     {(isLoadingVendorList == true) ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator>
                     :
@@ -636,10 +671,10 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                             </View>
                         </>
                     }
-                </Modal>
+                </Modal> */}
 
                 {/* Add New Vendor Modal */}
-                <Modal visible={addNewVendorModal} onDismiss={() => { setAddNewVendorModal(false); setVendorListModal(true);  setIsNewVendor(0); setNewVendorError(''); }} contentContainerStyle={styles.modalContainerStyle}>
+                {/* <Modal visible={addNewVendorModal} onDismiss={() => { setAddNewVendorModal(false); setVendorListModal(true);  setIsNewVendor(0); setNewVendorError(''); }} contentContainerStyle={styles.modalContainerStyle}>
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Vendor</Text>
                     <View>
                         <TextInput
@@ -685,7 +720,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                             Close
                         </Button>
                     </View>
-                </Modal>
+                </Modal> */}
 
                 {/* Garage List Modal */}
                 <Modal visible={garageListModal} onDismiss={() => { setGarageListModal(false); setIsGarageId(0); setIsGarageName(''); setGarageError(''); setSearchQueryForGarages('');  searchFilterForGarages();}} contentContainerStyle={styles.modalContainerStyle}>
@@ -801,6 +836,7 @@ const mapStateToProps = state => ({
     userRole: state.role.user_role,
     userId: state.user?.user?.id,
     selectedGarageId: state.garage.selected_garage_id,
+    selectedGarage: state.garage.selected_garage,
     garageId: state.garage.garage_id,
 })
 

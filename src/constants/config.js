@@ -1,7 +1,7 @@
 /* stage */
-export const WEB_URL = 'http://demo2.webstertech.in/servall_garage_api/public/';
-export const BASE_URL = 'http://demo2.webstertech.in/servall_garage_api/public/api/';
-export const API_URL = 'http://demo2.webstertech.in/servall_garage_api/public/api/';
+export const WEB_URL = 'https://www.servall.in/servall_garage_api/public/';
+export const BASE_URL = 'https://www.servall.in/servall_garage_api/public/api/';
+export const API_URL = 'https://www.servall.in/servall_garage_api/public/api/';
 
 /* live */
 // export const WEB_URL = 'https://admin.fakt.io/';

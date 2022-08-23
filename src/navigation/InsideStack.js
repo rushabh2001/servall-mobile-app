@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Button, Menu } from 'react-native-paper';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -16,6 +16,7 @@ import {
   EditStock,
   AddStock,
   AddPayment,
+  AddPaymentSelectOrder,
   OrderCreated,
   OrderList,
   AddGarage,
@@ -43,6 +44,12 @@ import {
   OrderWorkInProgress,
   WIPOrderList,
   OrderSearch,
+  OrderCompletedList,
+  OrderCompleted,
+  OrderVehicleReady,
+  VehicleReadyOrderList,
+  InvoicePreview,
+  InvoicePreviewSelectOrder,
 } from '../screens';
 
 const Stack = createStackNavigator();
@@ -168,17 +175,30 @@ const ServicesStack = ({ navigation }) => {
         }}
       />
       <Stack.Screen
+        name="AddPaymentSelectOrder"
+        component={AddPaymentSelectOrder}
+        options={{
+          title: "Add Payment - Select Order",
+        }}
+      />
+      <Stack.Screen
         name="OpenOrderList"
         component={OpenOrderList}
         options={{
           title: "Open - Order List",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('Services')}>
+              <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
+            </TouchableOpacity>
+          ),
         }}
+     
       />
       <Stack.Screen
         name="OrderWorkInProgress"
         component={OrderWorkInProgress}
         options={{
-          title: " Order WIP",
+          title: "Order WIP",
         }}
       />
       <Stack.Screen
@@ -188,7 +208,49 @@ const ServicesStack = ({ navigation }) => {
           title: "Work In Progress - Order List",
         }}
       />
-      
+      <Stack.Screen
+        name="OrderCompletedList"
+        component={OrderCompletedList}
+        options={{
+          title: "Order Completed - Order List",
+        }}
+      />
+      <Stack.Screen
+        name="OrderCompleted"
+        component={OrderCompleted}
+        options={{
+          title: "Order Completed",
+        }}
+      />
+      <Stack.Screen
+        name="OrderVehicleReady"
+        component={OrderVehicleReady}
+        options={{
+          title: "Vehicle Ready",
+        }}
+      />
+      <Stack.Screen
+        name="VehicleReadyOrderList"
+        component={VehicleReadyOrderList}
+        options={{
+          title: "Vehicle Ready - Order List",
+        }}
+      />
+      <Stack.Screen
+        name="InvoicePreview"
+        component={InvoicePreview}
+        options={{
+          title: "Preview Invoice",
+        }}
+      />
+      <Stack.Screen
+        name="InvoicePreviewSelectOrder"
+        component={InvoicePreviewSelectOrder}
+        options={{
+          title: "Preview Invoice - Select Order",
+        }}
+      />
+
     </Stack.Navigator>
   )
 }
@@ -207,7 +269,14 @@ const PartsStack = ({ navigation }) => {
         options={{
           headerRight: () => (
             <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
-              {(userRole == "Super Admin" || garageId?.length > 1) ? 
+              <Button
+                onPress={() => navigation.navigate('PartsStack', {screen: 'AddStock'})}
+                style={[styles.buttonStyle, { marginRight: 15 }]}
+                color={colors.secondary}
+                icon={(color) => <Icon name={'plus'} size={16} color={colors.secondary} />}
+                uppercase={false}
+              ><Text style={{ fontSize: 12, padding: 0 }}>Add Stock</Text></Button>
+              {/* {(userRole == "Super Admin" || garageId?.length > 1) ? 
                 <Button
                   onPress={() => navigation.navigate('ServicesStack', { screen: 'ChooseGarage' })}
                   style={[styles.buttonStyle, { marginRight: 15 }]}
@@ -217,7 +286,7 @@ const PartsStack = ({ navigation }) => {
                 ><Text style={{ fontSize: 12, padding: 0 }}>Choose Garage</Text></Button>
                 :
                 null
-              }
+              } */}
             </View>
           ),
         }}
@@ -425,22 +494,22 @@ const AllStack = ({ navigation }) => {
         name="CustomerDetails"
         component={CustomerDetails}
         options={{
-          headerRight: () => (
-            <View style={{ flexDirection: "row", justifyContent: "flex-end", alignItems: "center" }}>
-              <IconX name={"circle-double"} size={26} color={colors.black} style={[styles.topbarButton, { marginRight: 10 }]} />
+          // headerRight: () => (
+          //   <View style={{ flexDirection: "row", justifyContent: "flex-end", alignItems: "center" }}>
+          //     <IconX name={"circle-double"} size={26} color={colors.black} style={[styles.topbarButton, { marginRight: 10 }]} />
 
-              <Menu
-                visible={visible}
-                onDismiss={closeMenu}
-                anchor={<IconX name={"dots-vertical"} size={26} color={colors.black} style={styles.topbarButton} onPress={openMenu} />}>
-                <Menu.Item onPress={() => { console.log("Pressed button 1") }} title="Item 1" />
+          //     <Menu
+          //       visible={visible}
+          //       onDismiss={closeMenu}
+          //       anchor={<IconX name={"dots-vertical"} size={26} color={colors.black} style={styles.topbarButton} onPress={openMenu} />}>
+          //       <Menu.Item onPress={() => { console.log("Pressed button 1") }} title="Item 1" />
 
-                <Menu.Item onPress={() => { console.log("Pressed button 2") }} title="Item 2" />
+          //       <Menu.Item onPress={() => { console.log("Pressed button 2") }} title="Item 2" />
 
-                <Menu.Item onPress={() => { console.log("Pressed button 3") }} title="Item 3" />
-              </Menu>
-            </View>
-          ),
+          //       <Menu.Item onPress={() => { console.log("Pressed button 3") }} title="Item 3" />
+          //     </Menu>
+          //   </View>
+          // ),
           title: "Customer Details"
         }}
       />
@@ -509,22 +578,22 @@ const AllCustomerStack = ({ navigation }) => {
         name="CustomerDetails"
         component={CustomerDetails}
         options={{
-          headerRight: () => (
-            <View style={{ flexDirection: "row", justifyContent: "flex-end", alignItems: "center" }}>
-              <IconX name={"circle-double"} size={26} color={colors.black} style={[styles.topbarButton, { marginRight: 10 }]} />
+          // headerRight: () => (
+          //   <View style={{ flexDirection: "row", justifyContent: "flex-end", alignItems: "center" }}>
+          //     <IconX name={"circle-double"} size={26} color={colors.black} style={[styles.topbarButton, { marginRight: 10 }]} />
 
-              <Menu
-                visible={visible}
-                onDismiss={closeMenu}
-                anchor={<IconX name={"dots-vertical"} size={26} color={colors.black} style={[styles.topbarButton, { marginRight:15 }]} onPress={openMenu} />}>
-                <Menu.Item onPress={() => { navigation.navigate('CustomerInfo', { userId }); closeMenu(); }} title="Edit Profile" />
+          //     <Menu
+          //       visible={visible}
+          //       onDismiss={closeMenu}
+          //       anchor={<IconX name={"dots-vertical"} size={26} color={colors.black} style={[styles.topbarButton, { marginRight:15 }]} onPress={openMenu} />}>
+          //       <Menu.Item onPress={() => { navigation.navigate('CustomerInfo', { userId }); closeMenu(); }} title="Edit Profile" />
 
-                <Menu.Item onPress={() => { closeMenu(); onLogOut(); }} title="Log Out" />
+          //       <Menu.Item onPress={() => { closeMenu(); onLogOut(); }} title="Log Out" />
 
-                <Menu.Item onPress={() => { console.log("Pressed button 3") }} title="Item 3" />
-              </Menu>
-            </View>
-          ),
+          //       <Menu.Item onPress={() => { console.log("Pressed button 3") }} title="Item 3" />
+          //     </Menu>
+          //   </View>
+          // ),
           title: "My Profile",
         }}
         initialParams={{ userId: userId }}

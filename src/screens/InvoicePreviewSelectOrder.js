@@ -9,25 +9,28 @@ import moment from 'moment';
 import Lightbox from 'react-native-lightbox-v2';
 import RBSheet from "react-native-raw-bottom-sheet";
 
-const PurchaseOrderSelectOrder = ({navigation, userToken, selectedGarageId, navigator  }) => {
+const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, navigator  }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState(); 
     const [filteredData, setFilteredData] = useState([]);
     const [orderDataModal, setOrderDataModal] = useState(false);
-    const [orderData, setOrderData] = useState('');
-    const refRBSheet = useRef();
+    // const refRBSheet = useRef();
 
     const getOrderList = async () => {
+        let formData = {
+            status: "Pending"
+        }
         try {
-            const res = await fetch(`${API_URL}fetch_garage_order/${isGarageId}`, {
-                method: 'GET',
+            const res = await fetch(`${API_URL}fetch_payments_order/status`, {
+                method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + userToken
                 },
+                body: JSON.stringify(formData)
             });
             const json = await res.json();
             if (json !== undefined) {
@@ -80,7 +83,7 @@ const PurchaseOrderSelectOrder = ({navigation, userToken, selectedGarageId, navi
                                 data={filteredData}
                                 // onEndReachedThreshold={1}
                                 keyExtractor={item => item.id}
-                                renderItem={({item}) => (
+                                renderItem={({item, index}) => (
                                 <>
                                     <View style={styles.cards}>
                                         <View style={styles.upperInfo}>
@@ -91,8 +94,8 @@ const PurchaseOrderSelectOrder = ({navigation, userToken, selectedGarageId, navi
                                                 {/* <Text style={styles.orderStatus}>Completed</Text> */}
                                             </View>
                                             <View style={{right: 30, top: 35,position: 'absolute'}} >
-                                                <Icon onPress={() => {refRBSheet.current.open();}} type={"MaterialCommunityIcons"} name={'dots-vertical'} size={22}  color={colors.gray} />
-                                                {/* <Icon onPress={() => {refRBSheet.current.open();}} type={"MaterialCommunityIcons"} style={{right: 5, top: 8,position: 'absolute'}} name={'dots-vertical'} size={22}  color={colors.gray} /> */}
+                                                <Icon onPress={() => {this[RBSheet + index].open(); console.log(this[RBSheet + index]);}} type={"MaterialCommunityIcons"} name={'dots-vertical'} size={22}  color={colors.gray} />
+                                                {/* <Icon onPress={() => {this[RBSheet + index].open();}} type={"MaterialCommunityIcons"} style={{right: 5, top: 8,position: 'absolute'}} name={'dots-vertical'} size={22}  color={colors.gray} /> */}
                                             </View>
                                             <View>
                                                 {/* <Text style={styles.cardCustomerName}>Owner Name: </Text>
@@ -131,13 +134,10 @@ const PurchaseOrderSelectOrder = ({navigation, userToken, selectedGarageId, navi
                                             <View style={styles.cardActions}>
                                                 {/* <TouchableOpacity onPress={()=>{setOrderDataModal(true); }} style={styles.smallActionButton}><Text style={{color:colors.primary}}>View More Details...</Text></TouchableOpacity> */}
                                                 <TouchableOpacity onPress={()=>{
-                                                    const data = {
-                                                        'order_id': item.id,
-                                                        'customer_name': item.user.name?.trim(),
-                                                    }
-
-                                                    navigation.navigate('PurchaseOrder', {'data': data})
-
+                                                        const data = {
+                                                            'order_id': item.id,
+                                                        }
+                                                        navigation.navigate('InvoicePreview', {'data': data})
                                                     }} style={[styles.smallActionButton, {width: 150, marginTop:8}]}>
                                                     <Text style={{color:colors.primary}}>Select Order</Text>
                                                 </TouchableOpacity>
@@ -145,7 +145,7 @@ const PurchaseOrderSelectOrder = ({navigation, userToken, selectedGarageId, navi
                                         </View>
                                     </View>
                                     <Portal>
-                                        <Modal visible={orderDataModal} onDismiss={() => {}} contentContainerStyle={styles.modalContainerStyle}>
+                                        <Modal visible={orderDataModal} onDismiss={() => {setOrderDataModal(false); }} contentContainerStyle={styles.modalContainerStyle}>
                                             <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Order Details</Text>
                                             {/* {vehicleDataLoading 
                                             ? 
@@ -299,7 +299,9 @@ const PurchaseOrderSelectOrder = ({navigation, userToken, selectedGarageId, navi
                                     </Portal>
 
                                     <RBSheet
-                                        ref={refRBSheet}
+                                        ref={ref => {
+                                            this[RBSheet + index] = ref;
+                                        }}
                                         height={63}
                                         openDuration={250}
                                         >
@@ -307,7 +309,7 @@ const PurchaseOrderSelectOrder = ({navigation, userToken, selectedGarageId, navi
                                             <List.Item
                                                 title="View Order Details"
                                                 style={{paddingVertical:15}}
-                                                onPress={() => { setOrderDataModal(true); refRBSheet.current.close(); }}
+                                                onPress={() => { setOrderDataModal(true); this[RBSheet + index].close(); }}
                                                 left={() => (<Icon type={"MaterialCommunityIcons"} name="eye" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
                                             />
                                             {/* <Divider /> */}
@@ -513,4 +515,4 @@ const mapStateToProps = state => ({
     selectedGarageId: state.garage.selected_garage_id,
 })
 
-export default connect(mapStateToProps)(PurchaseOrderSelectOrder);
+export default connect(mapStateToProps)(InvoicePreviewSelectOrder);

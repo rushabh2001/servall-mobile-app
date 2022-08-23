@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Image, Text, View, StyleSheet, TouchableOpacity, ScrollView, Linking } from "react-native";
 import { Badge, Divider, Modal, Portal, Button, List } from "react-native-paper";
 import { colors } from "../constants";
@@ -116,11 +116,11 @@ const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
                             <TouchableOpacity onPress={()=> Linking.openURL(`tel:${isCustomerData.phone_number}`) } style={styles.smallButton}><Icon name={"phone"} size={20} color={colors.primary} /></TouchableOpacity>
                             <TouchableOpacity onPress={()=> Linking.openURL(`sms:${isCustomerData.phone_number}?&body=Hello%20ServAll`) } style={styles.smallButton}><Icon name={"comment-multiple"} size={20} color={colors.primary} /></TouchableOpacity>
                             <TouchableOpacity onPress={()=> Linking.openURL(`https://wa.me/${isCustomerData.phone_number}`) } style={styles.smallButton}><Icon name={"whatsapp"} size={20} color={colors.primary} /></TouchableOpacity>
-                            <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Icon name={"bell"} size={20} color={colors.primary} /><Text style={{marginLeft:4, color:colors.primary}}>Reminders</Text></TouchableOpacity>
+                            {/* <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Icon name={"bell"} size={20} color={colors.primary} /><Text style={{marginLeft:4, color:colors.primary}}>Reminders</Text></TouchableOpacity> */}
                         </>
                     : null }
                     <TouchableOpacity onPress={()=>{navigation.navigate('UserVehicleTab', { userId: route?.params?.userId }) }} style={styles.smallButton}><Text style={{color:colors.primary}}>Vehicles</Text></TouchableOpacity>
-                    <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Text style={{color:colors.primary}}>Appointments</Text></TouchableOpacity>
+                    {/* <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Text style={{color:colors.primary}}>Appointments</Text></TouchableOpacity> */}
                 </View>
                 <View style={styles.cardContainer}>
                     <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center", marginRight: 10}}>
@@ -140,7 +140,7 @@ const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
                         options={{ 
                             title: () => ( 
                                 <View style={styles.haveBadge}>
-                                    <Badge style={styles.badgeTag}  rounded="full" mb={-14} mr={-4} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>
+                                    <Badge style={styles.badgeTag} rounded="full" mb={-14} mr={-4} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>
                                             4
                                     </Badge>
                                     <Text style={styles.badgeBtn}>
@@ -323,9 +323,9 @@ const refRBSheet = useRef();
     return (
         <ScrollView style={styles.innerTabContainer}>
             <View style={styles.cards}>
-                <View style={{right: 30, top: 35,position: 'absolute'}} >
+                {/* <View style={{right: 30, top: 35,position: 'absolute'}} >
                     <Icon onPress={() => {refRBSheet.current.open();}} type={"MaterialCommunityIcons"} name={'dots-vertical'} size={22}  color={colors.gray} />
-                </View>
+                </View> */}
                 <View style={styles.cardTags} >
                     <Text style={styles.tags}>Running Repair</Text>
                     <Text style={styles.tags}>Running Repair</Text>
