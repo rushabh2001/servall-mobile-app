@@ -18,6 +18,7 @@ const VehicleSearch = ({ userToken, selectedGarageId, navigator  }) => {
     const [vehicleDataLoading, setVehicleDataLoading] = useState(true);
 
     const getVehicleDetails = async (vehicleId) => {
+        setVehicleDataLoading(true);
         try {
             const res = await fetch(`${API_URL}fetch_vehicle_data?id=${vehicleId}`, {
                 method: 'GET',
@@ -99,7 +100,7 @@ const VehicleSearch = ({ userToken, selectedGarageId, navigator  }) => {
                                 renderItem={({item}) => (
                                     <View style={styles.cards}>
                                         <View style={styles.cardOrderDetails}>
-                                            <Text style={styles.orderID}>Last Order ID: 11469</Text>
+                                            <Text style={styles.orderID}>Last Order ID: {item.id}</Text>
                                         </View>
                                         <View>
                                             <Text style={styles.cardCustomerName}>Owner Name: {item.users[0].name}</Text>

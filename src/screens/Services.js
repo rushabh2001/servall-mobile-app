@@ -6,6 +6,7 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import { connect } from 'react-redux';
 import { API_URL } from '../constants/config';
 import { useIsFocused } from '@react-navigation/native';
+import { set } from 'react-hook-form';
 
 const Services = ({ navigation, selectedGarageId, userToken }) => {
   const { colors } = useTheme();
@@ -15,13 +16,15 @@ const Services = ({ navigation, selectedGarageId, userToken }) => {
   const [isReadyOrders, setIsReadyOrders] = useState(0);
   const [isPaymentDue, setIsPaymentDue] = useState(0);
   const [isCompletedOrders, setIsCompletedOrders] = useState(0);
+  const [isCompletedPaymentOrders, setIsCompletedPaymentOrders] = useState(0);
   const [isLoadingDashboard, setIsLoadingDashboard] = useState(false);
+  const [duePaymentDashboard, setDuePaymentDashboard] = useState(0);
   const isFocused = useIsFocused();
 
   const getDashboardData = async () => {
     setIsLoadingDashboard(true);
     try {
-      const res = await fetch(`${API_URL}fetch_dashboard_data/${isGarageId}`, {
+      const res = await fetch(`${API_URL}fetch_dashboard_data/${selectedGarageId}`, {
           method: 'GET',
           headers: {
               'Accept': 'application/json',
@@ -31,12 +34,22 @@ const Services = ({ navigation, selectedGarageId, userToken }) => {
       });
       const json = await res.json();
       if (json !== undefined) {
-        console.log(json);
+        // console.log(json);
         setIsOpenOrders(json.order_status_1);
         setIsWipOrders(json.order_status_2);
         setIsReadyOrders(json.order_status_3);
-        setIsPaymentDue(json.due_payment);
+        setIsPaymentDue(parseInt(json.due_payment));
+        setIsCompletedPaymentOrders(json.complete_payment_count);
         setIsCompletedOrders(json.order_status_4);
+
+        var x=json.due_payment;
+        x=x.toString();
+        var lastThree = x.substring(x.length-3);
+        var otherNumbers = x.substring(0,x.length-3);
+        if(otherNumbers != '')
+            lastThree = ',' + lastThree;
+        let finalValue = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + lastThree;
+        setDuePaymentDashboard(finalValue);
         // setPartList(json.data);
         // setFilteredPartData(json.data);
       }
@@ -48,7 +61,9 @@ const Services = ({ navigation, selectedGarageId, userToken }) => {
   };
 
   useEffect(() => {
+    // setIsGarageId(selectedGarageId);
     getDashboardData();
+    // console.log(selectedGarageId);
   }, [isFocused]);
 
   return (
@@ -104,12 +119,14 @@ const Services = ({ navigation, selectedGarageId, userToken }) => {
                   <Image resizeMode={'cover'} style={styles.verticleImage} source={require('../assets/images/icons/logistic.png')} />
                 </View>
                 <View style={styles.haveBadge}>
-                  <Badge style={styles.badgeTag} rounded="full" mb={0} mr={-50} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>{isOpenOrders}</Badge>
-                  <Text style={styles.verticleCardTitle}>
-                    Open Order 
-                  </Text>
+                  <View style={styles.badgeTitle}>
+                    <Text style={styles.verticleCardTitle}>
+                      Open Order 
+                    </Text>
+                    <Badge style={styles.badgeTag} rounded="full" mb={0} mr={-50} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>{isOpenOrders}</Badge>
+                  </View>
                   <Text style={{textAlign:'center'}}>
-                    Repair order created
+                    Order created order list
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -119,13 +136,15 @@ const Services = ({ navigation, selectedGarageId, userToken }) => {
                 <View  style={{alignItems:'center'}}>
                   <Image resizeMode={'cover'} style={styles.verticleImage} source={require('../assets/images/icons/in-progress.png')} />
                 </View>
-                <View>
-                  <Badge style={styles.badgeTag} rounded="full" mb={0} mr={-50} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>{isWipOrders}</Badge>
-                  <Text style={styles.verticleCardTitle}>
-                    WIP Orders
-                  </Text>
+                <View style={styles.haveBadge}>
+                  <View style={styles.badgeTitle}>
+                    <Text style={styles.verticleCardTitle}>
+                      WIP Orders
+                    </Text>
+                    <Badge style={styles.badgeTag} rounded="full" mb={0} mr={-50} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>{isWipOrders}</Badge>
+                  </View>
                   <Text style={{textAlign:'center'}}>
-                    Work in progress
+                    Work in progress order list
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -136,13 +155,15 @@ const Services = ({ navigation, selectedGarageId, userToken }) => {
                 <View style={{alignItems:'center'}}>
                   <Image resizeMode={'cover'} style={styles.verticleImage} source={require('../assets/images/icons/delivery.png')} />
                 </View>
-                <View>
-                  <Badge style={[styles.badgeTag, {right: -2}]} rounded="full" mb={0} mr={-50} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>{isReadyOrders}</Badge>
-                  <Text style={styles.verticleCardTitle}>
-                    Ready Orders
-                  </Text>
+                <View style={styles.haveBadge}>
+                  <View style={styles.badgeTitle}>
+                    <Text style={styles.verticleCardTitle}>
+                      Ready Orders
+                    </Text>
+                    <Badge style={{marginLeft: 10}} rounded="full" mb={0} mr={-50} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>{isReadyOrders}</Badge>
+                  </View>
                   <Text style={{textAlign:'center'}}>
-                    Vehicle is ready
+                    Vehicle ready order list
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -158,7 +179,7 @@ const Services = ({ navigation, selectedGarageId, userToken }) => {
                     Share Invoice
                   </Text>
                   <Text style={styles.duePaymentText}>
-                    Due: ₹ {isPaymentDue}
+                    Due: ₹ {duePaymentDashboard}
                   </Text>
                   <Text style={{textAlign:'center'}}>
                     Invoice prepared
@@ -190,18 +211,39 @@ const Services = ({ navigation, selectedGarageId, userToken }) => {
               </View>
             </TouchableOpacity> */}
 
+            <TouchableOpacity style={[styles.cardContainer, { marginTop:10, elevation: 2 }]} onPress={ () => navigation.navigate("CompletedInvoicePreviewSelectOrder") }>
+              <View style={{flex:1, alignItems: 'center'}}>
+                <Image resizeMode={'cover'} style={styles.cardImage} source={require('../assets/images/icons/credit-card.png')} />
+              </View>
+              <View style={styles.cardRightContent}>
+                <View style={[styles.badgeTitle, {justifyContent: 'flex-start'}]}>
+                  <Text style={styles.cardTitle}>
+                    Payment Completed
+                  </Text>
+                  <Badge style={{ marginLeft: 10, marginBottom: 2 }} rounded="full" mb={0} mr={-50} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>{isCompletedPaymentOrders}</Badge>
+                </View>
+                <Text>
+                  View completed payment orders
+                </Text>
+              </View>
+              <View style={styles.cardArrow}>
+                  <Icon name={'caret-right'} size={18}  color={colors.gray} />
+              </View>
+            </TouchableOpacity>
 
             <TouchableOpacity style={[styles.cardContainer, { marginTop:10, elevation: 2 }]} onPress={ () => navigation.navigate("OrderCompletedList") }>
               <View style={{flex:1, alignItems: 'center'}}>
                 <Image resizeMode={'cover'} style={styles.cardImage} source={require('../assets/images/icons/packageready.png')} />
               </View>
               <View style={styles.cardRightContent}>
-                <Badge style={[styles.badgeTag, {right: 40, top: 3}]} rounded="full" mb={0} mr={-50} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>{isCompletedOrders}</Badge>
-                <Text style={styles.cardTitle}>
-                  Completed Orders
-                </Text>
+                <View style={[styles.badgeTitle, {justifyContent: 'flex-start'}]}>
+                  <Text style={styles.cardTitle}>
+                    Completed Orders
+                  </Text>
+                  <Badge style={{ marginLeft: 10, marginBottom: 2 }} rounded="full" mb={0} mr={-50} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>{isCompletedOrders}</Badge>
+                </View>
                 <Text>
-                  Click to view order history
+                  View completed orders list
                 </Text>
               </View>
               <View style={styles.cardArrow}>
@@ -252,7 +294,14 @@ const styles = StyleSheet.create({
     color: colors.black,
     fontWeight: '500',
     textAlign: 'center',
-    marginBottom: 3,
+    // marginBottom: 3,
+  },
+  badgeTitle: {
+    position: 'relative', 
+    flexDirection: 'row', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    marginBottom: 3
   },
   cardImage: {
       flex:1,

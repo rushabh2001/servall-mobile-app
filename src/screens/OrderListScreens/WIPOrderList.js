@@ -93,7 +93,7 @@ const WIPOrderList = ({navigation, userToken, selectedGarageId }) => {
                                                 </View>
                                                 <View>
                                                     <View style={{flexDirection: 'row'}}>
-                                                        <Text style={styles.orderAmount}>Order Amount:</Text><Text style={styles.orderAmount}> ₹ {item.total}</Text>
+                                                        <Text style={styles.orderAmount}>Order Amount:</Text><Text style={styles.orderAmount}> ₹ {item.total}</Text><Text style={[styles.orderAmount, {marginLeft: 8, color: item.payment_status == "Completed" ? colors.green : colors.danger}]}>{item.payment_status == "Completed" ? "(Paid)" : "(Due)"}</Text>
                                                     </View>
                                                     <Divider />
                                                     <View style={{flexDirection: 'row'}}>
@@ -147,8 +147,7 @@ const WIPOrderList = ({navigation, userToken, selectedGarageId }) => {
                                             ref={ref => {
                                                 this[RBSheet + index] = ref;
                                             }}
-                                        
-                                            height={126}
+                                            height={item?.payment_status == "Pending" ? 190 : 128}
                                             openDuration={250}
                                             >
                                             <View style={{flexDirection:"column", flex:1}}>
@@ -179,6 +178,7 @@ const WIPOrderList = ({navigation, userToken, selectedGarageId }) => {
                                                             'services_list': item?.orderservice,
                                                             'parts_list': item?.orderparts,
                                                             'created_at': item?.created_at,
+                                                            'payment_status': item?.payment_status,
                                                             'total': item?.total,
                                                             'applicable_discount': item?.discount
                                                         }
@@ -215,6 +215,7 @@ const WIPOrderList = ({navigation, userToken, selectedGarageId }) => {
                                                             'parts_list': item?.orderparts,
                                                             'created_at': item?.created_at,
                                                             'total': item?.total,
+                                                            'payment_status': item?.payment_status,
                                                             'status': item?.status,
                                                             'applicable_discount': item?.discount
                                                         }
@@ -223,7 +224,24 @@ const WIPOrderList = ({navigation, userToken, selectedGarageId }) => {
                                                     }}
                                                     left={() => (<Icon type={"MaterialCommunityIcons"} name="clipboard-edit-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
                                                 />
-                                                <Divider />
+                                                {item?.payment_status == "Pending" &&
+                                                    <>
+                                                        <Divider />
+                                                        <List.Item
+                                                            title="Add Payment"
+                                                            style={{paddingVertical:15}}
+                                                            onPress={() =>  { 
+                                                                let arrData = {
+                                                                    'order_id': item.id,
+                                                                    'total': item?.total,
+                                                                }
+                                                                navigation.navigate('AddPayment', {'data': arrData}); 
+                                                                this[RBSheet + index].close(); 
+                                                            }}
+                                                            left={() => (<Icon type={"MaterialCommunityIcons"} name="account-cash" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
+                                                        />
+                                                    </>
+                                                }
                                             </View>
                                         </RBSheet>
                                     </>

@@ -50,6 +50,8 @@ import {
   VehicleReadyOrderList,
   InvoicePreview,
   InvoicePreviewSelectOrder,
+  CompletedInvoicePreview,
+  CompletedInvoicePreviewSelectOrder,
 } from '../screens';
 
 const Stack = createStackNavigator();
@@ -129,7 +131,11 @@ const ServicesStack = ({ navigation }) => {
                 ><Text style={{ fontSize: 12, padding: 0 }}>Add New Vehicle</Text></Button>
             </View>
           ),
-          
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('Services')}>
+              <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Stack.Screen
@@ -137,6 +143,11 @@ const ServicesStack = ({ navigation }) => {
         component={AddRepairOrderStep2}
         options={{
           title: "Add Repair Order",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('AddRepairOrder')}>
+              <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Stack.Screen
@@ -144,6 +155,11 @@ const ServicesStack = ({ navigation }) => {
         component={AddRepairOrderStep3}
         options={{
           title: "Add Repair Order",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('AddRepairOrder')}>
+              <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Stack.Screen
@@ -165,6 +181,11 @@ const ServicesStack = ({ navigation }) => {
         component={OrderCreated}
         options={{
           title: "Order Created",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('OpenOrderList')}>
+              <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Stack.Screen
@@ -172,6 +193,11 @@ const ServicesStack = ({ navigation }) => {
         component={AddPayment}
         options={{
           title: "Add Payment",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('AddPaymentSelectOrder')}>
+              <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Stack.Screen
@@ -179,6 +205,11 @@ const ServicesStack = ({ navigation }) => {
         component={AddPaymentSelectOrder}
         options={{
           title: "Add Payment - Select Order",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('Services')}>
+              <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Stack.Screen
@@ -199,6 +230,11 @@ const ServicesStack = ({ navigation }) => {
         component={OrderWorkInProgress}
         options={{
           title: "Order WIP",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('WIPOrderList')}>
+              <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Stack.Screen
@@ -206,6 +242,11 @@ const ServicesStack = ({ navigation }) => {
         component={WIPOrderList}
         options={{
           title: "Work In Progress - Order List",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('Services')}>
+              <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Stack.Screen
@@ -213,6 +254,11 @@ const ServicesStack = ({ navigation }) => {
         component={OrderCompletedList}
         options={{
           title: "Order Completed - Order List",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('Services')}>
+              <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Stack.Screen
@@ -220,6 +266,11 @@ const ServicesStack = ({ navigation }) => {
         component={OrderCompleted}
         options={{
           title: "Order Completed",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('OrderCompletedList')}>
+              <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Stack.Screen
@@ -227,6 +278,11 @@ const ServicesStack = ({ navigation }) => {
         component={OrderVehicleReady}
         options={{
           title: "Vehicle Ready",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('VehicleReadyOrderList')}>
+              <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Stack.Screen
@@ -234,6 +290,11 @@ const ServicesStack = ({ navigation }) => {
         component={VehicleReadyOrderList}
         options={{
           title: "Vehicle Ready - Order List",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('Services')}>
+              <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Stack.Screen
@@ -241,6 +302,11 @@ const ServicesStack = ({ navigation }) => {
         component={InvoicePreview}
         options={{
           title: "Preview Invoice",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('InvoicePreviewSelectOrder')}>
+              <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Stack.Screen
@@ -248,6 +314,35 @@ const ServicesStack = ({ navigation }) => {
         component={InvoicePreviewSelectOrder}
         options={{
           title: "Preview Invoice - Select Order",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('Services')}>
+              <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+      <Stack.Screen
+        name="CompletedInvoicePreview"
+        component={InvoicePreview}
+        options={{
+          title: "Preview Paid Invoice",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('CompletedInvoicePreviewSelectOrder')}>
+              <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+      <Stack.Screen
+        name="CompletedInvoicePreviewSelectOrder"
+        component={CompletedInvoicePreviewSelectOrder}
+        options={{
+          title: "Preview Paid Invoice - Select Order",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('Services')}>
+              <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
+            </TouchableOpacity>
+          ),
         }}
       />
 
@@ -578,22 +673,22 @@ const AllCustomerStack = ({ navigation }) => {
         name="CustomerDetails"
         component={CustomerDetails}
         options={{
-          // headerRight: () => (
-          //   <View style={{ flexDirection: "row", justifyContent: "flex-end", alignItems: "center" }}>
-          //     <IconX name={"circle-double"} size={26} color={colors.black} style={[styles.topbarButton, { marginRight: 10 }]} />
+          headerRight: () => (
+            <View style={{ flexDirection: "row", justifyContent: "flex-end", alignItems: "center" }}>
+              <IconX name={"circle-double"} size={26} color={colors.black} style={[styles.topbarButton, { marginRight: 10 }]} />
 
-          //     <Menu
-          //       visible={visible}
-          //       onDismiss={closeMenu}
-          //       anchor={<IconX name={"dots-vertical"} size={26} color={colors.black} style={[styles.topbarButton, { marginRight:15 }]} onPress={openMenu} />}>
-          //       <Menu.Item onPress={() => { navigation.navigate('CustomerInfo', { userId }); closeMenu(); }} title="Edit Profile" />
+              <Menu
+                visible={visible}
+                onDismiss={closeMenu}
+                anchor={<IconX name={"dots-vertical"} size={26} color={colors.black} style={[styles.topbarButton, { marginRight:15 }]} onPress={openMenu} />}>
+                <Menu.Item onPress={() => { navigation.navigate('CustomerInfo', { userId }); closeMenu(); }} title="Edit Profile" />
 
-          //       <Menu.Item onPress={() => { closeMenu(); onLogOut(); }} title="Log Out" />
+                <Menu.Item onPress={() => { closeMenu(); onLogOut(); }} title="Log Out" />
 
-          //       <Menu.Item onPress={() => { console.log("Pressed button 3") }} title="Item 3" />
-          //     </Menu>
-          //   </View>
-          // ),
+                {/* <Menu.Item onPress={() => { console.log("Pressed button 3") }} title="Item 3" /> */}
+              </Menu>
+            </View>
+          ),
           title: "My Profile",
         }}
         initialParams={{ userId: userId }}

@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View , Text, StyleSheet, TextInput, Keyboard, ActivityIndicator } from 'react-native';
+import { View , Text, StyleSheet, Keyboard, ActivityIndicator } from 'react-native';
 import { connect } from 'react-redux';
 import { colors } from '../constants';
 import { API_URL } from '../constants/config';
-import { Button } from 'react-native-paper';
+import { Button, TextInput } from 'react-native-paper';
 import InputScrollView from 'react-native-input-scroll-view';
 import { Picker } from '@react-native-picker/picker';
 
@@ -222,6 +222,7 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
                         <View style={{flex:1}}>
                             <Text style={[styles.headingStyle, { marginTop:20 }]}>Customer Details:</Text>
                             <TextInput
+                                mode="outlined"
                                 label='Customer Name'
                                 style={styles.input}
                                 placeholder="Customer Name"
@@ -233,6 +234,7 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
                             }
 
                             <TextInput
+                                mode="outlined"
                                 label='Email Address'
                                 style={styles.input}
                                 placeholder="Email Address"
@@ -244,6 +246,7 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
                             }
 
                             <TextInput
+                                mode="outlined"
                                 label='Phone Number'
                                 style={styles.input}
                                 placeholder="Phone Number"
@@ -255,11 +258,11 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
                                 <Text style={{color: colors.danger}}>{phoneNumberError}</Text>
                             }
 
-                            <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 20}}>
+                            <View style={styles.dropDownContainer}>
                                 <Picker
                                     selectedValue={isState}
                                     onValueChange={(v) => {setIsState(v)}}
-                                    style={{padding: 0}}
+                                    style={styles.dropDownField}
                                     itemStyle={{padding: 0}}
                                 >
                                     <Picker.Item label="Select State" value="0" />
@@ -278,11 +281,11 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
                                 <Text style={{color: colors.danger}}>{stateError}</Text>
                             }
 
-                            <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 20}}>
+                            <View style={styles.dropDownContainer}>
                                 <Picker
                                     selectedValue={isCity}
                                     onValueChange={(v) => setIsCity(v) }
-                                    style={{padding: 0}}
+                                    style={styles.dropDownField}
                                     itemStyle={{padding: 0}}
                                 >
                                     <Picker.Item label="Select City" value="0" />
@@ -303,6 +306,7 @@ const CustomerInfo = ({ navigation, userToken, route }) => {
                             }
 
                             <TextInput
+                                mode="outlined"
                                 label='Address'
                                 style={styles.input}
                                 placeholder="Address"
@@ -333,12 +337,6 @@ const styles = StyleSheet.create({
     },
     input: {
         marginTop: 20,
-        padding: 15,
-        height: 55,
-        borderColor: colors.light_gray, // 7a42f4
-        borderWidth: 1,
-        borderRadius: 5,
-        backgroundColor: colors.white,
         fontSize: 16,
      },
      headingStyle: {
@@ -355,7 +353,24 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 15,
-     }
+     },
+     datePickerIcon: {
+        padding: 10,
+        position: 'absolute',
+        right: 7,
+        top: 13,
+        zIndex: 2,
+    },
+    dropDownContainer: {
+        borderWidth:1,
+        borderColor: colors.light_gray, 
+        borderRadius: 5, 
+        marginTop: 20,
+    },
+    dropDownField: {
+        padding: 0,
+        backgroundColor: '#F0F2F5',
+    },
 })
 
 const mapStateToProps = state => ({

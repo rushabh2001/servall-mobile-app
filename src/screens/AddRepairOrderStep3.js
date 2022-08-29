@@ -893,6 +893,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                             placeholder="Odometer (in KMs)"
                             value={isOdometerKMs}
                             onChangeText={(text) => setIsOdometerKMs(text)}
+                            keyboardType="numeric"
                         />
                         {odometerKMsError?.length > 0 &&
                             <Text style={styles.errorTextStyle}>{odometerKMsError}</Text>
@@ -942,6 +943,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                             <View style={styles.datePickerContainer} pointerEvents='none'>
                                 <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
                                 <TextInput
+                                    mode="outlined"
                                     label='Estimate Delivery Time'
                                     style={styles.datePickerField}
                                     placeholder="Estimate Delivery Time"
@@ -1007,6 +1009,7 @@ const AddRepairOrderStep3 = ({ route, userToken, navigation }) => {
                                                                         <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
                                                                     </View>
                                                                 }
+                                                                key={item.id}
                                                                 onPress={() => {
                                                                         setIsPartName(item.name); 
                                                                         setIsPart(item.id); 
@@ -1233,14 +1236,20 @@ const styles = StyleSheet.create({
     },
     datePickerField: {
         flex: 1,
-        paddingHorizontal: 15,
+        borderColor: colors.light_gray,
+        borderBottomWidth: 1,
+        borderRadius: 5,
+        backgroundColor: '#F0F2F5',
+        color: '#424242',
+        // paddingHorizontal: 15,
+        // height: 55,
         fontSize: 16,
     },
     datePickerIcon: {
         padding: 10,
         position: 'absolute',
         right: 7,
-        top: 12,
+        top: 13,
         zIndex: 2,
     },
     dropDownContainer: {

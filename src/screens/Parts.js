@@ -46,8 +46,9 @@ const Parts = ({ navigation, userToken, selectedGarageId }) => {
 
   const getPartList = async () => {
     setIsLoading(true);
+    console.log('isGarageId', selectedGarageId);
     try {
-      const res = await fetch(`${API_URL}fetch_garage_inventory/${isGarageId}`, {
+      const res = await fetch(`${API_URL}fetch_garage_inventory/${selectedGarageId}`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -91,9 +92,9 @@ const Parts = ({ navigation, userToken, selectedGarageId }) => {
   }, [isFocused]);
 
   const element = (data, index) => (
-    <TouchableOpacity onPress={() => {navigation.navigate('EditStock', {'data': data})}} style={{marginLeft: 20}}>
+    // <TouchableOpacity onPress={() => {navigation.navigate('EditStock', {'data': data})}} style={{marginLeft: 20}}>
       <Icon name="chevron-circle-right" size={18} style={styles.actionArrow} />
-    </TouchableOpacity>
+    // </TouchableOpacity>
   );
 
   return (
@@ -152,18 +153,20 @@ const Parts = ({ navigation, userToken, selectedGarageId }) => {
                         data={filteredPartData}
                         keyExtractor={item => item.id}
                         renderItem={({item, index}) => (
-                          <View style={{flexDirection: 'row', margin: 5}}>
-                            <Cell data={item.parts.name} style={{flex: 2}} textStyle={styles.text} />
-                            <Cell data={item.current_stock} style={{flex: 1}} textStyle={styles.text} />
-                            <Cell data={item.mrp} style={{flex: 1}} textStyle={styles.text} />
-                            <Cell data={item.rack_id} style={{flex: 1}} textStyle={styles.text} />
-                            <Cell data={element(item, index)} style={{flex: 1}} textStyle={styles.text} />
+                          <View style={{margin: 5}}>
+                            <TouchableOpacity style={{flexDirection: 'row'}} onPress={() => {navigation.navigate('EditStock', {'data': item})}}>
+                              <Cell data={item.parts.name} style={{flex: 2}} textStyle={styles.text} />
+                              <Cell data={item.current_stock} style={{flex: 1}} textStyle={styles.text} />
+                              <Cell data={item.mrp} style={{flex: 1}} textStyle={styles.text} />
+                              <Cell data={item.rack_id} style={{flex: 1}} textStyle={styles.text} />
+                              <Cell data={element(item, index)} style={{ flex: 1 }} textStyle={styles.text} />
+                            </TouchableOpacity>
                           </View>
                         )} 
                     />
                     :
                     <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
-                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such part is associated!</Text>
+                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such part is associated to your garage!</Text>
                     </View>
                   }
               </Table>
@@ -228,6 +231,7 @@ const styles = StyleSheet.create({
   actionArrow: {
     fontSize:16,
     color: colors.black,
+    marginLeft: 15,
   }
 })
 

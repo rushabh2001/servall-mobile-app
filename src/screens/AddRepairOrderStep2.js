@@ -1,24 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View , Text, StyleSheet, TextInput, Keyboard, ActivityIndicator, TouchableOpacity } from 'react-native';
-import { Modal, Portal } from 'react-native-paper';
+import { View , Text, StyleSheet, Keyboard, ActivityIndicator, TouchableOpacity, FlatList } from 'react-native';
+import { Modal, Portal, Divider, TextInput, Button, Searchbar, List } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { colors } from '../constants';
 import { API_URL } from '../constants/config';
-import { Button } from 'react-native-paper';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import InputScrollView from 'react-native-input-scroll-view';
 import { Picker } from '@react-native-picker/picker';
 import moment from 'moment';
 import DocumentPicker from 'react-native-document-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import RadioForm from 'react-native-simple-radio-button';
+import { set } from 'react-hook-form';
 
 const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId, userId, garageId }) => {
     
     const [isUserVehicleDetails, setIsUserVehicleDetails] = useState('');
-    const [isUserId, setIsUserId] = useState();
-    const [isVehicleId, setIsVehicleId] = useState();
-    const [isBrandName, setIsBrandName] = useState('');
-    const [isModelName, setIsModelName] = useState('');
 
     // Customer Fields
     const [isName, setIsName] = useState('');
@@ -27,6 +24,16 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     const [isCity, setIsCity] = useState();
     const [isState, setIsState] = useState();
     const [isAddress, setIsAddress] = useState('');
+    const [userOption, setUserOption] = useState('new_user');
+
+    const [isUser, setIsUser] = useState();
+    const [userList, setUserList] =  useState([]);
+    const [userError, setUserError] = useState('');
+    const [isUserName, setIsUserName] = useState('');
+    const [userListModal, setUserListModal] = useState(false);
+    const [isLoadingUserList, setIsLoadingUserList] = useState(false);
+    const [filteredUserData, setFilteredUserData] = useState([]);
+    const [searchQueryForUsers, setSearchQueryForUsers] = useState(); 
 
     // Error States
     const [nameError, setNameError] = useState(''); 
@@ -90,6 +97,11 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     const [isLoading, setIsLoading] = useState(false);
     
     const scroll1Ref = useRef();
+
+    var radio_props = [
+        {label: 'New User', value: 'new_user' },
+        {label: 'Existing User', value: 'existing_user' }
+      ];
 
     const addNewInsuranceCompany = async () => {
         let data = {'name': newInsuranceCompanyName}
@@ -207,48 +219,57 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     const changePurchaseSelectedDate = (event, selectedDate) => {
         if (selectedDate != null) {
             let currentDate = selectedDate || datePurchase;
-            let formattedDate = moment(currentDate, 'YYYY MMMM D').format('DD-MM-YYYY');
+            let formattedDate = moment(currentDate, 'YYYY-MM-DD', true).format('DD-MM-YYYY');
             setDisplayPurchaseCalender(false);
             setDatePurchase(formattedDate);
-            let formateDateForDatabase = moment(currentDate, 'YYYY MMMM D').format('YYYY-MM-DD');
-            setIsPurchaseDate(formateDateForDatabase);
+            let formateDateForDatabase = moment(currentDate, 'YYYY-MM-DD"T"hh:mm ZZ').format('YYYY-MM-DD');
+            setIsPurchaseDate(new Date(formateDateForDatabase));
         }
      };
 
     const changeManufacturingSelectedDate = (event, selectedDate) => {
         if (selectedDate != null) {
             let currentDate = selectedDate || dateManufacturing;
-            let formattedDate = moment(currentDate, 'YYYY MMMM D').format('DD-MM-YYYY');
+            let formattedDate = moment(currentDate, 'YYYY-MM-DD', true).format('DD-MM-YYYY');
             setDisplayManufacturingCalender(false);
             setDateManufacturing(formattedDate);
-            let formateDateForDatabase = moment(currentDate, 'YYYY MMMM D').format('YYYY-MM-DD');
-            setIsManufacturingDate(formateDateForDatabase);
+            let formateDateForDatabase = moment(currentDate, 'YYYY-MM-DD"T"hh:mm ZZ').format('YYYY-MM-DD');
+            setIsManufacturingDate(new Date(formateDateForDatabase));
         }
     };
 
     const changeInsuranceExpirySelectedDate = (event, selectedDate) => {
         if (selectedDate != null) {
             let currentDate = selectedDate || dateInsuranceExpiry;
-            let formattedDate = moment(currentDate, 'YYYY MMMM D').format('DD-MM-YYYY');
+            let formattedDate = moment(currentDate, 'YYYY-MM-DD', true).format('DD-MM-YYYY');
             setDisplayInsuranceExpiryCalender(false);
             setDateInsuranceExpiry(formattedDate);
-            let formateDateForDatabase = moment(currentDate, 'YYYY MMMM D').format('YYYY-MM-DD');
-            setIsInsuranceExpiryDate(formateDateForDatabase);  
+            let formateDateForDatabase = moment(currentDate, 'YYYY-MM-DD"T"hh:mm ZZ').format('YYYY-MM-DD');
+            setIsInsuranceExpiryDate(new Date(formateDateForDatabase));  
         }   
     };
 
     const validate = () => {
-        return !(
-            !isName || isName?.trim().length === 0  || 
-            !isPhoneNumber || isPhoneNumber?.trim().length === 0 || 
-            !isEmail || isEmail?.trim().length === 0 ||  isEmail?.trim().length < 6 || isEmail?.indexOf('@') < 0 || isEmail?.indexOf(' ') >= 0 ||
-            !isCity || isCity === 0 ||
-            !isState || isState === 0 ||
-            !isBrand || isBrand === 0 ||
-            !isModel || isModel === 0 ||
-            !isGarageId || isGarageId === 0 ||
-            !isVehicleRegistrationNumber || isVehicleRegistrationNumber?.trim().length === 0 
-        )
+        if(userOption == "new_user") {
+            return !(
+                !isName || isName?.trim().length === 0  || 
+                !isPhoneNumber || isPhoneNumber?.trim().length === 0 || 
+                !isEmail || isEmail?.trim().length === 0 ||  isEmail?.trim().length < 6 || isEmail?.indexOf('@') < 0 || isEmail?.indexOf(' ') >= 0 ||
+                !isCity || isCity === 0 ||
+                !isState || isState === 0 ||
+                !isBrand || isBrand === 0 ||
+                !isModel || isModel === 0 ||
+                !isGarageId || isGarageId === 0 ||
+                !isVehicleRegistrationNumber || isVehicleRegistrationNumber?.trim().length === 0 
+            )
+        } else if(userOption == "existing_user") {
+            return !(
+                !isBrand || isBrand === 0 ||
+                !isModel || isModel === 0 ||
+                !isGarageId || isGarageId === 0 ||
+                !isVehicleRegistrationNumber || isVehicleRegistrationNumber?.trim().length === 0 
+            )
+        }
     }
 
     const submit = () => {
@@ -256,13 +277,17 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
         Keyboard.dismiss();  
 
         if (!validate()) {
-            if (!isName) setNameError("Customer Name is required"); else setNameError('');
-            if (!isPhoneNumber) setPhoneNumberError("Phone Number is required"); else setPhoneNumberError('');
-            if (!isEmail) setEmailError("Email is required");
-            else if (isEmail.length < 6) setEmailError("Email should be minimum 6 characters");
-            else if (isEmail?.indexOf(' ') >= 0) setEmailError('Email cannot contain spaces');
-            else if (isEmail?.indexOf('@') < 0) setEmailError('Invalid Email Format');
-            else setEmailError('');
+            if(userOption == "new_user") {
+                if (!isName) setNameError("Customer Name is required"); else setNameError('');
+                if (!isPhoneNumber) setPhoneNumberError("Phone Number is required"); else setPhoneNumberError('');
+                if (!isEmail) setEmailError("Email is required");
+                else if (isEmail.length < 6) setEmailError("Email should be minimum 6 characters");
+                else if (isEmail?.indexOf(' ') >= 0) setEmailError('Email cannot contain spaces');
+                else if (isEmail?.indexOf('@') < 0) setEmailError('Invalid Email Format');
+                else setEmailError('');
+            } else if(userOption == "existing_user") {
+                if (!isUser || isUser === 0) setUserError('User is required'); else setUserError('');
+            }
             if (!isBrand || isBrand === 0) setBrandError('Brand is required'); else setBrandError('');
             if (!isModel || isModel === 0) setModelError('Model is required'); else setModelError('');
             if (!isCity || isCity === 0) setCityError("City is required"); else setCityError('');
@@ -273,32 +298,43 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
         }
 
         const data = new FormData();
-        data.append('name', isName?.trim());
-        data.append('email', isEmail?.trim());
-        data.append('phone_number', isPhoneNumber?.trim());
-        if(isCity) data.append('city', isCity);
-        if(isState) data.append('state', isState);
-        if(isAddress) data.append('address', isAddress?.trim());
+ 
+        if(userOption == "new_user") {
+            data.append("user_option", userOption);
+            data.append('name', isName?.trim());
+            data.append('email', isEmail?.trim());
+            data.append('phone_number', isPhoneNumber?.trim());
+            data.append('city', isCity);
+            data.append('state', isState);
+            if(isAddress) data.append('address', isAddress?.trim());
+            data.append('vehicle_option', 'new_vehicle');
+        } else if(userOption == "existing_user") {
+            data.append('user_id', isUser);
+        }
         data.append('brand_id', JSON.stringify(isBrand));
         data.append('model_id', JSON.stringify(isModel));
         data.append('vehicle_registration_number', isVehicleRegistrationNumber?.trim());
-        if(isPurchaseDate) data.append('purchase_date', isPurchaseDate);
-        if(isManufacturingDate) data.append('manufacturing_date', isManufacturingDate);
+        if(isPurchaseDate) data.append('purchase_date', moment(isPurchaseDate, 'YYYY-MM-DD"T"hh:mm ZZ').format('YYYY-MM-DD'));
+        if(isManufacturingDate) data.append('manufacturing_date', moment(isManufacturingDate, 'YYYY-MM-DD"T"hh:mm ZZ').format('YYYY-MM-DD'));
         if(isEngineNumber) data.append('engine_number', isEngineNumber?.trim());
         if(isChasisNumber) data.append('chasis_number', isChasisNumber?.trim());
         if(isInsuranceProvider) data.append('insurance_id', parseInt(isInsuranceProvider));
         if(isInsurerGstin) data.append('insurer_gstin', isInsurerGstin?.trim());
         if(isInsurerAddress) data.append('insurer_address', isInsurerAddress?.trim());
         if(isPolicyNumber) data.append('policy_number', isPolicyNumber?.trim());
-        if(isInsuranceExpiryDate) data.append('insurance_expiry_date', isInsuranceExpiryDate);
+        if(isInsuranceExpiryDate) data.append('insurance_expiry_date', moment(isInsuranceExpiryDate, 'YYYY-MM-DD"T"hh:mm ZZ').format('YYYY-MM-DD'));
         if(isRegistrationCertificateImg != null) data.append('registration_certificate_img', isRegistrationCertificateImg);
         if(isInsuranceImg != null) data.append('insurance_img', isInsuranceImg);
-        data.append('vehicle_option', 'new_vehicle');
         data.append('garage_id', isGarageId);
 
-        // console.log('brandList', brandList.find(data => data.id === isBrand).name);
-        // console.log('modelList', modelList.find(data => data.id === isModel).model_name);
-        addCustomer(data);
+        if(userOption == "new_user") {
+            console.log('new_user', data);
+            addCustomer(data);
+        } else if(userOption == "existing_user") {
+            console.log('existing_user', data);
+            addVehicle(data);
+        }
+   
     }
 
     const addCustomer = async (data) => {
@@ -327,28 +363,79 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                   { res.data.message.vehicle_registration_number && setVehicleRegistrationNumberError(res.data.message.vehicle_registration_number); }
                   return;
                 } else {
+                    // console.log('res', res);
                     const jsonData = { 
                         'user_id': res.data.user_id, 
                         'vehicle_id': res.data.vehicle_id,
-                        'name': res.data.name,
-                        'email': res.data.email,
-                        'phone_number': res.data.phone_number,
+                        'name': res.data.user_data.name,
+                        'email': res.data.user_data.email,
+                        'phone_number': res.data.user_data.phone_number,
                         'brand_id': res.data.vehicle_data.brand_id,
                         'model_id': res.data.vehicle_data.model_id,
                         'vehicle_registration_number': res.data.vehicle_data.vehicle_registration_number,
-                        'brand_name': brandList.find(data => data.id === res.data.vehicle_data.brand_id).name,
-                        'model_name': modelList.find(data => data.id === res.data.vehicle_data.model_id).model_name,
-                        'garage_id' : res.data.Garage_id,
+                        'brand_name': brandList.find(data => data.id == isBrand).name,
+                        'model_name': modelList.find(data => data.id == isModel).model_name,
+                        'garage_id' : res.data.garage_id,
                     }
-                    // setIsUserVehicleDetails(jsonData);
-                    setTimeout(function() { navigation.navigate('AddRepairOrderStep3', {'userVehicleDetails': jsonData}); }, 3000);
+                    // console.log('res', jsonData);
+                    setIsUserVehicleDetails(jsonData);
+                    navigation.navigate('AddRepairOrderStep3', {'userVehicleDetails': jsonData})
                 }
             });
         } catch (e) {
             console.log(e);
         } finally {
-            console.log('isUserVehicleDetails', jsonData);
-            
+            setIsLoading(false);
+        }
+    };
+
+    const addVehicle = async (data) => {
+        try {
+            await fetch(`${API_URL}add_new_vehicle_user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'multipart/form-data; ',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: data
+            })
+            .then(res => {
+                const statusCode = res.status;
+                let data;
+                return res.json().then(obj => {
+                    data = obj;
+                    return { statusCode, data };
+                });
+            })
+            .then((res) => {
+                // console.log('res', res);
+                if (res.statusCode == 201 || res.statusCode == 200 || res.message == true) {
+                    const jsonData = { 
+                        'user_id': res.data.user_id, 
+                        'vehicle_id': res.data.vehicle_id,
+                        'name': res.data.user_data.name,
+                        'email': res.data.user_data.email,
+                        'phone_number': res.data.user_data.phone_number,
+                        'brand_id': res.data.vehicle_data.brand_id,
+                        'model_id': res.data.vehicle_data.model_id,
+                        'vehicle_registration_number': res.data.vehicle_data.vehicle_registration_number,
+                        'brand_name': brandList.find(data => data.id == isBrand).name,
+                        'model_name': modelList.find(data => data.id == isModel).model_name,
+                        'garage_id' : res.data.garage_id,
+                    }
+                    // console.log('jsonData', jsonData);
+                    setIsUserVehicleDetails(jsonData);
+                    navigation.navigate('AddRepairOrderStep3', {'userVehicleDetails': jsonData})
+                } else if (res.statusCode == 400) {
+                    { res.data.message.vehicle_registration_number && setVehicleRegistrationNumberError(res.data.message.vehicle_registration_number); }
+                    return;
+                }
+            });
+        } catch (e) {
+            console.log(e);
+        } finally {
+            setIsLoading(false);
+         
         }
     };
 
@@ -408,7 +495,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
             }
         } catch (e) {
             console.log(e);
-        } 
+        }
     };
 
     const getModelList = async () => {
@@ -473,10 +560,57 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
         }
     };
 
+    const getUserList = async () => {
+        // console.log('User List called');
+        setIsLoadingUserList(true);
+        try {
+            const res = await fetch(`${API_URL}fetch_my_garage_customers?garage_id=${isGarageId}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+            });
+            const json = await res.json();
+            if (json !== undefined) {
+                setUserList(json.user_list);
+                setIsUserName(''); 
+                setIsUser(0); 
+                setFilteredUserData(json.user_list);
+            }
+        } catch (e) {
+            console.log(e);
+        } finally {
+            setIsLoadingUserList(false)
+        }
+    };
+
+    const searchFilterForUsers = (text) => {
+        if (text) {
+            let newData = userList.filter(
+                function (listData) {
+                // let arr2 = listData.phone_number ? listData.phone_number : ''.toUpperCase() 
+                let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
+                // let itemData = arr1.concat(arr2);
+                // console.log(itemData);
+                let textData = text.toUpperCase();
+                return itemData.indexOf(textData) > -1;
+                }
+            );
+            setFilteredUserData(newData);
+            setSearchQueryForUsers(text);
+        } else {
+            setFilteredUserData(userList);
+            setSearchQueryForUsers(text);
+        }
+    };
+
     useEffect(() => {
         getStatesList();
         getBrandList();
         getGarageList();
+        getUserList();
         getInsuranceProviderList();
     }, []);
 
@@ -485,8 +619,18 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     }, [isState]);
    
     useEffect(() => {
-        if(isBrand != undefined) getModelList();
+        if(isBrand != undefined) {
+            getModelList();
+        }
     }, [isBrand]);
+
+    useEffect(() => {
+        getUserList();
+    }, [isGarageId]);
+    
+    // useEffect(() => {
+    //     if(isUserVehicleDetails != '') navigation.navigate('AddRepairOrderStep3', {'userVehicleDetails': isUserVehicleDetails})
+    // }, [isUserVehicleDetails]);
 
     return (
         <View style={styles.pageContainer}>
@@ -500,96 +644,6 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                         behavior="padding"
                     >
                         <View style={{flex:1}}>
-                            <Text style={[styles.headingStyle, { marginTop:20 }]}>Customer Details:</Text>
-                            <TextInput
-                                label='Customer Name'
-                                style={styles.input}
-                                placeholder="Customer Name"
-                                value={isName}
-                                onChangeText={(text) => setIsName(text)}
-                            />
-                            {nameError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{nameError}</Text>
-                            }
-
-                            <TextInput
-                                label='Email Address'
-                                style={styles.input}
-                                placeholder="Email Address"
-                                value={isEmail}
-                                onChangeText={(text) => setIsEmail(text)}
-                            />
-                            {emailError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{emailError}</Text>
-                            }
-
-                            <TextInput
-                                label='Phone Number'
-                                style={styles.input}
-                                placeholder="Phone Number"
-                                value={isPhoneNumber}
-                                onChangeText={(text) => setIsPhoneNumber(text)}
-                                keyboardType={"phone-pad"}
-                            />
-                            {phoneNumberError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{phoneNumberError}</Text>
-                            }
-
-                            <View style={styles.dropDownContainer}>
-                                <Picker
-                                    selectedValue={isState}
-                                    onValueChange={(v) => {setIsState(v)}}
-                                    style={styles.dropDownField}
-                                    itemStyle={{padding: 0}}
-                                >
-                                    <Picker.Item label="Select State" value="0" />
-                                    {StateList.map((StateList, i) => {
-                                        return (
-                                            <Picker.Item
-                                                key={i}
-                                                label={StateList.name}
-                                                value={StateList.id}
-                                            />
-                                        );
-                                    })}
-                                </Picker>
-                            </View>
-                            {stateError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{stateError}</Text>
-                            }
-
-                            <View style={styles.dropDownContainer}>
-                                <Picker
-                                    selectedValue={isCity}
-                                    onValueChange={(v) => setIsCity(v)}
-                                    style={styles.dropDownStyle}
-                                    itemStyle={{padding: 0}}
-                                    enabled={cityFieldToggle}
-                                >
-                                    <Picker.Item label="Select City" value="0" />
-                                    {CityList.map((CityList, i) => {
-                                        return (
-                                            <Picker.Item
-                                                key={i}
-                                                label={CityList.name}
-                                                value={CityList.id}
-                                            />
-                                        );
-                                    })}
-                                    
-                                </Picker>
-                            </View>
-                            {cityError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{cityError}</Text>
-                            }
-
-                            <TextInput
-                                label='Address'
-                                style={styles.input}
-                                placeholder="Address"
-                                value={isAddress}
-                                onChangeText={(text) => setIsAddress(text)}
-                            />
 
                             {(userRole == "Super Admin" || garageId?.length > 1)  &&
                                 <View>
@@ -618,6 +672,169 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                 </View>
                             }
                          
+                            <Divider style={{marginTop: 20}} />
+
+                            <View style={{marginTop: 15}}>
+                                <RadioForm
+                                    radio_props={radio_props}
+                                    initial={0}
+                                    onPress={(value) => setUserOption(value)}
+                                    animation={true}
+                                    formHorizontal={true}
+                                    labelHorizontal={true}
+                                    buttonWrapStyle={{marginLeft: 10}}
+                                    labelStyle={{marginRight: 40}}
+                                />
+                            </View>
+                            { userOption == "existing_user" ? 
+                                <>
+                                    <View>
+                                        <TouchableOpacity 
+                                            style={styles.userDropDownField} 
+                                            onPress={() => {
+                                                setUserListModal(true);
+                                                searchFilterForUsers('');
+                                            }}
+                                        >
+                                        </TouchableOpacity>
+                                        <TextInput
+                                            mode="outlined"
+                                            label='User'
+                                            style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                            placeholder="Select User"
+                                            value={isUserName}
+                                            right={<TextInput.Icon name="menu-down" />}
+                                        />
+                                    </View>
+                                    {userError?.length > 0 &&
+                                        <Text style={styles.errorTextStyle}>{userError}</Text>
+                                    } 
+                                    {/* <View style={styles.dropDownContainer}>
+                                        <Picker
+                                            selectedValue={isUser}
+                                            onValueChange={(option) => { setIsUser(option); }}
+                                            style={styles.dropDownField}
+                                            itemStyle={{padding: 0}}
+                                        >
+                                            <Picker.Item label="Select User" value="0" />
+                                            {userList.map((userList, i) => {
+                                                return (
+                                                    <Picker.Item
+                                                        key={i}
+                                                        label={userList.name}
+                                                        value={userList.id}
+                                                    />
+                                                );
+                                            })}
+                                        </Picker>
+                                    </View>
+                                    {userError?.length > 0 &&
+                                        <Text style={styles.errorTextStyle}>{userError}</Text>
+                                    } */}
+                                </>
+                            :
+                                <>
+                                    <Text style={[styles.headingStyle, { marginTop:20 }]}>Customer Details:</Text>
+                                    <TextInput
+                                        mode="outlined"
+                                        label='Customer Name'
+                                        style={styles.input}
+                                        placeholder="Customer Name"
+                                        value={isName}
+                                        onChangeText={(text) => setIsName(text)}
+                                    />
+                                    {nameError?.length > 0 &&
+                                        <Text style={styles.errorTextStyle}>{nameError}</Text>
+                                    }
+
+                                    <TextInput
+                                        mode="outlined"
+                                        label='Email Address'
+                                        style={styles.input}
+                                        placeholder="Email Address"
+                                        value={isEmail}
+                                        onChangeText={(text) => setIsEmail(text)}
+                                    />
+                                    {emailError?.length > 0 &&
+                                        <Text style={styles.errorTextStyle}>{emailError}</Text>
+                                    }
+
+                                    <TextInput
+                                        mode="outlined"
+                                        label='Phone Number'
+                                        style={styles.input}
+                                        placeholder="Phone Number"
+                                        value={isPhoneNumber}
+                                        onChangeText={(text) => setIsPhoneNumber(text)}
+                                        keyboardType={"phone-pad"}
+                                    />
+                                    {phoneNumberError?.length > 0 &&
+                                        <Text style={styles.errorTextStyle}>{phoneNumberError}</Text>
+                                    }
+
+                                    <View style={styles.dropDownContainer}>
+                                        <Picker
+                                            selectedValue={isState}
+                                            onValueChange={(v) => {setIsState(v)}}
+                                            style={styles.dropDownField}
+                                            itemStyle={{padding: 0}}
+                                        >
+                                            <Picker.Item label="Select State" value="0" />
+                                            {StateList.map((StateList, i) => {
+                                                return (
+                                                    <Picker.Item
+                                                        key={i}
+                                                        label={StateList.name}
+                                                        value={StateList.id}
+                                                    />
+                                                );
+                                            })}
+                                        </Picker>
+                                    </View>
+                                    {stateError?.length > 0 &&
+                                        <Text style={styles.errorTextStyle}>{stateError}</Text>
+                                    }
+
+                                    <View style={styles.dropDownContainer}>
+                                        <Picker
+                                            selectedValue={isCity}
+                                            onValueChange={(v) => setIsCity(v)}
+                                            style={styles.dropDownStyle}
+                                            itemStyle={{padding: 0}}
+                                            enabled={cityFieldToggle}
+                                        >
+                                            <Picker.Item label="Select City" value="0" />
+                                            {CityList.map((CityList, i) => {
+                                                return (
+                                                    <Picker.Item
+                                                        key={i}
+                                                        label={CityList.name}
+                                                        value={CityList.id}
+                                                    />
+                                                );
+                                            })}
+                                            
+                                        </Picker>
+                                    </View>
+                                    {cityError?.length > 0 &&
+                                        <Text style={styles.errorTextStyle}>{cityError}</Text>
+                                    }
+
+                                    <TextInput
+                                        mode="outlined"
+                                        label='Address'
+                                        style={styles.input}
+                                        placeholder="Address"
+                                        value={isAddress}
+                                        onChangeText={(text) => setIsAddress(text)}
+                                    />
+
+                                    
+                                </>
+                            }
+
+                            <Divider style={{marginTop: 20}} />
+
                             <Text style={[styles.headingStyle, { marginTop:20 }]}>Vehicle Details:</Text>
                                 <View style={styles.dropDownContainer}>
                                     <Picker
@@ -669,6 +886,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                 }
 
                                 <TextInput
+                                    mode="outlined"
                                     label='Vehicle Registration Number'
                                     style={styles.input}
                                     placeholder="Vehicle Registration Number"
@@ -683,6 +901,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                     <View style={styles.datePickerContainer} pointerEvents='none'>
                                         <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
                                         <TextInput
+                                            mode="outlined"
                                             label='Purchase Date'
                                             style={styles.datePickerField}
                                             placeholder="Purchase Date"
@@ -702,6 +921,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                     <View style={styles.datePickerContainer} pointerEvents='none'>
                                         <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
                                         <TextInput
+                                            mode="outlined"
                                             label='Manufacturing Date'
                                             style={styles.datePickerField}
                                             placeholder="Manufacturing Date"
@@ -718,6 +938,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                 </TouchableOpacity>
                                
                                 <TextInput
+                                    mode="outlined"
                                     label='Engine Number'
                                     style={styles.input}
                                     placeholder="Engine Number"
@@ -726,6 +947,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                 />
                               
                                 <TextInput
+                                    mode="outlined"
                                     label='Chasis Number'
                                     style={styles.input}
                                     placeholder="Chasis Number"
@@ -755,6 +977,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                 </View>
                                 
                                 <TextInput
+                                    mode="outlined"
                                     label='Insurer GSTIN'
                                     style={styles.input}
                                     placeholder="Insurer GSTIN"
@@ -763,6 +986,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                 />
                               
                                 <TextInput
+                                    mode="outlined"
                                     label='Insurer Address'
                                     style={styles.input}
                                     placeholder="Insurer Address"
@@ -771,6 +995,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                 />
                               
                                 <TextInput
+                                    mode="outlined"
                                     label='Policy Number'
                                     style={styles.input}
                                     placeholder="Policy Number"
@@ -782,6 +1007,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                     <View style={styles.datePickerContainer} pointerEvents='none'>
                                         <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
                                         <TextInput
+                                            mode="outlined"
                                             label='Insurance Expiry Date'
                                             style={styles.datePickerField}
                                             placeholder="Insurance Expiry Date"
@@ -851,6 +1077,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                 <Modal visible={addBrandModal} onDismiss={() => { setAddBrandModal(false); setNewBrandName(""); setIsBrand(0); }} contentContainerStyle={styles.modalContainerStyle}>
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Brand</Text>
                     <TextInput
+                        mode="outlined"
                         label='Brand Name'
                         style={styles.input}
                         placeholder="Brand Name"
@@ -880,6 +1107,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                 <Modal visible={addModelModal} onDismiss={() => { setAddModelModal(false); setNewModelName(""); setIsModel(0); }} contentContainerStyle={styles.modalContainerStyle}>
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
                     <TextInput
+                        mode="outlined"
                         label='Model Name'
                         style={styles.input}
                         placeholder="Model Name"
@@ -909,6 +1137,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                 <Modal visible={addInsuranceCompanyModal} onDismiss={() => { setAddInsuranceCompanyModal(false); setNewInsuranceCompanyName(""); setIsInsuranceProvider(0); }} contentContainerStyle={styles.modalContainerStyle}>
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
                     <TextInput
+                        mode="outlined"
                         label='Insurance Company Name'
                         style={styles.input}
                         placeholder="Insurance Company Name"
@@ -934,6 +1163,57 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                     </View>
                 </Modal>
             </Portal>
+            <Portal>
+                {/* Users List Modal */}
+                <Modal visible={userListModal} onDismiss={() => { setUserListModal(false); setIsUser(0); setIsUserName(''); setUserError(''); setSearchQueryForUsers('');  searchFilterForUsers();}} contentContainerStyle={styles.modalContainerStyle}>
+                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select User</Text>
+                    {(isLoadingUserList == true) ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator>
+                        :
+                        <>
+                            <View style={{marginTop: 20, marginBottom: 10}}>
+                                <Searchbar
+                                    placeholder="Search here..."
+                                    onChangeText={(text) => { if(text != null) searchFilterForUsers(text)}}
+                                    value={searchQueryForUsers}
+                                    elevation={0}
+                                    style={{ elevation: 0.8, marginBottom: 10}}
+                                />
+                                {filteredUserData?.length > 0 ?  
+                                    <FlatList
+                                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                        data={filteredUserData}
+                                        style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
+                                        keyExtractor={item => item.id}
+                                        renderItem={({item}) => (
+                                            <>
+                                                <List.Item
+                                                    title={
+                                                        <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                            <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
+                                                        </View>
+                                                    }
+                                                    onPress={() => {
+                                                            setIsUserName(item.name); 
+                                                            setIsUser(item.id); 
+                                                            setUserError('');
+                                                            setUserListModal(false);  
+                                                            searchFilterForUsers('');
+                                                        }
+                                                    }
+                                                />
+                                            </>
+                                        )} 
+                                    />
+                                    :
+                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
+                                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such user is associated!</Text>
+                                    </View>
+                                }
+                            </View>
+                        </>
+                    }
+                </Modal>
+            </Portal>
         </View>
     )
 }
@@ -947,12 +1227,6 @@ const styles = StyleSheet.create({
     },
     input: {
         marginTop: 20,
-        padding: 15,
-        height: 55,
-        borderColor: colors.light_gray,
-        borderWidth: 1,
-        borderRadius: 5,
-        backgroundColor: colors.white,
         fontSize: 16,
      },
     headingStyle: {
@@ -981,11 +1255,11 @@ const styles = StyleSheet.create({
     datePickerField: {
         flex: 1,
         borderColor: colors.light_gray,
-        borderWidth: 1,
+        borderBottomWidth: 1,
         borderRadius: 5,
-        backgroundColor: '#fff',
+        backgroundColor: '#F0F2F5',
         color: '#424242',
-        paddingHorizontal: 15,
+        // paddingHorizontal: 15,
         height: 55,
         fontSize: 16,
     },
@@ -993,7 +1267,7 @@ const styles = StyleSheet.create({
         padding: 10,
         position: 'absolute',
         right: 7,
-        top: 6,
+        top: 13,
         zIndex: 2,
     },
     dropDownContainer: {
@@ -1004,6 +1278,7 @@ const styles = StyleSheet.create({
     },
     dropDownField: {
         padding: 0,
+        backgroundColor: '#F0F2F5',
     },
     errorTextStyle: {
         color: colors.danger,
@@ -1020,6 +1295,17 @@ const styles = StyleSheet.create({
         backgroundColor: 'white', 
         padding: 20,
         marginHorizontal: 30
+    },
+    userDropDownField: {
+        fontSize: 16,
+        color: colors.black,
+        position: 'absolute',
+        marginTop: 15,
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '80%',
+        zIndex: 2,
     },
 })
 

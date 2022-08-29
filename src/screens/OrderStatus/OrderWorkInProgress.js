@@ -1,61 +1,29 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Linking, FlatList } from "react-native";
 import { Checkbox, Divider, Button } from "react-native-paper";
-import { colors } from "../constants";
+import { colors } from "../../constants";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import IconX from "react-native-vector-icons/FontAwesome5";
 import { connect } from 'react-redux';
 import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
 import moment from "moment";
-import { API_URL } from "../constants/config";
+import { API_URL } from "../../constants/config";
 
-const OrderCreated = ({ navigation, userRole, route, userToken }) => {
+const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
 
     const [partData, setPartData] = useState([]);
     const [serviceData, setServiceData] = useState([]);
     const [isOrderData, setIsOrderData] = useState(route?.params?.data);
-
     const [isOrderId, setIsOrderId] = useState(route?.params?.data?.order_id);
-    // const [isGarageId, setIsGarageId] = useState(route?.params?.data?.garage_id);
-    // const [isUserId, setIsUserId] = useState(route?.params?.data?.user_id);
-    // const [isVehicleId, setIsVehicleId] = useState(route?.params?.data?.vehicle_id);
     const [isName, setIsName] = useState(route?.params?.data?.name);
-    // const [isEmail, setIsEmail] = useState(route?.params?.data?.email);
     const [isPhoneNumber, setIsPhoneNumber] = useState(route?.params?.data?.phone_number);
-
-    // Vehicle Fields
-    // const [isBrand, setIsBrand] = useState(route?.params?.data?.brand_id);
     const [isBrandName, setIsBrandName] = useState(route?.params?.data?.brand_name);
-    // const [isModel, setIsModel] = useState(route?.params?.data?.model_id);
-    // const [isModelName, setIsModelName] = useState(route?.params?.data?.model_name);
     const [isVehicleRegistrationNumber, setIsVehicleRegistrationNumber] = useState(route?.params?.data?.vehicle_registration_number);
-
-    // const [isOdometerKMs, setIsOdometerKMs] = useState(route?.params?.data?.odometer);
-    // const [isFuelLevel, setIsFuelLevel] = useState(route?.params?.data?.fuel_level);
-    // const [isComment, setIsComment] = useState(route?.params?.data?.comment);
     const [isTotal, setIsTotal] = useState(route?.params?.data?.total);
-    // const [isApplicableDiscount, setIsApplicableDiscount] = useState(route?.params?.data?.applicable_discount);
-
-    // const [isCreatedAt, setIsCreatedAt] = useState(route?.params?.data?.created_at);
     const [createdAt, setCreatedAt] = useState(moment(route?.params?.data?.created_at, 'YYYY-MM-DD hh:mm:ss').fromNow());
-
-    // const [isEstimatedDeliveryDateTime, setIsEstimatedDeliveryDateTime] = useState(route?.params?.data?.estimated_delivery_time);
     const [estimatedDeliveryDateTime, setEstimatedDeliveryDateTime] = useState(moment(route?.params?.data?.estimated_delivery_time, 'YYYY-MM-DD hh:mm:ss').format('DD-MM-YYYY hh:mm A'));
 
-    // const [partTotals, setPartTotals] = useState([]);
-    // const [serviceTotals, setSeviceTotals] = useState([]);
-
-    // const [servicesTotal, setServicesTotal] = useState(route?.params?.data?.labor_total);
-    // const [partsTotal, setPartsTotal] = useState(route?.params?.data?.parts_total);
-
-    // const [isTotalServiceDiscount, setIsTotalServiceDiscount] = useState(0);
-    // const [isTotalPartDiscount, setIsTotalPartDiscount] = useState(0);
-    
-    // const [fieldsServices, setFieldsServices] = useState([]);
-    // const [fieldsParts, setFieldsParts] = useState([]);
-
     const changeOrderStatus = async () => {
-        console.log('working');
 
         // Data to call API 
         let orderServicesArray = [];
@@ -66,11 +34,10 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
         partData.forEach(item => {
             orderPartsArray.push({ order_part_id: item.id, is_done: item.is_done });
         });
-        console.log('orderStatusArray', isOrderData);
 
         // Data to send for next screen 
-        isOrderData['parts_list'] = partData;
-        isOrderData['services_list'] = serviceData;
+        isOrderData.parts_list = partData;
+        isOrderData.services_list = serviceData;
 
         try {
             const res = await fetch(`${API_URL}order_status/update`, {
@@ -90,9 +57,9 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
             if (json !== undefined) {
                 console.log(json);
                 if (json.order_status == "Vehicle Received") {
-                    // navigation.navigate('OrderCreated', {'data': isOrderData});
+                    navigation.navigate('OrderCreated', {'data': isOrderData});
                 } else if(json.order_status == "Work in Progress Order") {
-                    navigation.navigate('OrderWorkInProgress', {'data': isOrderData});
+                    // navigation.navigate('OrderWorkInProgress', {'data': isOrderData});
                 } else if(json.order_status == "Vehicle Ready") {
                     navigation.navigate('OrderVehicleReady', {'data': isOrderData});
                 } else if(json.order_status == "Completed Order") {
@@ -104,37 +71,9 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
         }
     }
 
-    // const changePartsStatus = async () => {
-    //     let orderStatusArray = [];
-    //     partData.forEach(item => {
-    //         orderStatusArray.push({ order_part_id: item.id, is_done: item.is_done });
-    //     });
-    //     try {
-    //         const res = await fetch(`${API_URL}part_status/update`, {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Accept': 'application/json',
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': 'Bearer ' + userToken
-    //             },
-    //             body: JSON.stringify({
-    //                 order_id: isOrderId,
-    //                 order_part: orderStatusArray,
-    //             }),
-    //         });
-    //         const json = await res.json();
-    //         if (json !== undefined) {
-    //             {(partData.length != 0 && serviceData.length != 0) && navigation.navigate('OrderWorkInProgress')}
-    //         }
-    //     } catch (e) {
-    //         console.log(e);
-    //     }
-    // }
-
     useEffect(() => {
         setServiceData(route?.params?.data?.services_list);
         setPartData(route?.params?.data?.parts_list);
-        // console.log(route?.params?.data?.parts_list);
     }, [route?.params?.data]);
     
     return (
@@ -154,7 +93,7 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
                     <View>
                         <ProgressSteps
                             labelFontSize={12}
-                            activeStep={0}
+                            activeStep={1}
                             disabledStepIconColor="#616161"
                             labelColor="#616161"
                             progressBarColor="#616161"
@@ -163,15 +102,17 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
                                 label="Created"
                                 removeBtnRow={true}
                             >   
+                            </ProgressStep>
+                            <ProgressStep 
+                                label="In Progress"
+                                removeBtnRow={true}
+                            >
                                 <View>
                                     <View style={{flexDirection: "row", alignItems:"center", justifyContent: 'center'}}>
                                         <Text style={styles.customerName}>{isName}</Text>
-                                        {/* <Text style={styles.customerName}>{ isCustomerData != null ? isCustomerData.name : '' }</Text> */}
-                                        {/* <Icon onPress={() => {}} name={"pencil"} size={20} color={colors.gray} /> */}
                                     </View>
                                     <View style={{flexDirection: "row", alignItems:"center", justifyContent: 'center'}}>
                                         <Text style={styles.customerPhonenumber}>{isPhoneNumber}</Text>
-                                        {/* <Text style={styles.customerPhonenumber}>{ isCustomerData != null ? isCustomerData?.phone_number : '' }</Text> */}
                                     </View>
                                     <View style={{flexDirection: "row", alignItems:"center", justifyContent: 'center'}}>
                                         <Text style={styles.customerVehicle}>{isBrandName} ({isVehicleRegistrationNumber})</Text>
@@ -182,50 +123,23 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
                                                 <TouchableOpacity onPress={()=> Linking.openURL(`tel:${isPhoneNumber}`) } style={styles.smallButton}><Icon name={"phone"} size={20} color={colors.primary} /></TouchableOpacity>
                                                 <TouchableOpacity onPress={()=> Linking.openURL(`sms:${isPhoneNumber}?&body=Hello%20ServAll`) } style={styles.smallButton}><Icon name={"comment-multiple"} size={20} color={colors.primary} /></TouchableOpacity>
                                                 <TouchableOpacity onPress={()=> Linking.openURL(`https://wa.me/${isPhoneNumber}`) } style={styles.smallButton}><Icon name={"whatsapp"} size={20} color={colors.primary} /></TouchableOpacity>
-                                                {/* <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Icon name={"bell"} size={20} color={colors.primary} /><Text style={{marginLeft:4, color:colors.primary}}>Reminders</Text></TouchableOpacity> */}
                                             </>
                                         : null }
-                                        {/* <TouchableOpacity onPress={()=>{}} style={styles.smallButton}><Text style={{color:colors.primary}}>Vehicles</Text></TouchableOpacity>
-                                        <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Text style={{color:colors.primary}}>Appointments</Text></TouchableOpacity> */}
                                     </View>
                                     <View style={styles.cardContainer}>
                                         <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center", marginRight: 10}}>
                                             <Text style={{color: colors.black, fontSize: 16}}>Total</Text>
                                             <Text style={{color: colors.black, fontSize: 16}}>₹ {isTotal}</Text>
                                         </View>
-                                        {/* <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center"}}>
-                                            <Text style={{color: colors.danger2, fontSize: 16}}>Discount</Text>
-                                            <Text style={{color: colors.danger2, fontSize: 16}}>₹ {isApplicableDiscount}</Text>
-                                        </View> */}
                                         <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center", marginRight: 10}}>
                                             <Text style={{color: colors.green, fontSize: 16}}>Received</Text>
-                                            <Text style={{color: colors.green, fontSize: 16}}>₹ { route?.params?.data?.payment_status == 'completed' ? isTotal : 0 }</Text>
+                                            <Text style={{color: colors.green, fontSize: 16}}>₹ { route?.params?.data?.payment_status == 'Completed' ? isTotal : 0 }</Text>
                                         </View>
-                                        {/* <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center"}}>
-                                            <Text style={{color: colors.danger2, fontSize: 16}}>Due</Text>
-                                            <Text style={{color: colors.danger2, fontSize: 16}}>₹ {isTotal}</Text>
-                                        </View> */}
                                     </View>
-                                    {/* <View style={{flexDirection:"row", marginTop: 15, alignSelf:"center", justifyContent:'center'}}>
-                                        <TouchableOpacity 
-                                            onPress={()=> Linking.openURL(`tel:${isPhoneNumber}`) } 
-                                            // style={{marginRight: 10}}
-                                        >
-                                            <IconX name={"file-pdf"} size={28} color={colors.primary} />
-                                        </TouchableOpacity>
-                                        <TouchableOpacity onPress={()=> Linking.openURL(`sms:${isPhoneNumber}?&body=Hello%20ServAll`) } style={{}}><IconX name={"share-alt-square"} size={28} color={colors.primary} /></TouchableOpacity>
-
-                                        <TouchableOpacity onPress={()=> Linking.openURL(`https://wa.me/Text`) } style={styles.smallButton}><Icon name={"whatsapp"} size={20} color={colors.primary} /></TouchableOpacity>
-                                        <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Icon name={"bell"} size={20} color={colors.primary} /><Text style={{marginLeft:4, color:colors.primary}}>Reminders</Text></TouchableOpacity>
-                                    </View>
-                                    <View style={{marginTop: 5, alignSelf:"center", justifyContent:'center'}}>
-                                        <Text style={{color: colors.black}}>Repair Order</Text>
-                                    </View> */}
                                 </View>
                                 <View style={{flexDirection: 'column', marginTop: 20}}>
                                     <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.secondary, padding: 10}}>
                                         <Text style={{fontSize: 18, color: colors.white}}>Services</Text>
-                                        {/* <TouchableOpacity onPress={changeServicesStatus} style={[styles.smallButton, {paddingHorizontal: 8, borderColor: colors.white}]}><IconX name={"edit"} size={16} color={colors.white} /><Text style={{marginLeft:4, color:colors.white}}>Save Progress</Text></TouchableOpacity> */}
                                     </View>
                                     <View style={{flexDirection:'column', backgroundColor: colors.white}}>
                                         <>
@@ -247,29 +161,16 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
                                                                     serviceValues2[index]['is_done'] = 1;
                                                                     setServiceData(serviceValues2);
                                                                 } else {                                                          
-                                                                    // item.is_done = 0 
                                                                     let serviceValues2 = [...serviceData];
-                                                            
-                                                                    // serviceValues2[index][value.name] = value.value;
                                                                     serviceValues2[index]['is_done'] = 0;
-                                    
-                                                                    setServiceData(serviceValues2);
-                                                                    // serviceData[index]['is_done'] = 0
-                                                                    // setorderStatusArray([
-                                                                    //     ...orderStatusArray, 
-                                                                    //     {"order_service_id": item.id, "is_done": 0},
-                                                                    //     // {"order_service_id": item,"is_done":1}
-                                                                    // ])  
+                                                                    setServiceData(serviceValues2); 
                                                                 }
-                                                                console.log(serviceData);
-                                                                // setChecked(!checked);
                                                             }}
-                                                            style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 7, paddingHorizontal: 10}}
+                                                            style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 5, paddingHorizontal: 10}}
                                                             activeOpacity={1}
                                                         >
                                                             <Text style={{fontSize: 18, color: colors.black}}>- {item?.service?.name}</Text>
                                                             <Checkbox
-                                                                // checked
                                                                 status={serviceData[index]['is_done'] == 1 ? 'checked' : 'unchecked'}
                                                             />
                                                         </TouchableOpacity>
@@ -277,26 +178,10 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
                                                 />
                                             }
                                         </>
-                                        
-                                        {/* <TouchableOpacity  
-                                            onPress={() => {
-                                                setChecked(!checked);
-                                            }}
-                                            style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 7, paddingHorizontal: 10}}
-                                            activeOpacity={1}
-                                        >
-                                            <Text style={{fontSize: 18, color: colors.black}}>- Air filter hose Cleaning</Text>
-                                            <Checkbox
-                                                status={checked ? 'checked' : 'unchecked'}
-
-                                            />
-                                        </TouchableOpacity> */}
-                                        {/* <Checkbox.Item label="- Item" status="checked" /> */}
                                     </View>
 
                                     <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 25, backgroundColor: colors.secondary, padding: 10}}>
                                         <Text style={{fontSize: 18, color: colors.white}}>Parts</Text>
-                                        {/* <TouchableOpacity onPress={changePartsStatus} style={[styles.smallButton, {paddingHorizontal: 8, borderColor: colors.white}]}><IconX name={"edit"} size={16} color={colors.white} /><Text style={{marginLeft:4, color:colors.white}}>Save Progress</Text></TouchableOpacity> */}
                                     </View>
                                     <View style={{flexDirection:'column', backgroundColor: colors.white}}>
                                         <>
@@ -322,7 +207,6 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
                                                                     partValues2[index]['is_done'] = 0;
                                                                     setPartData(partValues2);
                                                                 }
-                                                                console.log(partData);
                                                             }}
                                                             style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 5, paddingHorizontal: 10}}
                                                             activeOpacity={1}
@@ -336,20 +220,6 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
                                                 />
                                             }
                                         </>
-                                        {/* // <TouchableOpacity  
-                                        //     onPress={() => {
-                                        //         setChecked(!checked);
-                                        //     }}
-                                        //     style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 7, paddingHorizontal: 10}}
-                                        //     activeOpacity={1}
-                                        // >
-                                        //     <Text style={{fontSize: 18, color: colors.black}}>- Air filter hose Cleaning</Text>
-                                        //     <Checkbox
-                                        //         status={checked ? 'checked' : 'unchecked'}
-
-                                        //     />
-                                        // </TouchableOpacity>
-                                        // <Checkbox.Item label="- Item" status="checked" /> */}
                                     </View>
                                 </View>
 
@@ -360,12 +230,6 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
                                 >
                                     Update Status
                                 </Button>
-
-                            </ProgressStep>
-                            <ProgressStep 
-                                label="In Progress"
-                                removeBtnRow={true}
-                            >
                             </ProgressStep>
                             <ProgressStep 
                                 label="Vehicle Ready"
@@ -381,8 +245,6 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
                     </View>
                     
                 </View>
-                {/* <View style={styles.lowerContainer}>
-                </View> */}
             </ScrollView>
         </View>
     )
@@ -392,17 +254,10 @@ const styles = StyleSheet.create({
     surfaceContainer: {
         flex:1,
         padding:15,
-        // marginBottom: 35
     },
     stepLables: {
-        // flexDirection: 'row',
-        // width: '100%',
-        // alignContent: 'space-between'
         flexDirection: "row", 
         alignItems:"center", 
-        // elevation: 3, 
-        // backgroundColor: colors.white,
-        // padding: 8,
         marginBottom: -15,
         justifyContent:"space-between",
         width: "100%",
@@ -438,7 +293,6 @@ const styles = StyleSheet.create({
     smallButton: {
         fontSize: 16,
         color: colors.primary,
-        // flex: 1,
         flexDirection: 'row',
         justifyContent: 'center',
         borderRadius: 2,
@@ -447,7 +301,6 @@ const styles = StyleSheet.create({
         padding: 3,
         marginHorizontal: 4,
         marginTop: 3,
-        // alignSelf: 'space-between'
     },
     cardContainer: {
         flexDirection: "row", 
@@ -457,7 +310,6 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         padding: 8,
         marginVertical: 10,
-        // marginHorizonal: 40,
         justifyContent:"space-around",
         width: "70%",
     },
@@ -468,4 +320,4 @@ const mapStateToProps = state => ({
     userToken: state.user.userToken,
 })
 
-export default connect(mapStateToProps)(OrderCreated);
+export default connect(mapStateToProps)(OrderWorkInProgress);

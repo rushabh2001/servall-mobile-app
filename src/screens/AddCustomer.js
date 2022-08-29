@@ -1,10 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View , Text, StyleSheet, TextInput, Keyboard, ActivityIndicator, TouchableOpacity } from 'react-native';
-import { Modal, Portal } from 'react-native-paper';
+import { View , Text, StyleSheet, Keyboard, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { Modal, Portal, TextInput, Button } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { colors } from '../constants';
 import { API_URL } from '../constants/config';
-import { Button } from 'react-native-paper';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import InputScrollView from 'react-native-input-scroll-view';
 import { Picker } from '@react-native-picker/picker';
@@ -201,10 +200,10 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
     const changePurchaseSelectedDate = (event, selectedDate) => {
         if (selectedDate != null) {
             let currentDate = selectedDate || datePurchase;
-            let formattedDate = moment(currentDate, 'YYYY MMMM D').format('DD-MM-YYYY');
+            let formattedDate = moment(currentDate, 'YYYY-MM-DD', true).format('DD-MM-YYYY');
             setDisplayPurchaseCalender(false);
             setDatePurchase(formattedDate);
-            let formateDateForDatabase = moment(currentDate, 'YYYY MMMM D').format('YYYY-MM-DD');
+            let formateDateForDatabase = moment(currentDate, 'YYYY-MM-DD"T"hh:mm ZZ').format('YYYY-MM-DD');
             setIsPurchaseDate(new Date(formateDateForDatabase));
         }
      };
@@ -212,10 +211,10 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
     const changeManufacturingSelectedDate = (event, selectedDate) => {
         if (selectedDate != null) {
             let currentDate = selectedDate || dateManufacturing;
-            let formattedDate = moment(currentDate, 'YYYY MMMM D').format('DD-MM-YYYY');
+            let formattedDate = moment(currentDate, 'YYYY-MM-DD', true).format('DD-MM-YYYY');
             setDisplayManufacturingCalender(false);
             setDateManufacturing(formattedDate);
-            let formateDateForDatabase = moment(currentDate, 'YYYY MMMM D').format('YYYY-MM-DD');
+            let formateDateForDatabase = moment(currentDate, 'YYYY-MM-DD"T"hh:mm ZZ').format('YYYY-MM-DD');
             setIsManufacturingDate(new Date(formateDateForDatabase));
         }
     };
@@ -223,10 +222,10 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
     const changeInsuranceExpirySelectedDate = (event, selectedDate) => {
         if (selectedDate != null) {
             let currentDate = selectedDate || dateInsuranceExpiry;
-            let formattedDate = moment(currentDate, 'YYYY MMMM D').format('DD-MM-YYYY');
+            let formattedDate = moment(currentDate, 'YYYY-MM-DD', true).format('DD-MM-YYYY');
             setDisplayInsuranceExpiryCalender(false);
             setDateInsuranceExpiry(formattedDate);
-            let formateDateForDatabase = moment(currentDate, 'YYYY MMMM D').format('YYYY-MM-DD');
+            let formateDateForDatabase = moment(currentDate, 'YYYY-MM-DD"T"hh:mm ZZ').format('YYYY-MM-DD');
             setIsInsuranceExpiryDate(new Date(formateDateForDatabase));  
         }   
     };
@@ -276,15 +275,15 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
         data.append('brand_id', JSON.stringify(isBrand));
         data.append('model_id', JSON.stringify(isModel));
         data.append('vehicle_registration_number', isVehicleRegistrationNumber?.trim());
-        if(isPurchaseDate) data.append('purchase_date', isPurchaseDate);
-        if(isManufacturingDate) data.append('manufacturing_date', isManufacturingDate);
+        if(isPurchaseDate) data.append('purchase_date', moment(isPurchaseDate, 'YYYY-MM-DD"T"hh:mm ZZ').format('YYYY-MM-DD'));
+        if(isManufacturingDate) data.append('manufacturing_date', moment(isManufacturingDate, 'YYYY-MM-DD"T"hh:mm ZZ').format('YYYY-MM-DD'));
         if(isEngineNumber) data.append('engine_number', isEngineNumber?.trim());
         if(isChasisNumber) data.append('chasis_number', isChasisNumber?.trim());
         if(isInsuranceProvider) data.append('insurance_id', parseInt(isInsuranceProvider));
         if(isInsurerGstin) data.append('insurer_gstin', isInsurerGstin?.trim());
         if(isInsurerAddress) data.append('insurer_address', isInsurerAddress?.trim());
         if(isPolicyNumber) data.append('policy_number', isPolicyNumber?.trim());
-        if(isInsuranceExpiryDate) data.append('insurance_expiry_date', isInsuranceExpiryDate);
+        if(isInsuranceExpiryDate) data.append('insurance_expiry_date', moment(isInsuranceExpiryDate, 'YYYY-MM-DD"T"hh:mm ZZ').format('YYYY-MM-DD'));
         if(isRegistrationCertificateImg != null) data.append('registration_certificate_img', isRegistrationCertificateImg);
         if(isInsuranceImg != null) data.append('insurance_img', isInsuranceImg);
         data.append('vehicle_option', 'new_vehicle');
@@ -482,6 +481,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                         <View style={{flex:1}}>
                             <Text style={[styles.headingStyle, { marginTop:20 }]}>Customer Details:</Text>
                             <TextInput
+                                mode="outlined"
                                 label='Customer Name'
                                 style={styles.input}
                                 placeholder="Customer Name"
@@ -493,6 +493,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                             }
 
                             <TextInput
+                                mode="outlined"
                                 label='Email Address'
                                 style={styles.input}
                                 placeholder="Email Address"
@@ -504,6 +505,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                             }
 
                             <TextInput
+                                mode="outlined"
                                 label='Phone Number'
                                 style={styles.input}
                                 placeholder="Phone Number"
@@ -564,6 +566,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                             }
 
                             <TextInput
+                                mode="outlined"
                                 label='Address'
                                 style={styles.input}
                                 placeholder="Address"
@@ -649,6 +652,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                 }
 
                                 <TextInput
+                                    mode="outlined"
                                     label='Vehicle Registration Number'
                                     style={styles.input}
                                     placeholder="Vehicle Registration Number"
@@ -663,6 +667,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                     <View style={styles.datePickerContainer} pointerEvents='none'>
                                         <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
                                         <TextInput
+                                            mode="outlined"
                                             label='Purchase Date'
                                             style={styles.datePickerField}
                                             placeholder="Purchase Date"
@@ -682,6 +687,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                     <View style={styles.datePickerContainer} pointerEvents='none'>
                                         <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
                                         <TextInput
+                                            mode="outlined"
                                             label='Manufacturing Date'
                                             style={styles.datePickerField}
                                             placeholder="Manufacturing Date"
@@ -698,6 +704,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                 </TouchableOpacity>
                                
                                 <TextInput
+                                    mode="outlined"
                                     label='Engine Number'
                                     style={styles.input}
                                     placeholder="Engine Number"
@@ -706,6 +713,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                 />
                               
                                 <TextInput
+                                    mode="outlined"
                                     label='Chasis Number'
                                     style={styles.input}
                                     placeholder="Chasis Number"
@@ -735,6 +743,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                 </View>
                                 
                                 <TextInput
+                                    mode="outlined"
                                     label='Insurer GSTIN'
                                     style={styles.input}
                                     placeholder="Insurer GSTIN"
@@ -743,6 +752,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                 />
                               
                                 <TextInput
+                                    mode="outlined"
                                     label='Insurer Address'
                                     style={styles.input}
                                     placeholder="Insurer Address"
@@ -751,6 +761,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                 />
                               
                                 <TextInput
+                                    mode="outlined"
                                     label='Policy Number'
                                     style={styles.input}
                                     placeholder="Policy Number"
@@ -762,6 +773,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                     <View style={styles.datePickerContainer} pointerEvents='none'>
                                         <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
                                         <TextInput
+                                            mode="outlined"
                                             label='Insurance Expiry Date'
                                             style={styles.datePickerField}
                                             placeholder="Insurance Expiry Date"
@@ -831,6 +843,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                 <Modal visible={addBrandModal} onDismiss={() => { setAddBrandModal(false); setNewBrandName(""); setIsBrand(0); }} contentContainerStyle={styles.modalContainerStyle}>
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Brand</Text>
                     <TextInput
+                        mode="outlined"
                         label='Brand Name'
                         style={styles.input}
                         placeholder="Brand Name"
@@ -860,6 +873,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                 <Modal visible={addModelModal} onDismiss={() => { setAddModelModal(false); setNewModelName(""); setIsModel(0); }} contentContainerStyle={styles.modalContainerStyle}>
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
                     <TextInput
+                        mode="outlined"
                         label='Model Name'
                         style={styles.input}
                         placeholder="Model Name"
@@ -889,6 +903,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                 <Modal visible={addInsuranceCompanyModal} onDismiss={() => { setAddInsuranceCompanyModal(false); setNewInsuranceCompanyName(""); setIsInsuranceProvider(0); }} contentContainerStyle={styles.modalContainerStyle}>
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
                     <TextInput
+                        mode="outlined"
                         label='Insurance Company Name'
                         style={styles.input}
                         placeholder="Insurance Company Name"
@@ -927,12 +942,6 @@ const styles = StyleSheet.create({
     },
     input: {
         marginTop: 20,
-        padding: 15,
-        height: 55,
-        borderColor: colors.light_gray,
-        borderWidth: 1,
-        borderRadius: 5,
-        backgroundColor: colors.white,
         fontSize: 16,
      },
     headingStyle: {
@@ -961,19 +970,19 @@ const styles = StyleSheet.create({
     datePickerField: {
         flex: 1,
         borderColor: colors.light_gray,
-        borderWidth: 1,
+        borderBottomWidth: 1,
         borderRadius: 5,
-        backgroundColor: '#fff',
+        backgroundColor: '#F0F2F5',
         color: '#424242',
-        paddingHorizontal: 15,
-        height: 55,
+        // paddingHorizontal: 15,
+        // height: 55,
         fontSize: 16,
     },
     datePickerIcon: {
         padding: 10,
         position: 'absolute',
         right: 7,
-        top: 6,
+        top: 13,
         zIndex: 2,
     },
     dropDownContainer: {
@@ -984,6 +993,7 @@ const styles = StyleSheet.create({
     },
     dropDownField: {
         padding: 0,
+        backgroundColor: '#F0F2F5',
     },
     errorTextStyle: {
         color: colors.danger,

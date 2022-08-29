@@ -43,13 +43,13 @@ const More = ({ navigation, signOut}) => {
                 right={() => (<Icon name="caret-right" style={{marginRight:20, alignSelf:"center"}} color={colors.gray} size={18} />)}
               />
               <Divider />
-              <List.Item
+              {/* <List.Item
                 title="Cancelled Orders"
                 style={{paddingVertical:15}}
                 left={() => (<Icon name="flag" style={{marginRight:20, alignSelf:"center", width: 30}} color={colors.black} size={21} />)}
                 right={() => (<Icon name="caret-right" style={{marginRight:20, alignSelf:"center"}} color={colors.gray} size={18} />)}
               />
-              <Divider />
+              <Divider /> */}
               <List.Item
                 title="Log Out"
                 onPress={() => onLogOut()}

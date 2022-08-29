@@ -303,31 +303,59 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
     };
 
     const getInvetoryData = async () => {
+        setIsLoading(true);
         try {
-            const res = await fetch(`${API_URL}fetch_parts_inventory?parts_id=${isPart}&garage_id=${isGarageId}`, {
+            await fetch(`${API_URL}fetch_parts_inventory?parts_id=${isPart}&garage_id=${isGarageId}`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + userToken
-                },
+                }
+            })
+            .then(res => {
+                const statusCode = res.status;
+                let data;
+                return res.json().then(obj => {
+                    data = obj;
+                    return { statusCode, data };
+                });
+            })
+            .then((res) => {
+                if(res.statusCode == 404) {
+                    console.log('getInvetoryData', res.data);
+                    // setIsVendor(parseInt(res.data.id));
+                    // setIsVendorName(res.data.name);
+                    setIsCurrentStock('');
+                    setIsMaxStock('');
+                    setIsMinStock('');
+                    setIsMRP('');
+                    setIsRackId('');
+                    setIsPrice('');
+                    setIsComment('');
+            
+                } else if(res.statusCode == 201 || res.statusCode == 200) {
+                    setIsCurrentStock(res.data.data.current_stock);
+                    setIsMaxStock(res.data.data.max_stock);
+                    setIsMinStock(res.data.data.min_stock);
+                    setIsMRP(res.data.data.mrp);
+                    setIsRackId(res.data.data.rack_id);
+                    setIsPrice(res.data.data.purchase_price);
+                    setIsComment(res.data.data.comment);
+                } else {
+                    setIsCurrentStock('');
+                    setIsMaxStock('');
+                    setIsMinStock('');
+                    setIsMRP('');
+                    setIsRackId('');
+                    setIsPrice('');
+                    setIsComment('');
+                }
             });
-            const json = await res.json();
-            if (json !== undefined) {
-                console.log('getInvetoryData', res);
-                // setIsVendor(parseInt(json.data.id));
-                // setIsVendorName(json.data.name);
-        
-                setIsCurrentStock(json.data.current_stock);
-                setIsMaxStock(json.data.max_stock);
-                setIsMinStock(json.data.min_stock);
-                setIsMRP(json.data.mrp);
-                setIsRackId(json.data.rack_id);
-                setIsPrice(json.data.purchase_price);
-                // setIsComment(json.data.comment);
-            }
         } catch (e) {
             console.log(e);
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -338,283 +366,286 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
     }, []);
 
     useEffect(() => {
-        getInvetoryData();
-      }, [isPart, isGarageId]);
+        if(isPart != 0 && isGarageId != 0) getInvetoryData()
+    }, [isPart, isGarageId]);
 
     return (
         <View style={styles.pageContainer}>
-            {isLoading == true ? <ActivityIndicator></ActivityIndicator> :
-                <InputScrollView
-                    ref={scroll1Ref}
-                    contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
-                    keyboardShouldPersistTaps={'handled'}
-                    showsVerticalScrollIndicator={false}
-                    scrollEventThrottle={8}
-                    behavior="padding"
-                >
-                    <View style={{ flex: 1 }}>
-                        <Text style={[styles.headingStyle, { marginTop: 20 }]}>New Stock Details:</Text>
+            <InputScrollView
+                ref={scroll1Ref}
+                contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start' }}
+                keyboardShouldPersistTaps={'handled'}
+                showsVerticalScrollIndicator={false}
+                scrollEventThrottle={8}
+                behavior="padding"
+            >
+                <View style={{ flex: 1 }}>
+                    <Text style={[styles.headingStyle, { marginTop: 20 }]}>New Stock Details:</Text>
 
+                    {(userRole == "Super Admin" || garageId?.length > 1) &&
                         <View>
                             <TouchableOpacity 
                                 style={styles.partDropDownField} 
                                 onPress={() => {
-                                    setPartListModal(true);
+                                    setGarageListModal(true);
                                 }}
                             >
                             </TouchableOpacity>
                             <TextInput
                                 mode="outlined"
-                                label='Part'
-                                style={{marginTop: 18, backgroundColor: '#f1f1f1', width:'100%' }}
-                                placeholder="Select Part"
-                                value={isPartName}
+                                label='Garage'
+                                style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                placeholder="Select Garage"
+                                value={isGarageName}
                                 right={<TextInput.Icon name="menu-down" />}
                             />
                         </View>
+                    }
 
-                        {/* <View>
-                            <TouchableOpacity 
-                                style={styles.partDropDownField} 
-                                onPress={() => {
-                                    setVendorListModal(true);
-                                }}
-                            >
-                            </TouchableOpacity>
+                    <View>
+                        <TouchableOpacity 
+                            style={styles.partDropDownField} 
+                            onPress={() => {
+                                setPartListModal(true);
+                            }}
+                        >
+                        </TouchableOpacity>
+                        <TextInput
+                            mode="outlined"
+                            label='Part'
+                            style={{marginTop: 18, backgroundColor: '#f1f1f1', width:'100%' }}
+                            placeholder="Select Part"
+                            value={isPartName}
+                            // onChangeText={() => getInvetoryData()}
+                            right={<TextInput.Icon name="menu-down" />}
+                        />
+                    </View>
+
+                    {/* <View>
+                        <TouchableOpacity 
+                            style={styles.partDropDownField} 
+                            onPress={() => {
+                                setVendorListModal(true);
+                            }}
+                        >
+                        </TouchableOpacity>
+                        <TextInput
+                            mode="outlined"
+                            label='Vendor'
+                            style={{marginTop: 18, backgroundColor: '#f1f1f1', width:'100%' }}
+                            placeholder="Select Vendor"
+                            value={isVendorName}
+                            right={<TextInput.Icon name="menu-down" />}
+                        />
+                    </View> */}
+
+                    {isLoading == true ? <ActivityIndicator></ActivityIndicator> :
+                        <>
                             <TextInput
                                 mode="outlined"
-                                label='Vendor'
-                                style={{marginTop: 18, backgroundColor: '#f1f1f1', width:'100%' }}
-                                placeholder="Select Vendor"
-                                value={isVendorName}
-                                right={<TextInput.Icon name="menu-down" />}
+                                label='Purchase Price (Without GST)'
+                                style={styles.input}
+                                placeholder="Purchase Price (Without GST)"
+                                value={isPrice}
+                                onChangeText={(text) => setIsPrice(text)}
+                                keyboardType={"phone-pad"}
                             />
-                        </View> */}
+                            {priceError?.length > 0 &&
+                                <Text style={styles.errorTextStyle}>{priceError}</Text>
+                            }
 
-                        <TextInput
-                            mode="outlined"
-                            label='Purchase Price (Without GST)'
-                            style={styles.input}
-                            placeholder="Purchase Price (Without GST)"
-                            value={isPrice}
-                            onChangeText={(text) => setIsPrice(text)}
-                            keyboardType={"phone-pad"}
-                        />
-                        {priceError?.length > 0 &&
-                            <Text style={styles.errorTextStyle}>{priceError}</Text>
-                        }
+                            <TextInput
+                                mode="outlined"
+                                label='MRP'
+                                style={styles.input}
+                                placeholder="MRP"
+                                value={isMRP}
+                                onChangeText={(text) => setIsMRP(text)}
+                                keyboardType={"phone-pad"}
+                            />
+                            {mrpError?.length > 0 &&
+                                <Text style={styles.errorTextStyle}>{mrpError}</Text>
+                            }
+                            
+                            <TextInput
+                                mode="outlined"
+                                label='Rack ID'
+                                style={styles.input}
+                                placeholder="Rack ID"
+                                value={isRackId}
+                                onChangeText={(text) => setIsRackId(text)}
+                            />
+                            {rackIdError?.length > 0 &&
+                                <Text style={styles.errorTextStyle}>{rackIdError}</Text>
+                            }
 
-                        <TextInput
-                            mode="outlined"
-                            label='MRP'
-                            style={styles.input}
-                            placeholder="MRP"
-                            value={isMRP}
-                            onChangeText={(text) => setIsMRP(text)}
-                            keyboardType={"phone-pad"}
-                        />
-                        {mrpError?.length > 0 &&
-                            <Text style={styles.errorTextStyle}>{mrpError}</Text>
-                        }
-                        
-                        <TextInput
-                            mode="outlined"
-                            label='Rack ID'
-                            style={styles.input}
-                            placeholder="Rack ID"
-                            value={isRackId}
-                            onChangeText={(text) => setIsRackId(text)}
-                        />
-                        {rackIdError?.length > 0 &&
-                            <Text style={styles.errorTextStyle}>{rackIdError}</Text>
-                        }
+                            <TextInput
+                                mode="outlined"
+                                label='Current Stock'
+                                style={styles.input}
+                                placeholder="Current Stock"
+                                value={isCurrentStock}
+                                onChangeText={(text) => setIsCurrentStock(text)}
+                                keyboardType={"phone-pad"}
+                            />
+                            {currentStockError?.length > 0 &&
+                                <Text style={styles.errorTextStyle}>{currentStockError}</Text>
+                            }
 
-                        <TextInput
-                            mode="outlined"
-                            label='Current Stock'
-                            style={styles.input}
-                            placeholder="Current Stock"
-                            value={isCurrentStock}
-                            onChangeText={(text) => setIsCurrentStock(text)}
-                            keyboardType={"phone-pad"}
-                        />
-                        {currentStockError?.length > 0 &&
-                            <Text style={styles.errorTextStyle}>{currentStockError}</Text>
-                        }
+                            <TextInput
+                                mode="outlined"
+                                label='Minimum Stock'
+                                style={styles.input}
+                                placeholder="Minimum Stock"
+                                value={isMinStock}
+                                onChangeText={(text) => setIsMinStock(text)}
+                                keyboardType={"phone-pad"}
+                            />
+                            {minStockError?.length > 0 &&
+                                <Text style={styles.errorTextStyle}>{minStockError}</Text>
+                            }
 
-                        <TextInput
-                            mode="outlined"
-                            label='Minimum Stock'
-                            style={styles.input}
-                            placeholder="Minimum Stock"
-                            value={isMinStock}
-                            onChangeText={(text) => setIsMinStock(text)}
-                            keyboardType={"phone-pad"}
-                        />
-                        {minStockError?.length > 0 &&
-                            <Text style={styles.errorTextStyle}>{minStockError}</Text>
-                        }
+                            <TextInput
+                                mode="outlined"
+                                label='Maximum Stock'
+                                style={styles.input}
+                                placeholder="Maximum Stock"
+                                value={isMaxStock}
+                                onChangeText={(text) => setIsMaxStock(text)}
+                                keyboardType={"phone-pad"}
+                            />
+                            {maxStockError?.length > 0 &&
+                                <Text style={styles.errorTextStyle}>{maxStockError}</Text>
+                            }
 
-                        <TextInput
-                            mode="outlined"
-                            label='Maximum Stock'
-                            style={styles.input}
-                            placeholder="Maximum Stock"
-                            value={isMaxStock}
-                            onChangeText={(text) => setIsMaxStock(text)}
-                            keyboardType={"phone-pad"}
-                        />
-                        {maxStockError?.length > 0 &&
-                            <Text style={styles.errorTextStyle}>{maxStockError}</Text>
-                        }
-
-                        <TextInput
-                            mode="outlined"
-                            label='Comment'
-                            style={styles.input}
-                            placeholder="Comment"
-                            value={isComment}
-                            onChangeText={(text) => setIsComment(text)}
-                            numberOfLines={3}
-                            multiline={true}
-                        />
-                        {commentError?.length > 0 &&
-                            <Text style={styles.errorTextStyle}>{commentError}</Text>
-                        }
-
-                        {(userRole == "Super Admin" || garageId?.length > 1) &&
-                            <View>
-                                <TouchableOpacity 
-                                    style={styles.partDropDownField} 
-                                    onPress={() => {
-                                        setGarageListModal(true);
-                                    }}
-                                >
-                                </TouchableOpacity>
-                                <TextInput
-                                    mode="outlined"
-                                    label='Garage'
-                                    style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
-                                    placeholder="Select Garage"
-                                    value={isGarageName}
-                                    right={<TextInput.Icon name="menu-down" />}
-                                />
-                            </View>
-                        }
-
-                        <Button
-                            style={{ marginTop: 15 }}
-                            mode={'contained'}
-                            onPress={submit}
-                        >
-                            Add
-                        </Button>
-                     
-                    </View>
-                </InputScrollView>
-            }
-
-            <Portal>
-                {/* Parts List Modal */}
-                <Modal visible={partListModal} onDismiss={() => { setPartListModal(false); setIsPart(0); setIsPartName(''); setPartError(''); setSearchQueryForParts('');  searchFilterForParts();}} contentContainerStyle={styles.modalContainerStyle}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Part</Text>
-                    {(isLoadingPartList == true) ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator>
-                        :
-                        <>
-                            <View style={{marginTop: 20, marginBottom: 10}}>
-                                <Searchbar
-                                    placeholder="Search here..."
-                                    onChangeText={(text) => { if(text != null) searchFilterForParts(text)}}
-                                    value={searchQueryForParts}
-                                    elevation={0}
-                                    style={{ elevation: 0.8, marginBottom: 10}}
-                                />
-                                {filteredPartData?.length > 0 ?  
-                                    <FlatList
-                                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
-                                        data={filteredPartData}
-                                        style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
-                                        keyExtractor={item => item.id}
-                                        renderItem={({item}) => (
-                                            <>
-                                                <List.Item
-                                                    title={
-                                                        <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
-                                                            <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
-                                                        </View>
-                                                    }
-                                                    onPress={() => {
-                                                            setIsPartName(item.name); 
-                                                            setIsPart(item.id); 
-                                                            setPartError('');
-                                                            setPartListModal(false);  
-                                                        }
-                                                    }
-                                                />
-                                            </>
-                                        )} 
-                                    />
-                                :
-                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
-                                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such part is associated!</Text>
-                                    </View>
-                                }
-                                <View style={{justifyContent:"flex-end", flexDirection: 'row'}}>
-                                    <TouchableOpacity  style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: colors.primary, marginTop: 7, paddingVertical: 3, paddingHorizontal: 10, borderRadius: 4}} onPress={() => { setAddNewPartModal(true); setPartListModal(false); }}>
-                                        <Icon style={{color: colors.white, marginRight: 4}} name="plus" size={16} />
-                                        <Text style={{color: colors.white}}>Add Part</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
+                            <TextInput
+                                mode="outlined"
+                                label='Comment'
+                                style={styles.input}
+                                placeholder="Comment"
+                                value={isComment}
+                                onChangeText={(text) => setIsComment(text)}
+                                numberOfLines={3}
+                                multiline={true}
+                            />
+                            {commentError?.length > 0 &&
+                                <Text style={styles.errorTextStyle}>{commentError}</Text>
+                            }
                         </>
                     }
-                </Modal>
 
-                {/* Add New Part Model */}
-                <Modal visible={addNewPartModal} onDismiss={() => { setAddNewPartModal(false); setPartListModal(true);  setIsNewPart(0); setNewPartError(''); }} contentContainerStyle={styles.modalContainerStyle}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Part</Text>
-                    <View>
-                        <TextInput
-                            mode="outlined"
-                            label='Part Name'
-                            style={styles.input}
-                            placeholder="Part Name"
-                            value={isNewPart}
-                            onChangeText={(text) => setIsNewPart(text)}
-                        />
-                    </View>
-                    {newPartError?.length > 0 &&
-                        <Text style={styles.errorTextStyle}>{newPartError}</Text>
-                    }
-                    <View style={{ flexDirection: "row", marginTop: 10}}>
-                        <Button
-                            style={{ marginTop: 15, flex: 1, marginRight: 10 }}
-                            mode={'contained'}
-                            onPress={() => {
-                                if(isNewPart == "") {
-                                    setNewPartError("Please Enter Part Name");
-                                } else {
-                                    setAddNewPartModal(false);
-                                    addNewPart();
-                                }
-                            }}
-                        >
-                            Add
-                        </Button>
-                        <Button
-                            style={{ marginTop: 15, flex: 1 }}
-                            mode={'contained'}
-                            onPress={() => {
+                    <Button
+                        style={{ marginTop: 15 }}
+                        mode={'contained'}
+                        onPress={submit}
+                    >
+                        Add
+                    </Button>
+                    
+                </View>
+            </InputScrollView>
+
+        <Portal>
+            {/* Parts List Modal */}
+            <Modal visible={partListModal} onDismiss={() => { setPartListModal(false); setIsPart(0); setIsPartName(''); setPartError(''); setSearchQueryForParts('');  searchFilterForParts();}} contentContainerStyle={styles.modalContainerStyle}>
+                <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Part</Text>
+                {(isLoadingPartList == true) ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator>
+                    :
+                    <>
+                        <View style={{marginTop: 20, marginBottom: 10}}>
+                            <Searchbar
+                                placeholder="Search here..."
+                                onChangeText={(text) => { if(text != null) searchFilterForParts(text)}}
+                                value={searchQueryForParts}
+                                elevation={0}
+                                style={{ elevation: 0.8, marginBottom: 10}}
+                            />
+                            {filteredPartData?.length > 0 ?  
+                                <FlatList
+                                    ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                    data={filteredPartData}
+                                    style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
+                                    keyExtractor={item => item.id}
+                                    renderItem={({item}) => (
+                                        <>
+                                            <List.Item
+                                                title={
+                                                    <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                        <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
+                                                    </View>
+                                                }
+                                                onPress={() => {
+                                                        setIsPartName(item.name); 
+                                                        setIsPart(item.id); 
+                                                        setPartError('');
+                                                        setPartListModal(false);  
+                                                    }
+                                                }
+                                            />
+                                        </>
+                                    )} 
+                                />
+                            :
+                                <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
+                                    <Text style={{ color: colors.black, textAlign: 'center'}}>No such part is associated!</Text>
+                                </View>
+                            }
+                            <View style={{justifyContent:"flex-end", flexDirection: 'row'}}>
+                                <TouchableOpacity  style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: colors.primary, marginTop: 7, paddingVertical: 3, paddingHorizontal: 10, borderRadius: 4}} onPress={() => { setAddNewPartModal(true); setPartListModal(false); }}>
+                                    <Icon style={{color: colors.white, marginRight: 4}} name="plus" size={16} />
+                                    <Text style={{color: colors.white}}>Add Part</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </>
+                }
+            </Modal>
+
+            {/* Add New Part Model */}
+            <Modal visible={addNewPartModal} onDismiss={() => { setAddNewPartModal(false); setPartListModal(true);  setIsNewPart(0); setNewPartError(''); }} contentContainerStyle={styles.modalContainerStyle}>
+                <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Part</Text>
+                <View>
+                    <TextInput
+                        mode="outlined"
+                        label='Part Name'
+                        style={styles.input}
+                        placeholder="Part Name"
+                        value={isNewPart}
+                        onChangeText={(text) => setIsNewPart(text)}
+                    />
+                </View>
+                {newPartError?.length > 0 &&
+                    <Text style={styles.errorTextStyle}>{newPartError}</Text>
+                }
+                <View style={{ flexDirection: "row", marginTop: 10}}>
+                    <Button
+                        style={{ marginTop: 15, flex: 1, marginRight: 10 }}
+                        mode={'contained'}
+                        onPress={() => {
+                            if(isNewPart == "") {
+                                setNewPartError("Please Enter Part Name");
+                            } else {
                                 setAddNewPartModal(false);
-                                setPartListModal(true);
-                                setIsNewPart('');
-                                setNewPartError('');
-                            }}
-                        >
-                            Close
-                        </Button>
-                    </View>
-                </Modal>
+                                addNewPart();
+                            }
+                        }}
+                    >
+                        Add
+                    </Button>
+                    <Button
+                        style={{ marginTop: 15, flex: 1 }}
+                        mode={'contained'}
+                        onPress={() => {
+                            setAddNewPartModal(false);
+                            setPartListModal(true);
+                            setIsNewPart('');
+                            setNewPartError('');
+                        }}
+                    >
+                        Close
+                    </Button>
+                </View>
+            </Modal>
 
                 {/* Vendors List Modal */}
                 {/* <Modal visible={vendorListModal} onDismiss={() => { setVendorListModal(false); setIsVendor(0); setIsVendorName(''); setVendorError(''); setSearchQueryForVendors('');  searchFilterForVendors();}} contentContainerStyle={styles.modalContainerStyle}>
@@ -793,7 +824,7 @@ const styles = StyleSheet.create({
         padding: 20,
         flex: 1,
         backgroundColor: colors.white,
-        justifyContent: 'center',
+        // justifyContent: 'center',
     },
     input: {
         marginTop: 20,

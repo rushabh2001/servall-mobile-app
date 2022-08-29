@@ -1,15 +1,15 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Linking, FlatList } from "react-native";
 import { Checkbox, Divider, Button } from "react-native-paper";
-import { colors } from "../constants";
+import { colors } from "../../constants";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import IconX from "react-native-vector-icons/FontAwesome5";
 import { connect } from 'react-redux';
 import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
 import moment from "moment";
-import { API_URL } from "../constants/config";
+import { API_URL } from "../../constants/config";
 
-const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
+const OrderVehicleReady = ({ navigation, userRole, route, userToken }) => {
 
     const [partData, setPartData] = useState([]);
     const [serviceData, setServiceData] = useState([]);
@@ -91,9 +91,9 @@ const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
                 if (json.order_status == "Vehicle Received") {
                     navigation.navigate('OrderCreated', {'data': isOrderData});
                 } else if(json.order_status == "Work in Progress Order") {
-                    // navigation.navigate('OrderWorkInProgress', {'data': isOrderData});
+                    navigation.navigate('OrderWorkInProgress', {'data': isOrderData});
                 } else if(json.order_status == "Vehicle Ready") {
-                    navigation.navigate('OrderVehicleReady', {'data': isOrderData});
+                    // navigation.navigate('OrderVehicleReady', {'data': isOrderData});
                 } else if(json.order_status == "Completed Order") {
                     navigation.navigate('OrderCompleted', {'data': isOrderData});
                 }
@@ -153,7 +153,7 @@ const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
                     <View>
                         <ProgressSteps
                             labelFontSize={12}
-                            activeStep={1}
+                            activeStep={2}
                             disabledStepIconColor="#616161"
                             labelColor="#616161"
                             progressBarColor="#616161"
@@ -165,6 +165,12 @@ const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
                             </ProgressStep>
                             <ProgressStep 
                                 label="In Progress"
+                                removeBtnRow={true}
+                            >
+    
+                            </ProgressStep>
+                            <ProgressStep 
+                                label="Vehicle Ready"
                                 removeBtnRow={true}
                             >
                                 <View>
@@ -203,7 +209,7 @@ const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
                                         </View> */}
                                         <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center", marginRight: 10}}>
                                             <Text style={{color: colors.green, fontSize: 16}}>Received</Text>
-                                            <Text style={{color: colors.green, fontSize: 16}}>₹ { route?.params?.data?.payment_status == 'completed' ? isTotal : 0 }</Text>
+                                            <Text style={{color: colors.green, fontSize: 16}}>₹ { route?.params?.data?.payment_status == 'Completed' ? isTotal : 0 }</Text>
                                         </View>
                                         {/* <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center"}}>
                                             <Text style={{color: colors.danger2, fontSize: 16}}>Due</Text>
@@ -268,7 +274,7 @@ const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
                                                                 console.log(serviceData);
                                                                 // setChecked(!checked);
                                                             }}
-                                                            style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 7, paddingHorizontal: 10}}
+                                                            style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 5, paddingHorizontal: 10}}
                                                             activeOpacity={1}
                                                         >
                                                             <Text style={{fontSize: 18, color: colors.black}}>- {item?.service?.name}</Text>
@@ -366,11 +372,6 @@ const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
                                 </Button>
                             </ProgressStep>
                             <ProgressStep 
-                                label="Vehicle Ready"
-                                removeBtnRow={true}
-                            >
-                            </ProgressStep>
-                            <ProgressStep 
                                 label="Completed Order"
                                 removeBtnRow={true}
                             >
@@ -466,4 +467,4 @@ const mapStateToProps = state => ({
     userToken: state.user.userToken,
 })
 
-export default connect(mapStateToProps)(OrderWorkInProgress);
+export default connect(mapStateToProps)(OrderVehicleReady);

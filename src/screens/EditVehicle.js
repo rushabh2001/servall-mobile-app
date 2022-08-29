@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View , Text, StyleSheet, TextInput, Keyboard, ActivityIndicator, TouchableOpacity, Pressable, Image } from 'react-native';
+import { View , Text, StyleSheet, Keyboard, ActivityIndicator, TouchableOpacity, Pressable, Image } from 'react-native';
 import { connect } from 'react-redux';
 import { colors } from '../constants';
 import { API_URL, WEB_URL } from '../constants/config';
-import { Button, Divider, Modal, Portal } from 'react-native-paper';
+import { Button, Divider, Modal, Portal, TextInput } from 'react-native-paper';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import InputScrollView from 'react-native-input-scroll-view';
 import { Picker } from '@react-native-picker/picker';
@@ -18,15 +18,15 @@ const EditVehicle = ({ navigation, userToken, route }) => {
     const [isBrand, setIsBrand] = useState();
     const [isModel, setIsModel] = useState();
     const [isVehicleRegistrationNumber, setIsVehicleRegistrationNumber] = useState();
-    const [isPurchaseDate, setIsPurchaseDate] = useState(new Date());
-    const [isManufacturingDate, setIsManufacturingDate] = useState(new Date());
+    const [isPurchaseDate, setIsPurchaseDate] = useState();
+    const [isManufacturingDate, setIsManufacturingDate] = useState();
     const [isEngineNumber, setIsEngineNumber] = useState();
     const [isChasisNumber, setIsChasisNumber] = useState();
     const [isInsuranceProvider, setIsInsuranceProvider] = useState();
     const [isInsurerGstin, setIsInsurerGstin] = useState();
     const [isInsurerAddress, setIsInsurerAddress] = useState();
     const [isPolicyNumber, setIsPolicyNumber] = useState();
-    const [isInsuranceExpiryDate, setIsInsuranceExpiryDate] = useState(new Date());
+    const [isInsuranceExpiryDate, setIsInsuranceExpiryDate] = useState();
     const [isRegistrationCertificateImg, setIsRegistrationCertificateImg] = useState(null);
     const [isInsuranceImg, setIsInsuranceImg] = useState(null);
 
@@ -326,24 +326,31 @@ const EditVehicle = ({ navigation, userToken, route }) => {
             let formattedDate = moment(currentDate, 'YYYY MMMM D').format('DD-MM-YYYY');
             setDisplayPurchaseCalender(false);
             setDatePurchase(formattedDate);
+            // let formateDateForDatabase = moment(currentDate, 'YYYY-MM-DD"T"hh:mm ZZ').format('YYYY-MM-DD');
+            setIsPurchaseDate(new Date(currentDate));
         }
      };
 
     const changeManufacturingSelectedDate = (event, selectedDate) => {
         if (selectedDate != null) {
             let currentDate = selectedDate || dateManufacturing;
-            let formattedDate = moment(currentDate, 'YYYY MMMM D').format('DD-MM-YYYY');
+            let formattedDate = moment(currentDate, 'YYYY-MM-DD').format('DD-MM-YYYY');
             setDisplayManufacturingCalender(false);
             setDateManufacturing(formattedDate);
+            // let formateDateForDatabase = moment(currentDate, 'YYYY-MM-DD"T"hh:mm ZZ').format('YYYY-MM-DD');
+            setIsManufacturingDate(new Date(currentDate));
         }
     };
 
     const changeInsuranceExpirySelectedDate = (event, selectedDate) => {
         if (selectedDate != null) {
             let currentDate = selectedDate || dateInsuranceExpiry;
-            let formattedDate = moment(currentDate, 'YYYY MMMM D').format('DD-MM-YYYY');
+            let formattedDate = moment(currentDate, 'YYYY-MM-DD').format('DD-MM-YYYY');
             setDisplayInsuranceExpiryCalender(false);
             setDateInsuranceExpiry(formattedDate);
+            let formateDateForDatabase = moment(currentDate, 'YYYY-MM-DD"T"hh:mm ZZ').format('YYYY-MM-DD');
+            setIsInsuranceExpiryDate(new Date(formateDateForDatabase));  
+            console.log('setIsInsuranceExpiryDate', currentDate, 'formateDateForDatabase', formateDateForDatabase);
         }   
     };
 
@@ -368,15 +375,15 @@ const EditVehicle = ({ navigation, userToken, route }) => {
             'brand_id': isBrand,
             'model_id': isModel,
             'vehicle_registration_number': isVehicleRegistrationNumber,
-            'purchase_date': moment(isPurchaseDate, 'YYYY MMMM D').format('YYYY-MM-DD'),
-            'manufacturing_date': moment(isManufacturingDate, 'YYYY MMMM D').format('YYYY-MM-DD'),
+            'purchase_date': moment(isPurchaseDate, 'YYYY-MM-DD"T"hh:mm ZZ').format('YYYY-MM-DD'),
+            'manufacturing_date': moment(isManufacturingDate, 'YYYY-MM-DD"T"hh:mm ZZ').format('YYYY-MM-DD'),
             'engine_number': isEngineNumber,
             'chasis_number': isChasisNumber,
             'insurance_id': isInsuranceProvider,
             'insurer_gstin': isInsurerGstin,
             'insurer_address': isInsurerAddress,
             'policy_number': isPolicyNumber,
-            'insurance_expiry_date':  moment(isInsuranceExpiryDate, 'YYYY MMMM D').format('YYYY-MM-DD'),
+            'insurance_expiry_date':  moment(isInsuranceExpiryDate, 'YYYY-MM-DD"T"hh:mm ZZ').format('YYYY-MM-DD'),
             'user_id': parseInt(route?.params?.userId)
         }
 
@@ -512,12 +519,13 @@ const EditVehicle = ({ navigation, userToken, route }) => {
             if(selectedVehicleData?.vehicle_registration_number) setIsVehicleRegistrationNumber(selectedVehicleData.vehicle_registration_number);
             if(selectedVehicleData?.purchase_date) { 
                 setIsPurchaseDate(new Date(selectedVehicleData?.purchase_date)); 
-                const formattedPurchaseDate = moment(isPurchaseDate, 'YYYY MMMM D').format('DD-MM-YYYY'); 
+                let formattedPurchaseDate = moment(selectedVehicleData?.purchase_date, 'YYYY-MM-DD').format('DD-MM-YYYY'); 
+                setDisplayPurchaseCalender(false);
                 setDatePurchase(formattedPurchaseDate); 
             };
             if(selectedVehicleData?.manufacturing_date) {
                 setIsManufacturingDate(new Date(selectedVehicleData?.manufacturing_date)); 
-                const formattedManufacturingDate = moment(selectedVehicleData?.manufacturing_date, 'YYYY MMMM D').format('DD-MM-YYYY'); 
+                let formattedManufacturingDate = moment(selectedVehicleData?.manufacturing_date, 'YYYY-MM-DD').format('DD-MM-YYYY'); 
                 setDisplayManufacturingCalender(false);
                 setDateManufacturing(formattedManufacturingDate);
             }
@@ -529,8 +537,9 @@ const EditVehicle = ({ navigation, userToken, route }) => {
             if(selectedVehicleData?.policy_number) setIsPolicyNumber(selectedVehicleData.policy_number);
             if(selectedVehicleData?.insurance_expiry_date) {
                 setIsInsuranceExpiryDate(new Date(selectedVehicleData?.insurance_expiry_date));
-                setDisplayManufacturingCalender(false); 
-                setDateInsuranceExpiry(moment(selectedVehicleData?.insurance_expiry_date, 'YYYY MMMM D').format('DD-MM-YYYY'));
+                let formattedInsuranceExpiryDate = moment(selectedVehicleData?.insurance_expiry_date, 'YYYY-MM-DD').format('DD-MM-YYYY'); 
+                setDisplayInsuranceExpiryCalender(false); 
+                setDateInsuranceExpiry(formattedInsuranceExpiryDate);
             }
             if(selectedVehicleData?.registration_certificate_img != null) setIsRegistrationCertificateImg(selectedVehicleData.registration_certificate_img);
             if(selectedVehicleData?.insurance_img != null) setIsInsuranceImg(selectedVehicleData.insurance_img);
@@ -637,6 +646,7 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                                         }
 
                                         <TextInput
+                                            mode="outlined"
                                             label='Vehicle Registration Number'
                                             style={styles.input}
                                             placeholder="Vehicle Registration Number"
@@ -651,6 +661,7 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                                             <View style={styles.datePickerContainer} pointerEvents='none'>
                                                 <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
                                                 <TextInput
+                                                    mode="outlined"
                                                     label='Purchase Date'
                                                     style={styles.datePickerField}
                                                     placeholder="Purchase Date"
@@ -673,6 +684,7 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                                             <View style={styles.datePickerContainer} pointerEvents='none'>
                                                 <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
                                                 <TextInput
+                                                    mode="outlined"
                                                     label='Manufacturing Date'
                                                     style={styles.datePickerField}
                                                     placeholder="Manufacturing Date"
@@ -692,6 +704,7 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                                         }
 
                                         <TextInput
+                                            mode="outlined"
                                             label='Engine Number'
                                             style={styles.input}
                                             placeholder="Engine Number"
@@ -703,6 +716,7 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                                         }
 
                                         <TextInput
+                                            mode="outlined"
                                             label='Chasis Number'
                                             style={styles.input}
                                             placeholder="Chasis Number"
@@ -738,6 +752,7 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                                         }
 
                                         <TextInput
+                                            mode="outlined"
                                             label='Insurer GSTIN'
                                             style={styles.input}
                                             placeholder="Insurer GSTIN"
@@ -749,6 +764,7 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                                         }
 
                                         <TextInput
+                                            mode="outlined"
                                             label='Insurer Address'
                                             style={styles.input}
                                             placeholder="Insurer Address"
@@ -760,6 +776,7 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                                         }
 
                                         <TextInput
+                                            mode="outlined"
                                             label='Policy Number'
                                             style={styles.input}
                                             placeholder="Policy Number"
@@ -774,6 +791,7 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                                             <View style={styles.datePickerContainer} pointerEvents='none'>
                                                 <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
                                                 <TextInput
+                                                    mode="outlined"
                                                     label='Insurance Expiry Date'
                                                     style={styles.datePickerField}
                                                     placeholder="Insurance Expiry Date"
@@ -873,6 +891,7 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                             <Modal visible={addBrandModal} onDismiss={() => { setAddBrandModal(false); setNewBrandName(""); setIsBrand(0); }} contentContainerStyle={styles.modalContainerStyle}>
                                 <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Brand</Text>
                                 <TextInput
+                                    mode="outlined"
                                     label='Brand Name'
                                     style={styles.input}
                                     placeholder="Brand Name"
@@ -904,6 +923,7 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                             <Modal visible={addModelModal} onDismiss={() => { setAddModelModal(false); setNewModelName(""); setIsModel(0); }} contentContainerStyle={styles.modalContainerStyle}>
                                 <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
                                 <TextInput
+                                    mode="outlined"
                                     label='Model Name'
                                     style={styles.input}
                                     placeholder="Model Name"
@@ -935,6 +955,7 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                             <Modal visible={addInsuranceCompanyModal} onDismiss={() => { setAddInsuranceCompanyModal(false); setNewInsuranceCompanyName(""); setIsInsuranceProvider(0); }} contentContainerStyle={styles.modalContainerStyle}>
                                 <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Insurance Provider Company</Text>
                                 <TextInput
+                                    mode="outlined"
                                     label='Insurance Company Name'
                                     style={styles.input}
                                     placeholder="Insurance Company Name"
@@ -979,12 +1000,6 @@ const styles = StyleSheet.create({
     },
     input: {
         marginTop: 20,
-        padding: 15,
-        height: 55,
-        borderColor: colors.light_gray,
-        borderWidth: 1,
-        borderRadius: 5,
-        backgroundColor: colors.white,
         fontSize: 16,
      },
     headingStyle: {
@@ -1012,12 +1027,12 @@ const styles = StyleSheet.create({
     },
     datePickerField: {
         flex: 1,
-        borderColor: colors.light_gray, // 7a42f4
-        borderWidth: 1,
+        borderColor: colors.light_gray,
+        borderBottomWidth: 1,
         borderRadius: 5,
-        backgroundColor: '#fff',
+        backgroundColor: '#F0F2F5',
         color: '#424242',
-        paddingHorizontal: 15,
+        // paddingHorizontal: 15,
         height: 55,
         fontSize: 16,
     },
@@ -1025,7 +1040,7 @@ const styles = StyleSheet.create({
         padding: 10,
         position: 'absolute',
         right: 7,
-        top: 6,
+        top: 13,
         zIndex: 2,
     },
     dropDownContainer: {
@@ -1036,6 +1051,7 @@ const styles = StyleSheet.create({
     },
     dropDownField: {
         padding: 0,
+        backgroundColor: '#F0F2F5',
     },
     errorTextStyle: {
         color: colors.danger,

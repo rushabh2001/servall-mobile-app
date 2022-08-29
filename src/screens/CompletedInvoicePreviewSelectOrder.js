@@ -9,7 +9,7 @@ import moment from 'moment';
 import Lightbox from 'react-native-lightbox-v2';
 import RBSheet from "react-native-raw-bottom-sheet";
 
-const AddPaymentSelectOrder = ({navigation, userToken, selectedGarageId, navigator  }) => {
+const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, navigator  }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [data, setData] = useState([]);
@@ -23,7 +23,7 @@ const AddPaymentSelectOrder = ({navigation, userToken, selectedGarageId, navigat
 
     const getOrderList = async () => {
         let formData = {
-            status: "Pending"
+            status: "Completed"
         }
         try {
             const res = await fetch(`${API_URL}fetch_payments_order/status`, {
@@ -161,9 +161,8 @@ const AddPaymentSelectOrder = ({navigation, userToken, selectedGarageId, navigat
                                                 <TouchableOpacity onPress={()=>{
                                                         const data = {
                                                             'order_id': item.id,
-                                                            'total': item.total,
                                                         }
-                                                        navigation.navigate('AddPayment', {'data': data})
+                                                        navigation.navigate('InvoicePreview', {'data': data})
                                                     }} style={[styles.smallActionButton, {width: 150, marginTop:8}]}>
                                                     <Text style={{color:colors.primary}}>Select Order</Text>
                                                 </TouchableOpacity>
@@ -521,4 +520,4 @@ const mapStateToProps = state => ({
     selectedGarageId: state.garage.selected_garage_id,
 })
 
-export default connect(mapStateToProps)(AddPaymentSelectOrder);
+export default connect(mapStateToProps)(InvoicePreviewSelectOrder);

@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View , Text, StyleSheet, TextInput, Keyboard, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View , Text, StyleSheet, Keyboard, ActivityIndicator, TouchableOpacity, FlatList } from 'react-native';
+import { Modal, Portal, Button, TextInput, Searchbar, Divider, List } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { colors } from '../constants';
 import { API_URL } from '../constants/config';
-import { Button } from 'react-native-paper';
 import { IconX, ICON_TYPE } from '../icons';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import InputScrollView from 'react-native-input-scroll-view';
@@ -27,7 +27,7 @@ const AddGarage = ({navigation, userToken}) => {
     const [cityError, setCityError] = useState('');
     const [stateError, setStateError] = useState('');
     const [locationError, setLocationError] = useState('');
-    const [ownerOption, setOwnerOption] = useState('Existing User');
+    const [ownerOption, setOwnerOption] = useState('new_user');
     const [ownerId, setOwnerId] = useState(0);
    
     // User / Owner Fields
@@ -50,6 +50,16 @@ const AddGarage = ({navigation, userToken}) => {
     const [isLoading, setIsLoading] = useState(false);
     const [cityFieldToggle, setCityFieldToggle] = useState(false);
 
+    // States for Dropdown
+    // const [isUser, setIsUser] = useState('');
+    const [isUserName, setIsUserName] = useState('');
+    // const [userList, setUserList] = useState([]);
+    const [userListModal, setUserListModal] = useState(false);
+    const [isLoadingUserList, setIsLoadingUserList] = useState(false);
+    const [filteredUserData, setFilteredUserData] = useState([]);
+    const [searchQueryForUsers, setSearchQueryForUsers] = useState(); 
+    const [userError, setUserError] = useState();
+    
     var radio_props = [
         {label: 'New User', value: 'new_user' },
         {label: 'Existing User', value: 'existing_user' }
@@ -61,21 +71,25 @@ const AddGarage = ({navigation, userToken}) => {
         setIsLoading(true);
         Keyboard.dismiss();
         if(isGarageName.length == 0){ setGarageNameError("Garage Name is required"); }        
-        if(isGarageContactNumber.length == 0){ setGarageContactNumberError("Garage Contact Number is required");  }    
-        if(isCity.length == 0){ setCityError("City is required"); }    
-        if(isState.length == 0){ setStateError("State is required"); }    
-        if(isLocation.length == 0){ setLocationError("Location is required"); }    
-        if(isName.length == 0){ setNameError("Owner Name is required"); }    
-        if(isPhoneNumber.length == 0){ setPhoneNumberError("Phone Number is required"); }
-        else if(isPhoneNumber.length < 9){ setPhoneNumberError("Phone Number should be minimum 10 characters"); }       
-  
-        if(isEmail.length == 0){ setEmailError("Email is required"); }    
-        else if(isEmail.length < 6){ setEmailError("Email should be minimum 6 characters"); }      
-        else if(isEmail?.indexOf(' ') >= 0){ setEmailError('Email cannot contain spaces'); }    
-        else if(isEmail?.indexOf('@') < 0){ setEmailError('Invalid Email Format'); }
-        else{
-            setEmailError("");
-            setPhoneNumberError("");
+        if(isGarageContactNumber.length == 0){ setGarageContactNumberError("Garage Contact Number is required");  } 
+        if(ownerOption == "new_user") {   
+            if(isCity == 0){ setCityError("City is required"); }    
+            if(isState == 0){ setStateError("State is required"); }    
+            if(isLocation.length == 0){ setLocationError("Location is required"); }    
+            if(isName.length == 0){ setNameError("Owner Name is required"); }    
+            if(isPhoneNumber.length == 0){ setPhoneNumberError("Phone Number is required"); }
+            else if(isPhoneNumber.length < 9){ setPhoneNumberError("Phone Number should be minimum 10 characters"); }       
+    
+            if(isEmail.length == 0){ setEmailError("Email is required"); }    
+            else if(isEmail.length < 6){ setEmailError("Email should be minimum 6 characters"); }      
+            else if(isEmail?.indexOf(' ') >= 0){ setEmailError('Email cannot contain spaces'); }    
+            else if(isEmail?.indexOf('@') < 0){ setEmailError('Invalid Email Format'); }
+            else{
+                setEmailError("");
+                setPhoneNumberError("");
+            }
+        } else if(ownerOption == "existing_user") {
+            if(ownerId == 0){ userError("User is required"); } else { userError(""); }
         }
     
         const data = new FormData();
@@ -165,6 +179,54 @@ const AddGarage = ({navigation, userToken}) => {
         });
     }
 
+    const searchFilterForUsers = (text) => {
+        if (text) {
+            let newData = adminList.filter(
+                function (listData) {
+                // let arr2 = listData.phone_number ? listData.phone_number : ''.toUpperCase() 
+                let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
+                // let itemData = arr1.concat(arr2);
+                // console.log(itemData);
+                let textData = text.toUpperCase();
+                return itemData.indexOf(textData) > -1;
+                }
+            );
+            setFilteredUserData(newData);
+            setSearchQueryForUsers(text);
+        } else {
+            setFilteredUserData(adminList);
+            setSearchQueryForUsers(text);
+        }
+    };
+
+    const getUserList = async () => {
+        setIsLoadingUserList(true);
+        try {
+            const res = await fetch(`${API_URL}fetch_parts`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+            });
+            const json = await res.json();
+            // console.log(json);
+            if (json !== undefined) {
+                // console.log('setUserList', json.data);
+                setAdminList(json.data);
+                setFilteredUserData(json.data);
+            }
+        } catch (e) {
+            console.log(e);
+        } finally {
+            // setIsLoading2(false);
+            setIsLoadingUserList(false)
+
+        }
+    };
+
+
     const getStatesList = async () => {
         try {
             const res = await fetch(`${API_URL}fetch_states`, {
@@ -218,6 +280,7 @@ const AddGarage = ({navigation, userToken}) => {
             const json = await res.json();
             if (json !== undefined) {
                 setAdminList(json.admin_user_list);
+                setFilteredUserData(json.admin_user_list);
             }
         } catch (e) {
             console.log(e);
@@ -266,6 +329,7 @@ const AddGarage = ({navigation, userToken}) => {
                 <View style={{flex:1}}>
                     <Text style={styles.headingStyle}>Garage Details:</Text>
                     <TextInput
+                        mode="outlined"
                         label='Garage Name'
                         style={styles.input}
                         placeholder="Garage Name"
@@ -279,6 +343,7 @@ const AddGarage = ({navigation, userToken}) => {
                     }
 
                     <TextInput
+                        mode="outlined"
                         label='Garage Contact Number'
                         style={styles.input}
                         placeholder="Garage Contact Number"
@@ -338,6 +403,7 @@ const AddGarage = ({navigation, userToken}) => {
                     }
 
                     <TextInput
+                        mode="outlined"
                         label='Location'
                         style={styles.input}
                         placeholder="Location"
@@ -347,11 +413,13 @@ const AddGarage = ({navigation, userToken}) => {
                     {locationError?.length > 0 &&
                         <Text style={{color: colors.danger}}>{locationError}</Text>
                     }
+
+                    <Divider style={{marginTop: 20}} />
                     
                     <View style={{marginTop: 15}}>
                         <RadioForm
                             radio_props={radio_props}
-                            initial={ownerOption}
+                            initial={0}
                             onPress={(value) => setOwnerOption(value)}
                             animation={true}
                             formHorizontal={true}
@@ -360,9 +428,7 @@ const AddGarage = ({navigation, userToken}) => {
                             labelStyle={{marginRight: 40}}
                         />
                     </View>
-
-                    { ownerOption == "existing_user" ? 
-                        <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 10}}>
+                        {/* <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 10}}>
                             <Picker
                                 selectedValue={ownerId}
                                 onValueChange={(value) => setOwnerId(value)}
@@ -380,11 +446,38 @@ const AddGarage = ({navigation, userToken}) => {
                                     );
                                 })} 
                             </Picker>
-                        </View>
-                    : 
+                        </View> */}
+
+                
+
+                    { ownerOption == "existing_user" ? 
+                        <>
+                            <View>
+                                <TouchableOpacity 
+                                    style={styles.userDropDownField} 
+                                    onPress={() => {
+                                        setUserListModal(true);
+                                    }}
+                                >
+                                </TouchableOpacity>
+                                <TextInput
+                                    mode="outlined"
+                                    label='Owner Name'
+                                    style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                    placeholder="Select User"
+                                    value={isUserName}
+                                    right={<TextInput.Icon name="menu-down" />}
+                                />
+                            </View>
+                            {userError?.length > 0 &&
+                                <Text style={styles.errorTextStyle}>{userError}</Text>
+                            } 
+                        </>
+                    :
                         <>
                             <Text style={[styles.headingStyle, { marginTop:20 }]}>Owner Details:</Text>
                             <TextInput
+                                mode="outlined"
                                 label='Owner Name'
                                 style={styles.input}
                                 placeholder="Owner Name"
@@ -396,6 +489,7 @@ const AddGarage = ({navigation, userToken}) => {
                             }
 
                             <TextInput
+                                mode="outlined"
                                 label='Email Address'
                                 style={styles.input}
                                 placeholder="Email Address"
@@ -407,6 +501,7 @@ const AddGarage = ({navigation, userToken}) => {
                             }
 
                             <TextInput
+                                mode="outlined"
                                 label='Phone Number'
                                 style={styles.input}
                                 placeholder="Phone Number"
@@ -419,6 +514,7 @@ const AddGarage = ({navigation, userToken}) => {
                             }
 
                             <TextInput
+                                mode="outlined"
                                 label='Address'
                                 style={styles.input}
                                 placeholder="Address"
@@ -453,7 +549,61 @@ const AddGarage = ({navigation, userToken}) => {
                         Submit
                     </Button>
                 </View>
+                <Portal>
+                    {/* Users List Modal */}
+                    <Modal visible={userListModal} onDismiss={() => { setUserListModal(false); setOwnerId(0); setIsUserName(''); setUserError(''); setSearchQueryForUsers('');  searchFilterForUsers();}} contentContainerStyle={styles.modalContainerStyle}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select User</Text>
+                        {(isLoadingUserList == true) ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator>
+                            :
+                            <>
+                                <View style={{marginTop: 20, marginBottom: 10}}>
+                                    <Searchbar
+                                        placeholder="Search here..."
+                                        onChangeText={(text) => { if(text != null) searchFilterForUsers(text)}}
+                                        value={searchQueryForUsers}
+                                        elevation={0}
+                                        style={{ elevation: 0.8, marginBottom: 10}}
+                                    />
+                                    {filteredUserData?.length > 0 ?  
+                                        <FlatList
+                                            ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                            data={filteredUserData}
+                                            // onEndReachedThreshold={1}
+                                            style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
+                                            keyExtractor={item => item.id}
+                                            renderItem={({item}) => (
+                                                <>
+                                                    <List.Item
+                                                        title={
+                                                            // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setUserListModal(false);  setAddUserModal(true); }}>
+                                                                <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                                    <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
+                                                                </View>
+                                                            // </TouchableOpacity> 
+                                                        }
+                                                        onPress={() => {
+                                                                setIsUserName(item.name); 
+                                                                setOwnerId(item.id); 
+                                                                setUserError('');
+                                                                setUserListModal(false);  
+                                                            }
+                                                        }
+                                                    />
+                                                </>
+                                            )} 
+                                        />
+                                        :
+                                        <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
+                                            <Text style={{ color: colors.black, textAlign: 'center'}}>No such user is associated!</Text>
+                                        </View>
+                                    }
+                                </View>
+                            </>
+                        }
+                    </Modal>
+                </Portal>
             </InputScrollView>
+            // Modal Popup Code
         }
     </View>
     )
@@ -468,12 +618,6 @@ const styles = StyleSheet.create({
     },
     input: {
         marginTop: 20,
-        padding: 15,
-        height: 55,
-        borderColor: colors.light_gray, 
-        borderWidth: 1,
-        borderRadius: 5,
-        backgroundColor: colors.white,
         fontSize: 16,
      },
      headingStyle: {
@@ -490,7 +634,32 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 15,
-     }
+     },
+     dropDownContainer: {
+        borderWidth: 1,
+        borderColor: colors.light_gray,
+        borderRadius: 5,
+        marginTop: 20,
+    },
+    dropDownField: {
+        padding: 0,
+    },
+    userDropDownField: {
+        fontSize: 16,
+        color: colors.black,
+        position: 'absolute',
+        marginTop: 15,
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '80%',
+        zIndex: 2,
+    },
+    modalContainerStyle: {
+        backgroundColor: 'white', 
+        padding: 20,
+        marginHorizontal: 30
+    },
 })
 
 const mapStateToProps = state => ({

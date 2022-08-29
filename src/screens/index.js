@@ -16,7 +16,7 @@ import AddRepairOrder from "./AddRepairOrder";
 import AddRepairOrderStep2 from "./AddRepairOrderStep2";
 import AddRepairOrderStep3 from "./AddRepairOrderStep3";
 import OrderList from "./OrderList";
-import OrderCreated from "./OrderCreated";
+import OrderCreated from "./OrderStatus/OrderCreated";
 import AddPayment from "./AddPayment";
 import AddPaymentSelectOrder from "./AddPaymentSelectOrder";
 import AddStock from "./AddStock";
@@ -27,15 +27,17 @@ import PurchaseOrder from "./PurchaseOrder";
 import PurchaseOrderSelectOrder from "./PurchaseOrderSelectOrder";
 import EditRepairOrder from "./EditRepairOrder";
 import OpenOrderList from "./OrderListScreens/OpenOrderList";
-import OrderWorkInProgress from './OrderWorkInProgress';
+import OrderWorkInProgress from './OrderStatus/OrderWorkInProgress';
 import WIPOrderList from './OrderListScreens/WIPOrderList';
 import OrderSearch from './OrderSearch';
 import OrderCompletedList from './OrderListScreens/OrderCompletedList';
-import OrderCompleted from './OrderCompleted';
-import OrderVehicleReady from './OrderVehicleReady';
+import OrderCompleted from './OrderStatus/OrderCompleted';
+import OrderVehicleReady from './OrderStatus/OrderVehicleReady';
 import VehicleReadyOrderList from './OrderListScreens/VehicleReadyOrderList';
 import InvoicePreview from './InvoicePreview';
 import InvoicePreviewSelectOrder from './InvoicePreviewSelectOrder';
+import CompletedInvoicePreview from './CompletedInvoicePreview';
+import CompletedInvoicePreviewSelectOrder from './CompletedInvoicePreviewSelectOrder';
 
 export {
     Accounts,
@@ -76,4 +78,6 @@ export {
     VehicleReadyOrderList,
     InvoicePreview,
     InvoicePreviewSelectOrder,
+    CompletedInvoicePreview,
+    CompletedInvoicePreviewSelectOrder,
 }

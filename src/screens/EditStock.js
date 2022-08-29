@@ -178,6 +178,31 @@ const EditStock = ({ navigation, userRole, userId, userToken, route, garageId })
                 >
                     <View style={{ flex: 1 }}>
                         <Text style={[styles.headingStyle, { marginTop: 20 }]}>Stock Details:</Text>
+
+                        {(userRole == "Super Admin" || garageId?.length > 1) &&
+                            <View>
+                                {/* <TouchableOpacity 
+                                    style={styles.garageDropDownField} 
+                                    onPress={() => {
+                                        setGarageListModal(true);
+                                    }}
+                                >
+                                </TouchableOpacity> */}
+                                <TextInput
+                                    mode="outlined"
+                                    label='Garage'
+                                    style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                    placeholder="Select Garage"
+                                    value={isGarageName}
+                                    right={<TextInput.Icon name="menu-down" />}
+                                    disabled={true}
+                                />
+                                {garageError?.length > 0 &&
+                                    <Text style={styles.errorTextStyle}>{garageError}</Text>
+                                }
+                            </View>
+                        }
+                        
                         <TextInput
                             mode="outlined"
                             label='Part'
@@ -304,28 +329,7 @@ const EditStock = ({ navigation, userRole, userId, userToken, route, garageId })
                             <Text style={styles.errorTextStyle}>{commentError}</Text>
                         }
 
-                        {(userRole == "Super Admin" || garageId?.length > 1) &&
-                            <View>
-                                <TouchableOpacity 
-                                    style={styles.garageDropDownField} 
-                                    onPress={() => {
-                                        setGarageListModal(true);
-                                    }}
-                                >
-                                </TouchableOpacity>
-                                <TextInput
-                                    mode="outlined"
-                                    label='Garage'
-                                    style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
-                                    placeholder="Select Garage"
-                                    value={isGarageName}
-                                    right={<TextInput.Icon name="menu-down" />}
-                                />
-                                {garageError?.length > 0 &&
-                                    <Text style={styles.errorTextStyle}>{garageError}</Text>
-                                }
-                            </View>
-                        }
+                      
               
                         <Button
                             style={{ marginTop: 15 }}

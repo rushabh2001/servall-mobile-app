@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Image, Text, View, StyleSheet, TouchableOpacity, ScrollView, Linking } from "react-native";
+import { Image, Text, View, StyleSheet, TouchableOpacity, ScrollView, Linking, ActivityIndicator } from "react-native";
 import { Badge, Divider, Modal, Portal, Button, List } from "react-native-paper";
 import { colors } from "../constants";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -10,19 +10,25 @@ import { useIsFocused } from "@react-navigation/native";
 import DocumentPicker from 'react-native-document-picker';
 import Lightbox from 'react-native-lightbox-v2';
 import RBSheet from "react-native-raw-bottom-sheet";
+import moment from "moment";
+import ServAllLogo from '../assets/images/placeholder_servall.jpg';
 
 const customerTopTabs = createMaterialTopTabNavigator();
 
 const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
-
+    const [isLoading, setIsLoading] = useState(true);
     const [isCustomerData, setIsCustomerData] = useState('');
-    const [imageUri, setImageUri] = useState(`${WEB_URL}img/placeolder_servall.jpg`);
+    const [imageUri, setImageUri] = useState(Image.resolveAssetSource(ServAllLogo).uri);
     const [singleFile, setSingleFile] = useState(null);
     const [resizeImage, setResizeImage] = useState("cover");
-    const [viewVehicleDetailsModal, setViewVehicleDetailsModal] = useState(false);
     const isFocused = useIsFocused();
+    const [orderDataModal, setOrderDataModal] = useState(false);
+    const [selectedOrderId, setSelectedOrderId] = useState(); 
+    const [orderData, setOrderData] = useState(); 
+    const [orderDataLoading, setOrderDataLoading] = useState(true);
 
     const getCustomerDetails = async () => {
+        setIsLoading(true);
         try {
             const res = await fetch(`${API_URL}fetch_customer_details?id=${route?.params?.userId}`, {
                 method: 'GET',
@@ -34,17 +40,44 @@ const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
             });
             const json = await res.json();
             if (json !== undefined) {
+                console.log('setIsCustomerData',json?.user_details);
                 setIsCustomerData(json?.user_details);
                 if(json.user_details.profile_image != null) {
                     setImageUri( WEB_URL + 'uploads/profile_image/' + json?.user_details.profile_image);
                 } else {
-                    setImageUri( WEB_URL + 'img/placeolder_servall.jpg');
+                    setImageUri(Image.resolveAssetSource(ServAllLogo).uri);
                 }
+                // console.log('isCustomerData', isCustomerData.order);
+                // console.log('isCustomerData Length', isCustomerData.order.length);
             }
         } catch (e) {
             console.log(e);
+        } finally {
+            setIsLoading(false);
         }
     };
+
+    const getOrderDetails = async (orderId) => {
+        try {
+            const res = await fetch(`${API_URL}order/${orderId}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+            });
+            const json = await res.json();
+            if (json !== undefined) {
+                setOrderData(json.data);
+            }
+        } catch (e) {
+            console.log(e);
+        } finally {
+            setOrderDataLoading(false);
+        }
+    };
+
 
     const changeProfileImage = async () => {
         try {
@@ -86,6 +119,90 @@ const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
         }
     };
 
+    const CustomerOrders = () => {
+        return(
+            <ScrollView style={styles.innerTabContainer}>
+                {isLoading ?  <ActivityIndicator style={{marginVertical: 50}}></ActivityIndicator> :
+                    ((isCustomerData.order.length != 0 || isCustomerData.order == undefined) ?
+                        <>
+                            {isCustomerData.order.map((order, i) => {
+                                return (
+                                    <View style={styles.cards}>
+                                        {/* <View style={styles.cardTags} >
+                                            <Text style={styles.tags}>Running Repair</Text>
+                                            <Text style={styles.tags}>Running Repair</Text>
+                                            <Text style={styles.tags}>Running Repair</Text>
+                                        </View> */}
+                                        <View style={styles.cardOrderDetails}>
+                                            <Text style={styles.orderID}>Order ID: {order.id}</Text>
+                                            <Text style={styles.orderStatus}>{order.status}</Text>
+                                        </View>
+                                        <View>
+                                            <Text style={styles.orderAmount}>Order Amount: ₹ {order.total}</Text>
+                                            <Divider />
+                                            <Text style={styles.orderDate}>Order Date: {moment(order.created_at, 'YYYY-MM-DD HH:mm:ss').format('DD-MM-YYYY')}</Text>
+                                            <Divider />
+                                            <Text style={styles.kmNoted}>KM: {order.odometer}</Text>
+                                        </View>
+                                        <View style={styles.cardActions}>
+                                            <TouchableOpacity onPress={()=>{setOrderDataModal(true); getOrderDetails(order.id); }} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>View Details</Text></TouchableOpacity>
+                                        </View>
+                                    </View>
+                                );
+                            })}
+                        </>
+                    :
+                        <View style={[styles.cards, {alignItems: 'center', height: 200, justifyContent: 'center', backgroundColor: "transparent", }]}>
+                            <Text>No Order Found for this user!</Text>
+                        </View>
+                    )
+                }
+            </ScrollView>
+        )
+    }
+
+    const CustomerNotifications = () => {
+        return(
+            <ScrollView style={styles.innerTabContainer}>
+                {isLoading ?  <ActivityIndicator style={{marginVertical: 50}}></ActivityIndicator> :
+                    ((isCustomerData.order.length != 0 || isCustomerData.order == undefined) ?
+                        <>
+                            {isCustomerData.order.map((order, i) => {
+                                return (
+                                    <View style={styles.cards}>
+                                        <View style={styles.cardTags} >
+                                            <Text style={styles.tags}>Running Repair</Text>
+                                            <Text style={styles.tags}>Running Repair</Text>
+                                            <Text style={styles.tags}>Running Repair</Text>
+                                        </View>
+                                        <View style={styles.cardOrderDetails}>
+                                            <Text style={styles.orderID}>Order ID: {order.id}</Text>
+                                            <Text style={styles.orderStatus}>{order.status}</Text>
+                                        </View>
+                                        <View>
+                                            <Text style={styles.orderAmount}>Order Amount: ₹ {order.total}</Text>
+                                            <Divider />
+                                            <Text style={styles.orderDate}>Order Date: {moment(order.created_at, 'YYYY-MM-DD HH:mm:ss').format('DD-MM-YYYY')}</Text>
+                                            <Divider />
+                                            <Text style={styles.kmNoted}>KM: {order.odometer}</Text>
+                                        </View>
+                                        <View style={styles.cardActions}>
+                                            <TouchableOpacity onPress={()=>{setOrderDataModal(true); getOrderDetails(order.id); }} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>View Details</Text></TouchableOpacity>
+                                        </View>
+                                    </View>
+                                );
+                            })}
+                        </>
+                    :
+                        <View style={[styles.cards, {alignItems: 'center', height: 200, justifyContent: 'center', backgroundColor: "transparent", }]}>
+                            <Text>No Order Found for this user!</Text>
+                        </View>
+                    )
+                }
+            </ScrollView>
+        )
+    }
+
     useEffect(() => {
         if (singleFile != null) {
             uploadImage();
@@ -125,23 +242,26 @@ const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
                 <View style={styles.cardContainer}>
                     <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center", marginRight: 10}}>
                         <Text style={{color: colors.danger2, fontSize: 16}}>Outstanding</Text>
-                        <Text style={{color: colors.danger2, fontSize: 16}}>₹ 0</Text>
+                        <Text style={{color: colors.danger2, fontSize: 16}}>₹ {isCustomerData.due_payment}</Text>
                     </View>
                     <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center"}}>
                         <Text style={{color: colors.green, fontSize: 16}}>Paid</Text>
-                        <Text style={{color: colors.green, fontSize: 16}}>₹ 8,818</Text>
+                        <Text style={{color: colors.green, fontSize: 16}}>₹ {isCustomerData.completed_payment}</Text>
                     </View>
                 </View>
             </View>
 
             <View style={styles.lowerContainer}>
                 <customerTopTabs.Navigator>
-                    <customerTopTabs.Screen name="CustomerOrders" component={CustomerOrders}
+                    <customerTopTabs.Screen 
+                        name="CustomerOrders" 
+                        component={CustomerOrders}
+                        // initialParams={{ isCustomerData: isCustomerData }}
                         options={{ 
                             title: () => ( 
                                 <View style={styles.haveBadge}>
                                     <Badge style={styles.badgeTag} rounded="full" mb={-14} mr={-4} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>
-                                            4
+                                        {isCustomerData?.order?.length}
                                     </Badge>
                                     <Text style={styles.badgeBtn}>
                                         Orders
@@ -150,12 +270,13 @@ const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
                             ),
                         }}
                     />
-                    <customerTopTabs.Screen name="CustomerNotifications" component={CustomerNotifications} 
+                    <customerTopTabs.Screen name="CustomerNotifications" 
+                        component={CustomerNotifications} 
                         options={{ 
                             title: () => ( 
                                 <View style={styles.haveBadge}>
                                     <Badge style={styles.badgeTag} rounded="full" mb={-14} mr={-4} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>
-                                        0
+                                        {isCustomerData?.order?.length}
                                     </Badge>
                                     <Text style={styles.badgeBtn}>
                                         Notifications
@@ -168,67 +289,133 @@ const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
             </View>
 
             <Portal>
-                <Modal visible={viewVehicleDetailsModal} onDismiss={() => {}} contentContainerStyle={styles.modalContainerStyle}>
+                <Modal visible={orderDataModal} onDismiss={() => {setOrderDataModal(false); }} contentContainerStyle={styles.modalContainerStyle}>
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Order Details</Text>
+                    {orderDataLoading 
+                    ? 
+                        <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> 
+                    :
                         <ScrollView>
-                            <Text style={styles.cardDetailsHeading}>Vehicle Owner Name:</Text>
-                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Text style={styles.cardDetailsHeading}>Order ID:</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.id}</Text>
                             <Divider />
-                            <Text style={styles.cardDetailsHeading}>Vehicle Owner`s Phone Number:</Text>
-                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Text style={styles.cardDetailsHeading}>Order Status:</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.status}</Text>
                             <Divider />
-                            <Text style={styles.cardDetailsHeading}>Vehicle Owner`s Email:</Text>
-                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Text style={styles.cardDetailsHeading}>Odometer:</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.odometer}</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Fuel Level:</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.fuel_level}</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Order Date:</Text>
+                            <Text style={styles.cardDetailsData}>{moment(orderData.created_at, 'YYYY-MM-DD HH:mm:ss').format('DD-MM-YYYY')}</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Estimated Delivery Time:</Text>
+                            <Text style={styles.cardDetailsData}>{moment(orderData.estimated_delivery_time, 'YYYY-MM-DD HH:mm:ss').format('DD-MM-YYYY hh:mm A')}</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Services Total:</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.labor_total}</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Parts Total:</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.parts_total}</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Total Discount:</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.discount}</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Order Total:</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.total}</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Order Belongs to Garage:</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.garage.garage_name}</Text>
+                            {/* <Divider /> */}
+                
+                            <Text style={[styles.headingStyle, { marginTop: 10, color: colors.white, textAlign: "center", backgroundColor: colors.primary, width: '100%', justifyContent: 'center'}]}>User Details</Text>                                                   
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Name:</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.user.name}</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Phone Number:</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.user.phone_number}</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Email Address:</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.user.email}</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>Address:</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.user.address}</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>State:</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.user.state}</Text>
+                            <Divider />
+                            <Text style={styles.cardDetailsHeading}>City:</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.user.city}</Text>
+                            {/* <Divider /> */}
+
+                            <Text style={[styles.headingStyle, { marginTop: 10, color: colors.white, textAlign: "center", backgroundColor: colors.primary, width: '100%', justifyContent: 'center'}]}>Vehicle Details</Text>                                                   
                             <Divider />
                             <Text style={styles.cardDetailsHeading}>Vehicle Registration Number:</Text>
-                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.vehicle_registration_number ? orderData.vehicle?.vehicle_registration_number : null}</Text>
                             <Divider />
                             <Text style={styles.cardDetailsHeading}>Vehicle Brand:</Text>
-                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.brand?.name ? orderData.vehicle?.brand?.name : null}</Text>
                             <Divider />
                             <Text style={styles.cardDetailsHeading}>Vehicle Model:</Text>
-                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.vehicle_model?.model_name ? orderData.vehicle?.vehicle_model?.model_name : null}</Text>
                             <Divider />
                             <Text style={styles.cardDetailsHeading}>Purchase Date:</Text>
-                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.purchase_date ? moment(orderData.vehicle?.purchase_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
                             <Divider />
                             <Text style={styles.cardDetailsHeading}>Manufacturing Date:</Text>
-                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.manufacturing_date ? moment(orderData.vehicle?.manufacturing_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
                             <Divider />
                             <Text style={styles.cardDetailsHeading}>Engine Number:</Text>
-                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.engine_number ? orderData.vehicle?.engine_number : null}</Text>
                             <Divider />
                             <Text style={styles.cardDetailsHeading}>Chasis Number:</Text>
-                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.chasis_number ? orderData.vehicle?.chasis_number : null}</Text>
                             <Divider />
                             <Text style={styles.cardDetailsHeading}>Insurance Provider Company:</Text>
-                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.insurance_provider?.name ? orderData.vehicle?.insurance_provider?.name : null}</Text>
                             <Divider />
                             <Text style={styles.cardDetailsHeading}>Insurer GSTIN:</Text>
-                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.insurer_gstin ? orderData.vehicle?.insurer_gstin : null}</Text>
                             <Divider />
                             <Text style={styles.cardDetailsHeading}>Insurer Address:</Text>
-                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.insurer_address ? orderData.vehicle?.insurer_address : null}</Text>
                             <Divider />
                             <Text style={styles.cardDetailsHeading}>Policy Number:</Text>
-                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.policy_number ? orderData.vehicle?.policy_number : null}</Text>
                             <Divider />
                             <Text style={styles.cardDetailsHeading}>Insurance Expiry Date:</Text>
-                            <Text style={styles.cardDetailsData}>Test</Text>
+                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.insurance_expiry_date ? moment(orderData.vehicle?.insurance_expiry_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
                             <Divider />
                             <Text style={styles.cardDetailsHeading}>Registration Certificate:</Text>
-                            <Text style={styles.cardDetailsData}>Not Uploaded Registration Certificate</Text>
+                            {orderData.vehicle?.registration_certificate_img !== null ?
+                                <Lightbox navigator={navigator} style={styles.lightBoxWrapperModal}>
+                                    <Image resizeMode={'cover'} style={styles.verticleImageModal} source={{uri: WEB_URL + 'uploads/registration_certificate_img/' + orderData.vehicle?.registration_certificate_img }} /> 
+                                </Lightbox>
+                            :
+                                <Text style={styles.cardDetailsData}>Not Uploaded Registration Certificate</Text>
+                            }
                             <Divider />
                             <Text style={styles.cardDetailsHeading}>Insurance Policy:</Text>
-                            <Text style={styles.cardDetailsData}>Not Uploaded Insurance Policy</Text>
-                        </ScrollView>
+                            {orderData.vehicle?.insurance_img !== null ?
+                                <Lightbox navigator={navigator} style={styles.lightBoxWrapperModal}>
+                                    <Image resizeMode={'cover'} style={styles.verticleImageModal} source={{uri: WEB_URL + 'uploads/insurance_img/' + orderData.vehicle?.insurance_img }} />
+                                </Lightbox>
+                            :
+                                <Text style={styles.cardDetailsData}>Not Uploaded Insurance Policy</Text>
+                            }
 
+                        </ScrollView>
+                    }
                     <View style={{flexDirection: "row",}}>
+            
                         <View style={{flex: 1}}></View>
                         <Button
                             style={{marginTop:15, flex: 1.4, alignSelf: 'center'}}
                             mode={'contained'}
-                            onPress={() => { setVehicleDataLoading(true); setViewVehicleDetailsModal(false); }}
+                            onPress={() => { setOrderDataModal(false); }}
                         >
                             Close
                         </Button>
@@ -240,188 +427,22 @@ const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
     )
 }
 
-const CustomerNotifications = () => {
-    return (
-        <ScrollView style={styles.innerTabContainer}>
-           <View style={styles.cards}>
-               <View style={styles.cardTags} >
-                    <Text style={styles.tags}>Running Repair</Text>
-                    <Text style={styles.tags}>Running Repair</Text>
-                    <Text style={styles.tags}>Running Repair</Text>
-                </View>
-                <View style={styles.cardOrderDetails}>
-                    <Text style={styles.orderID}>Order ID: 11469</Text>
-                    <Text style={styles.orderStatus}>Completed</Text>
-                </View>
-                <View>
-                <Text style={styles.orderAmount}>Order Amount: ₹ 8,818</Text>
-                <Divider />
-                <Text style={styles.cardCustomerName}>Name: Karankumar Bilimoria</Text>
-                <Divider />
-                <Text style={styles.orderDate}>Order Date: 21 Sep 2021 10:02</Text>
-                <Divider />
-                <Text style={styles.kmNoted}>KM: 9311 KM</Text>
-                </View>
-                <View style={styles.cardActions}>
-                    <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>View Details</Text></TouchableOpacity>
-                </View>
-           </View>
+// const CustomerNotifications = ({ route }) => {
+//     return (
+       
+//     )
+// }
 
-           <View style={styles.cards}>
-               <View style={styles.cardTags} >
-                    <Text style={styles.tags}>Running Repair</Text>
-                    <Text style={styles.tags}>Running Repair</Text>
-                    <Text style={styles.tags}>Running Repair</Text>
-                </View>
-                <View style={styles.cardOrderDetails}>
-                    <Text style={styles.orderID}>Order ID: 11469</Text>
-                    <Text style={styles.orderStatus}>Completed</Text>
-                </View>
-                <View>
-                <Text style={styles.orderAmount}>Order Amount: ₹ 8,818</Text>
-                <Divider />
-                <Text style={styles.cardCustomerName}>Name: Karankumar Bilimoria</Text>
-                <Divider />
-                <Text style={styles.orderDate}>Order Date: 21 Sep 2021 10:02</Text>
-                <Divider />
-                <Text style={styles.kmNoted}>KM: 9311 KM</Text>
-                </View>
-                <View style={styles.cardActions}>
-                    <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>View Details</Text></TouchableOpacity>
-                </View>
-           </View>
+// const CustomerOrders = ({ route }) => {
+// const refRBSheet = useRef();
+// useEffect(() => {
+//   console.log('orders', isCustomerData);
+// }, [])
 
-           <View style={styles.cards}>
-               <View style={styles.cardTags} >
-                    <Text style={styles.tags}>Running Repair</Text>
-                    <Text style={styles.tags}>Running Repair</Text>
-                    <Text style={styles.tags}>Running Repair</Text>
-                </View>
-                <View style={styles.cardOrderDetails}>
-                    <Text style={styles.orderID}>Order ID: 11469</Text>
-                    <Text style={styles.orderStatus}>Completed</Text>
-                </View>
-                <View>
-                <Text style={styles.orderAmount}>Order Amount: ₹ 8,818</Text>
-                <Divider />
-                <Text style={styles.cardCustomerName}>Name: Karankumar Bilimoria</Text>
-                <Divider />
-                <Text style={styles.orderDate}>Order Date: 21 Sep 2021 10:02</Text>
-                <Divider />
-                <Text style={styles.kmNoted}>KM: 9311 KM</Text>
-                </View>
-                <View style={styles.cardActions}>
-                    <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>View Details</Text></TouchableOpacity>
-                </View>
-           </View>
-        </ScrollView>
-    )
-}
-
-const CustomerOrders = () => {
-const refRBSheet = useRef();
-    return (
-        <ScrollView style={styles.innerTabContainer}>
-            <View style={styles.cards}>
-                {/* <View style={{right: 30, top: 35,position: 'absolute'}} >
-                    <Icon onPress={() => {refRBSheet.current.open();}} type={"MaterialCommunityIcons"} name={'dots-vertical'} size={22}  color={colors.gray} />
-                </View> */}
-                <View style={styles.cardTags} >
-                    <Text style={styles.tags}>Running Repair</Text>
-                    <Text style={styles.tags}>Running Repair</Text>
-                    <Text style={styles.tags}>Running Repair</Text>
-                </View>
-                <View style={styles.cardOrderDetails}>
-                    <Text style={styles.orderID}>Order ID: 11469</Text>
-                    <Text style={styles.orderStatus}>Completed</Text>
-                </View>
-                <View>
-                <Text style={styles.orderAmount}>Order Amount: ₹ 8,818</Text>
-                <Divider />
-                <Text style={styles.cardCustomerName}>Name: Karankumar Bilimoria</Text>
-                <Divider />
-                <Text style={styles.orderDate}>Order Date: 21 Sep 2021 10:02</Text>
-                <Divider />
-                <Text style={styles.kmNoted}>KM: 9311 KM</Text>
-                </View>
-                <View style={styles.cardActions}>
-                    <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>View Details</Text></TouchableOpacity>
-                </View>
-
-                <RBSheet
-                    ref={refRBSheet}
-                    height={126}
-                    openDuration={250}
-                    >
-                    <View style={{flexDirection:"column", flex:1}}>
-                        <List.Item
-                            title="View Order Details"
-                            style={{paddingVertical:15}}
-                            onPress={() => { setViewVehicleDetailsModal(true); refRBSheet.current.close(); }}
-                            left={() => (<Icon type={"MaterialCommunityIcons"} name="eye" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
-                        />
-                        <Divider />
-                        <List.Item
-                            title="Change Order Status"
-                            style={{paddingVertical:15}}
-                            onPress={() =>  { navigation.navigate("MyCustomers"); refRBSheet.current.close(); }}
-                            left={() => (<Icon type={"MaterialCommunityIcons"} name="clipboard-list-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
-                        />
-                        <Divider />
-                    </View>
-                </RBSheet>
-            </View>
-
-            <View style={styles.cards}>
-                <View style={styles.cardTags} >
-                    <Text style={styles.tags}>Running Repair</Text>
-                    <Text style={styles.tags}>Running Repair</Text>
-                    <Text style={styles.tags}>Running Repair</Text>
-                </View>
-                <View style={styles.cardOrderDetails}>
-                    <Text style={styles.orderID}>Order ID: 11469</Text>
-                    <Text style={styles.orderStatus}>Completed</Text>
-                </View>
-                <View>
-                <Text style={styles.orderAmount}>Order Amount: ₹ 8,818</Text>
-                <Divider />
-                <Text style={styles.cardCustomerName}>Name: Karankumar Bilimoria</Text>
-                <Divider />
-                <Text style={styles.orderDate}>Order Date: 21 Sep 2021 10:02</Text>
-                <Divider />
-                <Text style={styles.kmNoted}>KM: 9311 KM</Text>
-                </View>
-                <View style={styles.cardActions}>
-                    <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>View Details</Text></TouchableOpacity>
-                </View>
-            </View>
-
-            <View style={styles.cards}>
-                <View style={styles.cardTags} >
-                    <Text style={styles.tags}>Running Repair</Text>
-                    <Text style={styles.tags}>Running Repair</Text>
-                    <Text style={styles.tags}>Running Repair</Text>
-                </View>
-                <View style={styles.cardOrderDetails}>
-                    <Text style={styles.orderID}>Order ID: 11469</Text>
-                    <Text style={styles.orderStatus}>Completed</Text>
-                </View>
-                <View>
-                    <Text style={styles.orderAmount}>Order Amount: ₹ 8,818</Text>
-                    <Divider />
-                    <Text style={styles.cardCustomerName}>Name: Karankumar Bilimoria</Text>
-                    <Divider />
-                    <Text style={styles.orderDate}>Order Date: 21 Sep 2021 10:02</Text>
-                    <Divider />
-                    <Text style={styles.kmNoted}>KM: 9311 KM</Text>
-                </View>
-                <View style={styles.cardActions}>
-                    <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>View Details</Text></TouchableOpacity>
-                </View>
-            </View>
-        </ScrollView>
-    )
-}
+//     return (
+     
+//     )
+// }
 
 const styles = StyleSheet.create({
     surfaceContainer: {
@@ -584,6 +605,54 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         overflow: "hidden",
         backgroundColor: colors.black
+    },
+
+    // modal styles
+    modalContainerStyle: {
+        backgroundColor: 'white', 
+        padding: 20,
+        marginHorizontal: 30,
+        marginTop: 40,
+        marginBottom: 70
+    },
+    cardDetailsHeading: {
+        color: colors.black,
+        fontSize: 16,
+        paddingTop: 4,
+        paddingBottom: 4,
+        fontWeight: 'bold' 
+    }, 
+    cardDetailsData: {
+        color: colors.black,
+        fontSize: 16,
+        paddingTop: 4,
+        paddingBottom: 4
+    },
+    headingStyle: {
+        color: colors.black,
+        fontSize: 20,
+        paddingTop: 5,
+        paddingBottom: 5
+    },
+    smallButton: {
+        fontSize: 16,
+        color: colors.primary,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        borderRadius: 2,
+        borderWidth: 1,
+        borderColor: colors.primary,
+        padding: 3,
+        marginHorizontal: 4,
+        marginTop: 3,
+    },
+    verticleImageModal: {
+        height: 150,
+        resizeMode: 'contain',  
+        flex: 1, 
+    }, 
+    lightBoxWrapperModal: {
+        width: 150,
     },
 })
 

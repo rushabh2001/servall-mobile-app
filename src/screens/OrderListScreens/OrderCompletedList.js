@@ -94,7 +94,7 @@ const OrderCompletedList = ({navigation, userToken, selectedGarageId }) => {
                                                 </View>
                                                 <View>
                                                     <View style={{flexDirection: 'row'}}>
-                                                        <Text style={styles.orderAmount}>Order Amount:</Text><Text style={styles.orderAmount}> ₹ {item.total}</Text>
+                                                    <Text style={styles.orderAmount}>Order Amount:</Text><Text style={styles.orderAmount}> ₹ {item.total}</Text><Text style={[styles.orderAmount, {marginLeft: 8, color: item.payment_status == "Completed" ? colors.green : colors.danger}]}>{item.payment_status == "Completed" ? "(Paid)" : "(Due)"}</Text>
                                                     </View>
                                                     <Divider />
                                                     <View style={{flexDirection: 'row'}}>
@@ -148,13 +148,12 @@ const OrderCompletedList = ({navigation, userToken, selectedGarageId }) => {
                                             ref={ref => {
                                                 this[RBSheet + index] = ref;
                                             }}
-                                        
-                                            height={126}
+                                            height={64}
                                             openDuration={250}
                                             >
                                             <View style={{flexDirection:"column", flex:1}}>
                                                 <List.Item
-                                                    title="Change Order Status"
+                                                    title="View Order"
                                                     style={{paddingVertical:15}}
                                                     onPress={() =>  { 
                                                         let arrData = {
@@ -180,52 +179,15 @@ const OrderCompletedList = ({navigation, userToken, selectedGarageId }) => {
                                                             'services_list': item?.orderservice,
                                                             'parts_list': item?.orderparts,
                                                             'created_at': item?.created_at,
+                                                            'payment_status': item?.payment_status,
                                                             'total': item?.total,
                                                             'applicable_discount': item?.discount
                                                         }
                                                         navigation.navigate('OrderCompleted', {'data': arrData});  
                                                         this[RBSheet + index].close(); 
                                                         }}
-                                                    left={() => (<Icon type={"MaterialCommunityIcons"} name="clipboard-list-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
+                                                    left={() => (<Icon type={"MaterialCommunityIcons"} name="eye" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
                                                 />
-                                                <Divider />
-                                                <List.Item
-                                                    title="Edit Order"
-                                                    style={{paddingVertical:15}}
-                                                    onPress={() =>  { 
-                                                        let arrData = {
-                                                            'order_id': item.id,
-                                                            'user_id': item.user_id,
-                                                            'garage_id': item.garage_id,
-                                                            'vehicle_id': item.vehicle_id,
-                                                            'name': item.user.name,
-                                                            'email': item.user.email,
-                                                            'phone_number': item.user.phone_number,
-                                                            'brand_id': item.vehicle.brand_id,
-                                                            'brand_name': item?.vehicle?.brand?.name,
-                                                            'model_id': item?.vehicle?.model_id,
-                                                            'model_name': item?.vehicle?.vehicle_model?.model_name,
-                                                            'vehicle_registration_number': item?.vehicle?.vehicle_registration_number,
-                                                            'odometer': item?.odometer,
-                                                            'fuel_level': item?.fuel_level,
-                                                            'comment': item?.comment,
-                                                            'estimated_delivery_time': item?.estimated_delivery_time,
-                                                            'labor_total': item?.labor_total,
-                                                            'parts_total': item?.parts_total,
-                                                            'services_list': item?.orderservice,
-                                                            'parts_list': item?.orderparts,
-                                                            'created_at': item?.created_at,
-                                                            'total': item?.total,
-                                                            'status': item?.status,
-                                                            'applicable_discount': item?.discount
-                                                        }
-                                                        console.log('data:', arrData);
-                                                        navigation.navigate('EditRepairOrder', {'data': arrData}); 
-                                                        this[RBSheet + index].close(); 
-                                                    }}
-                                                    left={() => (<Icon type={"MaterialCommunityIcons"} name="clipboard-edit-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
-                                                />
-                                                <Divider />
                                             </View>
                                         </RBSheet>
                                     </>

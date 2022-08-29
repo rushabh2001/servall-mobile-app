@@ -16,7 +16,10 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, nav
     const [searchQuery, setSearchQuery] = useState(); 
     const [filteredData, setFilteredData] = useState([]);
     const [orderDataModal, setOrderDataModal] = useState(false);
-    // const refRBSheet = useRef();
+    const refRBSheet = useRef();
+    const [selectedOrderId, setSelectedOrderId] = useState(); 
+    const [orderData, setOrderData] = useState(); 
+    const [orderDataLoading, setOrderDataLoading] = useState(true);
 
     const getOrderList = async () => {
         let formData = {
@@ -34,6 +37,7 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, nav
             });
             const json = await res.json();
             if (json !== undefined) {
+                console.log(json);
                 setData(json.data);
                 setFilteredData(json.data);
             }
@@ -60,6 +64,27 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, nav
         } else {
             setFilteredData(data);
             setSearchQuery(text);
+        }
+    };
+
+    const getOrderDetails = async (orderId) => {
+        try {
+            const res = await fetch(`${API_URL}order/${orderId}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+            });
+            const json = await res.json();
+            if (json !== undefined) {
+                setOrderData(json.data);
+            }
+        } catch (e) {
+            console.log(e);
+        } finally {
+            setOrderDataLoading(false);
         }
     };
 
@@ -94,8 +119,8 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, nav
                                                 {/* <Text style={styles.orderStatus}>Completed</Text> */}
                                             </View>
                                             <View style={{right: 30, top: 35,position: 'absolute'}} >
-                                                <Icon onPress={() => {this[RBSheet + index].open(); console.log(this[RBSheet + index]);}} type={"MaterialCommunityIcons"} name={'dots-vertical'} size={22}  color={colors.gray} />
-                                                {/* <Icon onPress={() => {this[RBSheet + index].open();}} type={"MaterialCommunityIcons"} style={{right: 5, top: 8,position: 'absolute'}} name={'dots-vertical'} size={22}  color={colors.gray} /> */}
+                                                {/* <Icon onPress={() => {this[RBSheet + index].open(); console.log(this[RBSheet + index]);}} type={"MaterialCommunityIcons"} name={'eye'} size={22}  color={colors.gray} /> */}
+                                                <Icon onPress={() => {setSelectedOrderId(item.id); refRBSheet.current.open();}} type={"MaterialCommunityIcons"} style={{right: 0, top: 0, position: 'absolute'}} name={'dots-vertical'} size={22}  color={colors.gray} />
                                             </View>
                                             <View>
                                                 {/* <Text style={styles.cardCustomerName}>Owner Name: </Text>
@@ -144,180 +169,144 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, nav
                                             </View>
                                         </View>
                                     </View>
-                                    <Portal>
-                                        <Modal visible={orderDataModal} onDismiss={() => {setOrderDataModal(false); }} contentContainerStyle={styles.modalContainerStyle}>
-                                            <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Order Details</Text>
-                                            {/* {vehicleDataLoading 
-                                            ? 
-                                                <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> 
-                                            : */}
-                                                <ScrollView>
-                                                <Text style={styles.cardDetailsHeading}>Order ID:</Text>
-                                                <Text style={styles.cardDetailsData}>{item.id}</Text>
-                                                <Divider />
-                                                <Text style={styles.cardDetailsHeading}>Order Status:</Text>
-                                                <Text style={styles.cardDetailsData}>{item.status}</Text>
-                                                <Divider />
-                                                <Text style={styles.cardDetailsHeading}>Odometer:</Text>
-                                                <Text style={styles.cardDetailsData}>{item.odometer}</Text>
-                                                <Divider />
-                                                <Text style={styles.cardDetailsHeading}>Fuel Level:</Text>
-                                                <Text style={styles.cardDetailsData}>{item.fuel_level}</Text>
-                                                <Divider />
-                                                <Text style={styles.cardDetailsHeading}>Order Date:</Text>
-                                                <Text style={styles.cardDetailsData}>{moment(item.created_at, 'YYYY-MM-DD HH:mm:ss').format('DD-MM-YYYY')}</Text>
-                                                <Divider />
-                                                <Text style={styles.cardDetailsHeading}>Estimated Delivery Time:</Text>
-                                                <Text style={styles.cardDetailsData}>{moment(item.estimated_delivery_time, 'YYYY-MM-DD HH:mm:ss').format('DD-MM-YYYY hh:mm A')}</Text>
-                                                <Divider />
-                                                <Text style={styles.cardDetailsHeading}>Services Total:</Text>
-                                                <Text style={styles.cardDetailsData}>{item.labor_total}</Text>
-                                                <Divider />
-                                                <Text style={styles.cardDetailsHeading}>Parts Total:</Text>
-                                                <Text style={styles.cardDetailsData}>{item.parts_total}</Text>
-                                                <Divider />
-                                                <Text style={styles.cardDetailsHeading}>Total Discount:</Text>
-                                                <Text style={styles.cardDetailsData}>{item.discount}</Text>
-                                                <Divider />
-                                                <Text style={styles.cardDetailsHeading}>Order Total:</Text>
-                                                <Text style={styles.cardDetailsData}>{item.total}</Text>
-                                                <Divider />
-                                                <Text style={styles.cardDetailsHeading}>Registration Certificate:</Text>
-                                                {/* {VehicleData?.registration_certificate_img !== null ? */}
-                                                    {/* <Lightbox navigator={navigator} style={styles.lightBoxWrapper}>
-                                                        <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/registration_certificate_img/' + VehicleData?.registration_certificate_img }} /> 
-                                                    </Lightbox> */}
-                                                {/* : */}
-                                                    <Text style={styles.cardDetailsData}>Not Uploaded Registration Certificate</Text>
-                                                {/* } */}
-                                                <Divider />
-                                                <Text style={styles.cardDetailsHeading}>Insurance Policy:</Text>
-                                                {/* {VehicleData?.insurance_img !== null ? */}
-                                                    {/* <Lightbox navigator={navigator} style={styles.lightBoxWrapper}>
-                                                        <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/insurance_img/' + VehicleData?.insurance_img }} />
-                                                    </Lightbox> */}
-                                                {/* : */}
-                                                    <Text style={styles.cardDetailsData}>Not Uploaded Insurance Policy</Text>
-                                                {/* } */}
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>Order Belongs to Garage:</Text>
-                                                    <Text style={styles.cardDetailsData}>{item.garage.garage_name}</Text>
-                                                    {/* <Divider /> */}
-                                        
-                                                    <Text style={[styles.headingStyle, { marginTop: 10, color: colors.white, textAlign: "center", backgroundColor: colors.primary, width: '100%', justifyContent: 'center'}]}>User Details</Text>                                                   
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>Name:</Text>
-                                                    <Text style={styles.cardDetailsData}>{item.user.name}</Text>
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>Phone Number:</Text>
-                                                    <Text style={styles.cardDetailsData}>{item.user.phone_number}</Text>
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>Email Address:</Text>
-                                                    <Text style={styles.cardDetailsData}>{item.user.email}</Text>
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>Address:</Text>
-                                                    <Text style={styles.cardDetailsData}>{item.user.address}</Text>
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>State:</Text>
-                                                    <Text style={styles.cardDetailsData}>{item.user.state}</Text>
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>City:</Text>
-                                                    <Text style={styles.cardDetailsData}>{item.user.city}</Text>
-                                                    {/* <Divider /> */}
-
-                                                    <Text style={[styles.headingStyle, { marginTop: 10, color: colors.white, textAlign: "center", backgroundColor: colors.primary, width: '100%', justifyContent: 'center'}]}>Vehicle Details</Text>                                                   
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>Vehicle Registration Number:</Text>
-                                                    <Text style={styles.cardDetailsData}>{item.vehicle?.vehicle_registration_number ? item.vehicle?.vehicle_registration_number : null}</Text>
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>Vehicle Brand:</Text>
-                                                    <Text style={styles.cardDetailsData}>{item.vehicle?.brand?.name ? item.vehicle?.brand?.name : null}</Text>
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>Vehicle Model:</Text>
-                                                    <Text style={styles.cardDetailsData}>{item.vehicle?.vehicle_model?.model_name ? item.vehicle?.vehicle_model?.model_name : null}</Text>
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>Purchase Date:</Text>
-                                                    <Text style={styles.cardDetailsData}>{item.vehicle?.purchase_date ? moment(item.vehicle?.purchase_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>Manufacturing Date:</Text>
-                                                    <Text style={styles.cardDetailsData}>{item.vehicle?.manufacturing_date ? moment(item.vehicle?.manufacturing_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>Engine Number:</Text>
-                                                    <Text style={styles.cardDetailsData}>{item.vehicle?.engine_number ? item.vehicle?.engine_number : null}</Text>
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>Chasis Number:</Text>
-                                                    <Text style={styles.cardDetailsData}>{item.vehicle?.chasis_number ? item.vehicle?.chasis_number : null}</Text>
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>Insurance Provider Company:</Text>
-                                                    <Text style={styles.cardDetailsData}>{item.vehicle?.insurance_provider?.name ? item.vehicle?.insurance_provider?.name : null}</Text>
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>Insurer GSTIN:</Text>
-                                                    <Text style={styles.cardDetailsData}>{item.vehicle?.insurer_gstin ? item.vehicle?.insurer_gstin : null}</Text>
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>Insurer Address:</Text>
-                                                    <Text style={styles.cardDetailsData}>{item.vehicle?.insurer_address ? item.vehicle?.insurer_address : null}</Text>
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>Policy Number:</Text>
-                                                    <Text style={styles.cardDetailsData}>{item.vehicle?.policy_number ? item.vehicle?.policy_number : null}</Text>
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>Insurance Expiry Date:</Text>
-                                                    <Text style={styles.cardDetailsData}>{item.vehicle?.insurance_expiry_date ? moment(item.vehicle?.insurance_expiry_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>Registration Certificate:</Text>
-                                                    {item.vehicle?.registration_certificate_img !== null ?
-                                                        <Lightbox navigator={navigator} style={styles.lightBoxWrapper}>
-                                                            <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/registration_certificate_img/' + item.vehicle?.registration_certificate_img }} /> 
-                                                        </Lightbox>
-                                                    :
-                                                        <Text style={styles.cardDetailsData}>Not Uploaded Registration Certificate</Text>
-                                                    }
-                                                    <Divider />
-                                                    <Text style={styles.cardDetailsHeading}>Insurance Policy:</Text>
-                                                    {item.vehicle?.insurance_img !== null ?
-                                                        <Lightbox navigator={navigator} style={styles.lightBoxWrapper}>
-                                                            <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/insurance_img/' + item.vehicle?.insurance_img }} />
-                                                        </Lightbox>
-                                                    :
-                                                        <Text style={styles.cardDetailsData}>Not Uploaded Insurance Policy</Text>
-                                                    }
-
-                                                </ScrollView>
-                                            {/* } */}
-                                            <View style={{flexDirection: "row",}}>
-                                    
-                                                <View style={{flex: 1}}></View>
-                                                <Button
-                                                    style={{marginTop:15, flex: 1.4, alignSelf: 'center'}}
-                                                    mode={'contained'}
-                                                    onPress={() => { setOrderDataModal(false); }}
-                                                >
-                                                    Close
-                                                </Button>
-                                                <View style={{flex: 1}}></View>
-                                            </View>
-                                        </Modal>
-                                    </Portal>
-
-                                    <RBSheet
-                                        ref={ref => {
-                                            this[RBSheet + index] = ref;
-                                        }}
-                                        height={63}
-                                        openDuration={250}
-                                        >
-                                        <View style={{flexDirection:"column", flex:1}}>
-                                            <List.Item
-                                                title="View Order Details"
-                                                style={{paddingVertical:15}}
-                                                onPress={() => { setOrderDataModal(true); this[RBSheet + index].close(); }}
-                                                left={() => (<Icon type={"MaterialCommunityIcons"} name="eye" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
-                                            />
-                                            {/* <Divider /> */}
-                                        </View>
-                                    </RBSheet>
                                 </>
                                 )}
                             />  
+                            <Portal>
+                                <Modal visible={orderDataModal} onDismiss={() => {setOrderDataModal(false); }} contentContainerStyle={styles.modalContainerStyle}>
+                                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Order Details</Text>
+                                    {orderDataLoading 
+                                    ? 
+                                        <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> 
+                                    :
+                                        <ScrollView>
+                                            <Text style={styles.cardDetailsHeading}>Order ID:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.id}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Order Status:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.status}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Odometer:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.odometer}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Fuel Level:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.fuel_level}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Order Date:</Text>
+                                            <Text style={styles.cardDetailsData}>{moment(orderData.created_at, 'YYYY-MM-DD HH:mm:ss').format('DD-MM-YYYY')}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Estimated Delivery Time:</Text>
+                                            <Text style={styles.cardDetailsData}>{moment(orderData.estimated_delivery_time, 'YYYY-MM-DD HH:mm:ss').format('DD-MM-YYYY hh:mm A')}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Services Total:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.labor_total}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Parts Total:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.parts_total}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Total Discount:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.discount}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Order Total:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.total}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Order Belongs to Garage:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.garage.garage_name}</Text>
+                                            {/* <Divider /> */}
+                                
+                                            <Text style={[styles.headingStyle, { marginTop: 10, color: colors.white, textAlign: "center", backgroundColor: colors.primary, width: '100%', justifyContent: 'center'}]}>User Details</Text>                                                   
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Name:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.user.name}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Phone Number:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.user.phone_number}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Email Address:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.user.email}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Address:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.user.address}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>State:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.user.state}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>City:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.user.city}</Text>
+                                            {/* <Divider /> */}
+
+                                            <Text style={[styles.headingStyle, { marginTop: 10, color: colors.white, textAlign: "center", backgroundColor: colors.primary, width: '100%', justifyContent: 'center'}]}>Vehicle Details</Text>                                                   
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Vehicle Registration Number:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.vehicle_registration_number ? orderData.vehicle?.vehicle_registration_number : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Vehicle Brand:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.brand?.name ? orderData.vehicle?.brand?.name : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Vehicle Model:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.vehicle_model?.model_name ? orderData.vehicle?.vehicle_model?.model_name : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Purchase Date:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.purchase_date ? moment(orderData.vehicle?.purchase_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Manufacturing Date:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.manufacturing_date ? moment(orderData.vehicle?.manufacturing_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Engine Number:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.engine_number ? orderData.vehicle?.engine_number : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Chasis Number:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.chasis_number ? orderData.vehicle?.chasis_number : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Insurance Provider Company:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.insurance_provider?.name ? orderData.vehicle?.insurance_provider?.name : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Insurer GSTIN:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.insurer_gstin ? orderData.vehicle?.insurer_gstin : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Insurer Address:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.insurer_address ? orderData.vehicle?.insurer_address : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Policy Number:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.policy_number ? orderData.vehicle?.policy_number : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Insurance Expiry Date:</Text>
+                                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.insurance_expiry_date ? moment(orderData.vehicle?.insurance_expiry_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Registration Certificate:</Text>
+                                            {orderData.vehicle?.registration_certificate_img !== null ?
+                                                <Lightbox navigator={navigator} style={styles.lightBoxWrapper}>
+                                                    <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/registration_certificate_img/' + orderData.vehicle?.registration_certificate_img }} /> 
+                                                </Lightbox>
+                                            :
+                                                <Text style={styles.cardDetailsData}>Not Uploaded Registration Certificate</Text>
+                                            }
+                                            <Divider />
+                                            <Text style={styles.cardDetailsHeading}>Insurance Policy:</Text>
+                                            {orderData.vehicle?.insurance_img !== null ?
+                                                <Lightbox navigator={navigator} style={styles.lightBoxWrapper}>
+                                                    <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/insurance_img/' + orderData.vehicle?.insurance_img }} />
+                                                </Lightbox>
+                                            :
+                                                <Text style={styles.cardDetailsData}>Not Uploaded Insurance Policy</Text>
+                                            }
+
+                                        </ScrollView>
+                                    }
+                                    <View style={{flexDirection: "row",}}>
+                            
+                                        <View style={{flex: 1}}></View>
+                                        <Button
+                                            style={{marginTop:15, flex: 1.4, alignSelf: 'center'}}
+                                            mode={'contained'}
+                                            onPress={() => { setOrderDataModal(false); }}
+                                        >
+                                            Close
+                                        </Button>
+                                        <View style={{flex: 1}}></View>
+                                    </View>
+                                </Modal>
+                            </Portal>
                         </View>
                     :
                         <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 50,  backgroundColor:colors.white,}}>
@@ -325,6 +314,22 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, nav
                         </View>
                     )
                 }
+
+                <RBSheet
+                    ref={refRBSheet}
+                    height={63}
+                    openDuration={250}
+                    >
+                    <View style={{flexDirection:"column", flex:1}}>
+                        <List.Item
+                            title="View Order Details"
+                            style={{paddingVertical:15}}
+                            onPress={() => { setOrderDataModal(true); refRBSheet.current.close(); getOrderDetails(selectedOrderId); }}
+                            left={() => (<Icon type={"MaterialCommunityIcons"} name="eye" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
+                        />
+                        {/* <Divider /> */}
+                    </View>
+                </RBSheet>
             </View>
         </View>
     );

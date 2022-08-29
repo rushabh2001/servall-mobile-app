@@ -67,12 +67,13 @@ const AddPayment = ({ navigation, userRole, route, userToken }) => {
             'order_id': orderId,
             'payment_method': isPaymentMethod,
             // 'total_amount': isAmount,
-            'total_amount': isAmount?.trim(),
+            'total_amount': parseInt(isAmount?.trim()),
             'payment_reference_number': isPaymentReferenceNumber?.trim(),
-            'payment_date': isPaymentDate,
+            'payment_date': moment(isPaymentDate, 'YYYY-MM-DD"T"hh:mm ZZ').format('YYYY-MM-DD'),
             'comment': isComment?.trim(),
         }
 
+        console.log(data);
         addPayment(data); 
     }
 
@@ -88,6 +89,8 @@ const AddPayment = ({ navigation, userRole, route, userToken }) => {
                 body: JSON.stringify(data)
             });
             const json = await res.json();
+            console.log(json);
+
             if (json !== undefined) {
                 navigation.navigate('Services');
             }
