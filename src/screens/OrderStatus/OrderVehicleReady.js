@@ -216,21 +216,22 @@ const OrderVehicleReady = ({ navigation, userRole, route, userToken }) => {
                                             <Text style={{color: colors.danger2, fontSize: 16}}>₹ {isTotal}</Text>
                                         </View> */}
                                     </View>
-                                    {/* <View style={{flexDirection:"row", marginTop: 15, alignSelf:"center", justifyContent:'center'}}>
-                                        <TouchableOpacity 
-                                            onPress={()=> Linking.openURL(`tel:${isPhoneNumber}`) } 
-                                            // style={{marginRight: 10}}
+                                    <View style={{flexDirection:"row", marginTop: 15, alignSelf:"center", justifyContent:'center'}}>
+                                        <TouchableOpacity onPress={() => {
+                                                const invoiceData = {'order_id': route?.params?.data?.order_id};
+                                                navigation.navigate('InvoicePreview', {'data': invoiceData});
+                                            }}
                                         >
-                                            <IconX name={"file-pdf"} size={28} color={colors.primary} />
+                                            <IconX name={"file-pdf"} size={40} color={colors.primary} />
                                         </TouchableOpacity>
-                                        <TouchableOpacity onPress={()=> Linking.openURL(`sms:${isPhoneNumber}?&body=Hello%20ServAll`) } style={{}}><IconX name={"share-alt-square"} size={28} color={colors.primary} /></TouchableOpacity>
+                                        {/* <TouchableOpacity onPress={()=> Linking.openURL(`sms:${isPhoneNumber}?&body=Hello%20ServAll`) } style={{}}><IconX name={"share-alt-square"} size={28} color={colors.primary} /></TouchableOpacity>
 
                                         <TouchableOpacity onPress={()=> Linking.openURL(`https://wa.me/Text`) } style={styles.smallButton}><Icon name={"whatsapp"} size={20} color={colors.primary} /></TouchableOpacity>
-                                        <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Icon name={"bell"} size={20} color={colors.primary} /><Text style={{marginLeft:4, color:colors.primary}}>Reminders</Text></TouchableOpacity>
+                                        <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Icon name={"bell"} size={20} color={colors.primary} /><Text style={{marginLeft:4, color:colors.primary}}>Reminders</Text></TouchableOpacity> */}
                                     </View>
                                     <View style={{marginTop: 5, alignSelf:"center", justifyContent:'center'}}>
                                         <Text style={{color: colors.black}}>Repair Order</Text>
-                                    </View> */}
+                                    </View>
                                 </View>
                                 <View style={{flexDirection: 'column', marginTop: 20}}>
                                     <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.secondary, padding: 10}}>

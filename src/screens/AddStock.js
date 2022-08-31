@@ -439,7 +439,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                         />
                     </View> */}
 
-                    {isLoading == true ? <ActivityIndicator></ActivityIndicator> :
+                    {isLoading == true ? <View style={{marginVertical: 170, flex: 1, justifyContent: 'center', alignItems: 'center'}}><ActivityIndicator></ActivityIndicator></View> :
                         <>
                             <TextInput
                                 mode="outlined"

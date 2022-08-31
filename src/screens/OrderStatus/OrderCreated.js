@@ -193,6 +193,16 @@ const OrderCreated = ({ navigation, userRole, route, userToken }) => {
                                         </View>
                                     </View>
                                 </View>
+                                <View style={{flexDirection:"row", marginTop: 15, alignSelf:"center", justifyContent:'center'}}>
+                                    <TouchableOpacity onPress={() => {
+                                            const invoiceData = {'order_id': route?.params?.data?.order_id};
+                                            navigation.navigate('InvoicePreview', {'data': invoiceData});  }} >
+                                        <IconX name={"file-pdf"} size={40} color={colors.primary} />
+                                    </TouchableOpacity>
+                                </View>
+                                <View style={{marginTop: 5, alignSelf:"center", justifyContent:'center'}}>
+                                    <Text style={{color: colors.black}}>Repair Order</Text>
+                                </View>
                                 <View style={{flexDirection: 'column', marginTop: 20}}>
                                     <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.secondary, padding: 10}}>
                                         <Text style={{fontSize: 18, color: colors.white}}>Services</Text>

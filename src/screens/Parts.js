@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import { useTheme, Searchbar, Button, DataTable, Divider } from 'react-native-paper';
 import { colors } from '../constants';
 import Icon from 'react-native-vector-icons/FontAwesome5';
@@ -17,8 +17,11 @@ const Parts = ({ navigation, userToken, selectedGarageId }) => {
   const { colors } = useTheme();
   const isFocused = useIsFocused();
   const tableHead = ['(P No.) Name', 'Stock', 'MRP','Rack No', 'Action'];
-  const [tableData, setTableData] = useState([]);
   const [isGarageId, setIsGarageId] = useState(selectedGarageId);
+
+  const [page, setPage] = useState(1);
+  const [isScrollLoading, setIsScrollLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const [filteredPartData, setFilteredPartData] = useState([]);
   const [searchQueryForParts, setSearchQueryForParts] = useState(); 
@@ -45,10 +48,10 @@ const Parts = ({ navigation, userToken, selectedGarageId }) => {
   };
 
   const getPartList = async () => {
-    setIsLoading(true);
-    console.log('isGarageId', selectedGarageId);
+    { page == 1 && setIsLoading(true) }
+    { page != 1 && setIsScrollLoading(true) }
     try {
-      const res = await fetch(`${API_URL}fetch_garage_inventory/${selectedGarageId}`, {
+      const res = await fetch(`${API_URL}fetch_garage_inventory/${isGarageId}?page=${page}`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -58,15 +61,20 @@ const Parts = ({ navigation, userToken, selectedGarageId }) => {
       });
       const json = await res.json();
       if (json !== undefined) {
-        setPartList(json.data);
-        setTableData(json.data);
-        setFilteredPartData(json.data);
-
+        // setPartList(json.data);
+        // setTableData(json.data);
+        setFilteredPartData([
+          ...filteredPartData,
+          ...json.data.data,
+        ]);
       }
     } catch (e) {
       console.log(e);
     } finally {
-      setIsLoading(false);
+      { page == 1 && setIsLoading(false) }
+      { page != 1 && setIsScrollLoading(false) }
+      setPage(page + 1);
+      console.log(page);
     }
   };
 
@@ -86,6 +94,52 @@ const Parts = ({ navigation, userToken, selectedGarageId }) => {
         setSearchQueryForParts(text);
     }
   };
+
+  const pullRefresh = async () => {
+    try {
+        const res = await fetch(`${API_URL}fetch_garage_inventory/${isGarageId}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + userToken
+            },
+        });
+        const json = await response.json();
+        console.log('1', json);
+        if (response.status == '200') {
+            setSearchQueryForParts('');
+            setFilteredPartData(json.data.data);
+            setPage(2);
+            setRefreshing(false);
+        } else {
+            // console.log('2', response.status);
+            setRefreshing(false);
+        }
+    } catch (error) {
+        // if (error?.message == 'Unauthenticated.') signOut();
+        console.error(error);
+    }
+};
+
+const renderFooter = () => {
+    return (
+        <>
+            {isScrollLoading && (
+                <View style={styles.footer}>
+                    <ActivityIndicator
+                        size="large"
+                    />
+                </View>
+            )}
+        </>
+    );
+};
+
+const onRefresh = () => {
+    setRefreshing(true);
+    pullRefresh();
+};
 
   useEffect(() => {
     getPartList();
@@ -151,6 +205,16 @@ const Parts = ({ navigation, userToken, selectedGarageId }) => {
                     <FlatList
                         ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
                         data={filteredPartData}
+                        onEndReached={filteredPartData?.length > 10 && getPartList}
+                        onEndReachedThreshold={0.5}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing}
+                                onRefresh={onRefresh}
+                                colors={['green']}
+                            />
+                        }
+                        ListFooterComponent={renderFooter}
                         keyExtractor={item => item.id}
                         renderItem={({item, index}) => (
                           <View style={{margin: 5}}>

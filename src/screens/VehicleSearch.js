@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, ScrollView, Image } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, ScrollView, Image, RefreshControl } from "react-native";
 import { connect } from 'react-redux';
 import { Button, Divider, Searchbar, Modal, Portal } from "react-native-paper";
 import { colors } from  "../constants";
@@ -10,12 +10,15 @@ import  { API_URL, WEB_URL } from "../constants/config";
 const VehicleSearch = ({ userToken, selectedGarageId, navigator  }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isGarageId, setGarageId] = useState(selectedGarageId);
-    const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState(); 
     const [filteredData, setFilteredData] = useState([]);
     const [viewVehicleDetailsModal, setViewVehicleDetailsModal] = useState(false);
     const [VehicleData, setVehicleData] = useState('');
     const [vehicleDataLoading, setVehicleDataLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const [isScrollLoading, setIsScrollLoading] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+    const [data, setData] = useState([]);
 
     const getVehicleDetails = async (vehicleId) => {
         setVehicleDataLoading(true);
@@ -40,8 +43,10 @@ const VehicleSearch = ({ userToken, selectedGarageId, navigator  }) => {
     };
 
     const getVehicleList = async () => {
+        { page == 1 && setIsLoading(true) }
+        { page != 1 && setIsScrollLoading(true) }
         try {
-            const res = await fetch(`${API_URL}fetch_all_vehicle_by_query?garage_id=${isGarageId}`, {
+            const res = await fetch(`${API_URL}fetch_all_vehicle_by_query/${isGarageId}?page=${page}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -51,13 +56,22 @@ const VehicleSearch = ({ userToken, selectedGarageId, navigator  }) => {
             });
             const json = await res.json();
             if (json !== undefined) {
-                setData(json.vehicle_list);
-                setFilteredData(json.vehicle_list);
+                setData([
+                    ...data,
+                    ...json.vehicle_list.data
+                ]);
+                setFilteredData([
+                    ...filteredData,
+                    ...json.vehicle_list.data,
+                ]);
+
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            setIsLoading(false);
+        } finally { 
+            { page == 1 && setIsLoading(false) }
+            { page != 1 && setIsScrollLoading(false) }
+            setPage(page + 1);
         }
     };
 
@@ -78,6 +92,50 @@ const VehicleSearch = ({ userToken, selectedGarageId, navigator  }) => {
         }
     };
 
+    const pullRefresh = async () => {
+        try {
+            const response = await fetch(`${API_URL}fetch_all_vehicle_by_query/${isGarageId}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setSearchQuery('');
+                setData(json.vehicle_list.data);
+                setFilteredData(json.vehicle_list.data);
+                setPage(2);
+                setRefreshing(false);
+            } else {
+                setRefreshing(false);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const renderFooter = () => {
+        return (
+            <>
+                {isScrollLoading && (
+                    <View style={styles.footer}>
+                        <ActivityIndicator
+                            size="large"
+                        />
+                    </View>
+                )}
+            </>
+        );
+    };
+
+    const onRefresh = () => {
+        setRefreshing(true);
+        pullRefresh();
+    };
+
     useEffect(() => {
         getVehicleList();
     }, []);
@@ -96,6 +154,16 @@ const VehicleSearch = ({ userToken, selectedGarageId, navigator  }) => {
                             <FlatList
                                 ItemSeparatorComponent= {() => (<Divider />)}
                                 data={filteredData}
+                                onEndReached={getVehicleList}
+                                onEndReachedThreshold={0.5}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={refreshing}
+                                        onRefresh={onRefresh}
+                                        colors={['green']}
+                                    />
+                                }
+                                ListFooterComponent={renderFooter}
                                 keyExtractor={item => item.id}
                                 renderItem={({item}) => (
                                     <View style={styles.cards}>
@@ -358,6 +426,9 @@ const styles = StyleSheet.create({
     }, 
     lightBoxWrapper: {
         width: 150,
+    },
+    footer: {
+        marginVertical: 15,
     },
 })
 

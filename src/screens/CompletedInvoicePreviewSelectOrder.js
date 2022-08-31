@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, ScrollView, Image } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, ScrollView, Image, RefreshControl } from "react-native";
 import { connect } from 'react-redux';
 import { Button, Divider, Searchbar, Modal, Portal, List } from "react-native-paper";
 import { colors } from  "../constants";
@@ -20,13 +20,18 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, nav
     const [selectedOrderId, setSelectedOrderId] = useState(); 
     const [orderData, setOrderData] = useState(); 
     const [orderDataLoading, setOrderDataLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const [isScrollLoading, setIsScrollLoading] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
 
     const getOrderList = async () => {
+        { page == 1 && setIsLoading(true) }
+        { page != 1 && setIsScrollLoading(true) }
         let formData = {
             status: "Completed"
         }
         try {
-            const res = await fetch(`${API_URL}fetch_payments_order/status`, {
+            const res = await fetch(`${API_URL}fetch_payments_order/status?page=${page}`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -37,14 +42,21 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, nav
             });
             const json = await res.json();
             if (json !== undefined) {
-                console.log(json);
-                setData(json.data);
-                setFilteredData(json.data);
+                setData([
+                    ...data,
+                    ...json.data.data
+                ]);
+                setFilteredData([
+                    ...filteredData,
+                    ...json.data.data,
+                ]);
             }
         } catch (e) {
             console.log(e);
         } finally {
-            setIsLoading(false);
+            { page == 1 && setIsLoading(false) }
+            { page != 1 && setIsScrollLoading(false) }
+            setPage(page + 1);
         }
     };
 
@@ -88,6 +100,50 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, nav
         }
     };
 
+    const pullRefresh = async () => {
+        try {
+            const response = await fetch(`${API_URL}fetch_payments_order/status`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setSearchQuery('');
+                setData(json.data.data);
+                setFilteredData(json.data.data);
+                setPage(2);
+                setRefreshing(false);
+            } else {
+                setRefreshing(false);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const renderFooter = () => {
+        return (
+            <>
+                {isScrollLoading && (
+                    <View style={styles.footer}>
+                        <ActivityIndicator
+                            size="large"
+                        />
+                    </View>
+                )}
+            </>
+        );
+    };
+
+    const onRefresh = () => {
+        setRefreshing(true);
+        pullRefresh();
+    };
+
     useEffect(() => {
         getOrderList();
     }, []);
@@ -106,7 +162,16 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, nav
                             <FlatList
                                 ItemSeparatorComponent= {() => (<Divider />)}
                                 data={filteredData}
-                                // onEndReachedThreshold={1}
+                                onEndReached={getOrderList}
+                                onEndReachedThreshold={0.5}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={refreshing}
+                                        onRefresh={onRefresh}
+                                        colors={['green']}
+                                    />
+                                }
+                                ListFooterComponent={renderFooter}
                                 keyExtractor={item => item.id}
                                 renderItem={({item, index}) => (
                                 <>
@@ -512,7 +577,9 @@ const styles = StyleSheet.create({
     lightBoxWrapper: {
         width: 150,
     },
-   
+    footer: {
+        marginVertical: 20,
+    },
 })
 
 const mapStateToProps = state => ({

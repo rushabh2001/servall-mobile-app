@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, ActivityIndicator, FlatList, Linking } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, FlatList, Linking, RefreshControl } from "react-native";
 import { connect } from 'react-redux';
 import { Button, Divider, Searchbar, List } from "react-native-paper";
 import { colors } from  "../../constants";
@@ -15,12 +15,16 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId }) => {
     const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState(); 
     const [filteredData, setFilteredData] = useState([]);
-    const isFocused = useIsFocused();
+    const isFocused = useIsFocused();   
+    const [page, setPage] = useState(1);
+    const [isScrollLoading, setIsScrollLoading] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
 
     const getOrderList = async () => {
-        setIsLoading(true);
+        { page == 1 && setIsLoading(true) }
+        { page != 1 && setIsScrollLoading(true) }
         try {
-            const res = await fetch(`${API_URL}fetch_garage_order/status/${isGarageId}`, {
+            const res = await fetch(`${API_URL}fetch_garage_order/status/${isGarageId}?page=${page}`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -32,14 +36,24 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId }) => {
                 }),
             });
             const json = await res.json();
+            // console.log('json', json);
             if (json !== undefined) {
-                setData(json.data);
-                setFilteredData(json.data);
+                // if(page == 1)
+                setData([
+                    ...data,
+                    ...json.data.data
+                ]);
+                setFilteredData([
+                    ...filteredData,
+                    ...json.data.data,
+                ]);
             }
         } catch (e) {
             console.log(e);
         } finally {
-            setIsLoading(false);
+            { page == 1 && setIsLoading(false) }
+            { page != 1 && setIsScrollLoading(false) }
+            setPage(page + 1);
         }
     };
 
@@ -47,10 +61,10 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId }) => {
         if (text) {
             const newData = data.filter(
                 function (listData) {
-                        let arr2 = listData.user.name ? listData.user.name.toUpperCase() : ''.toUpperCase();
-                        let arr1 = listData.id ?  listData.id : ''.toUpperCase()
-                        let itemData = arr2.concat(arr1);
-                        const textData = text.toUpperCase();
+                    let arr2 = listData.user.name ? listData.user.name.toUpperCase() : ''.toUpperCase();
+                    let arr1 = listData.vehicle.vehicle_registration_number ?  listData.vehicle.vehicle_registration_number : ''.toUpperCase();
+                    let itemData = arr2.concat(arr1);
+                    const textData = text.toUpperCase();
                     return itemData.indexOf(textData) > -1;
                 }
             );
@@ -66,6 +80,57 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId }) => {
         getOrderList();
     }, [isFocused]);
 
+    const onRefresh = () => {
+        setRefreshing(true);
+        pullRefresh();
+    };
+
+    const pullRefresh = async () => {
+        try {
+            const response = await fetch(`${API_URL}fetch_garage_order/status/${isGarageId}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    status: 'Vehicle Received',
+                }),
+            });
+            const json = await response.json();
+            console.log('1', json);
+            if (response.status == '200') {
+                setSearchQuery('');
+                setData(json.data.data);
+                setFilteredData(json.data.data);
+                setPage(2);
+                setRefreshing(false);
+            } else {
+                // console.log('2', response.status);
+                setRefreshing(false);
+            }
+        } catch (error) {
+            // if (error?.message == 'Unauthenticated.') signOut();
+            console.error(error);
+        }
+    };
+    
+
+    const renderFooter = () => {
+        return (
+            <>
+                {isScrollLoading && (
+                    <View style={styles.footer}>
+                        <ActivityIndicator
+                            size="large"
+                        />
+                    </View>
+                )}
+            </>
+        );
+    };
+
     return (
         <View style={styles.surfaceContainer}>
             <Searchbar
@@ -74,13 +139,23 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId }) => {
                 value={searchQuery}
             />
             <View style={{flexDirection: "column", marginVertical: 30}}>
-                {isLoading ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> :
+                {isLoading ? <ActivityIndicator style={{marginVertical: 150}}></ActivityIndicator> :
                     (filteredData.length != 0 ?             
                         <View>
                             <FlatList
                                 ItemSeparatorComponent= {() => (<Divider />)}
-                                initialNumToRender={2}
+                                // initialNumToRender={2}
                                 data={filteredData}
+                                onEndReached={getOrderList}
+                                onEndReachedThreshold={0.5}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={refreshing}
+                                        onRefresh={onRefresh}
+                                        colors={['green']}
+                                    />
+                                }
+                                ListFooterComponent={renderFooter}
                                 keyExtractor={item => item.id}
                                 renderItem={({item, index}) => (
                                     <>
@@ -442,7 +517,9 @@ const styles = StyleSheet.create({
     lightBoxWrapper: {
         width: 150,
     },
-   
+    footer: {
+        marginVertical: 20,
+    },
 })
 
 const mapStateToProps = state => ({

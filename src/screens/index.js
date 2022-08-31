@@ -78,6 +78,5 @@ export {
     VehicleReadyOrderList,
     InvoicePreview,
     InvoicePreviewSelectOrder,
-    CompletedInvoicePreview,
     CompletedInvoicePreviewSelectOrder,
 }

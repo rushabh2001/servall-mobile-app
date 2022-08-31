@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, ActivityIndicator, FlatList } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, FlatList, RefreshControl } from "react-native";
 import { connect } from 'react-redux';
 import { Button, Divider, Searchbar, List } from "react-native-paper";
 import { colors } from  "../constants";
@@ -14,10 +14,15 @@ const OrderList = ({navigation, userToken, selectedGarageId, navigator  }) => {
     const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState(); 
     const [filteredData, setFilteredData] = useState([]);
+    const [page, setPage] = useState(1);
+    const [isScrollLoading, setIsScrollLoading] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
 
     const getOrderList = async () => {
+        { page == 1 && setIsLoading(true) }
+        { page != 1 && setIsScrollLoading(true) }
         try {
-            const res = await fetch(`${API_URL}fetch_garage_order/${isGarageId}`, {
+            const res = await fetch(`${API_URL}fetch_garage_order/${isGarageId}?page=${page}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -27,13 +32,21 @@ const OrderList = ({navigation, userToken, selectedGarageId, navigator  }) => {
             });
             const json = await res.json();
             if (json !== undefined) {
-                setData(json.data);
-                setFilteredData(json.data);
+                setData([
+                    ...data,
+                    ...json.data.data
+                ]);
+                setFilteredData([
+                    ...filteredData,
+                    ...json.data.data,
+                ]);
             }
         } catch (e) {
             console.log(e);
         } finally {
-            setIsLoading(false);
+            { page == 1 && setIsLoading(false) }
+            { page != 1 && setIsScrollLoading(false) }
+            setPage(page + 1);
         }
     };
 
@@ -56,6 +69,56 @@ const OrderList = ({navigation, userToken, selectedGarageId, navigator  }) => {
         }
     };
 
+    const pullRefresh = async () => {
+        try {
+            const response = await fetch(`${API_URL}fetch_garage_order/status/${isGarageId}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    status: 'Completed Order',
+                }),
+            });
+            const json = await response.json();
+            console.log('1', json);
+            if (response.status == '200') {
+                setSearchQuery('');
+                setData(json.data.data);
+                setFilteredData(json.data.data);
+                setPage(2);
+                setRefreshing(false);
+            } else {
+                // console.log('2', response.status);
+                setRefreshing(false);
+            }
+        } catch (error) {
+            // if (error?.message == 'Unauthenticated.') signOut();
+            console.error(error);
+        }
+    };
+
+    const renderFooter = () => {
+        return (
+            <>
+                {isScrollLoading && (
+                    <View style={styles.footer}>
+                        <ActivityIndicator
+                            size="large"
+                        />
+                    </View>
+                )}
+            </>
+        );
+    };
+
+    const onRefresh = () => {
+        setRefreshing(true);
+        pullRefresh();
+    };
+
     useEffect(() => {
         getOrderList();
     }, []);
@@ -74,6 +137,27 @@ const OrderList = ({navigation, userToken, selectedGarageId, navigator  }) => {
                             <FlatList
                                 ItemSeparatorComponent= {() => (<Divider />)}
                                 data={filteredData}
+                                onEndReached={getOrderList}
+                                onEndReachedThreshold={0.5}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={refreshing}
+                                        onRefresh={onRefresh}
+                                        colors={['green']}
+                                    />
+                                }
+                                ListFooterComponent={renderFooter}
+                                ListEmptyComponent={() => (
+                                    <View style={styles.nodata}>
+                                        <Text
+                                            style={{
+                                                fontSize: 18,
+                                                color: '#0B2E40',
+                                            }}>
+                                            No data found.
+                                        </Text>
+                                    </View>
+                                )}
                                 keyExtractor={item => item.id}
                                 renderItem={({item, index}) => (
                                     <>
@@ -388,6 +472,9 @@ const styles = StyleSheet.create({
     }, 
     lightBoxWrapper: {
         width: 150,
+    },
+    footer: {
+        marginVertical: 15,
     },
 })
 

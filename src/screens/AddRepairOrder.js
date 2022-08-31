@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
 import { Searchbar, Divider } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { colors } from '../constants';
@@ -10,13 +10,18 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
 
     const [isLoading, setIsLoading] = useState(true);
     const [isGarageId, setGarageId] = useState(selectedGarageId);
-    const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState(); 
     const [filteredData, setFilteredData] = useState([]);
+    const [page, setPage] = useState(1);
+    const [data, setData] = useState([]);
+    const [isScrollLoading, setIsScrollLoading] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
 
     const getVehicleList = async () => {
+        { page == 1 && setIsLoading(true) }
+        { page != 1 && setIsScrollLoading(true) }
         try {
-            const res = await fetch(`${API_URL}fetch_all_vehicle_by_query?garage_id=${isGarageId}`, {
+            const res = await fetch(`${API_URL}fetch_all_vehicle_by_query/${isGarageId}?page=${page}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -26,13 +31,21 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
             });
             const json = await res.json();
             if (json !== undefined) {
-                setData(json.vehicle_list);
-                setFilteredData(json.vehicle_list);
+                setData([
+                    ...data,
+                    ...json.vehicle_list.data
+                ]);
+                setFilteredData([
+                    ...filteredData,
+                    ...json.vehicle_list.data,
+                ]);
             }
         } catch (e) {
             console.log(e);
         } finally {
-            setIsLoading(false);
+            { page == 1 && setIsLoading(false) }
+            { page != 1 && setIsScrollLoading(false) }
+            setPage(page + 1);
         }
     };
 
@@ -84,6 +97,50 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
         navigation.navigate('AddRepairOrderStep3', { 'userVehicleDetails': userVehicleDetails } );
     }
 
+    const pullRefresh = async () => {
+        try {
+            const response = await fetch(`${API_URL}fetch_all_vehicle_by_query/${isGarageId}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setSearchQuery('');
+                setData(json.vehicle_list.data);
+                setFilteredData(json.vehicle_list.data);
+                setPage(2);
+                setRefreshing(false);
+            } else {
+                setRefreshing(false);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const renderFooter = () => {
+        return (
+            <>
+                {isScrollLoading && (
+                    <View style={styles.footer}>
+                        <ActivityIndicator
+                            size="large"
+                        />
+                    </View>
+                )}
+            </>
+        );
+    };
+
+    const onRefresh = () => {
+        setRefreshing(true);
+        pullRefresh();
+    };
+
     useEffect(() => {
         getVehicleList();
     }, []);
@@ -102,6 +159,16 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
                                 <FlatList
                                     ItemSeparatorComponent= {() => (<Divider />)}
                                     data={filteredData}
+                                    onEndReached={getVehicleList}
+                                    onEndReachedThreshold={0.5}
+                                    refreshControl={
+                                        <RefreshControl
+                                            refreshing={refreshing}
+                                            onRefresh={onRefresh}
+                                            colors={['green']}
+                                        />
+                                    }
+                                    ListFooterComponent={renderFooter}
                                     keyExtractor={item => item.id}
                                     renderItem={({item, index}) => (
                                         <View style={styles.cards}>
@@ -279,6 +346,9 @@ const styles = StyleSheet.create({
     }, 
     lightBoxWrapper: {
         width: 150,
+    },
+    footer: {
+        marginVertical: 15,
     },
 })
 

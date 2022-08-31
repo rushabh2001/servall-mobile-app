@@ -16,43 +16,15 @@ const OrderCompleted = ({ navigation, userRole, route, userToken }) => {
     const [isOrderData, setIsOrderData] = useState(route?.params?.data);
 
     const [isOrderId, setIsOrderId] = useState(route?.params?.data?.order_id);
-    // const [isGarageId, setIsGarageId] = useState(route?.params?.data?.garage_id);
-    // const [isUserId, setIsUserId] = useState(route?.params?.data?.user_id);
-    // const [isVehicleId, setIsVehicleId] = useState(route?.params?.data?.vehicle_id);
     const [isName, setIsName] = useState(route?.params?.data?.name);
-    // const [isEmail, setIsEmail] = useState(route?.params?.data?.email);
     const [isPhoneNumber, setIsPhoneNumber] = useState(route?.params?.data?.phone_number);
 
     // Vehicle Fields
-    // const [isBrand, setIsBrand] = useState(route?.params?.data?.brand_id);
     const [isBrandName, setIsBrandName] = useState(route?.params?.data?.brand_name);
-    // const [isModel, setIsModel] = useState(route?.params?.data?.model_id);
-    // const [isModelName, setIsModelName] = useState(route?.params?.data?.model_name);
     const [isVehicleRegistrationNumber, setIsVehicleRegistrationNumber] = useState(route?.params?.data?.vehicle_registration_number);
-
-    // const [isOdometerKMs, setIsOdometerKMs] = useState(route?.params?.data?.odometer);
-    // const [isFuelLevel, setIsFuelLevel] = useState(route?.params?.data?.fuel_level);
-    // const [isComment, setIsComment] = useState(route?.params?.data?.comment);
     const [isTotal, setIsTotal] = useState(route?.params?.data?.total);
-    // const [isApplicableDiscount, setIsApplicableDiscount] = useState(route?.params?.data?.applicable_discount);
-
-    // const [isCreatedAt, setIsCreatedAt] = useState(route?.params?.data?.created_at);
     const [createdAt, setCreatedAt] = useState(moment(route?.params?.data?.created_at, 'YYYY-MM-DD hh:mm:ss').fromNow());
-
-    // const [isEstimatedDeliveryDateTime, setIsEstimatedDeliveryDateTime] = useState(route?.params?.data?.estimated_delivery_time);
     const [estimatedDeliveryDateTime, setEstimatedDeliveryDateTime] = useState(moment(route?.params?.data?.estimated_delivery_time, 'YYYY-MM-DD hh:mm:ss').format('DD-MM-YYYY hh:mm A'));
-
-    // const [partTotals, setPartTotals] = useState([]);
-    // const [serviceTotals, setSeviceTotals] = useState([]);
-
-    // const [servicesTotal, setServicesTotal] = useState(route?.params?.data?.labor_total);
-    // const [partsTotal, setPartsTotal] = useState(route?.params?.data?.parts_total);
-
-    // const [isTotalServiceDiscount, setIsTotalServiceDiscount] = useState(0);
-    // const [isTotalPartDiscount, setIsTotalPartDiscount] = useState(0);
-    
-    // const [fieldsServices, setFieldsServices] = useState([]);
-    // const [fieldsParts, setFieldsParts] = useState([]);
 
     const changeOrderStatus = async () => {
 
@@ -65,7 +37,6 @@ const OrderCompleted = ({ navigation, userRole, route, userToken }) => {
         partData.forEach(item => {
             orderPartsArray.push({ order_part_id: item.id, is_done: item.is_done });
         });
-        // console.log('orderStatusArray',orderStatusArray);
 
         // Data to send for next screen 
         isOrderData.parts_list = partData;
@@ -103,37 +74,9 @@ const OrderCompleted = ({ navigation, userRole, route, userToken }) => {
         }
     }
 
-    // const changePartsStatus = async () => {
-    //     let orderStatusArray = [];
-    //     partData.forEach(item => {
-    //         orderStatusArray.push({ order_part_id: item.id, is_done: item.is_done });
-    //     });
-    //     try {
-    //         const res = await fetch(`${API_URL}part_status/update`, {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Accept': 'application/json',
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': 'Bearer ' + userToken
-    //             },
-    //             body: JSON.stringify({
-    //                 order_id: isOrderId,
-    //                 order_part: orderStatusArray,
-    //             }),
-    //         });
-    //         const json = await res.json();
-    //         if (json !== undefined) {
-    //             {(partData.length != 0 && serviceData.length != 0) && navigation.navigate('OrderWorkInProgress')}
-    //         }
-    //     } catch (e) {
-    //         console.log(e);
-    //     }
-    // }
-
     useEffect(() => {
         setServiceData(route?.params?.data?.services_list);
         setPartData(route?.params?.data?.parts_list);
-        // console.log(route?.params?.data?.parts_list);
     }, [route?.params?.data]);
     
     return (
@@ -210,6 +153,16 @@ const OrderCompleted = ({ navigation, userRole, route, userToken }) => {
                                             <Text style={{color: colors.green, fontSize: 16}}>₹ { route?.params?.data?.payment_status == 'Completed' ? isTotal : 0 }</Text>
                                         </View>
                                     </View>
+                                </View>
+                                <View style={{flexDirection:"row", marginTop: 15, alignSelf:"center", justifyContent:'center'}}>
+                                    <TouchableOpacity onPress={() => {
+                                            const invoiceData = {'order_id': route?.params?.data?.order_id};
+                                            navigation.navigate('InvoicePreview', {'data': invoiceData});  }} >
+                                        <IconX name={"file-pdf"} size={40} color={colors.primary} />
+                                    </TouchableOpacity>
+                                </View>
+                                <View style={{marginTop: 5, alignSelf:"center", justifyContent:'center'}}>
+                                    <Text style={{color: colors.black}}>Repair Order</Text>
                                 </View>
                                 <View style={{flexDirection: 'column', marginTop: 20}}>
                                     <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.secondary, padding: 10}}>

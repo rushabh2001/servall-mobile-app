@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, StyleSheet, Linking, ActivityIndicator, FlatList } from "react-native";
+import { View, Text, StyleSheet, Linking, ActivityIndicator, FlatList, RefreshControl } from "react-native";
 import { connect } from 'react-redux';
 import { List, Button, Divider, Searchbar } from "react-native-paper";
 import { colors } from  "../constants";
@@ -17,26 +17,45 @@ const MyCustomer = ({ navigation, userToken, selectedGarageId, selectedGarage })
     const [searchQuery, setSearchQuery] = useState(); 
     const [filteredData, setFilteredData] = useState([]);
     const isFocused = useIsFocused();
+    const [page, setPage] = useState(1);
+    const [isScrollLoading, setIsScrollLoading] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
 
     const getCustomerList = async () => {
+        { page == 1 && setIsLoading(true) }
+        { page != 1 && setIsScrollLoading(true) }
         try {
-            const res = await fetch(`${API_URL}fetch_my_garage_customers?garage_id=${isGarageId}`, {
-                method: 'GET',
+            const res = await fetch(`${API_URL}fetch_my_garage_customers?page=${page}`, {
+                method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + userToken
                 },
+                body: JSON.stringify({
+                    garage_id: isGarageId,
+                }),
             });
             const json = await res.json();
             if (json !== undefined) {
-                setData(json.user_list);
-                setFilteredData(json.user_list);
+                console.log('json', json);
+                setData([
+                    ...data,
+                    ...json.user_list.data,
+                ]);
+                setFilteredData([
+                    ...filteredData,
+                    ...json.user_list.data,
+                ]);
+                // setData(json.user_list);
+                // setFilteredData(json.user_list);
             }
         } catch (e) {
             console.log(e);
         } finally {
-            setIsLoading(false);
+            { page == 1 && setIsLoading(false) }
+            { page != 1 && setIsScrollLoading(false) }
+            setPage(page + 1);
         }
     };
 
@@ -59,6 +78,56 @@ const MyCustomer = ({ navigation, userToken, selectedGarageId, selectedGarage })
         }
     };
 
+    const pullRefresh = async () => {
+        try {
+            const response = await fetch(`${API_URL}fetch_my_garage_customers`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    garage_id: isGarageId,
+                }),
+            });
+            const json = await response.json();
+            console.log('1', json);
+            if (response.status == '200') {
+                setSearchQuery('');
+                setData(json.user_list.data);
+                setFilteredData(json.user_list.data);
+                setPage(2);
+                setRefreshing(false);
+            } else {
+                // console.log('2', response.status);
+                setRefreshing(false);
+            }
+        } catch (error) {
+            // if (error?.message == 'Unauthenticated.') signOut();
+            console.error(error);
+        }
+    };
+
+    const renderFooter = () => {
+        return (
+            <>
+                {isScrollLoading && (
+                    <View style={styles.footer}>
+                        <ActivityIndicator
+                            size="large"
+                        />
+                    </View>
+                )}
+            </>
+        );
+    };
+
+    const onRefresh = () => {
+        setRefreshing(true);
+        pullRefresh();
+    };
+
     useEffect(() => {
         getCustomerList();
     }, []);
@@ -78,12 +147,21 @@ const MyCustomer = ({ navigation, userToken, selectedGarageId, selectedGarage })
             />
             <View style={{flexDirection: "column", backgroundColor:colors.white, elevation: 2, marginTop:15, marginBottom: 65 }}>
                 {isLoading ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> :
-                    (data?.length > 0 ?  
+                    (filteredData?.length > 0 ?  
                         <>
                             <FlatList
                                 ItemSeparatorComponent= {() => (<Divider />)}
                                 data={filteredData}
-                                // onEndReachedThreshold={1}
+                                onEndReached={getCustomerList}
+                                onEndReachedThreshold={0.5}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={refreshing}
+                                        onRefresh={onRefresh}
+                                        colors={['green']}
+                                    />
+                                }
+                                ListFooterComponent={renderFooter}
                                 keyExtractor={item => item.id}
                                 renderItem={({item, index}) => (
                                     <>
@@ -212,7 +290,10 @@ const styles = StyleSheet.create({
         color: colors.white, 
         paddingVertical: 7, 
         backgroundColor: colors.secondary
-    }
+    },
+    footer: {
+        marginVertical: 15,
+    },
 })
 
 const mapStateToProps = state => ({

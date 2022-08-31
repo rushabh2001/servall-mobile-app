@@ -575,9 +575,9 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
             const json = await res.json();
             if (json !== undefined) {
                 setUserList(json.user_list);
+                setFilteredUserData(json.user_list);
                 setIsUserName(''); 
                 setIsUser(0); 
-                setFilteredUserData(json.user_list);
             }
         } catch (e) {
             console.log(e);
@@ -588,18 +588,19 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
 
     const searchFilterForUsers = (text) => {
         if (text) {
-            let newData = userList.filter(
+            const newData = userList.filter(
                 function (listData) {
                 // let arr2 = listData.phone_number ? listData.phone_number : ''.toUpperCase() 
-                let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
+                let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase();
                 // let itemData = arr1.concat(arr2);
                 // console.log(itemData);
-                let textData = text.toUpperCase();
+                const textData = text.toUpperCase();
                 return itemData.indexOf(textData) > -1;
                 }
             );
             setFilteredUserData(newData);
             setSearchQueryForUsers(text);
+            console.log('setFilteredUserData', newData);
         } else {
             setFilteredUserData(userList);
             setSearchQueryForUsers(text);
@@ -625,7 +626,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     }, [isBrand]);
 
     useEffect(() => {
-        getUserList();
+        if(isGarageId != undefined) getUserList();
     }, [isGarageId]);
     
     // useEffect(() => {
@@ -1102,8 +1103,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                         </Button>
                     </View>
                 </Modal>
-            </Portal>
-            <Portal>
+      
                 <Modal visible={addModelModal} onDismiss={() => { setAddModelModal(false); setNewModelName(""); setIsModel(0); }} contentContainerStyle={styles.modalContainerStyle}>
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
                     <TextInput
@@ -1132,8 +1132,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                         </Button>
                     </View>
                 </Modal>
-            </Portal>
-            <Portal>
+          
                 <Modal visible={addInsuranceCompanyModal} onDismiss={() => { setAddInsuranceCompanyModal(false); setNewInsuranceCompanyName(""); setIsInsuranceProvider(0); }} contentContainerStyle={styles.modalContainerStyle}>
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
                     <TextInput
@@ -1162,8 +1161,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                         </Button>
                     </View>
                 </Modal>
-            </Portal>
-            <Portal>
+        
                 {/* Users List Modal */}
                 <Modal visible={userListModal} onDismiss={() => { setUserListModal(false); setIsUser(0); setIsUserName(''); setUserError(''); setSearchQueryForUsers('');  searchFilterForUsers();}} contentContainerStyle={styles.modalContainerStyle}>
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select User</Text>
@@ -1175,33 +1173,31 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                     placeholder="Search here..."
                                     onChangeText={(text) => { if(text != null) searchFilterForUsers(text)}}
                                     value={searchQueryForUsers}
-                                    elevation={0}
-                                    style={{ elevation: 0.8, marginBottom: 10}}
+                                    // elevation={0}
+                                    style={{ marginBottom: 10}}
                                 />
                                 {filteredUserData?.length > 0 ?  
                                     <FlatList
                                         ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
                                         data={filteredUserData}
                                         style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
-                                        keyExtractor={item => item.id}
+                                        keyExtractor={item => `user-${item.id}`}
                                         renderItem={({item}) => (
-                                            <>
-                                                <List.Item
-                                                    title={
-                                                        <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
-                                                            <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
-                                                        </View>
+                                            <List.Item
+                                                title={
+                                                    <View style={{flexDirection:"row", display:'flex'}}>
+                                                        <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
+                                                    </View>
+                                                }
+                                                onPress={() => {
+                                                        setIsUserName(item.name); 
+                                                        setIsUser(item.id); 
+                                                        setUserError('');
+                                                        setUserListModal(false);  
+                                                        // searchFilterForUsers('');
                                                     }
-                                                    onPress={() => {
-                                                            setIsUserName(item.name); 
-                                                            setIsUser(item.id); 
-                                                            setUserError('');
-                                                            setUserListModal(false);  
-                                                            searchFilterForUsers('');
-                                                        }
-                                                    }
-                                                />
-                                            </>
+                                                }
+                                            />
                                         )} 
                                     />
                                     :

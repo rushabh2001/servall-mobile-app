@@ -50,7 +50,6 @@ import {
   VehicleReadyOrderList,
   InvoicePreview,
   InvoicePreviewSelectOrder,
-  CompletedInvoicePreview,
   CompletedInvoicePreviewSelectOrder,
 } from '../screens';
 
@@ -302,11 +301,11 @@ const ServicesStack = ({ navigation }) => {
         component={InvoicePreview}
         options={{
           title: "Preview Invoice",
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.navigate('InvoicePreviewSelectOrder')}>
-              <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
-            </TouchableOpacity>
-          ),
+          // headerLeft: () => (
+          //   <TouchableOpacity onPress={() => navigation.navigate('InvoicePreviewSelectOrder')}>
+          //     <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
+          //   </TouchableOpacity>
+          // ),
         }}
       />
       <Stack.Screen
@@ -316,18 +315,6 @@ const ServicesStack = ({ navigation }) => {
           title: "Preview Invoice - Select Order",
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.navigate('Services')}>
-              <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
-            </TouchableOpacity>
-          ),
-        }}
-      />
-      <Stack.Screen
-        name="CompletedInvoicePreview"
-        component={InvoicePreview}
-        options={{
-          title: "Preview Paid Invoice",
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.navigate('CompletedInvoicePreviewSelectOrder')}>
               <IconX name={'arrow-left'} size={26} color={colors.black} style={[styles.topbarButton, { marginLeft: 12 }]} />
             </TouchableOpacity>
           ),
