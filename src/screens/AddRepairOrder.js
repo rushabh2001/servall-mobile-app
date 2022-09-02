@@ -22,12 +22,15 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
         { page != 1 && setIsScrollLoading(true) }
         try {
             const res = await fetch(`${API_URL}fetch_all_vehicle_by_query/${isGarageId}?page=${page}`, {
-                method: 'GET',
+                method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + userToken
                 },
+                body: JSON.stringify({
+                    search: searchQuery,
+                }),
             });
             const json = await res.json();
             if (json !== undefined) {
@@ -100,12 +103,15 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
     const pullRefresh = async () => {
         try {
             const response = await fetch(`${API_URL}fetch_all_vehicle_by_query/${isGarageId}`, {
-                method: 'GET',
+                method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + userToken
                 },
+                body: JSON.stringify({
+                    search: searchQuery,
+                }),
             });
             const json = await response.json();
             if (response.status == '200') {
@@ -151,9 +157,12 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
                     placeholder="Search here..."
                     onChangeText={(text) => searchFilter(text)}
                     value={searchQuery}
+                    clearIcon={true}
+                    onClear={(text) => { searchFilter(''); setSearchQuery(''); }}
+                    style={{ marginBottom: 15 }}
                 />
-                <View style={{flexDirection: "column", marginVertical:15 }}>
-                    {isLoading ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> :
+                <View style={{ flexDirection: "column", flex: 1 }}>
+                    {isLoading ? <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View> :
                         (filteredData.length != 0 ? 
                             <View>
                                 <FlatList
@@ -208,7 +217,7 @@ const styles = StyleSheet.create({
     surfaceContainer: {
         flex:1,
         padding:15,
-        marginBottom: 35
+        // marginBottom: 35
     },
     buttonStyle: {
         letterSpacing: 0,

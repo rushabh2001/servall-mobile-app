@@ -918,8 +918,7 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                                     </Button>
                                 </View>
                             </Modal>
-                        </Portal>
-                        <Portal>
+                 
                             <Modal visible={addModelModal} onDismiss={() => { setAddModelModal(false); setNewModelName(""); setIsModel(0); }} contentContainerStyle={styles.modalContainerStyle}>
                                 <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
                                 <TextInput
@@ -950,8 +949,7 @@ const EditVehicle = ({ navigation, userToken, route }) => {
                                     </Button>
                                 </View>
                             </Modal>
-                        </Portal>
-                        <Portal>
+                
                             <Modal visible={addInsuranceCompanyModal} onDismiss={() => { setAddInsuranceCompanyModal(false); setNewInsuranceCompanyName(""); setIsInsuranceProvider(0); }} contentContainerStyle={styles.modalContainerStyle}>
                                 <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Insurance Provider Company</Text>
                                 <TextInput

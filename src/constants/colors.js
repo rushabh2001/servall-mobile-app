@@ -18,6 +18,7 @@ export default colors = {
     orange: '#c15226',
     light_danger: '#f6a6a2',
     light_green: '#99ff99',
+    transparent: '#00000000',
 
     password_top_back: '#7089ff',
     password_bottom_back: '#B5A9FE',

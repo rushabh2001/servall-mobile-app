@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, ScrollView, Image, RefreshControl } from "react-native";
 import { connect } from 'react-redux';
-import { Button, Divider, Searchbar, Modal, Portal, List } from "react-native-paper";
+import { Button, Divider, Modal, Portal, List, TextInput } from "react-native-paper";
 import { colors } from  "../constants";
 import  { API_URL, WEB_URL } from "../constants/config"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import IconX from "react-native-vector-icons/FontAwesome5";
 import moment from 'moment';
 import Lightbox from 'react-native-lightbox-v2';
 import RBSheet from "react-native-raw-bottom-sheet";
@@ -27,18 +28,18 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, nav
     const getOrderList = async () => {
         { page == 1 && setIsLoading(true) }
         { page != 1 && setIsScrollLoading(true) }
-        let formData = {
-            status: "Completed"
-        }
         try {
-            const res = await fetch(`${API_URL}fetch_payments_order/status?page=${page}`, {
+            const res = await fetch(`${API_URL}fetch_payments_order/status/${selectedGarageId}?page=${page}`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + userToken
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({
+                    status: "Completed",
+                    search: searchQuery,
+                }),
             });
             const json = await res.json();
             if (json !== undefined) {
@@ -60,22 +61,31 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, nav
         }
     };
 
-    const searchFilter = (text) => {
-        if (text) {
-            const newData = data.filter(
-                function (listData) {
-                    let arr2 = listData.user.name ? listData.user.name.toUpperCase() : ''.toUpperCase();
-                    let arr1 = listData.id ?  listData.id : ''.toUpperCase()
-                    let itemData = arr2.concat(arr1);
-                    const textData = text.toUpperCase();
-                return itemData.indexOf(textData) > -1;
-                }
-            );
-            setFilteredData(newData);
-            setSearchQuery(text);
-        } else {
-            setFilteredData(data);
-            setSearchQuery(text);
+    const searchFilter = async () => {
+        try {
+            const response = await fetch(`${API_URL}fetch_payments_order/status/${selectedGarageId}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    status: "Completed",
+                    search: searchQuery,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setData(json.data.data);
+                setFilteredData(json.data.data);
+                setPage(2);
+                setRefreshing(false);
+            } else {
+                setRefreshing(false);
+            }
+        } catch (error) {
+            console.error(error);
         }
     };
 
@@ -101,18 +111,23 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, nav
     };
 
     const pullRefresh = async () => {
+        setSearchQuery(null);
         try {
-            const response = await fetch(`${API_URL}fetch_payments_order/status`, {
+            const response = await fetch(`${API_URL}fetch_payments_order/status/${selectedGarageId}`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + userToken
                 },
+                body: JSON.stringify({
+                    status: "Completed",
+                    search: '',
+                    // search: searchQuery,
+                }),
             });
             const json = await response.json();
             if (response.status == '200') {
-                setSearchQuery('');
                 setData(json.data.data);
                 setFilteredData(json.data.data);
                 setPage(2);
@@ -150,13 +165,25 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, nav
 
     return (
         <View style={styles.surfaceContainer}>
-            <Searchbar
-                placeholder="Search here..."
-                onChangeText={(text) => searchFilter(text)}
-                value={searchQuery}
-            />
-            <View style={{flexDirection: "column", marginVertical: 30}}>
-                {isLoading ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> :
+                 <View>
+                <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                    <TextInput
+                        mode={'flat'}
+                        placeholder="Search here..."
+                        onChangeText={(text) => setSearchQuery(text)}
+                        value={searchQuery}
+                        activeUnderlineColor={colors.transparent}
+                        underlineColor={colors.transparent}
+                        style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                        right={searchQuery != null && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => pullRefresh()} />}
+                    />
+                    <TouchableOpacity onPress={() => searchFilter()} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                        <IconX name={'search'} size={17} color={colors.white} />
+                    </TouchableOpacity>
+                </View>
+            </View>
+            <View style={{ flexDirection: "column", flex: 1 }}>
+                {isLoading ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
                     (filteredData.length != 0 ?             
                         <View>
                             <FlatList
@@ -405,7 +432,7 @@ const styles = StyleSheet.create({
     surfaceContainer: {
         flex:1,
         padding:15,
-        marginBottom: 35
+        // marginBottom: 35
     },
     buttonStyle: {
         letterSpacing: 0,

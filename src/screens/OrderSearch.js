@@ -12,7 +12,7 @@ const OrderSearch = ({navigation, userToken, selectedGarageId, navigator  }) => 
     const [isLoading, setIsLoading] = useState(true);
     const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [data, setData] = useState([]);
-    const [searchQuery, setSearchQuery] = useState(); 
+    const [searchQuery, setSearchQuery] = useState(''); 
     const [filteredData, setFilteredData] = useState([]);
     const [page, setPage] = useState(1);
     const [isScrollLoading, setIsScrollLoading] = useState(false);
@@ -23,12 +23,15 @@ const OrderSearch = ({navigation, userToken, selectedGarageId, navigator  }) => 
         { page != 1 && setIsScrollLoading(true) }
         try {
             const res = await fetch(`${API_URL}fetch_garage_order/${isGarageId}?page=${page}`, {
-                method: 'GET',
+                method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + userToken
                 },
+                body: JSON.stringify({
+                    search: searchQuery,
+                }),
             });
             const json = await res.json();
             if (json !== undefined) {
@@ -72,12 +75,15 @@ const OrderSearch = ({navigation, userToken, selectedGarageId, navigator  }) => 
     const pullRefresh = async () => {
         try {
             const response = await fetch(`${API_URL}fetch_garage_order/${isGarageId}`, {
-                method: 'GET',
+                method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + userToken
                 },
+                body: JSON.stringify({
+                    search: searchQuery,
+                }),
             });
             const json = await response.json();
             if (response.status == '200') {
@@ -123,9 +129,10 @@ const OrderSearch = ({navigation, userToken, selectedGarageId, navigator  }) => 
                 placeholder="Search here..."
                 onChangeText={(text) => searchFilter(text)}
                 value={searchQuery}
+                style={{ marginBottom: 15 }}
             />
-            <View style={{ flexDirection: "column", marginVertical: 30 }}>
-                {isLoading ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> :
+            <View style={{ flexDirection: "column", flex: 1 }}>
+                {isLoading ? <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View> :
                     (filteredData.length != 0 ?             
                         <View>
                             <FlatList
@@ -316,7 +323,7 @@ const styles = StyleSheet.create({
     surfaceContainer: {
         flex:1,
         padding:15,
-        marginBottom: 35
+        // marginBottom: 35
     },
     buttonStyle: {
         letterSpacing: 0,

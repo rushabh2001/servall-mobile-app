@@ -32,6 +32,7 @@ const ChooseGarage = ({ navigation, userToken, userRole, setSelectedGarage, user
                 body: JSON.stringify({
                     user_id: userId,
                     user_role: userRole,
+                    search: '',
                 }),
             });
             const json = await res.json();
@@ -64,6 +65,7 @@ const ChooseGarage = ({ navigation, userToken, userRole, setSelectedGarage, user
                 body: JSON.stringify({
                     user_id: userId,
                     user_role: userRole,
+                    search: '',
                 }),
             });
             const json = await response.json();
@@ -79,6 +81,8 @@ const ChooseGarage = ({ navigation, userToken, userRole, setSelectedGarage, user
         } catch (error) {
             // if (error?.message == 'Unauthenticated.') signOut();
             console.error(error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -101,12 +105,11 @@ const ChooseGarage = ({ navigation, userToken, userRole, setSelectedGarage, user
         pullRefresh();
     };
 
-
     useEffect(() => {
         setIsLoading(true);
         if(isFocused) {
             setData([]);
-            getGarageList();
+            pullRefresh();
         } else {
             setData([]);
         }
@@ -114,7 +117,7 @@ const ChooseGarage = ({ navigation, userToken, userRole, setSelectedGarage, user
 
     return (
         <View style={styles.surfaceContainer}>
-            {isLoading ? <ActivityIndicator style={{paddingVertical: 20}}></ActivityIndicator> : 
+            {isLoading ? <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View> : 
                 <View style={[styles.mainContainer, userRole == "Super Admin" && {marginBottom: 70}]}>
                     {userRole == "Super Admin" &&
                         <List.Item

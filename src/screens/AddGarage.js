@@ -199,34 +199,6 @@ const AddGarage = ({navigation, userToken}) => {
         }
     };
 
-    const getUserList = async () => {
-        setIsLoadingUserList(true);
-        try {
-            const res = await fetch(`${API_URL}fetch_parts`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + userToken
-                },
-            });
-            const json = await res.json();
-            // console.log(json);
-            if (json !== undefined) {
-                // console.log('setUserList', json.data);
-                setAdminList(json.data);
-                setFilteredUserData(json.data);
-            }
-        } catch (e) {
-            console.log(e);
-        } finally {
-            // setIsLoading2(false);
-            setIsLoadingUserList(false)
-
-        }
-    };
-
-
     const getStatesList = async () => {
         try {
             const res = await fetch(`${API_URL}fetch_states`, {
@@ -551,12 +523,11 @@ const AddGarage = ({navigation, userToken}) => {
                 </View>
                 <Portal>
                     {/* Users List Modal */}
-                    <Modal visible={userListModal} onDismiss={() => { setUserListModal(false); setOwnerId(0); setIsUserName(''); setUserError(''); setSearchQueryForUsers('');  searchFilterForUsers();}} contentContainerStyle={styles.modalContainerStyle}>
+                    <Modal visible={userListModal} onDismiss={() => { setUserListModal(false); setOwnerId(0); setIsUserName(''); setUserError(''); setSearchQueryForUsers('');  searchFilterForUsers();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select User</Text>
-                        {(isLoadingUserList == true) ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator>
-                            :
+                        {(isLoadingUserList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
                             <>
-                                <View style={{marginTop: 20, marginBottom: 10}}>
+                                <View style={{marginTop: 20, marginBottom: 10, flex: 1 }}>
                                     <Searchbar
                                         placeholder="Search here..."
                                         onChangeText={(text) => { if(text != null) searchFilterForUsers(text)}}

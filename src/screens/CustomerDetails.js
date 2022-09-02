@@ -23,7 +23,6 @@ const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
     const [resizeImage, setResizeImage] = useState("cover");
     const isFocused = useIsFocused();
     const [orderDataModal, setOrderDataModal] = useState(false);
-    const [selectedOrderId, setSelectedOrderId] = useState(); 
     const [orderData, setOrderData] = useState(); 
     const [orderDataLoading, setOrderDataLoading] = useState(true);
 

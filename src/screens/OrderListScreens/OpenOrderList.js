@@ -33,6 +33,7 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId }) => {
                 },
                 body: JSON.stringify({
                     status: 'Vehicle Received',
+                    search: searchQuery,
                 }),
             });
             const json = await res.json();
@@ -96,6 +97,7 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId }) => {
                 },
                 body: JSON.stringify({
                     status: 'Vehicle Received',
+                    search: searchQuery,
                 }),
             });
             const json = await response.json();
@@ -115,7 +117,6 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId }) => {
             console.error(error);
         }
     };
-    
 
     const renderFooter = () => {
         return (
@@ -133,13 +134,19 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId }) => {
 
     return (
         <View style={styles.surfaceContainer}>
-            <Searchbar
-                placeholder="Search here..."
-                onChangeText={(text) => searchFilter(text)}
-                value={searchQuery}
-            />
-            <View style={{flexDirection: "column", marginVertical: 30}}>
-                {isLoading ? <ActivityIndicator style={{marginVertical: 150}}></ActivityIndicator> :
+             <View>
+                <View style={{ marginBottom: 15, flex: 1, flexDirection: 'row'}}>
+                    <Searchbar
+                        placeholder="Search here..."
+                        onChangeText={(text) => setSearchQuery(text)}
+                        value={searchQuery}
+                        style={{ marginBottom: 15, flex: 0.8 }}
+                    />
+                    <Icon style={{ zIndex: 2, backgroundColor: colors.primary, flex: 0.2 }} onPress={() => searchFilter(searchQuery)} type={"MaterialCommunityIcons"} name={'dots-vertical'} size={22} color={colors.black} />
+                </View>
+            </View>
+            <View style={{ flexDirection: "column", flex: 1 }}>
+                {isLoading ? <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View> :
                     (filteredData.length != 0 ?             
                         <View>
                             <FlatList
@@ -344,7 +351,7 @@ const styles = StyleSheet.create({
     surfaceContainer: {
         flex:1,
         padding:15,
-        marginBottom: 35
+        // marginBottom: 35
     },
     buttonStyle: {
         letterSpacing: 0,

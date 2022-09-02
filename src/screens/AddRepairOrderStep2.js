@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View , Text, StyleSheet, Keyboard, ActivityIndicator, TouchableOpacity, FlatList } from 'react-native';
+import { View , Text, StyleSheet, Keyboard, ActivityIndicator, TouchableOpacity, RefreshControl, FlatList } from 'react-native';
 import { Modal, Portal, Divider, TextInput, Button, Searchbar, List } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { colors } from '../constants';
@@ -13,7 +13,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import RadioForm from 'react-native-simple-radio-button';
 import { set } from 'react-hook-form';
 
-const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId, userId, garageId }) => {
+const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId, selectedGarage, userId, garageId }) => {
     
     const [isUserVehicleDetails, setIsUserVehicleDetails] = useState('');
 
@@ -34,6 +34,10 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     const [isLoadingUserList, setIsLoadingUserList] = useState(false);
     const [filteredUserData, setFilteredUserData] = useState([]);
     const [searchQueryForUsers, setSearchQueryForUsers] = useState(); 
+
+    const [userPage, setUserPage] = useState(1);
+    const [isUserScrollLoading, setIsUserScrollLoading] = useState(false);
+    const [userRefreshing, setUserRefreshing] = useState(false);
 
     // Error States
     const [nameError, setNameError] = useState(''); 
@@ -68,10 +72,21 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     const [registrationCertificateImgError, setRegistrationCertificateImgError] = useState('');
     const [insuranceImgError, setInsuranceImgError] = useState('');
 
-    const [isGarageId, setIsGarageId] =  useState();
+    const [isGarageId, setIsGarageId] = useState(selectedGarageId);
+    const [isGarageName, setIsGarageName] = useState(!selectedGarage ? "" : selectedGarage.garage_name);
+    const [garageList, setGarageList] = useState([]);
+    const [garageListModal, setGarageListModal] = useState(false);
+    const [isLoadingGarageList, setIsLoadingGarageList] = useState(true);
+    const [filteredGarageData, setFilteredGarageData] = useState([]);
+    const [searchQueryForGarages, setSearchQueryForGarages] = useState(); 
+    const [garageError, setGarageError] = useState('');   // Error State
     const [garageIdError, setGarageIdError] = useState();
 
-    const [garageList, setGarageList] =  useState([]);
+    const [garagePage, setGaragePage] = useState(1);
+    const [isGarageScrollLoading, setIsGarageScrollLoading] = useState(false);
+    const [garageRefreshing, setGarageRefreshing] = useState(false);
+
+
     const [brandList, setBrandList] =  useState([]);
     const [modelList, setModelList] =  useState([]);
     const [insuranceProviderList, setInsuranceProviderList] =  useState([]);
@@ -538,51 +553,148 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
         }
     };
 
-    const getGarageList = async () => {
+    const searchFilterForGarages = (text) => {
+        if (text) {
+            let newData = garageList.filter(
+                function (listData) {
+                    let itemData = listData.garage_name ? listData.garage_name.toUpperCase() : ''.toUpperCase()
+                    let textData = text.toUpperCase();
+                    return itemData.indexOf(textData) > -1;
+                }
+            );
+            setFilteredGarageData(newData);
+            setSearchQueryForGarages(text);
+        } else {
+            setFilteredGarageData(garageList);
+            setSearchQueryForGarages(text);
+        }
+    };
+
+const getGarageList = async () => {
+        { garagePage == 1 && setIsLoadingGarageList(true) }
+        { garagePage != 1 && setIsGarageScrollLoading(true) }
         try {
-            const res = await fetch(`${API_URL}fetch_owner_garages?user_id=${userId}&user_role=${userRole}`, {
-                method: 'GET',
+            const res = await fetch(`${API_URL}fetch_owner_garages?page=${garagePage}`, {
+                method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + userToken
                 },
+                body: JSON.stringify({
+                    user_id: userId,
+                    user_role: userRole,
+                }),
             });
             const json = await res.json();
+            console.log(json);
             if (json !== undefined) {
-                setGarageList(json.garage_list);
+                setGarageList([
+                    ...garageList,
+                    ...json.garage_list.data
+                ]);
+                setFilteredGarageData([
+                    ...filteredGarageData,
+                    ...json.garage_list.data
+                ]);
+                // setGarageList(json.garage_list);
             }
         } catch (e) {
             console.log(e);
         } finally {
-            setIsLoading(false);
-            setIsGarageId(selectedGarageId);
+            { garagePage == 1 && setIsLoadingGarageList(false) }
+            { garagePage != 1 && setIsGarageScrollLoading(false) }
+            setGaragePage(garagePage + 1);
         }
     };
 
-    const getUserList = async () => {
-        // console.log('User List called');
-        setIsLoadingUserList(true);
+    const pullGarageRefresh = async () => {
         try {
-            const res = await fetch(`${API_URL}fetch_my_garage_customers?garage_id=${isGarageId}`, {
-                method: 'GET',
+            const response = await fetch(`${API_URL}fetch_owner_garages`, {
+                method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + userToken
                 },
+                body: JSON.stringify({
+                    user_id: userId,
+                    user_role: userRole,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setSearchQueryForGarages('');
+                setGarageList(json.garage_list.data);
+                setFilteredGarageData(json.garage_list.data);
+                setGaragePage(2);
+                setGarageRefreshing(false);
+            } else {
+                setGarageRefreshing(false);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const renderGarageFooter = () => {
+        return (
+            <>
+                {isGarageScrollLoading && (
+                    <View style={styles.footer}>
+                        <ActivityIndicator
+                            size="large"
+                        />
+                    </View>
+                )}
+            </>
+        );
+    };
+
+    const onGarageRefresh = () => {
+        setGarageRefreshing(true);
+        pullGarageRefresh();
+    };
+
+    const getUserList = async () => {
+        { userPage == 1 && setIsLoadingUserList(true) }
+        { userPage != 1 && setIsUserScrollLoading(true) }
+        // setIsLoadingUserList(true);
+        try {
+            const res = await fetch(`${API_URL}fetch_my_garage_customers?page=${userPage}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    garage_id: isGarageId,
+                    search: searchQueryForUsers,
+                }),
             });
             const json = await res.json();
             if (json !== undefined) {
-                setUserList(json.user_list);
-                setFilteredUserData(json.user_list);
+                setUserList([
+                    ...userList,
+                    ...json.user_list.data
+                ]);
+                setFilteredUserData([
+                    ...filteredUserData,
+                    ...json.user_list.data
+                ]);
+                // setUserList(json.user_list);
+                // setFilteredUserData(json.user_list);
                 setIsUserName(''); 
                 setIsUser(0); 
             }
         } catch (e) {
             console.log(e);
         } finally {
-            setIsLoadingUserList(false)
+            { userPage == 1 && setIsLoadingUserList(false) }
+            { userPage != 1 && setIsUserScrollLoading(false) }
+            setUserPage(userPage + 1);
+            // setIsLoadingUserList(false)
         }
     };
 
@@ -605,6 +717,54 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
             setFilteredUserData(userList);
             setSearchQueryForUsers(text);
         }
+    };
+
+    const pullUserRefresh = async () => {
+        try {
+            const response = await fetch(`${API_URL}fetch_my_garage_customers`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    garage_id: isGarageId,
+                    search: searchQueryForUsers,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setSearchQueryForUsers('');
+                setUserList(json.user_list.data);
+                setFilteredUserData(json.user_list.data);
+                setUserPage(2);
+                setUserRefreshing(false);
+            } else {
+                setUserRefreshing(false);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const renderUserFooter = () => {
+        return (
+            <>
+                {isUserScrollLoading && (
+                    <View style={styles.footer}>
+                        <ActivityIndicator
+                            size="large"
+                        />
+                    </View>
+                )}
+            </>
+        );
+    };
+
+    const onUserRefresh = () => {
+        setUserRefreshing(true);
+        pullUserRefresh();
     };
 
     useEffect(() => {
@@ -648,24 +808,22 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
 
                             {(userRole == "Super Admin" || garageId?.length > 1)  &&
                                 <View>
-                                    <View style={styles.dropDownContainer}>
-                                        <Picker
-                                            selectedValue={isGarageId}
-                                            onValueChange={(option) => setIsGarageId(option)}
-                                            style={styles.dropDownField}
-                                            itemStyle={{padding: 0}}
+                                    <View>
+                                        <TouchableOpacity 
+                                            style={styles.garageDropDownField} 
+                                            onPress={() => {
+                                                setGarageListModal(true);
+                                            }}
                                         >
-                                            <Picker.Item label="Customer Belongs To Garage" value="0" />
-                                            {garageList.map((garageList, i) => {
-                                                return (
-                                                    <Picker.Item
-                                                        key={i}
-                                                        label={garageList.garage_name}
-                                                        value={garageList.id}
-                                                    />
-                                                );
-                                            })}
-                                        </Picker>
+                                        </TouchableOpacity>
+                                        <TextInput
+                                            mode="outlined"
+                                            label='Garage'
+                                            style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                            placeholder="Select Garage"
+                                            value={isGarageName}
+                                            right={<TextInput.Icon name="menu-down" />}
+                                        />
                                     </View>
                                     {garageIdError?.length > 0 &&
                                         <Text style={styles.errorTextStyle}>{garageIdError}</Text>
@@ -1163,52 +1321,116 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                 </Modal>
         
                 {/* Users List Modal */}
-                <Modal visible={userListModal} onDismiss={() => { setUserListModal(false); setIsUser(0); setIsUserName(''); setUserError(''); setSearchQueryForUsers('');  searchFilterForUsers();}} contentContainerStyle={styles.modalContainerStyle}>
+                <Modal visible={userListModal} onDismiss={() => { setUserListModal(false); setIsUser(0); setIsUserName(''); setUserError(''); setSearchQueryForUsers('');  searchFilterForUsers();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select User</Text>
-                    {(isLoadingUserList == true) ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator>
-                        :
-                        <>
-                            <View style={{marginTop: 20, marginBottom: 10}}>
-                                <Searchbar
-                                    placeholder="Search here..."
-                                    onChangeText={(text) => { if(text != null) searchFilterForUsers(text)}}
-                                    value={searchQueryForUsers}
-                                    // elevation={0}
-                                    style={{ marginBottom: 10}}
+                    {(isLoadingUserList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
+                        <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
+                            <Searchbar
+                                placeholder="Search here..."
+                                onChangeText={(text) => { if(text != null) searchFilterForUsers(text)}}
+                                value={searchQueryForUsers}
+                                // elevation={0}
+                                style={{ marginBottom: 10}}
+                            />
+                            {filteredUserData?.length > 0 ?  
+                                <FlatList
+                                    ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                    data={filteredUserData}
+                                    onEndReached={getUserList}
+                                    onEndReachedThreshold={0.5}
+                                    refreshControl={
+                                        <RefreshControl
+                                            refreshing={userRefreshing}
+                                            onRefresh={onUserRefresh}
+                                            colors={['green']}
+                                        />
+                                    }
+                                    ListFooterComponent={renderUserFooter}
+                                    style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
+                                    keyExtractor={item => `user-${item.id}`}
+                                    renderItem={({item}) => (
+                                        <List.Item
+                                            title={
+                                                <View style={{flexDirection:"row", display:'flex'}}>
+                                                    <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
+                                                </View>
+                                            }
+                                            onPress={() => {
+                                                    setIsUserName(item.name); 
+                                                    setIsUser(item.id); 
+                                                    setUserError('');
+                                                    setUserListModal(false);  
+                                                    // searchFilterForUsers('');
+                                                }
+                                            }
+                                        />
+                                    )} 
                                 />
-                                {filteredUserData?.length > 0 ?  
-                                    <FlatList
-                                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
-                                        data={filteredUserData}
-                                        style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
-                                        keyExtractor={item => `user-${item.id}`}
-                                        renderItem={({item}) => (
+                                :
+                                <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
+                                    <Text style={{ color: colors.black, textAlign: 'center'}}>No such user is associated!</Text>
+                                </View>
+                            }
+                        </View>
+                    }
+                </Modal>
+
+                {/* Garage List Modal */}
+                <Modal visible={garageListModal} onDismiss={() => { setGarageListModal(false); setIsGarageId(0); setIsGarageName(''); setGarageError(''); setSearchQueryForGarages('');  searchFilterForGarages();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Garage</Text>
+                    {(isLoadingGarageList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
+                        <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
+                            <Searchbar
+                                placeholder="Search here..."
+                                onChangeText={(text) => { if(text != null) searchFilterForGarages(text)}}
+                                value={searchQueryForGarages}
+                                elevation={0}
+                                style={{ elevation: 0.8, marginBottom: 10 }}
+                            />
+                            {filteredGarageData?.length > 0 ?  
+                                <FlatList
+                                    ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                    data={filteredGarageData}
+                                    onEndReached={getGarageList}
+                                    onEndReachedThreshold={0.5}
+                                    refreshControl={
+                                        <RefreshControl
+                                            refreshing={garageRefreshing}
+                                            onRefresh={onGarageRefresh}
+                                            colors={['green']}
+                                        />
+                                    }
+                                    ListFooterComponent={renderGarageFooter}
+                                    style={{borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
+                                    keyExtractor={item => item.id}
+                                    renderItem={({item}) => (
+                                        <>
                                             <List.Item
                                                 title={
-                                                    <View style={{flexDirection:"row", display:'flex'}}>
-                                                        <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
+                                                    <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                        <Text style={{fontSize:16, color: colors.black}}>{item.garage_name}</Text>
                                                     </View>
                                                 }
                                                 onPress={() => {
-                                                        setIsUserName(item.name); 
-                                                        setIsUser(item.id); 
-                                                        setUserError('');
-                                                        setUserListModal(false);  
-                                                        // searchFilterForUsers('');
+                                                        setIsGarageName(item.garage_name); 
+                                                        setIsGarageId(item.id); 
+                                                        setGarageError('');
+                                                        setGarageListModal(false);  
                                                     }
                                                 }
                                             />
-                                        )} 
-                                    />
-                                    :
-                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
-                                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such user is associated!</Text>
-                                    </View>
-                                }
-                            </View>
-                        </>
+                                        </>
+                                    )} 
+                                />
+                                :
+                                <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
+                                    <Text style={{ color: colors.black, textAlign: 'center'}}>No such garage found!</Text>
+                                </View>
+                            }
+                        </View>
                     }
                 </Modal>
+
             </Portal>
         </View>
     )
@@ -1303,6 +1525,20 @@ const styles = StyleSheet.create({
         height: '80%',
         zIndex: 2,
     },
+    footer: {
+        marginVertical: 15,
+    },
+    garageDropDownField: {
+        fontSize: 16,
+        color: colors.black,
+        position: 'absolute',
+        marginTop: 15,
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '80%',
+        zIndex: 2,
+    },
 })
 
 const mapStateToProps = state => ({
@@ -1310,6 +1546,7 @@ const mapStateToProps = state => ({
     userRole: state.role.user_role,
     userId: state.user?.user?.id,
     selectedGarageId: state.garage.selected_garage_id,
+    selectedGarage: state.garage.selected_garage,
     garageId: state.garage.garage_id,
 })
 

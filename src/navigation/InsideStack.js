@@ -638,42 +638,18 @@ const AllCustomerStack = ({ navigation }) => {
       }}
     >
       <Stack.Screen
-        name="MyCustomers"
-        component={MyCustomers}
-        options={{
-          headerRight: () => (
-            <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
-              <Button
-                onPress={() => navigation.navigate('AddCustomer')}
-                style={styles.buttonStyle}
-                color={colors.secondary}
-                icon={(color) => <Icon name={'plus'} size={16} color={colors.secondary} />}
-                uppercase={false}
-              ><Text style={{ fontSize: 12, padding: 0 }}>Add Customer</Text></Button>
-            </View>
-          ),
-          title: "My Customer"
-        }}
-      />
-
-      <Stack.Screen
         name="CustomerDetails"
         component={CustomerDetails}
         options={{
           headerRight: () => (
-            <View style={{ flexDirection: "row", justifyContent: "flex-end", alignItems: "center" }}>
-              <IconX name={"circle-double"} size={26} color={colors.black} style={[styles.topbarButton, { marginRight: 10 }]} />
-
-              <Menu
-                visible={visible}
-                onDismiss={closeMenu}
-                anchor={<IconX name={"dots-vertical"} size={26} color={colors.black} style={[styles.topbarButton, { marginRight:15 }]} onPress={openMenu} />}>
-                <Menu.Item onPress={() => { navigation.navigate('CustomerInfo', { userId }); closeMenu(); }} title="Edit Profile" />
-
-                <Menu.Item onPress={() => { closeMenu(); onLogOut(); }} title="Log Out" />
-
-                {/* <Menu.Item onPress={() => { console.log("Pressed button 3") }} title="Item 3" /> */}
-              </Menu>
+            <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
+              <Button
+                onPress={() => { closeMenu(); onLogOut(); }}
+                style={styles.buttonStyle}
+                color={colors.secondary}
+                icon={(color) => <Icon name={'plus'} size={16} color={colors.secondary} />}
+                uppercase={false}
+              ><Text style={{ fontSize: 12, padding: 0 }}>Log out</Text></Button>
             </View>
           ),
           title: "My Profile",
@@ -704,7 +680,7 @@ const InsideCustomerStack = () => {
 
   return (
     <Tab.Navigator
-      initialRouteName="ServicesStack"
+      initialRouteName="AllCustomerStack"
       screenOptions={{
         tabBarActiveTintColor: colors.default_theme.primary,
         tabBarStyle: { height: 60, marginTop: 0 },
@@ -712,17 +688,6 @@ const InsideCustomerStack = () => {
         tabBarLabelStyle: { fontSize: 14 },
       }}
     >
-      <Tab.Screen
-        name="ServicesStack"
-        component={ServicesStack}
-        options={{
-          tabBarLabel: 'Service',
-          tabBarIcon: ({ color }) => (
-            <Icon name={'tools'} size={20} color={color} />
-          ),
-          headerShown: false
-        }}
-      />
       <Tab.Screen
         name="PartsStack"
         component={PartsStack}

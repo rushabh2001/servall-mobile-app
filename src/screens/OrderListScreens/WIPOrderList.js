@@ -33,6 +33,7 @@ const WIPOrderList = ({navigation, userToken, selectedGarageId }) => {
                 },
                 body: JSON.stringify({
                     status: 'Work in Progress Order',
+                    search: searchQuery,
                 }),
             });
             const json = await res.json();
@@ -85,6 +86,7 @@ const WIPOrderList = ({navigation, userToken, selectedGarageId }) => {
                 },
                 body: JSON.stringify({
                     status: 'Work in Progress Order',
+                    search: searchQuery,
                 }),
             });
             const json = await response.json();
@@ -134,9 +136,10 @@ const WIPOrderList = ({navigation, userToken, selectedGarageId }) => {
                 placeholder="Search here..."
                 onChangeText={(text) => searchFilter(text)}
                 value={searchQuery}
+                style={{ marginBottom: 15 }}
             />
-            <View style={{flexDirection: "column", marginVertical: 30}}>
-                {isLoading ? <ActivityIndicator style={{marginVertical: 150}}></ActivityIndicator> :
+            <View style={{ flexDirection: "column", flex: 1 }}>
+                {isLoading ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
                     (filteredData.length != 0 ?             
                         <View>
                             <FlatList
@@ -337,7 +340,7 @@ const styles = StyleSheet.create({
     surfaceContainer: {
         flex:1,
         padding:15,
-        marginBottom: 35
+        // marginBottom: 35
     },
     buttonStyle: {
         letterSpacing: 0,

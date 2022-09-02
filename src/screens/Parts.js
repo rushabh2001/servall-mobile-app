@@ -12,7 +12,7 @@ import { FlatList } from 'react-native-gesture-handler';
 
 const Parts = ({ navigation, userToken, selectedGarageId }) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [singleFile, setSingleFile] = useState('');
+  // const [singleFile, setSingleFile] = useState('');
   const [partList, setPartList] = useState([]);
   const { colors } = useTheme();
   const isFocused = useIsFocused();
@@ -26,42 +26,48 @@ const Parts = ({ navigation, userToken, selectedGarageId }) => {
   const [filteredPartData, setFilteredPartData] = useState([]);
   const [searchQueryForParts, setSearchQueryForParts] = useState(); 
 
-  const selectOneFile = async () => {
-    //Opening Document Picker for selection of one file
-    try {
-      const res = await DocumentPicker.pick({
-        type: [DocumentPicker.types.allFiles],
-      });
-      //Setting the state to show single file attributes
-      setSingleFile(res);
-    } catch (err) {
-      //Handling any exception (If any)
-      if (DocumentPicker.isCancel(err)) {
-        //If user canceled the document selection
-        alert('Canceled from single doc picker');
-      } else {
-        //For Unknown Error
-        alert('Unknown Error: ' + JSON.stringify(err));
-        throw err;
-      }
-    }
-  };
+  // const selectOneFile = async () => {
+  //   //Opening Document Picker for selection of one file
+  //   try {
+  //     const res = await DocumentPicker.pick({
+  //       type: [DocumentPicker.types.allFiles],
+  //     });
+  //     //Setting the state to show single file attributes
+  //     setSingleFile(res);
+  //   } catch (err) {
+  //     //Handling any exception (If any)
+  //     if (DocumentPicker.isCancel(err)) {
+  //       //If user canceled the document selection
+  //       alert('Canceled from single doc picker');
+  //     } else {
+  //       //For Unknown Error
+  //       alert('Unknown Error: ' + JSON.stringify(err));
+  //       throw err;
+  //     }
+  //   }
+  // };
 
   const getPartList = async () => {
     { page == 1 && setIsLoading(true) }
     { page != 1 && setIsScrollLoading(true) }
     try {
-      const res = await fetch(`${API_URL}fetch_garage_inventory/${isGarageId}?page=${page}`, {
-        method: 'GET',
+      const res = await fetch(`${API_URL}fetch_garage_inventory/${selectedGarageId}?page=${page}`, {
+        method: 'POST',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + userToken
         },
+        body: JSON.stringify({
+            search: searchQueryForParts,
+        }),
       });
       const json = await res.json();
       if (json !== undefined) {
-        // setPartList(json.data);
+        setPartList([
+          ...partList,
+          ...json.data.data,
+        ]);
         // setTableData(json.data);
         setFilteredPartData([
           ...filteredPartData,
@@ -97,18 +103,22 @@ const Parts = ({ navigation, userToken, selectedGarageId }) => {
 
   const pullRefresh = async () => {
     try {
-        const res = await fetch(`${API_URL}fetch_garage_inventory/${isGarageId}`, {
-            method: 'GET',
+        const response = await fetch(`${API_URL}fetch_garage_inventory/${selectedGarageId}`, {
+            method: 'POST',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + userToken
             },
+            body: JSON.stringify({
+              search: searchQueryForParts,
+            }),
         });
         const json = await response.json();
         console.log('1', json);
         if (response.status == '200') {
             setSearchQueryForParts('');
+            setPartList(json.data.data);
             setFilteredPartData(json.data.data);
             setPage(2);
             setRefreshing(false);
@@ -157,13 +167,14 @@ const onRefresh = () => {
       {/* Search Bar */}
       <Searchbar
         placeholder="Search here..."
-        onChangeText={(text) => { if(text != null) searchFilterForParts(text)}}
+        onChangeText={(text) => { if(text != null) searchFilterForParts(text) }}
         value={searchQueryForParts}
+        style={{ marginBottom: 15 }}
       />
 
-      <View style={{flexDirection:'row',  marginTop: 15}}>
+      {/* <View style={{flexDirection:'row', flex: 1 }}>
         <View style={{flex:1}}>
-          {/* <TouchableOpacity
+          <TouchableOpacity
             activeOpacity={0.5}
             style={styles.buttonStyle}
             onPress={selectOneFile}>
@@ -172,10 +183,10 @@ const onRefresh = () => {
             <Text style={{marginRight: 10, fontSize: 18, color: "#000"}}>
               Upload CSV
             </Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
         </View>
         <View style={{flex:0.7}}>
-          {/* <Button
+          <Button
               style={styles.buttonBlue}
               color="#123038"
               icon={({color}) => (<Icon name="plus" color={color} size={18} />) }
@@ -183,21 +194,19 @@ const onRefresh = () => {
               onPress={() => navigation.navigate('PartsStack', {screen: 'AddStock'})}
               uppercase={false} 
             > Add Stock
-          </Button> */}
+          </Button>
         </View>
 
-      </View>
+      </View> */}
 
       <View style={{flex:1}}>
-        <ScrollView>
-          {isLoading ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> :
+        {isLoading ? <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View>  :
+          <ScrollView>
             <View style={styles.container}>
               <Table>
                 <Row 
                   data={tableHead} 
-                  style={
-                    styles.head 
-                    } 
+                  style={styles.head} 
                   textStyle={styles.textHeading}
                   flexArr= {[2, 1, 1, 1, 1]}
                 />
@@ -214,7 +223,7 @@ const onRefresh = () => {
                                 colors={['green']}
                             />
                         }
-                        ListFooterComponent={renderFooter}
+                        ListFooterComponent={filteredPartData?.length > 10 && renderFooter}
                         keyExtractor={item => item.id}
                         renderItem={({item, index}) => (
                           <View style={{margin: 5}}>
@@ -235,8 +244,8 @@ const onRefresh = () => {
                   }
               </Table>
             </View>
-          }
-        </ScrollView>
+          </ScrollView>
+        }
       </View>
     </View>
   );
