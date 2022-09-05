@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Keyboard, ActivityIndicator, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
-import { Modal, Portal, Button, TextInput, List, Divider, Searchbar } from 'react-native-paper';
+import { Modal, Portal, Button, TextInput, List, Divider } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { colors } from '../constants';
 import { API_URL } from '../constants/config';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import IconX from "react-native-vector-icons/FontAwesome5";
 import InputScrollView from 'react-native-input-scroll-view';
 import moment from 'moment';
 import DocumentPicker from 'react-native-document-picker';
@@ -379,7 +380,7 @@ const EditRepairOrder = ({ navigation, route, userToken }) => {
         }
     };
 
-    const pullPartRefresh = async () => {
+    const searchFilterForParts  = async () => {
         try {
             const response = await fetch(`${API_URL}fetch_parts`, {
                 method: 'POST',
@@ -394,7 +395,6 @@ const EditRepairOrder = ({ navigation, route, userToken }) => {
             });
             const json = await response.json();
             if (response.status == '200') {
-                setSearchQueryForParts('');
                 setPartList(json.data.data);
                 setFilteredPartData(json.data.data);
                 setPartPage(2);
@@ -404,6 +404,33 @@ const EditRepairOrder = ({ navigation, route, userToken }) => {
             }
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    const pullPartRefresh = async () => {
+        setSearchQueryForParts(null);
+        try {
+            const response = await fetch(`${API_URL}fetch_parts`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    search: null,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setPartList(json.data.data);
+                setFilteredPartData(json.data.data);
+                setPartPage(2);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setPartRefreshing(false);
         }
     };
 
@@ -463,7 +490,7 @@ const EditRepairOrder = ({ navigation, route, userToken }) => {
         }
     };
 
-    const pullServiceRefresh = async () => {
+    const searchFilterForServices = async () => {
         try {
             const response = await fetch(`${API_URL}fetch_service`, {
                 method: 'POST',
@@ -478,7 +505,6 @@ const EditRepairOrder = ({ navigation, route, userToken }) => {
             });
             const json = await response.json();
             if (response.status == '200') {
-                setSearchQueryForServices('');
                 setServiceList(json.data.data);
                 setFilteredServiceData(json.data.data);
                 setServicePage(2);
@@ -488,6 +514,33 @@ const EditRepairOrder = ({ navigation, route, userToken }) => {
             }
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    const pullServiceRefresh = async () => {
+        setSearchQueryForServices(null);
+        try {
+            const response = await fetch(`${API_URL}fetch_service`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    search: null,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setServiceList(json.data.data);
+                setFilteredServiceData(json.data.data);
+                setServicePage(2);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setServiceRefreshing(false);
         }
     };
 
@@ -526,7 +579,7 @@ const EditRepairOrder = ({ navigation, route, userToken }) => {
             });
             const json = await res.json();
             if (json !== undefined) {
-                getServiceList();
+                pullServiceRefresh();
                 setIsService(parseInt(json.data.id));
                 setIsServiceName(json.data.name);
                 let data = {
@@ -560,7 +613,7 @@ const EditRepairOrder = ({ navigation, route, userToken }) => {
             });
             const json = await res.json();
             if (json !== undefined) {
-                getPartList();
+                pullPartRefresh();
                 setIsPart(parseInt(json.data.id));
                 setIsPartName(json.data.name);
                 let data = {
@@ -578,40 +631,6 @@ const EditRepairOrder = ({ navigation, route, userToken }) => {
             setNewPartError('Part name has already been taken.');
         }
     }
-
-    const searchFilterForParts = (text) => {
-        if (text) {
-            let newData = partList.filter(
-                function (listData) {
-                let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
-                let textData = text.toUpperCase();
-                return itemData.indexOf(textData) > -1;
-                }
-            );
-            setFilteredPartData(newData);
-            setSearchQueryForParts(text);
-        } else {
-            setFilteredPartData(partList);
-            setSearchQueryForParts(text);
-        }
-    };
-
-    const searchFilterForServices = (text) => {
-        if (text) {
-            let newData = serviceList.filter(
-                function (listData) {
-                let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
-                let textData = text.toUpperCase();
-                return itemData.indexOf(textData) > -1;
-                }
-            );
-            setFilteredServiceData(newData);
-            setSearchQueryForServices(text);
-        } else {
-            setFilteredServiceData(serviceList);
-            setSearchQueryForServices(text);
-        }
-    };
 
     useEffect(() => {
         let values = [...fieldsServices];
@@ -754,53 +773,6 @@ const EditRepairOrder = ({ navigation, route, userToken }) => {
                                             </View>
                                         </View>
                                     </View>
-
-                                    <Portal>
-                                        <Modal visible={addNewServiceModal} onDismiss={() => { setAddNewServiceModal(false); setServiceListModal(true);  setIsNewService(0); setNewServiceError(''); }} contentContainerStyle={styles.modalContainerStyle}>
-                                            <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Service</Text>
-                                            <View>
-                                                <TextInput
-                                                    mode="outlined"
-                                                    label='Service Name'
-                                                    style={styles.input}
-                                                    placeholder="Service Name"
-                                                    value={isNewService}
-                                                    onChangeText={(text) => setIsNewService(text)}
-                                                />
-                                            </View>
-                                            {newServiceError?.length > 0 &&
-                                                <Text style={styles.errorTextStyle}>{newServiceError}</Text>
-                                            }
-
-                                            <View style={{ flexDirection: "row", marginTop: 10}}>
-                                                <Button
-                                                    style={{ marginTop: 15, flex: 1, marginRight: 10 }}
-                                                    mode={'contained'}
-                                                    onPress={() => {
-                                                        if(isNewService == "") {
-                                                            setNewServiceError("Please Enter Service Name");
-                                                        } else {
-                                                            addNewService();
-                                                        }
-                                                    }}
-                                                >
-                                                    Add
-                                                </Button>
-                                                <Button
-                                                    style={{ marginTop: 15, flex: 1 }}
-                                                    mode={'contained'}
-                                                    onPress={() => {
-                                                        setAddNewServiceModal(false);
-                                                        setServiceListModal(true);
-                                                        setIsNewService('');
-                                                        setNewServiceError('');
-                                                    }}
-                                                >
-                                                    Close
-                                                </Button>
-                                            </View>
-                                        </Modal>
-                                    </Portal>
                                 </>
                             );
                         })}
@@ -896,53 +868,6 @@ const EditRepairOrder = ({ navigation, route, userToken }) => {
                                             </View>
                                         </View>
                                     </View>
-
-                                    <Portal>
-                                        <Modal visible={addNewPartModal} onDismiss={() => { setAddNewPartModal(false); setPartListModal(true);  setIsNewPart(0); setNewPartError(''); }} contentContainerStyle={styles.modalContainerStyle}>
-                                            <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Part</Text>
-                                            <View>
-                                                <TextInput
-                                                    mode="outlined"
-                                                    label='Part Name'
-                                                    style={styles.input}
-                                                    placeholder="Part Name"
-                                                    value={isNewPart}
-                                                    onChangeText={(text) => setIsNewPart(text)}
-                                                />
-                                            </View>
-                                            {newPartError?.length > 0 &&
-                                                <Text style={styles.errorTextStyle}>{newPartError}</Text>
-                                            }
-
-                                            <View style={{ flexDirection: "row", marginTop: 10}}>
-                                                <Button
-                                                    style={{ marginTop: 15, flex: 1, marginRight: 10 }}
-                                                    mode={'contained'}
-                                                    onPress={() => {
-                                                        if(isNewPart == "") {
-                                                            setNewPartError("Please Enter Part Name");
-                                                        } else {
-                                                            addNewPart();
-                                                        }
-                                                    }}
-                                                >
-                                                    Add
-                                                </Button>
-                                                <Button
-                                                    style={{ marginTop: 15, flex: 1 }}
-                                                    mode={'contained'}
-                                                    onPress={() => {
-                                                        setAddNewPartModal(false);
-                                                        setPartListModal(true);
-                                                        setIsNewPart('');
-                                                        setNewPartError('');
-                                                    }}
-                                                >
-                                                    Close
-                                                </Button>
-                                            </View>
-                                        </Modal>
-                                    </Portal>
                                 </>
                             );
                         })}
@@ -1156,19 +1081,30 @@ const EditRepairOrder = ({ navigation, route, userToken }) => {
                     {(isLoadingPartList == true) ? <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View>
                     :
                         <View style={{ marginTop: 20, flex: 1 }}>
-                            <Searchbar
-                                placeholder="Search here..."
-                                onChangeText={(text) => { if(text != null) searchFilterForParts(text)}}
-                                value={searchQueryForParts}
-                                elevation={0}
-                                style={{ elevation: 0.8, marginBottom: 10 }}
-                            />
+                            {/* Search Bar */}
+                            <View>
+                                <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                                    <TextInput
+                                        mode={'flat'}
+                                        placeholder="Search here..."
+                                        onChangeText={(text) => setSearchQueryForParts(text)}
+                                        value={searchQueryForParts}
+                                        activeUnderlineColor={colors.transparent}
+                                        underlineColor={colors.transparent}
+                                        style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                                        right={(searchQueryForParts != null && searchQueryForParts != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => onPartRefresh()} />}
+                                    />
+                                    <TouchableOpacity onPress={() => searchFilterForParts()} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                                        <IconX name={'search'} size={17} color={colors.white} />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
                             {filteredPartData?.length > 0 ?  
                                 <FlatList
                                     ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
                                     data={filteredPartData}
                                     style={{borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
-                                    onEndReached={filteredPartData?.length > 10 && getPartList}
+                                    onEndReached={filteredPartData?.length > 9 && getPartList}
                                     onEndReachedThreshold={0.5}
                                     refreshControl={
                                         <RefreshControl
@@ -1227,28 +1163,39 @@ const EditRepairOrder = ({ navigation, route, userToken }) => {
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Service</Text>
                     {(isLoadingServiceList == true) ? <View style={{ flex: 1, justifyContent: "center" }}> ? <ActivityIndicator></ActivityIndicator></View> :
                         <View style={{marginTop: 20, flex: 1 }}>
-                            <Searchbar
-                                placeholder="Search here..."
-                                onChangeText={(text) => { if(text != null) searchFilterForServices(text)}}
-                                value={searchQueryForServices}
-                                onEndReached={filteredServiceData?.length > 10 && getServiceList}
-                                onEndReachedThreshold={0.5}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={serviceRefreshing}
-                                        onRefresh={onServiceRefresh}
-                                        colors={['green']}
+                            {/* Search Bar */}
+                            <View>
+                                <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                                    <TextInput
+                                        mode={'flat'}
+                                        placeholder="Search here..."
+                                        onChangeText={(text) => setSearchQueryForServices(text)}
+                                        value={searchQueryForServices}
+                                        activeUnderlineColor={colors.transparent}
+                                        underlineColor={colors.transparent}
+                                        style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                                        right={(searchQueryForServices != null && searchQueryForServices != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => onServiceRefresh()} />}
                                     />
-                                }
-                                ListFooterComponent={renderServiceFooter}
-                                elevation={0}
-                                style={{ elevation: 0.8, marginBottom: 10}}
-                            />
+                                    <TouchableOpacity onPress={() => searchFilterForServices()} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                                        <IconX name={'search'} size={17} color={colors.white} />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
                             {filteredServiceData?.length > 0 ?  
                                 <FlatList
                                     ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
                                     data={filteredServiceData}
                                     style={{borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
+                                    onEndReached={filteredServiceData?.length > 9 && getServiceList}
+                                    onEndReachedThreshold={0.5}
+                                    refreshControl={
+                                        <RefreshControl
+                                            refreshing={serviceRefreshing}
+                                            onRefresh={onServiceRefresh}
+                                            colors={['green']}
+                                        />
+                                    }
+                                    ListFooterComponent={filteredServiceData?.length > 9 && renderServiceFooter}
                                     keyExtractor={item => item.id}
                                     renderItem={({item}) => (
                                         <>
@@ -1290,6 +1237,96 @@ const EditRepairOrder = ({ navigation, route, userToken }) => {
                             </View>
                         </View>
                     }
+                </Modal>
+
+                <Modal visible={addNewPartModal} onDismiss={() => { setAddNewPartModal(false); setPartListModal(true);  setIsNewPart(''); setNewPartError(''); }} contentContainerStyle={styles.modalContainerStyle}>
+                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Part</Text>
+                    <View>
+                        <TextInput
+                            mode="outlined"
+                            label='Part Name'
+                            style={styles.input}
+                            placeholder="Part Name"
+                            value={isNewPart}
+                            onChangeText={(text) => setIsNewPart(text)}
+                        />
+                    </View>
+                    {newPartError?.length > 0 &&
+                        <Text style={styles.errorTextStyle}>{newPartError}</Text>
+                    }
+
+                    <View style={{ flexDirection: "row", marginTop: 10}}>
+                        <Button
+                            style={{ marginTop: 15, flex: 1, marginRight: 10 }}
+                            mode={'contained'}
+                            onPress={() => {
+                                if(isNewPart == "") {
+                                    setNewPartError("Please Enter Part Name");
+                                } else {
+                                    addNewPart();
+                                }
+                            }}
+                        >
+                            Add
+                        </Button>
+                        <Button
+                            style={{ marginTop: 15, flex: 1 }}
+                            mode={'contained'}
+                            onPress={() => {
+                                setAddNewPartModal(false);
+                                setPartListModal(true);
+                                setIsNewPart('');
+                                setNewPartError('');
+                            }}
+                        >
+                            Close
+                        </Button>
+                    </View>
+                </Modal>
+
+                <Modal visible={addNewServiceModal} onDismiss={() => { setAddNewServiceModal(false); setServiceListModal(true);  setIsNewService(''); setNewServiceError(''); }} contentContainerStyle={styles.modalContainerStyle}>
+                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Service</Text>
+                    <View>
+                        <TextInput
+                            mode="outlined"
+                            label='Service Name'
+                            style={styles.input}
+                            placeholder="Service Name"
+                            value={isNewService}
+                            onChangeText={(text) => setIsNewService(text)}
+                        />
+                    </View>
+                    {newServiceError?.length > 0 &&
+                        <Text style={styles.errorTextStyle}>{newServiceError}</Text>
+                    }
+
+                    <View style={{ flexDirection: "row", marginTop: 10}}>
+                        <Button
+                            style={{ marginTop: 15, flex: 1, marginRight: 10 }}
+                            mode={'contained'}
+                            onPress={() => {
+                                if(isNewService == "") {
+                                    setNewServiceError("Please Enter Service Name");
+                                } else {
+                                    addNewService();
+                                }
+                            }}
+                        >
+                            Add
+                        </Button>
+                        <Button
+                            style={{ marginTop: 15, flex: 1 }}
+                            mode={'contained'}
+                            onPress={() => {
+                                setAddNewServiceModal(false);
+                                setServiceListModal(true);
+                                setIsNewService('');
+                                setNewServiceError('');
+                            }}
+                        >
+                            Close
+                        </Button>
+                    </View>
                 </Modal>
             </Portal>
         </View>
@@ -1363,22 +1400,13 @@ const styles = StyleSheet.create({
         marginTop: 15,
     },
     textEntryInput: {
-        // padding: 15,
-        // height: 55,
-        // borderColor: colors.light_gray, // 7a42f4
-        // borderWidth: 1,
-        // borderRadius: 5,
-        // backgroundColor: colors.white,
         fontSize: 16,
         flex: 0.33,
         marginRight: 10,
     },
     removeEntryIconContainer: {
-        // flex: 0.15,
         justifyContent: 'center',
         alignItems: 'center',
-        // display: 'flex',
-        // marginTop: 5,
         zIndex: 2,
         borderColor: colors.light_gray,
         borderWidth: 1,
@@ -1387,7 +1415,6 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 10,
         right: 10,
-        // marginLeft: 8,
     },
     removeEntryIcon: {
         color: colors.white,
@@ -1403,12 +1430,6 @@ const styles = StyleSheet.create({
     },
     input: {
         marginTop: 20,
-        // padding: 15,
-        // height: 55,
-        // borderColor: colors.light_gray, // 7a42f4
-        // borderWidth: 1,
-        // borderRadius: 5,
-        // backgroundColor: colors.white,
         fontSize: 16,
     },
     headingStyle: {
@@ -1441,8 +1462,6 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         backgroundColor: '#F0F2F5',
         color: '#424242',
-        // paddingHorizontal: 15,
-        // height: 55,
         fontSize: 16,
     },
     datePickerIcon: {
@@ -1488,7 +1507,6 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
         borderColor: colors.black,
-        // borderWidth: 1,
         backgroundColor: "#ecf5f9",
         padding: 10,
     },
@@ -1500,6 +1518,9 @@ const styles = StyleSheet.create({
     cardTitle: {
         color: "#000",
         fontSize: 16,
+    },
+    footer: {
+        marginVertical: 15,
     },
 })
 

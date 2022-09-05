@@ -5,13 +5,13 @@ import { connect } from 'react-redux';
 import { colors } from '../constants';
 import { API_URL } from '../constants/config';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import IconX from "react-native-vector-icons/FontAwesome5";
 import InputScrollView from 'react-native-input-scroll-view';
 import { Picker } from '@react-native-picker/picker';
 import moment from 'moment';
 import DocumentPicker from 'react-native-document-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import RadioForm from 'react-native-simple-radio-button';
-import { set } from 'react-hook-form';
 
 const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId, selectedGarage, userId, garageId }) => {
     
@@ -553,24 +553,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
         }
     };
 
-    const searchFilterForGarages = (text) => {
-        if (text) {
-            let newData = garageList.filter(
-                function (listData) {
-                    let itemData = listData.garage_name ? listData.garage_name.toUpperCase() : ''.toUpperCase()
-                    let textData = text.toUpperCase();
-                    return itemData.indexOf(textData) > -1;
-                }
-            );
-            setFilteredGarageData(newData);
-            setSearchQueryForGarages(text);
-        } else {
-            setFilteredGarageData(garageList);
-            setSearchQueryForGarages(text);
-        }
-    };
-
-const getGarageList = async () => {
+    const getGarageList = async () => {
         { garagePage == 1 && setIsLoadingGarageList(true) }
         { garagePage != 1 && setIsGarageScrollLoading(true) }
         try {
@@ -584,6 +567,7 @@ const getGarageList = async () => {
                 body: JSON.stringify({
                     user_id: userId,
                     user_role: userRole,
+                    search: searchQueryForGarages,
                 }),
             });
             const json = await res.json();
@@ -608,7 +592,7 @@ const getGarageList = async () => {
         }
     };
 
-    const pullGarageRefresh = async () => {
+    const searchFilterForGarages = async () => {
         try {
             const response = await fetch(`${API_URL}fetch_owner_garages`, {
                 method: 'POST',
@@ -620,11 +604,11 @@ const getGarageList = async () => {
                 body: JSON.stringify({
                     user_id: userId,
                     user_role: userRole,
+                    search: searchQueryForGarages,
                 }),
             });
             const json = await response.json();
             if (response.status == '200') {
-                setSearchQueryForGarages('');
                 setGarageList(json.garage_list.data);
                 setFilteredGarageData(json.garage_list.data);
                 setGaragePage(2);
@@ -634,6 +618,35 @@ const getGarageList = async () => {
             }
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    const pullGarageRefresh = async () => {
+        setSearchQueryForGarages(null);
+        try {
+            const response = await fetch(`${API_URL}fetch_owner_garages`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    user_role: userRole,
+                    search: null,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setGarageList(json.garage_list.data);
+                setFilteredGarageData(json.garage_list.data);
+                setGaragePage(2);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setGarageRefreshing(false);
         }
     };
 
@@ -698,28 +711,7 @@ const getGarageList = async () => {
         }
     };
 
-    const searchFilterForUsers = (text) => {
-        if (text) {
-            const newData = userList.filter(
-                function (listData) {
-                // let arr2 = listData.phone_number ? listData.phone_number : ''.toUpperCase() 
-                let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase();
-                // let itemData = arr1.concat(arr2);
-                // console.log(itemData);
-                const textData = text.toUpperCase();
-                return itemData.indexOf(textData) > -1;
-                }
-            );
-            setFilteredUserData(newData);
-            setSearchQueryForUsers(text);
-            console.log('setFilteredUserData', newData);
-        } else {
-            setFilteredUserData(userList);
-            setSearchQueryForUsers(text);
-        }
-    };
-
-    const pullUserRefresh = async () => {
+    const searchFilterForUsers = async () => {
         try {
             const response = await fetch(`${API_URL}fetch_my_garage_customers`, {
                 method: 'POST',
@@ -735,7 +727,6 @@ const getGarageList = async () => {
             });
             const json = await response.json();
             if (response.status == '200') {
-                setSearchQueryForUsers('');
                 setUserList(json.user_list.data);
                 setFilteredUserData(json.user_list.data);
                 setUserPage(2);
@@ -745,6 +736,34 @@ const getGarageList = async () => {
             }
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    const pullUserRefresh = async () => {
+        setSearchQueryForUsers(null);
+        try {
+            const response = await fetch(`${API_URL}fetch_my_garage_customers`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    garage_id: isGarageId,
+                    search: null,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setUserList(json.user_list.data);
+                setFilteredUserData(json.user_list.data);
+                setUserPage(2);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setUserRefreshing(false);
         }
     };
 
@@ -1325,13 +1344,23 @@ const getGarageList = async () => {
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select User</Text>
                     {(isLoadingUserList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
                         <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
-                            <Searchbar
-                                placeholder="Search here..."
-                                onChangeText={(text) => { if(text != null) searchFilterForUsers(text)}}
-                                value={searchQueryForUsers}
-                                // elevation={0}
-                                style={{ marginBottom: 10}}
-                            />
+                            <View>
+                                <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                                    <TextInput
+                                        mode={'flat'}
+                                        placeholder="Search here..."
+                                        onChangeText={(text) => setSearchQueryForUsers(text)}
+                                        value={searchQueryForUsers}
+                                        activeUnderlineColor={colors.transparent}
+                                        underlineColor={colors.transparent}
+                                        style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                                        right={(searchQueryForUsers != null && searchQueryForUsers != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => {setSearchQueryForUsers != ''; searchFilterForUsers('') }} />}
+                                    />
+                                    <TouchableOpacity onPress={() => searchFilterForUsers(searchQueryForUsers)} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                                        <IconX name={'search'} size={17} color={colors.white} />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
                             {filteredUserData?.length > 0 ?  
                                 <FlatList
                                     ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
@@ -1380,13 +1409,24 @@ const getGarageList = async () => {
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Garage</Text>
                     {(isLoadingGarageList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
                         <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
-                            <Searchbar
-                                placeholder="Search here..."
-                                onChangeText={(text) => { if(text != null) searchFilterForGarages(text)}}
-                                value={searchQueryForGarages}
-                                elevation={0}
-                                style={{ elevation: 0.8, marginBottom: 10 }}
-                            />
+                            {/* Search Bar */}
+                            <View>
+                                <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                                    <TextInput
+                                        mode={'flat'}
+                                        placeholder="Search here..."
+                                        onChangeText={(text) => setSearchQueryForGarages(text)}
+                                        value={searchQueryForGarages}
+                                        activeUnderlineColor={colors.transparent}
+                                        underlineColor={colors.transparent}
+                                        style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                                        right={(searchQueryForGarages != null && searchQueryForGarages != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => onGarageRefresh()} />}
+                                    />
+                                    <TouchableOpacity onPress={() => searchFilterForGarages()} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                                        <IconX name={'search'} size={17} color={colors.white} />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
                             {filteredGarageData?.length > 0 ?  
                                 <FlatList
                                     ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}

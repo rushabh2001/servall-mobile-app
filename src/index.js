@@ -28,7 +28,7 @@ export default function App() {
                 <StatusBar backgroundColor="#fff" barStyle={'dark-content'} />
                 <Provider store={store}>
                     <PaperProvider theme={theme}>
-                    <AppContainer />
+                        <AppContainer />
                     </PaperProvider>
                 </Provider>
             </NetInfoProvider>

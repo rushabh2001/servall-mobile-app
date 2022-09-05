@@ -151,34 +151,6 @@ const AddGarage = ({navigation, userToken}) => {
         }
     };
 
-    const userCheck = (data) => { 
-        fetch(`${API_URL}user_check`,
-        {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + userToken
-            },
-            body: JSON.stringify(data)
-        })
-        .then(res => {
-            const statusCode = res.status;
-            let data;
-            return res.json().then(obj => {
-                data = obj;
-                return { statusCode, data };
-            });
-        })
-        .then((res) => {
-            if(res.statusCode == 400) {
-              { res.data.message.email && setEmailError(res.data.message.email); }
-              { res.data.message.phone_number && setPhoneNumberError(res.data.message.phone_number); }
-              return;
-            } 
-        });
-    }
-
     const searchFilterForUsers = (text) => {
         if (text) {
             let newData = adminList.filter(
@@ -289,7 +261,7 @@ const AddGarage = ({navigation, userToken}) => {
 
     return (
     <View style={styles.pageContainer}>
-        { (isLoading == true) ? <ActivityIndicator></ActivityIndicator> :
+        { (isLoading == true) ? <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View> :
             <InputScrollView
                 ref={scroll1Ref}
                 contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
@@ -305,10 +277,8 @@ const AddGarage = ({navigation, userToken}) => {
                         label='Garage Name'
                         style={styles.input}
                         placeholder="Garage Name"
-                        textContentType="telephoneNumber"
                         value={isGarageName}
                         onChangeText={(text) => setIsGarageName(text)}
-                        rightIcon={<IconX color={colors.dark_black} size={24} name="closecircle" origin={ICON_TYPE.ANT_ICON} />}
                     />
                     {garageNameError?.length > 0 &&
                         <Text style={{color: colors.danger}}>{garageNameError}</Text>
@@ -526,50 +496,58 @@ const AddGarage = ({navigation, userToken}) => {
                     <Modal visible={userListModal} onDismiss={() => { setUserListModal(false); setOwnerId(0); setIsUserName(''); setUserError(''); setSearchQueryForUsers('');  searchFilterForUsers();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select User</Text>
                         {(isLoadingUserList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
-                            <>
-                                <View style={{marginTop: 20, marginBottom: 10, flex: 1 }}>
-                                    <Searchbar
-                                        placeholder="Search here..."
-                                        onChangeText={(text) => { if(text != null) searchFilterForUsers(text)}}
-                                        value={searchQueryForUsers}
-                                        elevation={0}
-                                        style={{ elevation: 0.8, marginBottom: 10}}
-                                    />
-                                    {filteredUserData?.length > 0 ?  
-                                        <FlatList
-                                            ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
-                                            data={filteredUserData}
-                                            // onEndReachedThreshold={1}
-                                            style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
-                                            keyExtractor={item => item.id}
-                                            renderItem={({item}) => (
-                                                <>
-                                                    <List.Item
-                                                        title={
-                                                            // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setUserListModal(false);  setAddUserModal(true); }}>
-                                                                <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
-                                                                    <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
-                                                                </View>
-                                                            // </TouchableOpacity> 
-                                                        }
-                                                        onPress={() => {
-                                                                setIsUserName(item.name); 
-                                                                setOwnerId(item.id); 
-                                                                setUserError('');
-                                                                setUserListModal(false);  
-                                                            }
-                                                        }
-                                                    />
-                                                </>
-                                            )} 
+                            <View style={{marginTop: 20, marginBottom: 10, flex: 1 }}>
+                                <View>
+                                    <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                                        <TextInput
+                                            mode={'flat'}
+                                            placeholder="Search here..."
+                                            onChangeText={(text) => setSearchQueryForUsers(text)}
+                                            value={searchQueryForUsers}
+                                            activeUnderlineColor={colors.transparent}
+                                            underlineColor={colors.transparent}
+                                            style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                                            right={(searchQueryForUsers != null && searchQueryForUsers != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => {setSearchQueryForUsers != ''; searchFilterForUsers('') }} />}
                                         />
-                                        :
-                                        <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
-                                            <Text style={{ color: colors.black, textAlign: 'center'}}>No such user is associated!</Text>
-                                        </View>
-                                    }
+                                        <TouchableOpacity onPress={() => searchFilterForUsers(searchQueryForUsers)} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                                            <IconX name={'search'} size={17} color={colors.white} />
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
-                            </>
+                                {filteredUserData?.length > 0 ?  
+                                    <FlatList
+                                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                        data={filteredUserData}
+                                        // onEndReachedThreshold={1}
+                                        style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
+                                        keyExtractor={item => item.id}
+                                        renderItem={({item}) => (
+                                            <>
+                                                <List.Item
+                                                    title={
+                                                        // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setUserListModal(false);  setAddUserModal(true); }}>
+                                                            <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                                <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
+                                                            </View>
+                                                        // </TouchableOpacity> 
+                                                    }
+                                                    onPress={() => {
+                                                            setIsUserName(item.name); 
+                                                            setOwnerId(item.id); 
+                                                            setUserError('');
+                                                            setUserListModal(false);  
+                                                        }
+                                                    }
+                                                />
+                                            </>
+                                        )} 
+                                    />
+                                    :
+                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
+                                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such user is associated!</Text>
+                                    </View>
+                                }
+                            </View>
                         }
                     </Modal>
                 </Portal>

@@ -122,8 +122,7 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, nav
                 },
                 body: JSON.stringify({
                     status: "Completed",
-                    search: '',
-                    // search: searchQuery,
+                    search: null,
                 }),
             });
             const json = await response.json();
@@ -131,12 +130,11 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, nav
                 setData(json.data.data);
                 setFilteredData(json.data.data);
                 setPage(2);
-                setRefreshing(false);
-            } else {
-                setRefreshing(false);
             }
         } catch (error) {
             console.error(error);
+        } finally {
+            setRefreshing(false);
         }
     };
 
@@ -165,7 +163,7 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, nav
 
     return (
         <View style={styles.surfaceContainer}>
-                 <View>
+             <View>
                 <View style={{ marginBottom: 15, flexDirection: 'row'}}>
                     <TextInput
                         mode={'flat'}
@@ -175,7 +173,7 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, nav
                         activeUnderlineColor={colors.transparent}
                         underlineColor={colors.transparent}
                         style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
-                        right={searchQuery != null && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => pullRefresh()} />}
+                        right={(searchQuery != null && searchQuery != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => onRefresh()} />}
                     />
                     <TouchableOpacity onPress={() => searchFilter()} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
                         <IconX name={'search'} size={17} color={colors.white} />
@@ -189,7 +187,7 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, nav
                             <FlatList
                                 ItemSeparatorComponent= {() => (<Divider />)}
                                 data={filteredData}
-                                onEndReached={getOrderList}
+                                onEndReached={filteredData?.length > 9 && getOrderList}
                                 onEndReachedThreshold={0.5}
                                 refreshControl={
                                     <RefreshControl
@@ -198,7 +196,7 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, nav
                                         colors={['green']}
                                     />
                                 }
-                                ListFooterComponent={renderFooter}
+                                ListFooterComponent={filteredData?.length > 9 && renderFooter}
                                 keyExtractor={item => item.id}
                                 renderItem={({item, index}) => (
                                 <>

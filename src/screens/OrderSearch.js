@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, ActivityIndicator, FlatList, Linking, RefreshControl } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, FlatList, Linking, RefreshControl, TouchableOpacity } from "react-native";
 import { connect } from 'react-redux';
-import { Button, Divider, Searchbar, List } from "react-native-paper";
+import { Button, Divider, TextInput, List } from "react-native-paper";
 import { colors } from  "../constants";
 import  { API_URL } from "../constants/config"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import IconX from "react-native-vector-icons/FontAwesome5";
 import moment from 'moment';
 import RBSheet from "react-native-raw-bottom-sheet";
 
@@ -53,26 +54,7 @@ const OrderSearch = ({navigation, userToken, selectedGarageId, navigator  }) => 
         }
     };
 
-    const searchFilter = (text) => {
-        if (text) {
-            const newData = data.filter(
-                function (listData) {
-                    let arr2 = listData.user.name ? listData.user.name.toUpperCase() : ''.toUpperCase();
-                    let arr1 = listData.id ?  listData.id : ''.toUpperCase()
-                    let itemData = arr2.concat(arr1);
-                    const textData = text.toUpperCase();
-                    return itemData.indexOf(textData) > -1;
-                }
-            );
-            setFilteredData(newData);
-            setSearchQuery(text);
-        } else {
-            setFilteredData(data);
-            setSearchQuery(text);
-        }
-    };
-
-    const pullRefresh = async () => {
+    const searchFilter = async () => {
         try {
             const response = await fetch(`${API_URL}fetch_garage_order/${isGarageId}`, {
                 method: 'POST',
@@ -87,7 +69,6 @@ const OrderSearch = ({navigation, userToken, selectedGarageId, navigator  }) => 
             });
             const json = await response.json();
             if (response.status == '200') {
-                setSearchQuery('');
                 setData(json.data.data);
                 setFilteredData(json.data.data);
                 setPage(2);
@@ -97,6 +78,31 @@ const OrderSearch = ({navigation, userToken, selectedGarageId, navigator  }) => 
             }
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    const pullRefresh = async () => {
+        setSearchQuery(null);
+        try {
+            const response = await fetch(`${API_URL}fetch_garage_order/${isGarageId}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    search: null,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setData(json.data.data);
+                setFilteredData(json.data.data);
+                setPage(2);
+            }
+        } finally {
+            setRefreshing(false);
         }
     };
 
@@ -125,12 +131,23 @@ const OrderSearch = ({navigation, userToken, selectedGarageId, navigator  }) => 
 
     return (
         <View style={styles.surfaceContainer}>
-            <Searchbar
-                placeholder="Search here..."
-                onChangeText={(text) => searchFilter(text)}
-                value={searchQuery}
-                style={{ marginBottom: 15 }}
-            />
+            <View>
+                <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                    <TextInput
+                        mode={'flat'}
+                        placeholder="Search here..."
+                        onChangeText={(text) => setSearchQuery(text)}
+                        value={searchQuery}
+                        activeUnderlineColor={colors.transparent}
+                        underlineColor={colors.transparent}
+                        style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                        right={(searchQuery != null && searchQuery != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => onRefresh()} />}
+                    />
+                    <TouchableOpacity onPress={() => searchFilter()} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                        <IconX name={'search'} size={17} color={colors.white} />
+                    </TouchableOpacity>
+                </View>
+            </View>
             <View style={{ flexDirection: "column", flex: 1 }}>
                 {isLoading ? <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View> :
                     (filteredData.length != 0 ?             
@@ -138,7 +155,7 @@ const OrderSearch = ({navigation, userToken, selectedGarageId, navigator  }) => 
                             <FlatList
                                 ItemSeparatorComponent= {() => (<Divider />)}
                                 data={filteredData}
-                                onEndReached={getOrderList}
+                                onEndReached={filteredData?.length > 9 && getOrderList}
                                 onEndReachedThreshold={0.5}
                                 refreshControl={
                                     <RefreshControl
@@ -147,7 +164,7 @@ const OrderSearch = ({navigation, userToken, selectedGarageId, navigator  }) => 
                                         colors={['green']}
                                     />
                                 }
-                                ListFooterComponent={renderFooter}
+                                ListFooterComponent={filteredData?.length > 9 && renderFooter}
                                 keyExtractor={item => item.id}
                                 renderItem={({item, index}) => (
                                     <>

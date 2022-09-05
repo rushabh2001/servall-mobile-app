@@ -8,7 +8,7 @@ import { API_URL } from '../constants/config';
 import { useIsFocused } from '@react-navigation/native';
 import { set } from 'react-hook-form';
 
-const Services = ({ navigation, selectedGarageId, userToken }) => {
+const Services = ({ navigation, selectedGarageId, userToken, selectedGarage, user }) => {
   const { colors } = useTheme();
   const [isGarageId, setIsGarageId] = useState(selectedGarageId);
   const [isOpenOrders, setIsOpenOrders] = useState(0);
@@ -63,202 +63,222 @@ const Services = ({ navigation, selectedGarageId, userToken }) => {
   useEffect(() => {
     // setIsGarageId(selectedGarageId);
     getDashboardData();
-    // console.log(selectedGarageId);
+    console.log('selectedGarage', selectedGarageId);
   }, [isFocused]);
 
   return (
-    <View style= {styles.customSurface}>
-      {/* {isLoadingDashboard == true ? <ActivityIndicator></ActivityIndicator> : */}
-        <ScrollView>
+    <View style={{ flex: 1 }}>
+      <View style={{ marginBottom: 35 }}>
+        { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
+      </View>
+      <View style= {styles.customSurface}>
+        {/* {isLoadingDashboard == true ? <ActivityIndicator></ActivityIndicator> : */}
+          <ScrollView>
 
-          {/* Create Repair Order Card */}
-          <View style={styles.mainCards}>
-            <TouchableOpacity style={[styles.cardContainer, {  marginTop:0, elevation: 3, flex:1 }]} onPress={() => navigation.navigate("ServicesStack" , {screen:"AddRepairOrder"}) }>
-              <View style={{flex:1, alignItems: 'center'}}>
-                <Image resizeMode={'cover'} style={styles.cardImage} source={require('../assets/images/icons/addorder.png')} />
-              </View>
-              <View style={styles.cardRightContent}>
-                <Text style={styles.cardTitle}>
-                  Create Repair Order
-                </Text>
-                <Text>
-                  Click to open new job card
-                </Text>
-              </View>
-              <View style={styles.cardArrow}>
-                  <Icon name={'caret-right'} size={18}  color={colors.gray} />
-              </View>
-            </TouchableOpacity>
-
-            {/* Add Payment */}
-            <TouchableOpacity style={[styles.cardContainer, { marginTop:10, elevation: 3, flex:1 }]} 
-              onPress={() => 
-                navigation.navigate("AddPaymentSelectOrder") 
-                // console.log("Pressed Me!")
-              }>
-              <View style={{flex:1, alignItems: 'center'}}>
-                <Image resizeMode={'cover'} style={styles.cardImage} source={require('../assets/images/icons/online-payment.png')} />
-              </View>
-              <View style={styles.cardRightContent}>
-                <Text style={styles.cardTitle}>
-                  Add Payment
-                </Text>
-                <Text>
-                  Add payment for order
-                </Text>
-              </View>
-              <View style={styles.cardArrow}>
-                  <Icon name={'caret-right'} size={18}  color={colors.gray} />
-              </View>
-            </TouchableOpacity>
-
-       
-            <View style={[styles.mainVerticleCard, { marginTop:10 }]}>
-              <TouchableOpacity style={[styles.verticleCardContainer, {flex:1, elevation: 2}]} onPress={ () => navigation.navigate("ServicesStack" , {screen:"OpenOrderList"}) }>
-                <View style={{alignItems:'center'}}>
-                  <Image resizeMode={'cover'} style={styles.verticleImage} source={require('../assets/images/icons/logistic.png')} />
+            {/* Create Repair Order Card */}
+            <View style={styles.mainCards}>
+              <TouchableOpacity style={[styles.cardContainer, {  marginTop:0, elevation: 3, flex:1 }]} onPress={() => navigation.navigate("ServicesStack" , {screen:"AddRepairOrder"}) }>
+                <View style={{flex:1, alignItems: 'center'}}>
+                  <Image resizeMode={'cover'} style={styles.cardImage} source={require('../assets/images/icons/addorder.png')} />
                 </View>
-                <View style={styles.haveBadge}>
-                  <View style={styles.badgeTitle}>
-                    <Text style={styles.verticleCardTitle}>
-                      Open Order 
-                    </Text>
-                    <Badge style={styles.badgeTag} rounded="full" mb={0} mr={-50} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>{isOpenOrders}</Badge>
-                  </View>
-                  <Text style={{textAlign:'center'}}>
-                    Order created order list
+                <View style={styles.cardRightContent}>
+                  <Text style={styles.cardTitle}>
+                    Create Repair Order
                   </Text>
+                  <Text>
+                    Click to open new job card
+                  </Text>
+                </View>
+                <View style={styles.cardArrow}>
+                    <Icon name={'caret-right'} size={18}  color={colors.gray} />
                 </View>
               </TouchableOpacity>
 
-              <View style={{flex:0.08}}></View>
-              <TouchableOpacity style={[styles.verticleCardContainer, {flex:1, elevation: 2}]} onPress={ () => navigation.navigate("WIPOrderList") }>
-                <View  style={{alignItems:'center'}}>
-                  <Image resizeMode={'cover'} style={styles.verticleImage} source={require('../assets/images/icons/in-progress.png')} />
+              {/* Add Payment */}
+              <TouchableOpacity style={[styles.cardContainer, { marginTop:10, elevation: 3, flex:1 }]} 
+                onPress={() => 
+                  navigation.navigate("AddPaymentSelectOrder") 
+                  // console.log("Pressed Me!")
+                }>
+                <View style={{flex:1, alignItems: 'center'}}>
+                  <Image resizeMode={'cover'} style={styles.cardImage} source={require('../assets/images/icons/online-payment.png')} />
                 </View>
-                <View style={styles.haveBadge}>
-                  <View style={styles.badgeTitle}>
-                    <Text style={styles.verticleCardTitle}>
-                      WIP Orders
-                    </Text>
-                    <Badge style={styles.badgeTag} rounded="full" mb={0} mr={-50} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>{isWipOrders}</Badge>
-                  </View>
-                  <Text style={{textAlign:'center'}}>
-                    Work in progress order list
+                <View style={styles.cardRightContent}>
+                  <Text style={styles.cardTitle}>
+                    Add Payment
+                  </Text>
+                  <Text>
+                    Add payment for order
                   </Text>
                 </View>
-              </TouchableOpacity>
-            </View>
-
-            <View style={[styles.mainVerticleCard, { marginTop:10 }]}>
-              <TouchableOpacity style={[styles.verticleCardContainer, {flex:1, elevation: 2}]} onPress={ () => navigation.navigate("VehicleReadyOrderList") }>
-                <View style={{alignItems:'center'}}>
-                  <Image resizeMode={'cover'} style={styles.verticleImage} source={require('../assets/images/icons/delivery.png')} />
-                </View>
-                <View style={styles.haveBadge}>
-                  <View style={styles.badgeTitle}>
-                    <Text style={styles.verticleCardTitle}>
-                      Ready Orders
-                    </Text>
-                    <Badge style={{marginLeft: 10}} rounded="full" mb={0} mr={-50} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>{isReadyOrders}</Badge>
-                  </View>
-                  <Text style={{textAlign:'center'}}>
-                    Vehicle ready order list
-                  </Text>
+                <View style={styles.cardArrow}>
+                    <Icon name={'caret-right'} size={18}  color={colors.gray} />
                 </View>
               </TouchableOpacity>
 
-              <View style={{flex:0.08}}></View>
+        
+              <View style={[styles.mainVerticleCard, { marginTop:10 }]}>
+                <TouchableOpacity style={[styles.verticleCardContainer, {flex:1, elevation: 2}]} onPress={ () => navigation.navigate("ServicesStack" , {screen:"OpenOrderList"}) }>
+                  <View style={{alignItems:'center'}}>
+                    <Image resizeMode={'cover'} style={styles.verticleImage} source={require('../assets/images/icons/logistic.png')} />
+                  </View>
+                  <View style={styles.haveBadge}>
+                    <View style={styles.badgeTitle}>
+                      <Text style={styles.verticleCardTitle}>
+                        Open Order 
+                      </Text>
+                      <Badge style={styles.badgeTag} rounded="full" mb={0} mr={-50} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>{isOpenOrders}</Badge>
+                    </View>
+                    <Text style={{textAlign:'center'}}>
+                      Order created order list
+                    </Text>
+                  </View>
+                </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.verticleCardContainer, {flex:1, elevation: 2}]} onPress={ () => navigation.navigate("InvoicePreviewSelectOrder") }>
-                <View style={{alignItems:'center'}}>
-                  <Image resizeMode={'cover'} style={styles.verticleImage} source={require('../assets/images/icons/payment.png')} />
+                <View style={{flex:0.08}}></View>
+                <TouchableOpacity style={[styles.verticleCardContainer, {flex:1, elevation: 2}]} onPress={ () => navigation.navigate("WIPOrderList") }>
+                  <View  style={{alignItems:'center'}}>
+                    <Image resizeMode={'cover'} style={styles.verticleImage} source={require('../assets/images/icons/in-progress.png')} />
+                  </View>
+                  <View style={styles.haveBadge}>
+                    <View style={styles.badgeTitle}>
+                      <Text style={styles.verticleCardTitle}>
+                        WIP Orders
+                      </Text>
+                      <Badge style={styles.badgeTag} rounded="full" mb={0} mr={-50} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>{isWipOrders}</Badge>
+                    </View>
+                    <Text style={{textAlign:'center'}}>
+                      Work in progress order list
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+
+              <View style={[styles.mainVerticleCard, { marginTop:10 }]}>
+                <TouchableOpacity style={[styles.verticleCardContainer, {flex:1, elevation: 2}]} onPress={ () => navigation.navigate("VehicleReadyOrderList") }>
+                  <View style={{alignItems:'center'}}>
+                    <Image resizeMode={'cover'} style={styles.verticleImage} source={require('../assets/images/icons/delivery.png')} />
+                  </View>
+                  <View style={styles.haveBadge}>
+                    <View style={styles.badgeTitle}>
+                      <Text style={styles.verticleCardTitle}>
+                        Ready Orders
+                      </Text>
+                      <Badge style={{marginLeft: 10}} rounded="full" mb={0} mr={-50} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>{isReadyOrders}</Badge>
+                    </View>
+                    <Text style={{textAlign:'center'}}>
+                      Vehicle ready order list
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+
+                <View style={{flex:0.08}}></View>
+
+                <TouchableOpacity style={[styles.verticleCardContainer, {flex:1, elevation: 2}]} onPress={ () => navigation.navigate("InvoicePreviewSelectOrder") }>
+                  <View style={{alignItems:'center'}}>
+                    <Image resizeMode={'cover'} style={styles.verticleImage} source={require('../assets/images/icons/payment.png')} />
+                  </View>
+                  <View>
+                    <Text style={styles.verticleCardTitle}>
+                      Share Invoice
+                    </Text>
+                    <Text style={styles.duePaymentText}>
+                      Due: ₹ {duePaymentDashboard}
+                    </Text>
+                    <Text style={{textAlign:'center'}}>
+                      Invoice prepared
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+                
+              </View>
+
+                {/* Create Invoice Card */}
+                {/* <TouchableOpacity style={[styles.cardContainer, { marginTop:10, elevation: 3, flex:1 }]} 
+                  onPress={() => 
+                  navigation.navigate("AddPaymentSelectOrder") 
+                  // console.log("Pressed Me!")
+                }>
+                <View style={{flex:1, alignItems: 'center'}}>
+                  <Image resizeMode={'cover'} style={styles.cardImage} source={require('../assets/images/icons/package.png')} />
                 </View>
-                <View>
-                  <Text style={styles.verticleCardTitle}>
+                <View style={styles.cardRightContent}>
+                  <Text style={styles.cardTitle}>
                     Share Invoice
                   </Text>
-                  <Text style={styles.duePaymentText}>
-                    Due: ₹ {duePaymentDashboard}
+                  <Text>
+                    Share direct parts/service invoice
                   </Text>
-                  <Text style={{textAlign:'center'}}>
-                    Invoice prepared
+                </View>
+                <View style={styles.cardArrow}>
+                    <Icon name={'caret-right'} size={18}  color={colors.gray} />
+                </View>
+              </TouchableOpacity> */}
+
+              <TouchableOpacity style={[styles.cardContainer, { marginTop:10, elevation: 2 }]} onPress={ () => navigation.navigate("CompletedInvoicePreviewSelectOrder") }>
+                <View style={{flex:1, alignItems: 'center'}}>
+                  <Image resizeMode={'cover'} style={styles.cardImage} source={require('../assets/images/icons/credit-card.png')} />
+                </View>
+                <View style={styles.cardRightContent}>
+                  <View style={[styles.badgeTitle, {justifyContent: 'flex-start'}]}>
+                    <Text style={styles.cardTitle}>
+                      Payment Completed
+                    </Text>
+                    <Badge style={{ marginLeft: 10, marginBottom: 2 }} rounded="full" mb={0} mr={-50} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>{isCompletedPaymentOrders}</Badge>
+                  </View>
+                  <Text>
+                    View completed payment orders
                   </Text>
+                </View>
+                <View style={styles.cardArrow}>
+                    <Icon name={'caret-right'} size={18}  color={colors.gray} />
                 </View>
               </TouchableOpacity>
-              
+
+              <TouchableOpacity style={[styles.cardContainer, { marginTop:10, elevation: 2 }]} onPress={ () => navigation.navigate("OrderCompletedList") }>
+                <View style={{flex:1, alignItems: 'center'}}>
+                  <Image resizeMode={'cover'} style={styles.cardImage} source={require('../assets/images/icons/packageready.png')} />
+                </View>
+                <View style={styles.cardRightContent}>
+                  <View style={[styles.badgeTitle, {justifyContent: 'flex-start'}]}>
+                    <Text style={styles.cardTitle}>
+                      Completed Orders
+                    </Text>
+                    <Badge style={{ marginLeft: 10, marginBottom: 2 }} rounded="full" mb={0} mr={-50} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>{isCompletedOrders}</Badge>
+                  </View>
+                  <Text>
+                    View completed orders list
+                  </Text>
+                </View>
+                <View style={styles.cardArrow}>
+                    <Icon name={'caret-right'} size={18}  color={colors.gray} />
+                </View>
+              </TouchableOpacity>
+
             </View>
-
-              {/* Create Invoice Card */}
-              {/* <TouchableOpacity style={[styles.cardContainer, { marginTop:10, elevation: 3, flex:1 }]} 
-                onPress={() => 
-                navigation.navigate("AddPaymentSelectOrder") 
-                // console.log("Pressed Me!")
-              }>
-              <View style={{flex:1, alignItems: 'center'}}>
-                <Image resizeMode={'cover'} style={styles.cardImage} source={require('../assets/images/icons/package.png')} />
-              </View>
-              <View style={styles.cardRightContent}>
-                <Text style={styles.cardTitle}>
-                  Share Invoice
-                </Text>
-                <Text>
-                  Share direct parts/service invoice
-                </Text>
-              </View>
-              <View style={styles.cardArrow}>
-                  <Icon name={'caret-right'} size={18}  color={colors.gray} />
-              </View>
-            </TouchableOpacity> */}
-
-            <TouchableOpacity style={[styles.cardContainer, { marginTop:10, elevation: 2 }]} onPress={ () => navigation.navigate("CompletedInvoicePreviewSelectOrder") }>
-              <View style={{flex:1, alignItems: 'center'}}>
-                <Image resizeMode={'cover'} style={styles.cardImage} source={require('../assets/images/icons/credit-card.png')} />
-              </View>
-              <View style={styles.cardRightContent}>
-                <View style={[styles.badgeTitle, {justifyContent: 'flex-start'}]}>
-                  <Text style={styles.cardTitle}>
-                    Payment Completed
-                  </Text>
-                  <Badge style={{ marginLeft: 10, marginBottom: 2 }} rounded="full" mb={0} mr={-50} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>{isCompletedPaymentOrders}</Badge>
-                </View>
-                <Text>
-                  View completed payment orders
-                </Text>
-              </View>
-              <View style={styles.cardArrow}>
-                  <Icon name={'caret-right'} size={18}  color={colors.gray} />
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={[styles.cardContainer, { marginTop:10, elevation: 2 }]} onPress={ () => navigation.navigate("OrderCompletedList") }>
-              <View style={{flex:1, alignItems: 'center'}}>
-                <Image resizeMode={'cover'} style={styles.cardImage} source={require('../assets/images/icons/packageready.png')} />
-              </View>
-              <View style={styles.cardRightContent}>
-                <View style={[styles.badgeTitle, {justifyContent: 'flex-start'}]}>
-                  <Text style={styles.cardTitle}>
-                    Completed Orders
-                  </Text>
-                  <Badge style={{ marginLeft: 10, marginBottom: 2 }} rounded="full" mb={0} mr={-50} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>{isCompletedOrders}</Badge>
-                </View>
-                <Text>
-                  View completed orders list
-                </Text>
-              </View>
-              <View style={styles.cardArrow}>
-                  <Icon name={'caret-right'} size={18}  color={colors.gray} />
-              </View>
-            </TouchableOpacity>
-
-          </View>
-        </ScrollView>
-      {/* } */}
+          </ScrollView>
+        {/* } */}
+      </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
+  garageNameTitle: {
+    textAlign: 'center', 
+    fontSize: 17, 
+    fontWeight: '500', 
+    color: colors.white, 
+    paddingVertical: 7, 
+    backgroundColor: colors.secondary,
+    position: 'absolute',
+    top: 0,
+    zIndex: 5,
+    width: '100%',
+    flex: 1,
+    left: 0, 
+    right: 0
+  },
   customSurface: {
     padding: 15,
     flexDirection: "column",
@@ -351,7 +371,9 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => ({
   userToken: state.user.userToken,
+  user: state.user.user,
   selectedGarageId: state.garage.selected_garage_id,
+  selectedGarage: state.garage.selected_garage,
   garageId: state.garage.garage_id,
 })
 

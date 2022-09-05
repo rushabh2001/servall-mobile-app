@@ -273,17 +273,10 @@ const styles = StyleSheet.create({
     surfaceContainer: {
         flex:1,
         padding:15,
-        // marginBottom: 35
     },
     stepLables: {
-        // flexDirection: 'row',
-        // width: '100%',
-        // alignContent: 'space-between'
         flexDirection: "row", 
         alignItems:"center", 
-        // elevation: 3, 
-        // backgroundColor: colors.white,
-        // padding: 8,
         marginBottom: -15,
         justifyContent:"space-between",
         width: "100%",

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
-import { Searchbar, Divider } from 'react-native-paper';
+import { Divider, TextInput } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { colors } from '../constants';
 import { API_URL } from '../constants/config';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import IconX from "react-native-vector-icons/FontAwesome5";
 
 const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
 
@@ -52,20 +53,30 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
         }
     };
 
-    const searchFilter = (text) => {
-        if (text) {
-            const newData = data.filter(
-                function (listData) {
-                    let itemData = listData.vehicle_registration_number ? listData.vehicle_registration_number.toUpperCase() : ''.toUpperCase()
-                    const textData = text.toUpperCase();
-                    return itemData.indexOf(textData) > -1;
-                }
-            );
-            setFilteredData(newData);
-            setSearchQuery(text);
-        } else {
-            setFilteredData(data);
-            setSearchQuery(text);
+    const searchFilter = async () => {
+        try {
+            const response = await fetch(`${API_URL}fetch_all_vehicle_by_query/${isGarageId}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    search: searchQuery,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setData(json.vehicle_list.data);
+                setFilteredData(json.vehicle_list.data);
+                setPage(2);
+                setRefreshing(false);
+            } else {
+                setRefreshing(false);
+            }
+        } catch (error) {
+            console.error(error);
         }
     };
 
@@ -101,6 +112,7 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
     }
 
     const pullRefresh = async () => {
+        setSearchQuery(null);
         try {
             const response = await fetch(`${API_URL}fetch_all_vehicle_by_query/${isGarageId}`, {
                 method: 'POST',
@@ -110,21 +122,19 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
                     'Authorization': 'Bearer ' + userToken
                 },
                 body: JSON.stringify({
-                    search: searchQuery,
+                    search: '',
                 }),
             });
             const json = await response.json();
             if (response.status == '200') {
-                setSearchQuery('');
                 setData(json.vehicle_list.data);
                 setFilteredData(json.vehicle_list.data);
                 setPage(2);
-                setRefreshing(false);
-            } else {
-                setRefreshing(false);
             }
         } catch (error) {
             console.error(error);
+        } finally {
+            setRefreshing(false);
         }
     };
 
@@ -152,63 +162,71 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
     }, []);
 
     return (
-            <View style={styles.surfaceContainer}>
-                <Searchbar
-                    placeholder="Search here..."
-                    onChangeText={(text) => searchFilter(text)}
-                    value={searchQuery}
-                    clearIcon={true}
-                    onClear={(text) => { searchFilter(''); setSearchQuery(''); }}
-                    style={{ marginBottom: 15 }}
-                />
-                <View style={{ flexDirection: "column", flex: 1 }}>
-                    {isLoading ? <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View> :
-                        (filteredData.length != 0 ? 
-                            <View>
-                                <FlatList
-                                    ItemSeparatorComponent= {() => (<Divider />)}
-                                    data={filteredData}
-                                    onEndReached={getVehicleList}
-                                    onEndReachedThreshold={0.5}
-                                    refreshControl={
-                                        <RefreshControl
-                                            refreshing={refreshing}
-                                            onRefresh={onRefresh}
-                                            colors={['green']}
-                                        />
-                                    }
-                                    ListFooterComponent={renderFooter}
-                                    keyExtractor={item => item.id}
-                                    renderItem={({item, index}) => (
-                                        <View style={styles.cards}>
-                                            <View>
-                                                <Text style={styles.cardCustomerName}>Owner Name: {item.users[0] ? item?.users[0].name : null}</Text>
-                                                <Divider />
-                                                <Text style={styles.cardCustomerName}>Owner`s Phone Number: {item.users[0] ? item?.users[0].phone_number : null}</Text>
-                                                <Divider />
-                                                <Text style={styles.cardCustomerName}>Brand: {item.brand.name}</Text>
-                                                <Divider />
-                                                <Text style={styles.cardCustomerName}>Model: {item.vehicle_model.model_name}</Text>
-                                                <Divider />
-                                                <Text style={styles.cardCustomerName}>Registration Number: {item.vehicle_registration_number}</Text>
-                                            </View>
-                                            <View style={styles.cardActions}>
-                                                <TouchableOpacity onPress={()=> sendVehicleData(index)} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>Select Vehicle</Text></TouchableOpacity>
-                                            </View>
-                                        </View>
-                                    )}
-                                />     
-                            </View>
-                        :
-                            <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 50,  backgroundColor:colors.white,}}>
-                                <Text style={{ color: colors.black, textAlign: 'center'}}>No Vehicles are associated with this Garage!</Text>
-                                <TouchableOpacity style={styles.buttonStyle} onPress={ () => navigation.navigate('AddRepairOrderStep2')}><Text><Icon name={'plus'} size={16} color={colors.secondary} /> Add New Vehicle</Text></TouchableOpacity>
-                            </View>
-                        )
-                    }
+        <View style={styles.surfaceContainer}>
+            <View>
+                <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                    <TextInput
+                        mode={'flat'}
+                        placeholder="Search here..."
+                        onChangeText={(text) => setSearchQuery(text)}
+                        value={searchQuery}
+                        activeUnderlineColor={colors.transparent}
+                        underlineColor={colors.transparent}
+                        style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                        right={(searchQuery != null && searchQuery != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => onRefresh()} />}
+                    />
+                    <TouchableOpacity onPress={() => searchFilter()} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                        <IconX name={'search'} size={17} color={colors.white} />
+                    </TouchableOpacity>
                 </View>
             </View>
-     
+            <View style={{ flexDirection: "column", flex: 1 }}>
+                {isLoading ? <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View> :
+                    (filteredData.length != 0 ? 
+                        <View>
+                            <FlatList
+                                ItemSeparatorComponent= {() => (<Divider />)}
+                                data={filteredData}
+                                onEndReached={filteredData?.length > 9 && getVehicleList}
+                                onEndReachedThreshold={0.5}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={refreshing}
+                                        onRefresh={onRefresh}
+                                        colors={['green']}
+                                    />
+                                }
+                                ListFooterComponent={filteredData?.length > 9 && renderFooter}
+                                keyExtractor={item => item.id}
+                                renderItem={({item, index}) => (
+                                    <View style={styles.cards}>
+                                        <View>
+                                            <Text style={styles.cardCustomerName}>Owner Name: {item.users[0] ? item?.users[0].name : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardCustomerName}>Owner`s Phone Number: {item.users[0] ? item?.users[0].phone_number : null}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardCustomerName}>Brand: {item.brand.name}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardCustomerName}>Model: {item.vehicle_model.model_name}</Text>
+                                            <Divider />
+                                            <Text style={styles.cardCustomerName}>Registration Number: {item.vehicle_registration_number}</Text>
+                                        </View>
+                                        <View style={styles.cardActions}>
+                                            <TouchableOpacity onPress={()=> sendVehicleData(index)} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>Select Vehicle</Text></TouchableOpacity>
+                                        </View>
+                                    </View>
+                                )}
+                            />     
+                        </View>
+                    :
+                        <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1,  backgroundColor:colors.white,}}>
+                            <Text style={{ color: colors.black, textAlign: 'center'}}>No Vehicles are associated with this Garage!</Text>
+                            <TouchableOpacity style={[styles.buttonStyle, { marginTop: 15 }]} onPress={ () => navigation.navigate('AddRepairOrderStep2')}><Text style={{ color: colors.black, padding: 5 }}><Icon name={'plus'} size={16} color={colors.secondary} /> Add New Vehicle</Text></TouchableOpacity>
+                        </View>
+                    )
+                }
+            </View>
+        </View>
     );
 }
 
@@ -217,7 +235,6 @@ const styles = StyleSheet.create({
     surfaceContainer: {
         flex:1,
         padding:15,
-        // marginBottom: 35
     },
     buttonStyle: {
         letterSpacing: 0,

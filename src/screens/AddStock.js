@@ -6,6 +6,7 @@ import { colors } from '../constants';
 import { API_URL } from '../constants/config';
 import InputScrollView from 'react-native-input-scroll-view';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import IconX from "react-native-vector-icons/FontAwesome5";
 
 const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, garageId, selectedGarage }) => {
 
@@ -166,20 +167,30 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
         }
     }
 
-    const searchFilterForParts = (text) => {
-        if (text) {
-            let newData = partList.filter(
-                function (listData) {
-                let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
-                let textData = text.toUpperCase();
-                return itemData.indexOf(textData) > -1;
-                }
-            );
-            setFilteredPartData(newData);
-            setSearchQueryForParts(text);
-        } else {
-            setFilteredPartData(partList);
-            setSearchQueryForParts(text);
+    const searchFilterForParts  = async () => {
+        try {
+            const response = await fetch(`${API_URL}fetch_parts`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    search: searchQueryForParts,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setPartList(json.data.data);
+                setFilteredPartData(json.data.data);
+                setPartPage(2);
+                setPartRefreshing(false);
+            } else {
+                setPartRefreshing(false);
+            }
+        } catch (error) {
+            console.error(error);
         }
     };
 
@@ -200,8 +211,6 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
             });
             const json = await res.json();
             if (json !== undefined) {
-                // setPartList(json.data);
-                // setFilteredPartData(json.data);
                 setPartList([
                     ...partList,
                     ...json.data.data
@@ -214,7 +223,6 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
         } catch (e) {
             console.log(e);
         } finally {
-            // setIsLoadingPartList(false)
             { partPage == 1 && setIsLoadingPartList(false) }
             { partPage != 1 && setIsPartScrollLoading(false) }
             setPartPage(partPage + 1);
@@ -222,6 +230,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
     };
 
     const pullPartRefresh = async () => {
+        setSearchQueryForParts(null);
         try {
             const response = await fetch(`${API_URL}fetch_parts`, {
                 method: 'POST',
@@ -231,21 +240,19 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                     'Authorization': 'Bearer ' + userToken
                 },
                 body: JSON.stringify({
-                    search: searchQueryForParts,
+                    search: null,
                 }),
             });
             const json = await response.json();
             if (response.status == '200') {
-                setSearchQueryForParts('');
                 setPartList(json.data.data);
                 setFilteredPartData(json.data.data);
                 setPartPage(2);
-                setPartRefreshing(false);
-            } else {
-                setPartRefreshing(false);
             }
         } catch (error) {
             console.error(error);
+        } finally {
+            setPartRefreshing(false);
         }
     };
 
@@ -268,87 +275,6 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
         pullPartRefresh();
     };
 
-    // const searchFilterForVendors = (text) => {
-    //     if (text) {
-    //         let newData = vendorList.filter(
-    //             function (listData) {
-    //             let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
-    //             let textData = text.toUpperCase();
-    //             return itemData.indexOf(textData) > -1;
-    //             }
-    //         );
-    //         setFilteredVendorData(newData);
-    //         setSearchQueryForVendors(text);
-    //     } else {
-    //         setFilteredVendorData(vendorList);
-    //         setSearchQueryForVendors(text);
-    //     }
-    // };
-
-    // const getVendorList = async () => {
-    //     setIsLoadingVendorList(true);
-    //     try {
-    //         const res = await fetch(`${API_URL}fetch_vendors`, {
-    //             method: 'GET',
-    //             headers: {
-    //                 'Accept': 'application/json',
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': 'Bearer ' + userToken
-    //             },
-    //         });
-    //         const json = await res.json();
-    //         if (json !== undefined) {
-    //             setVendorList(json.data);
-    //             setFilteredVendorData(json.data);
-    //         }
-    //     } catch (e) {
-    //         console.log(e);
-    //     } finally {
-    //         setIsLoadingVendorList(false)
-    //     }
-    // };
-
-    // const addNewVendor = async () => {
-    //     let data = { 'name': isNewVendor }
-    //     try {
-    //         const res = await fetch(`${API_URL}add_vendor`, {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Accept': 'application/json',
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': 'Bearer ' + userToken
-    //             },
-    //             body: JSON.stringify(data)
-    //         });
-    //         const json = await res.json();
-    //         if (json !== undefined) {
-    //             // console.log('setVendorList', json.data);
-    //             getVendorList();
-    //             setIsVendor(parseInt(json.data.id));
-    //             setIsVendorName(json.data.name);
-    //         }
-    //     } catch (e) {
-    //         console.log(e);
-    //     }
-    // }
-
-    const searchFilterForGarages = (text) => {
-        if (text) {
-            let newData = garageList.filter(
-                function (listData) {
-                    let itemData = listData.garage_name ? listData.garage_name.toUpperCase() : ''.toUpperCase()
-                    let textData = text.toUpperCase();
-                    return itemData.indexOf(textData) > -1;
-                }
-            );
-            setFilteredGarageData(newData);
-            setSearchQueryForGarages(text);
-        } else {
-            setFilteredGarageData(garageList);
-            setSearchQueryForGarages(text);
-        }
-    };
-
     const getGarageList = async () => {
         { garagePage == 1 && setIsLoadingGarageList(true) }
         { garagePage != 1 && setIsGarageScrollLoading(true) }
@@ -363,6 +289,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                 body: JSON.stringify({
                     user_id: userId,
                     user_role: userRole,
+                    search: searchQueryForGarages,
                 }),
             });
             const json = await res.json();
@@ -376,7 +303,6 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                     ...filteredGarageData,
                     ...json.garage_list.data
                 ]);
-                // setGarageList(json.garage_list);
             }
         } catch (e) {
             console.log(e);
@@ -386,8 +312,8 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
             setGaragePage(garagePage + 1);
         }
     };
-
-    const pullGarageRefresh = async () => {
+    
+    const searchFilterForGarages = async () => {
         try {
             const response = await fetch(`${API_URL}fetch_owner_garages`, {
                 method: 'POST',
@@ -399,11 +325,11 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                 body: JSON.stringify({
                     user_id: userId,
                     user_role: userRole,
+                    search: searchQueryForGarages,
                 }),
             });
             const json = await response.json();
             if (response.status == '200') {
-                setSearchQueryForGarages('');
                 setGarageList(json.garage_list.data);
                 setFilteredGarageData(json.garage_list.data);
                 setGaragePage(2);
@@ -413,6 +339,35 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
             }
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    const pullGarageRefresh = async () => {
+        setSearchQueryForGarages(null);
+        try {
+            const response = await fetch(`${API_URL}fetch_owner_garages`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    user_role: userRole,
+                    search: null,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setGarageList(json.garage_list.data);
+                setFilteredGarageData(json.garage_list.data);
+                setGaragePage(2);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setGarageRefreshing(false);
         }
     };
 
@@ -456,9 +411,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
             })
             .then((res) => {
                 if(res.statusCode == 404) {
-                    console.log('getInvetoryData', res.data);
-                    // setIsVendor(parseInt(res.data.id));
-                    // setIsVendorName(res.data.name);
+                    // console.log('getInvetoryData', res.data);
                     setIsCurrentStock('');
                     setIsMaxStock('');
                     setIsMinStock('');
@@ -493,7 +446,6 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
     }
 
     useEffect(() => {
-        // getVendorList();
         getGarageList();
         getPartList();
     }, []);
@@ -554,28 +506,9 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                             style={{marginTop: 18, backgroundColor: '#f1f1f1', width:'100%' }}
                             placeholder="Select Part"
                             value={isPartName}
-                            // onChangeText={() => getInvetoryData()}
                             right={<TextInput.Icon name="menu-down" />}
                         />
                     </View>
-
-                    {/* <View>
-                        <TouchableOpacity 
-                            style={styles.partDropDownField} 
-                            onPress={() => {
-                                setVendorListModal(true);
-                            }}
-                        >
-                        </TouchableOpacity>
-                        <TextInput
-                            mode="outlined"
-                            label='Vendor'
-                            style={{marginTop: 18, backgroundColor: '#f1f1f1', width:'100%' }}
-                            placeholder="Select Vendor"
-                            value={isVendorName}
-                            right={<TextInput.Icon name="menu-down" />}
-                        />
-                    </View> */}
 
                     {isLoading == true ? <View style={{marginVertical: 170, flex: 1, justifyContent: 'center', alignItems: 'center'}}><ActivityIndicator></ActivityIndicator></View> :
                         <>
@@ -683,27 +616,36 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                 </View>
             </InputScrollView>
 
-        <Portal>
-            {/* Parts List Modal */}
-            <Modal visible={partListModal} onDismiss={() => { setPartListModal(false); setIsPart(0); setIsPartName(''); setPartError(''); setSearchQueryForParts('');  searchFilterForParts();}} contentContainerStyle={styles.modalContainerStyle}>
-                <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Part</Text>
-                {(isLoadingPartList == true) ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator>
-                    :
-                    <>
-                        <View style={{marginTop: 20, marginBottom: 10}}>
-                            <Searchbar
-                                placeholder="Search here..."
-                                onChangeText={(text) => { if(text != null) searchFilterForParts(text)}}
-                                value={searchQueryForParts}
-                                elevation={0}
-                                style={{ elevation: 0.8, marginBottom: 10}}
-                            />
+            <Portal>
+                {/* Parts List Modal */}
+                <Modal visible={partListModal} onDismiss={() => { setPartListModal(false); setIsPart(0); setIsPartName(''); setPartError(''); setSearchQueryForParts('');  searchFilterForParts();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Part</Text>
+                    {(isLoadingPartList == true) ? <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View> :
+                        <View style={{ marginTop: 20, flex: 1 }}>
+                            {/* Search Bar */}
+                            <View>
+                                <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                                    <TextInput
+                                        mode={'flat'}
+                                        placeholder="Search here..."
+                                        onChangeText={(text) => setSearchQueryForParts(text)}
+                                        value={searchQueryForParts}
+                                        activeUnderlineColor={colors.transparent}
+                                        underlineColor={colors.transparent}
+                                        style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                                        right={(searchQueryForParts != null && searchQueryForParts != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => onPartRefresh()} />}
+                                    />
+                                    <TouchableOpacity onPress={() => searchFilterForParts()} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                                        <IconX name={'search'} size={17} color={colors.white} />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
                             {filteredPartData?.length > 0 ?  
                                 <FlatList
                                     ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
                                     data={filteredPartData}
-                                    style={{ borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
-                                    onEndReached={filteredPartData?.length > 10 && getPartList}
+                                    style={{ borderColor: '#0000000a', borderWidth: 1, flex: 1  }}
+                                    onEndReached={filteredPartData?.length > 9 && getPartList}
                                     onEndReachedThreshold={0.5}
                                     refreshControl={
                                         <RefreshControl
@@ -712,7 +654,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                                             colors={['green']}
                                         />
                                     }
-                                    ListFooterComponent={renderPartFooter}
+                                    ListFooterComponent={filteredPartData?.length > 9 && renderPartFooter}
                                     keyExtractor={item => item.id}
                                     renderItem={({item}) => (
                                         <>
@@ -745,142 +687,35 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                                 </TouchableOpacity>
                             </View>
                         </View>
-                    </>
-                }
-            </Modal>
-
-            {/* Add New Part Model */}
-            <Modal visible={addNewPartModal} onDismiss={() => { setAddNewPartModal(false); setPartListModal(true);  setIsNewPart(0); setNewPartError(''); }} contentContainerStyle={styles.modalContainerStyle}>
-                <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Part</Text>
-                <View>
-                    <TextInput
-                        mode="outlined"
-                        label='Part Name'
-                        style={styles.input}
-                        placeholder="Part Name"
-                        value={isNewPart}
-                        onChangeText={(text) => setIsNewPart(text)}
-                    />
-                </View>
-                {newPartError?.length > 0 &&
-                    <Text style={styles.errorTextStyle}>{newPartError}</Text>
-                }
-                <View style={{ flexDirection: "row", marginTop: 10}}>
-                    <Button
-                        style={{ marginTop: 15, flex: 1, marginRight: 10 }}
-                        mode={'contained'}
-                        onPress={() => {
-                            if(isNewPart == "") {
-                                setNewPartError("Please Enter Part Name");
-                            } else {
-                                setAddNewPartModal(false);
-                                addNewPart();
-                            }
-                        }}
-                    >
-                        Add
-                    </Button>
-                    <Button
-                        style={{ marginTop: 15, flex: 1 }}
-                        mode={'contained'}
-                        onPress={() => {
-                            setAddNewPartModal(false);
-                            setPartListModal(true);
-                            setIsNewPart('');
-                            setNewPartError('');
-                        }}
-                    >
-                        Close
-                    </Button>
-                </View>
-            </Modal>
-
-                {/* Vendors List Modal */}
-                {/* <Modal visible={vendorListModal} onDismiss={() => { setVendorListModal(false); setIsVendor(0); setIsVendorName(''); setVendorError(''); setSearchQueryForVendors('');  searchFilterForVendors();}} contentContainerStyle={styles.modalContainerStyle}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Vendor</Text>
-                    {(isLoadingVendorList == true) ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator>
-                    :
-                        <>
-                            <View style={{marginTop: 20, marginBottom: 10}}>
-                                <Searchbar
-                                    placeholder="Search here..."
-                                    onChangeText={(text) => { if(text != null) searchFilterForVendors(text)}}
-                                    value={searchQueryForVendors}
-                                    elevation={0}
-                                    style={{ elevation: 0.8, marginBottom: 10}}
-                                />
-                                {filteredVendorData?.length > 0 ?  
-                                    <FlatList
-                                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
-                                        data={filteredVendorData}
-                                        style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
-                                        keyExtractor={item => item.id}
-                                        renderItem={({item}) => (
-                                            <>
-                                                <List.Item
-                                                    title={
-                                                        <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
-                                                            <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
-                                                        </View>
-                                                    }
-                                                    onPress={() => {
-                                                            setIsVendorName(item.name); 
-                                                            setIsVendor(item.id); 
-                                                            setVendorError('');
-                                                            setVendorListModal(false);  
-                                                            setSearchQueryForVendors(''); 
-                                                            searchFilterForVendors();
-                                                        }
-                                                    }
-                                                />
-                                            </>
-                                        )} 
-                                    />
-                                :
-                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
-                                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such vendor is associated!</Text>
-                                    </View>
-                                }
-                                <View style={{justifyContent:"flex-end", flexDirection: 'row'}}>
-                                    <TouchableOpacity  style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: colors.primary, marginTop: 7, paddingVertical: 3, paddingHorizontal: 10, borderRadius: 4}} onPress={() => { setAddNewVendorModal(true); setVendorListModal(false); }}>
-                                        <Icon style={{color: colors.white, marginRight: 4}} name="plus" size={16} />
-                                        <Text style={{color: colors.white}}>Add Vendor</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                        </>
                     }
-                </Modal> */}
+                </Modal>
 
-                {/* Add New Vendor Modal */}
-                {/* <Modal visible={addNewVendorModal} onDismiss={() => { setAddNewVendorModal(false); setVendorListModal(true);  setIsNewVendor(0); setNewVendorError(''); }} contentContainerStyle={styles.modalContainerStyle}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Vendor</Text>
+                {/* Add New Part Model */}
+                <Modal visible={addNewPartModal} onDismiss={() => { setAddNewPartModal(false); setPartListModal(true);  setIsNewPart(''); setNewPartError(''); }} contentContainerStyle={styles.modalContainerStyle}>
+                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Part</Text>
                     <View>
                         <TextInput
                             mode="outlined"
-                            label='Vendor Name'
+                            label='Part Name'
                             style={styles.input}
-                            placeholder="Vendor Name"
-                            value={isNewVendor}
-                            onChangeText={(text) => setIsNewVendor(text)}
+                            placeholder="Part Name"
+                            value={isNewPart}
+                            onChangeText={(text) => setIsNewPart(text)}
                         />
                     </View>
-                    {newVendorError?.length > 0 &&
-                        <Text style={styles.errorTextStyle}>{newVendorError}</Text>
+                    {newPartError?.length > 0 &&
+                        <Text style={styles.errorTextStyle}>{newPartError}</Text>
                     }
-
                     <View style={{ flexDirection: "row", marginTop: 10}}>
                         <Button
                             style={{ marginTop: 15, flex: 1, marginRight: 10 }}
                             mode={'contained'}
                             onPress={() => {
-                                if(isNewVendor == "") {
-                                    setNewVendorError("Please Enter Vendor Name");
+                                if(isNewPart == "") {
+                                    setNewPartError("Please Enter Part Name");
                                 } else {
-                                    setAddNewVendorModal(false);
-                                    setIsNewVendor('');
-                                    setNewVendorError('');
-                                    addNewVendor();
+                                    setAddNewPartModal(false);
+                                    addNewPart();
                                 }
                             }}
                         >
@@ -890,74 +725,84 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                             style={{ marginTop: 15, flex: 1 }}
                             mode={'contained'}
                             onPress={() => {
-                                setAddNewVendorModal(false);
-                                setVendorListModal(true);
-                                setIsNewVendor('');
-                                setNewVendorError('');
+                                setAddNewPartModal(false);
+                                setPartListModal(true);
+                                setIsNewPart('');
+                                setNewPartError('');
                             }}
                         >
                             Close
                         </Button>
                     </View>
-                </Modal> */}
+                </Modal>
 
                 {/* Garage List Modal */}
                 <Modal visible={garageListModal} onDismiss={() => { setGarageListModal(false); setIsGarageId(0); setIsGarageName(''); setGarageError(''); setSearchQueryForGarages('');  searchFilterForGarages();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Garage</Text>
                     {(isLoadingGarageList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
-                        <>
-                            <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
-                                <Searchbar
-                                    placeholder="Search here..."
-                                    onChangeText={(text) => { if(text != null) searchFilterForGarages(text)}}
-                                    value={searchQueryForGarages}
-                                    elevation={0}
-                                    style={{ elevation: 0.8, marginBottom: 10 }}
-                                />
-                                {filteredGarageData?.length > 0 ?  
-                                    <FlatList
-                                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
-                                        data={filteredGarageData}
-                                        onEndReached={getGarageList}
-                                        onEndReachedThreshold={0.5}
-                                        refreshControl={
-                                            <RefreshControl
-                                                refreshing={garageRefreshing}
-                                                onRefresh={onGarageRefresh}
-                                                colors={['green']}
-                                            />
-                                        }
-                                        ListFooterComponent={renderGarageFooter}
-                                        style={{borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
-                                        keyExtractor={item => item.id}
-                                        renderItem={({item}) => (
-                                            <>
-                                                <List.Item
-                                                    title={
-                                                        <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
-                                                            <Text style={{fontSize:16, color: colors.black}}>{item.garage_name}</Text>
-                                                        </View>
-                                                    }
-                                                    onPress={() => {
-                                                            setIsGarageName(item.garage_name); 
-                                                            setIsGarageId(item.id); 
-                                                            setGarageError('');
-                                                            setGarageListModal(false);  
-                                                        }
-                                                    }
-                                                />
-                                            </>
-                                        )} 
+                        <View style={{ marginTop: 20, flex: 1 }}>
+                            {/* Search Bar */}
+                            <View>
+                                <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                                    <TextInput
+                                        mode={'flat'}
+                                        placeholder="Search here..."
+                                        onChangeText={(text) => setSearchQueryForGarages(text)}
+                                        value={searchQueryForGarages}
+                                        activeUnderlineColor={colors.transparent}
+                                        underlineColor={colors.transparent}
+                                        style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                                        right={(searchQueryForGarages != null && searchQueryForGarages != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => onGarageRefresh()} />}
                                     />
-                                    :
-                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
-                                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such garage found!</Text>
-                                    </View>
-                                }
+                                    <TouchableOpacity onPress={() => searchFilterForGarages()} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                                        <IconX name={'search'} size={17} color={colors.white} />
+                                    </TouchableOpacity>
+                                </View>
                             </View>
-                        </>
+                            {filteredGarageData?.length > 0 ?  
+                                <FlatList
+                                    ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                    data={filteredGarageData}
+                                    style={{borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
+                                    onEndReached={filteredGarageData?.length > 9 && getGarageList}
+                                    onEndReachedThreshold={0.5}
+                                    refreshControl={
+                                        <RefreshControl
+                                            refreshing={garageRefreshing}
+                                            onRefresh={onGarageRefresh}
+                                            colors={['green']}
+                                        />
+                                    }
+                                    ListFooterComponent={filteredGarageData?.length > 9 && renderGarageFooter}
+                                    keyExtractor={item => item.id}
+                                    renderItem={({item}) => (
+                                        <>
+                                            <List.Item
+                                                title={
+                                                    <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                        <Text style={{fontSize:16, color: colors.black}}>{item.garage_name}</Text>
+                                                    </View>
+                                                }
+                                                onPress={() => {
+                                                        setIsGarageName(item.garage_name); 
+                                                        setIsGarageId(item.id); 
+                                                        setGarageError('');
+                                                        setGarageListModal(false);  
+                                                    }
+                                                }
+                                            />
+                                        </>
+                                    )} 
+                                />
+                                :
+                                <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
+                                    <Text style={{ color: colors.black, textAlign: 'center'}}>No such garage found!</Text>
+                                </View>
+                            }
+                        </View>
                     }
                 </Modal>
+
             </Portal>
         </View>
     )

@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
-import { useTheme, Searchbar, Button, DataTable, Divider } from 'react-native-paper';
+import { TextInput, Divider } from 'react-native-paper';
 import { colors } from '../constants';
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import DocumentPicker from 'react-native-document-picker';
 import { connect } from 'react-redux';
 import { API_URL } from "../constants/config";
 import { useIsFocused  } from '@react-navigation/native';
 import { Table, Row, Cell } from 'react-native-table-component';
 import { FlatList } from 'react-native-gesture-handler';
 
-const Parts = ({ navigation, userToken, selectedGarageId }) => {
+const Parts = ({ navigation, userToken, selectedGarageId, user, selectedGarage }) => {
   const [isLoading, setIsLoading] = useState(true);
   // const [singleFile, setSingleFile] = useState('');
   const [partList, setPartList] = useState([]);
-  const { colors } = useTheme();
   const isFocused = useIsFocused();
   const tableHead = ['(P No.) Name', 'Stock', 'MRP','Rack No', 'Action'];
   const [isGarageId, setIsGarageId] = useState(selectedGarageId);
@@ -84,55 +82,61 @@ const Parts = ({ navigation, userToken, selectedGarageId }) => {
     }
   };
 
-  const searchFilterForParts = (text) => {
-    if (text) {
-        let newData = partList.filter(
-            function (listData) {
-            let itemData = listData.parts.name ? listData.parts.name.toUpperCase() : ''.toUpperCase()
-            let textData = text.toUpperCase();
-            return itemData.indexOf(textData) > -1;
-            }
-        );
-        setFilteredPartData(newData);
-        setSearchQueryForParts(text);
-    } else {
-        setFilteredPartData(partList);
-        setSearchQueryForParts(text);
+  const searchFilterForParts = async () => {
+    try {
+      const response = await fetch(`${API_URL}fetch_garage_inventory/${selectedGarageId}`, {
+          method: 'POST',
+          headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + userToken
+          },
+          body: JSON.stringify({
+            search: searchQueryForParts,
+          }),
+      });
+      const json = await response.json();
+      if (response.status == '200') {
+          setPartList(json.data.data);
+          setFilteredPartData(json.data.data);
+          setPage(2);
+          setRefreshing(false);
+      } else {
+          setRefreshing(false);
+      }
+    } catch (error) {
+        console.error(error);
     }
   };
 
   const pullRefresh = async () => {
+    setSearchQueryForParts(null);
     try {
-        const response = await fetch(`${API_URL}fetch_garage_inventory/${selectedGarageId}`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + userToken
-            },
-            body: JSON.stringify({
-              search: searchQueryForParts,
-            }),
-        });
-        const json = await response.json();
-        console.log('1', json);
-        if (response.status == '200') {
-            setSearchQueryForParts('');
-            setPartList(json.data.data);
-            setFilteredPartData(json.data.data);
-            setPage(2);
-            setRefreshing(false);
-        } else {
-            // console.log('2', response.status);
-            setRefreshing(false);
-        }
+      const response = await fetch(`${API_URL}fetch_garage_inventory/${selectedGarageId}`, {
+          method: 'POST',
+          headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + userToken
+          },
+          body: JSON.stringify({
+            search: '',
+          }),
+      });
+      const json = await response.json();
+      if (response.status == '200') {
+          setPartList(json.data.data);
+          setFilteredPartData(json.data.data);
+          setPage(2);
+      }
     } catch (error) {
-        // if (error?.message == 'Unauthenticated.') signOut();
         console.error(error);
+    } finally {
+      setRefreshing(false);
     }
-};
+  };
 
-const renderFooter = () => {
+  const renderFooter = () => {
     return (
         <>
             {isScrollLoading && (
@@ -144,114 +148,116 @@ const renderFooter = () => {
             )}
         </>
     );
-};
+  };
 
-const onRefresh = () => {
+  const onRefresh = () => {
     setRefreshing(true);
     pullRefresh();
-};
+  };
 
   useEffect(() => {
     getPartList();
   }, [isFocused]);
 
   const element = (data, index) => (
-    // <TouchableOpacity onPress={() => {navigation.navigate('EditStock', {'data': data})}} style={{marginLeft: 20}}>
       <Icon name="chevron-circle-right" size={18} style={styles.actionArrow} />
-    // </TouchableOpacity>
   );
 
   return (
-    <View style= {styles.customSurface}>
-        
-      {/* Search Bar */}
-      <Searchbar
-        placeholder="Search here..."
-        onChangeText={(text) => { if(text != null) searchFilterForParts(text) }}
-        value={searchQueryForParts}
-        style={{ marginBottom: 15 }}
-      />
+    <View style={{ flex: 1 }}>
+      <View style={{ marginBottom: 35 }}>
+      { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
+      </View>
+      <View style= {styles.customSurface}>
+          
+        {/* Search Bar */}
+        <View>
+          <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+              <TextInput
+                  mode={'flat'}
+                  placeholder="Search here..."
+                  onChangeText={(text) => setSearchQueryForParts(text)}
+                  value={searchQueryForParts}
+                  activeUnderlineColor={colors.transparent}
+                  underlineColor={colors.transparent}
+                  style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                  right={(searchQueryForParts != null && searchQueryForParts != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => onRefresh()} />}
+              />
+              <TouchableOpacity onPress={() => searchFilterForParts()} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                  <Icon name={'search'} size={17} color={colors.white} />
+              </TouchableOpacity>
+          </View>
+        </View>
 
-      {/* <View style={{flexDirection:'row', flex: 1 }}>
         <View style={{flex:1}}>
-          <TouchableOpacity
-            activeOpacity={0.5}
-            style={styles.buttonStyle}
-            onPress={selectOneFile}>
-            Single file selection button
-            <Icon name="upload" size={18} color={colors.primary} style={styles.downloadIcon} />
-            <Text style={{marginRight: 10, fontSize: 18, color: "#000"}}>
-              Upload CSV
-            </Text>
-          </TouchableOpacity>
+          {isLoading ? <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View>  :
+            <ScrollView>
+              <View style={styles.container}>
+                <Table>
+                  <Row 
+                    data={tableHead} 
+                    style={styles.head} 
+                    textStyle={styles.textHeading}
+                    flexArr= {[2, 1, 1, 1, 1]}
+                  />
+                    {filteredPartData?.length > 0 ?  
+                      <FlatList
+                          ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                          data={filteredPartData}
+                          onEndReached={filteredPartData?.length > 9 && getPartList}
+                          onEndReachedThreshold={0.5}
+                          refreshControl={
+                              <RefreshControl
+                                  refreshing={refreshing}
+                                  onRefresh={onRefresh}
+                                  colors={['green']}
+                              />
+                          }
+                          ListFooterComponent={filteredPartData?.length > 9 && renderFooter}
+                          keyExtractor={item => item.id}
+                          renderItem={({item, index}) => (
+                            <View style={{margin: 5}}>
+                              <TouchableOpacity style={{flexDirection: 'row'}} onPress={() => {navigation.navigate('EditStock', {'data': item})}}>
+                                <Cell data={item.parts.name} style={{flex: 2}} textStyle={styles.text} />
+                                <Cell data={item.current_stock} style={{flex: 1}} textStyle={styles.text} />
+                                <Cell data={item.mrp} style={{flex: 1}} textStyle={styles.text} />
+                                <Cell data={item.rack_id} style={{flex: 1}} textStyle={styles.text} />
+                                <Cell data={element(item, index)} style={{ flex: 1 }} textStyle={styles.text} />
+                              </TouchableOpacity>
+                            </View>
+                          )} 
+                      />
+                      :
+                      <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
+                          <Text style={{ color: colors.black, textAlign: 'center'}}>No such part is associated to your garage!</Text>
+                      </View>
+                    }
+                </Table>
+              </View>
+            </ScrollView>
+          }
         </View>
-        <View style={{flex:0.7}}>
-          <Button
-              style={styles.buttonBlue}
-              color="#123038"
-              icon={({color}) => (<Icon name="plus" color={color} size={18} />) }
-              mode="contained"
-              onPress={() => navigation.navigate('PartsStack', {screen: 'AddStock'})}
-              uppercase={false} 
-            > Add Stock
-          </Button>
-        </View>
-
-      </View> */}
-
-      <View style={{flex:1}}>
-        {isLoading ? <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View>  :
-          <ScrollView>
-            <View style={styles.container}>
-              <Table>
-                <Row 
-                  data={tableHead} 
-                  style={styles.head} 
-                  textStyle={styles.textHeading}
-                  flexArr= {[2, 1, 1, 1, 1]}
-                />
-                  {filteredPartData?.length > 0 ?  
-                    <FlatList
-                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
-                        data={filteredPartData}
-                        onEndReached={filteredPartData?.length > 10 && getPartList}
-                        onEndReachedThreshold={0.5}
-                        refreshControl={
-                            <RefreshControl
-                                refreshing={refreshing}
-                                onRefresh={onRefresh}
-                                colors={['green']}
-                            />
-                        }
-                        ListFooterComponent={filteredPartData?.length > 10 && renderFooter}
-                        keyExtractor={item => item.id}
-                        renderItem={({item, index}) => (
-                          <View style={{margin: 5}}>
-                            <TouchableOpacity style={{flexDirection: 'row'}} onPress={() => {navigation.navigate('EditStock', {'data': item})}}>
-                              <Cell data={item.parts.name} style={{flex: 2}} textStyle={styles.text} />
-                              <Cell data={item.current_stock} style={{flex: 1}} textStyle={styles.text} />
-                              <Cell data={item.mrp} style={{flex: 1}} textStyle={styles.text} />
-                              <Cell data={item.rack_id} style={{flex: 1}} textStyle={styles.text} />
-                              <Cell data={element(item, index)} style={{ flex: 1 }} textStyle={styles.text} />
-                            </TouchableOpacity>
-                          </View>
-                        )} 
-                    />
-                    :
-                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
-                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such part is associated to your garage!</Text>
-                    </View>
-                  }
-              </Table>
-            </View>
-          </ScrollView>
-        }
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  garageNameTitle: {
+    textAlign: 'center', 
+    fontSize: 17, 
+    fontWeight: '500', 
+    color: colors.white, 
+    paddingVertical: 7, 
+    backgroundColor: colors.secondary,
+    position: 'absolute',
+    top: 0,
+    zIndex: 5,
+    width: '100%',
+    flex: 1,
+    left: 0, 
+    right: 0
+  },
   container: { 
     flex: 1, 
     borderRadius: 5,
@@ -312,6 +318,8 @@ const mapStateToProps = state => ({
   userRole: state.role.user_role,
   userToken: state.user.userToken,
   selectedGarageId: state.garage.selected_garage_id,
+  user: state.user.user,
+  selectedGarage: state.garage.selected_garage,
   garageId: state.garage.garage_id,
 })
 
