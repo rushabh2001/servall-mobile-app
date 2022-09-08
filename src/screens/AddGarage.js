@@ -12,7 +12,7 @@ import { Picker } from '@react-native-picker/picker';
 import RadioForm from 'react-native-simple-radio-button';
 
 
-const AddGarage = ({navigation, userToken}) => {
+const AddGarage = ({navigation, userToken, selectedGarageId, selectedGarage, user }) => {
     
     // Garage Fields
     const [isGarageName, setIsGarageName] = useState('');
@@ -237,7 +237,7 @@ const AddGarage = ({navigation, userToken}) => {
         const res = await DocumentPicker.pick({
             type: [DocumentPicker.types.images],
         });
-        console.log(res);
+        // console.log(res);
         setImageFile(res[0]);
         } catch (err) {
             setImageFile(null);
@@ -260,305 +260,325 @@ const AddGarage = ({navigation, userToken}) => {
     }, []);
 
     return (
-    <View style={styles.pageContainer}>
-        { (isLoading == true) ? <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View> :
-            <InputScrollView
-                ref={scroll1Ref}
-                contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
-                keyboardShouldPersistTaps={'handled'}
-                showsVerticalScrollIndicator={false}
-                scrollEventThrottle={8}
-                behavior="padding"
-            >
-                <View style={{flex:1}}>
-                    <Text style={styles.headingStyle}>Garage Details:</Text>
-                    <TextInput
-                        mode="outlined"
-                        label='Garage Name'
-                        style={styles.input}
-                        placeholder="Garage Name"
-                        value={isGarageName}
-                        onChangeText={(text) => setIsGarageName(text)}
-                    />
-                    {garageNameError?.length > 0 &&
-                        <Text style={{color: colors.danger}}>{garageNameError}</Text>
-                    }
-
-                    <TextInput
-                        mode="outlined"
-                        label='Garage Contact Number'
-                        style={styles.input}
-                        placeholder="Garage Contact Number"
-                        value={isGarageContactNumber}
-                        onChangeText={(text) => setIsGarageContactNumber(text)}
-                        keyboardType={"phone-pad"}
-                    />
-                    {garageContactNumberError?.length > 0 &&
-                        <Text style={{color: colors.danger}}>{garageContactNumberError}</Text>
-                    }
-
-                    <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 20}}>
-                        <Picker
-                            selectedValue={isState}
-                            onValueChange={(v) => setIsState(v)}
-                            style={{padding: 0}}
-                            itemStyle={{padding: 0}}
-                        >
-                            <Picker.Item label="Select State" value="0" />
-                            {StateList.map((StateList, i) => {
-                                return (
-                                    <Picker.Item
-                                        key={i}
-                                        label={StateList.name}
-                                        value={StateList.id}
-                                    />
-                                );
-                            })}
-                        </Picker>
-                    </View>
-                    {stateError?.length > 0 &&
-                        <Text style={{color: colors.danger}}>{stateError}</Text>
-                    }
-
-                    <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 20}}>
-                        <Picker
-                            selectedValue={isCity}
-                            onValueChange={(v) => setIsCity(v) }
-                            style={{padding: 0}}
-                            itemStyle={{padding: 0}}
-                            enabled={cityFieldToggle}
-                        >
-                            <Picker.Item label="Select City" value="0" />
-                            {CityList.map((CityList, i) => {
-                                return (
-                                    <Picker.Item
-                                        key={i}
-                                        label={CityList.name}
-                                        value={CityList.id}
-                                    />
-                                );
-                            })} 
-                        </Picker>
-                    </View>
-                    {cityError?.length > 0 &&
-                        <Text style={{color: colors.danger}}>{cityError}</Text>
-                    }
-
-                    <TextInput
-                        mode="outlined"
-                        label='Location'
-                        style={styles.input}
-                        placeholder="Location"
-                        value={isLocation}
-                        onChangeText={(text) => setIsLocation(text)}
-                    />
-                    {locationError?.length > 0 &&
-                        <Text style={{color: colors.danger}}>{locationError}</Text>
-                    }
-
-                    <Divider style={{marginTop: 20}} />
-                    
-                    <View style={{marginTop: 15}}>
-                        <RadioForm
-                            radio_props={radio_props}
-                            initial={0}
-                            onPress={(value) => setOwnerOption(value)}
-                            animation={true}
-                            formHorizontal={true}
-                            labelHorizontal={true}
-                            buttonWrapStyle={{marginLeft: 10}}
-                            labelStyle={{marginRight: 40}}
-                        />
-                    </View>
-                        {/* <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 10}}>
-                            <Picker
-                                selectedValue={ownerId}
-                                onValueChange={(value) => setOwnerId(value)}
-                                style={{padding: 0}}
-                                itemStyle={{padding: 0}}
-                            >
-                                <Picker.Item label="Select Admin User" value="0" />
-                                {adminList.map((List, i) => {
-                                    return (
-                                        <Picker.Item
-                                            key={i}
-                                            label={List.name}
-                                            value={List.id}
-                                        />
-                                    );
-                                })} 
-                            </Picker>
-                        </View> */}
-
-                
-
-                    { ownerOption == "existing_user" ? 
-                        <>
-                            <View>
-                                <TouchableOpacity 
-                                    style={styles.userDropDownField} 
-                                    onPress={() => {
-                                        setUserListModal(true);
-                                    }}
-                                >
-                                </TouchableOpacity>
-                                <TextInput
-                                    mode="outlined"
-                                    label='Owner Name'
-                                    style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
-                                    placeholder="Select User"
-                                    value={isUserName}
-                                    right={<TextInput.Icon name="menu-down" />}
-                                />
-                            </View>
-                            {userError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{userError}</Text>
-                            } 
-                        </>
-                    :
-                        <>
-                            <Text style={[styles.headingStyle, { marginTop:20 }]}>Owner Details:</Text>
+        <View style={{ flex: 1 }}>
+            <View style={{ marginBottom: 35 }}>
+            { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
+            </View>
+            <View style={styles.pageContainer}>
+                { (isLoading == true) ? <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View> :
+                    <InputScrollView
+                        ref={scroll1Ref}
+                        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+                        keyboardShouldPersistTaps={'handled'}
+                        showsVerticalScrollIndicator={false}
+                        scrollEventThrottle={8}
+                        behavior="padding"
+                    >
+                        <View style={{flex:1}}>
+                            <Text style={styles.headingStyle}>Garage Details:</Text>
                             <TextInput
                                 mode="outlined"
-                                label='Owner Name'
+                                label='Garage Name'
                                 style={styles.input}
-                                placeholder="Owner Name"
-                                value={isName}
-                                onChangeText={(text) => setIsName(text)}
+                                placeholder="Garage Name"
+                                value={isGarageName}
+                                onChangeText={(text) => setIsGarageName(text)}
                             />
-                            {nameError?.length > 0 &&
-                                <Text style={{color: colors.danger}}>{nameError}</Text>
+                            {garageNameError?.length > 0 &&
+                                <Text style={{color: colors.danger}}>{garageNameError}</Text>
                             }
 
                             <TextInput
                                 mode="outlined"
-                                label='Email Address'
+                                label='Garage Contact Number'
                                 style={styles.input}
-                                placeholder="Email Address"
-                                value={isEmail}
-                                onChangeText={(text) => setIsEmail(text)}
-                            />
-                            {emailError?.length > 0 &&
-                                <Text style={{color: colors.danger}}>{emailError}</Text>
-                            }
-
-                            <TextInput
-                                mode="outlined"
-                                label='Phone Number'
-                                style={styles.input}
-                                placeholder="Phone Number"
-                                value={isPhoneNumber}
-                                onChangeText={(text) => setIsPhoneNumber(text)}
+                                placeholder="Garage Contact Number"
+                                value={isGarageContactNumber}
+                                onChangeText={(text) => setIsGarageContactNumber(text)}
                                 keyboardType={"phone-pad"}
                             />
-                            {phoneNumberError?.length > 0 &&
-                                <Text style={{color: colors.danger}}>{phoneNumberError}</Text>
+                            {garageContactNumberError?.length > 0 &&
+                                <Text style={{color: colors.danger}}>{garageContactNumberError}</Text>
+                            }
+
+                            <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 20}}>
+                                <Picker
+                                    selectedValue={isState}
+                                    onValueChange={(v) => setIsState(v)}
+                                    style={{padding: 0}}
+                                    itemStyle={{padding: 0}}
+                                >
+                                    <Picker.Item label="Select State" value="0" />
+                                    {StateList.map((StateList, i) => {
+                                        return (
+                                            <Picker.Item
+                                                key={i}
+                                                label={StateList.name}
+                                                value={StateList.id}
+                                            />
+                                        );
+                                    })}
+                                </Picker>
+                            </View>
+                            {stateError?.length > 0 &&
+                                <Text style={{color: colors.danger}}>{stateError}</Text>
+                            }
+
+                            <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 20}}>
+                                <Picker
+                                    selectedValue={isCity}
+                                    onValueChange={(v) => setIsCity(v) }
+                                    style={{padding: 0}}
+                                    itemStyle={{padding: 0}}
+                                    enabled={cityFieldToggle}
+                                >
+                                    <Picker.Item label="Select City" value="0" />
+                                    {CityList.map((CityList, i) => {
+                                        return (
+                                            <Picker.Item
+                                                key={i}
+                                                label={CityList.name}
+                                                value={CityList.id}
+                                            />
+                                        );
+                                    })} 
+                                </Picker>
+                            </View>
+                            {cityError?.length > 0 &&
+                                <Text style={{color: colors.danger}}>{cityError}</Text>
                             }
 
                             <TextInput
                                 mode="outlined"
-                                label='Address'
+                                label='Location'
                                 style={styles.input}
-                                placeholder="Address"
-                                value={isAddress}
-                                onChangeText={(text) => setIsAddress(text)}
+                                placeholder="Location"
+                                value={isLocation}
+                                onChangeText={(text) => setIsLocation(text)}
                             />
+                            {locationError?.length > 0 &&
+                                <Text style={{color: colors.danger}}>{locationError}</Text>
+                            }
 
-                            <View>
-                                <TouchableOpacity
-                                    activeOpacity={0.5}
-                                    style={styles.uploadButtonStyle}
-                                    onPress={selectFile}
-                                >
-                                    <Icon name="upload" size={18} color={colors.primary} style={styles.downloadIcon} />
-                                    <Text style={{marginRight: 10, fontSize: 18, color: "#000"}}>
-                                        Upload Profile Image
-                                    </Text>
-                                    {imageFile != null ? (
-                                        <Text style={styles.textStyle}>
-                                        File Name: {imageFile.name ? imageFile.name : ''}
-                                        </Text>
-                                    ) : null}
-                                </TouchableOpacity>
+                            <Divider style={{marginTop: 20}} />
+                            
+                            <View style={{marginTop: 15}}>
+                                <RadioForm
+                                    radio_props={radio_props}
+                                    initial={0}
+                                    onPress={(value) => setOwnerOption(value)}
+                                    animation={true}
+                                    formHorizontal={true}
+                                    labelHorizontal={true}
+                                    buttonWrapStyle={{marginLeft: 10}}
+                                    labelStyle={{marginRight: 40}}
+                                />
                             </View>
-                        </>
-                    }
-                    <Button
-                        style={{marginTop:15}}
-                        mode={'contained'}
-                        onPress={submit}
-                    >
-                        Submit
-                    </Button>
-                </View>
-                <Portal>
-                    {/* Users List Modal */}
-                    <Modal visible={userListModal} onDismiss={() => { setUserListModal(false); setOwnerId(0); setIsUserName(''); setUserError(''); setSearchQueryForUsers('');  searchFilterForUsers();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
-                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select User</Text>
-                        {(isLoadingUserList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
-                            <View style={{marginTop: 20, marginBottom: 10, flex: 1 }}>
-                                <View>
-                                    <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                                {/* <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 10}}>
+                                    <Picker
+                                        selectedValue={ownerId}
+                                        onValueChange={(value) => setOwnerId(value)}
+                                        style={{padding: 0}}
+                                        itemStyle={{padding: 0}}
+                                    >
+                                        <Picker.Item label="Select Admin User" value="0" />
+                                        {adminList.map((List, i) => {
+                                            return (
+                                                <Picker.Item
+                                                    key={i}
+                                                    label={List.name}
+                                                    value={List.id}
+                                                />
+                                            );
+                                        })} 
+                                    </Picker>
+                                </View> */}
+
+                        
+
+                            { ownerOption == "existing_user" ? 
+                                <>
+                                    <View>
+                                        <TouchableOpacity 
+                                            style={styles.userDropDownField} 
+                                            onPress={() => {
+                                                setUserListModal(true);
+                                            }}
+                                        >
+                                        </TouchableOpacity>
                                         <TextInput
-                                            mode={'flat'}
-                                            placeholder="Search here..."
-                                            onChangeText={(text) => setSearchQueryForUsers(text)}
-                                            value={searchQueryForUsers}
-                                            activeUnderlineColor={colors.transparent}
-                                            underlineColor={colors.transparent}
-                                            style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
-                                            right={(searchQueryForUsers != null && searchQueryForUsers != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => {setSearchQueryForUsers != ''; searchFilterForUsers('') }} />}
+                                            mode="outlined"
+                                            label='Owner Name'
+                                            style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                            placeholder="Select User"
+                                            value={isUserName}
+                                            right={<TextInput.Icon name="menu-down" />}
                                         />
-                                        <TouchableOpacity onPress={() => searchFilterForUsers(searchQueryForUsers)} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
-                                            <IconX name={'search'} size={17} color={colors.white} />
+                                    </View>
+                                    {userError?.length > 0 &&
+                                        <Text style={styles.errorTextStyle}>{userError}</Text>
+                                    } 
+                                </>
+                            :
+                                <>
+                                    <Text style={[styles.headingStyle, { marginTop:20 }]}>Owner Details:</Text>
+                                    <TextInput
+                                        mode="outlined"
+                                        label='Owner Name'
+                                        style={styles.input}
+                                        placeholder="Owner Name"
+                                        value={isName}
+                                        onChangeText={(text) => setIsName(text)}
+                                    />
+                                    {nameError?.length > 0 &&
+                                        <Text style={{color: colors.danger}}>{nameError}</Text>
+                                    }
+
+                                    <TextInput
+                                        mode="outlined"
+                                        label='Email Address'
+                                        style={styles.input}
+                                        placeholder="Email Address"
+                                        value={isEmail}
+                                        onChangeText={(text) => setIsEmail(text)}
+                                    />
+                                    {emailError?.length > 0 &&
+                                        <Text style={{color: colors.danger}}>{emailError}</Text>
+                                    }
+
+                                    <TextInput
+                                        mode="outlined"
+                                        label='Phone Number'
+                                        style={styles.input}
+                                        placeholder="Phone Number"
+                                        value={isPhoneNumber}
+                                        onChangeText={(text) => setIsPhoneNumber(text)}
+                                        keyboardType={"phone-pad"}
+                                    />
+                                    {phoneNumberError?.length > 0 &&
+                                        <Text style={{color: colors.danger}}>{phoneNumberError}</Text>
+                                    }
+
+                                    <TextInput
+                                        mode="outlined"
+                                        label='Address'
+                                        style={styles.input}
+                                        placeholder="Address"
+                                        value={isAddress}
+                                        onChangeText={(text) => setIsAddress(text)}
+                                    />
+
+                                    <View>
+                                        <TouchableOpacity
+                                            activeOpacity={0.5}
+                                            style={styles.uploadButtonStyle}
+                                            onPress={selectFile}
+                                        >
+                                            <Icon name="upload" size={18} color={colors.primary} style={styles.downloadIcon} />
+                                            <Text style={{marginRight: 10, fontSize: 18, color: "#000"}}>
+                                                Upload Profile Image
+                                            </Text>
+                                            {imageFile != null ? (
+                                                <Text style={styles.textStyle}>
+                                                File Name: {imageFile.name ? imageFile.name : ''}
+                                                </Text>
+                                            ) : null}
                                         </TouchableOpacity>
                                     </View>
-                                </View>
-                                {filteredUserData?.length > 0 ?  
-                                    <FlatList
-                                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
-                                        data={filteredUserData}
-                                        // onEndReachedThreshold={1}
-                                        style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
-                                        keyExtractor={item => item.id}
-                                        renderItem={({item}) => (
-                                            <>
-                                                <List.Item
-                                                    title={
-                                                        // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setUserListModal(false);  setAddUserModal(true); }}>
-                                                            <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
-                                                                <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
-                                                            </View>
-                                                        // </TouchableOpacity> 
-                                                    }
-                                                    onPress={() => {
-                                                            setIsUserName(item.name); 
-                                                            setOwnerId(item.id); 
-                                                            setUserError('');
-                                                            setUserListModal(false);  
-                                                        }
-                                                    }
+                                </>
+                            }
+                            <Button
+                                style={{marginTop:15}}
+                                mode={'contained'}
+                                onPress={submit}
+                            >
+                                Submit
+                            </Button>
+                        </View>
+                        <Portal>
+                            {/* Users List Modal */}
+                            <Modal visible={userListModal} onDismiss={() => { setUserListModal(false); setOwnerId(0); setIsUserName(''); setUserError(''); setSearchQueryForUsers('');  searchFilterForUsers();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                                <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select User</Text>
+                                {(isLoadingUserList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
+                                    <View style={{marginTop: 20, marginBottom: 10, flex: 1 }}>
+                                        <View>
+                                            <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                                                <TextInput
+                                                    mode={'flat'}
+                                                    placeholder="Search here..."
+                                                    onChangeText={(text) => setSearchQueryForUsers(text)}
+                                                    value={searchQueryForUsers}
+                                                    activeUnderlineColor={colors.transparent}
+                                                    underlineColor={colors.transparent}
+                                                    style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                                                    right={(searchQueryForUsers != null && searchQueryForUsers != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => {setSearchQueryForUsers != ''; searchFilterForUsers('') }} />}
                                                 />
-                                            </>
-                                        )} 
-                                    />
-                                    :
-                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
-                                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such user is associated!</Text>
+                                                <TouchableOpacity onPress={() => searchFilterForUsers(searchQueryForUsers)} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                                                    <IconX name={'search'} size={17} color={colors.white} />
+                                                </TouchableOpacity>
+                                            </View>
+                                        </View>
+                                        {filteredUserData?.length > 0 ?  
+                                            <FlatList
+                                                ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                                data={filteredUserData}
+                                                // onEndReachedThreshold={1}
+                                                style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
+                                                keyExtractor={item => item.id}
+                                                renderItem={({item}) => (
+                                                    <>
+                                                        <List.Item
+                                                            title={
+                                                                // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setUserListModal(false);  setAddUserModal(true); }}>
+                                                                    <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                                        <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
+                                                                    </View>
+                                                                // </TouchableOpacity> 
+                                                            }
+                                                            onPress={() => {
+                                                                    setIsUserName(item.name); 
+                                                                    setOwnerId(item.id); 
+                                                                    setUserError('');
+                                                                    setUserListModal(false);  
+                                                                }
+                                                            }
+                                                        />
+                                                    </>
+                                                )} 
+                                            />
+                                            :
+                                            <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
+                                                <Text style={{ color: colors.black, textAlign: 'center'}}>No such user is associated!</Text>
+                                            </View>
+                                        }
                                     </View>
                                 }
-                            </View>
-                        }
-                    </Modal>
-                </Portal>
-            </InputScrollView>
-            // Modal Popup Code
-        }
-    </View>
+                            </Modal>
+                        </Portal>
+                    </InputScrollView>
+                    // Modal Popup Code
+                }
+            </View>
+        </View>
     )
 }
 
 const styles = StyleSheet.create({
+    garageNameTitle: {
+        textAlign: 'center', 
+        fontSize: 17, 
+        fontWeight: '500', 
+        color: colors.white, 
+        paddingVertical: 7, 
+        backgroundColor: colors.secondary,
+        position: 'absolute',
+        top: 0,
+        zIndex: 5,
+        width: '100%',
+        flex: 1,
+        left: 0, 
+        right: 0
+    },
     pageContainer: {
         padding:20,
         flex: 1,
@@ -613,6 +633,9 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => ({
     userToken: state.user.userToken,
+    user: state.user.user,
+    selectedGarageId: state.garage.selected_garage_id,
+    selectedGarage: state.garage.selected_garage,
 })
 
 export default connect(mapStateToProps)(AddGarage);

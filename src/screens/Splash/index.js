@@ -9,7 +9,6 @@ export default function Splash() {
 
     return (
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.white}}>
-           
             <View />
             <Image source={{uri: ImageUri}} style={{height: 130, width: '80%'}} />
         </View>

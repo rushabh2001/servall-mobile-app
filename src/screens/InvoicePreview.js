@@ -6,11 +6,10 @@ import { colors } from  "../constants";
 import { API_URL } from "../constants/config";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { WebView } from 'react-native-webview';
-import RNShareFile from 'react-native-share-pdf';
 import RNFetchBlob from 'rn-fetch-blob';
 import Toast from 'react-native-toast-message';
 
-const InvoicePreview = ({ userToken, selectedGarageId, route  }) => {
+const InvoicePreview = ({ userToken, route, selectedGarageId, selectedGarage, user  }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isOrderId, setOrderId] = useState(route?.params?.data?.order_id);
     const [webViewLink, setWebViewLink] = useState('');
@@ -128,38 +127,58 @@ const InvoicePreview = ({ userToken, selectedGarageId, route  }) => {
     }, []);
 
     return (
-        <View style={styles.surfaceContainer}>
-            {isLoading ? <ActivityIndicator style={{ marginVertical: 30 }}></ActivityIndicator> :
-                <>  
-                    <View style={{ marginHorizontal: 20, flexDirection: 'row' }}>
-                        <Button
-                            style={{ marginBottom:15, flex: 1, borderColor: colors.primary, borderWidth: 1, }}
-                            mode={'outline'}
-                            onPress={historyDownload}
-                        >
-                            Download
-                        </Button>
-                    </View>
-                    <WebView
-                        source={{
-                        uri: `${webViewLink}`
-                        }}
-                        style={{ paddingTop: 20,}}
-                        automaticallyAdjustContentInsets={false}
-                        // useWebKit={true}
-                        // domStorageEnabled={true}
-                        // javaScriptEnabled={false}
-                    />
-                </>
-            }
-            <Toast />
-            {/* <TouchableOpacity onPress={() => loadAndSharePDF()}><Text>Click Me</Text></TouchableOpacity> */}
+        <View style={{ flex: 1 }}>
+            <View style={{ marginBottom: 35 }}>
+                { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
+            </View>
+            <View style={styles.surfaceContainer}>
+                {isLoading ? <ActivityIndicator style={{ marginVertical: 30 }}></ActivityIndicator> :
+                    <>  
+                        <View style={{ marginHorizontal: 20, flexDirection: 'row' }}>
+                            <Button
+                                style={{ marginBottom:15, flex: 1, borderColor: colors.primary, borderWidth: 1, }}
+                                mode={'outline'}
+                                onPress={historyDownload}
+                            >
+                                Download
+                            </Button>
+                        </View>
+                        <WebView
+                            source={{
+                            uri: `${webViewLink}`
+                            }}
+                            style={{ paddingTop: 20,}}
+                            automaticallyAdjustContentInsets={false}
+                            // useWebKit={true}
+                            // domStorageEnabled={true}
+                            // javaScriptEnabled={false}
+                        />
+                    </>
+                }
+                <Toast />
+                {/* <TouchableOpacity onPress={() => loadAndSharePDF()}><Text>Click Me</Text></TouchableOpacity> */}
+            </View>
         </View>
     );
 }
 
 
 const styles = StyleSheet.create({
+    garageNameTitle: {
+        textAlign: 'center', 
+        fontSize: 17, 
+        fontWeight: '500', 
+        color: colors.white, 
+        paddingVertical: 7, 
+        backgroundColor: colors.secondary,
+        position: 'absolute',
+        top: 0,
+        zIndex: 5,
+        width: '100%',
+        flex: 1,
+        left: 0, 
+        right: 0
+    },
     surfaceContainer: {
         flex:1,
         paddingBottom:15,
@@ -178,7 +197,9 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => ({
     userToken: state.user.userToken,
+    user: state.user.user,
     selectedGarageId: state.garage.selected_garage_id,
+    selectedGarage: state.garage.selected_garage,
 })
 
 export default connect(mapStateToProps)(InvoicePreview);

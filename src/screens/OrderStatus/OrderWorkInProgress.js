@@ -9,7 +9,7 @@ import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
 import moment from "moment";
 import { API_URL } from "../../constants/config";
 
-const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
+const OrderWorkInProgress = ({ navigation, userRole, route, userToken, selectedGarageId, selectedGarage, user }) => {
 
     const [partData, setPartData] = useState([]);
     const [serviceData, setServiceData] = useState([]);
@@ -77,190 +77,210 @@ const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
     }, [route?.params?.data]);
     
     return (
-        <View style={styles.surfaceContainer}>
-            <ScrollView>
-                <View style={styles.upperContainer}>
-                    <View style={styles.stepLables}>
-                        <View style={{justifyContent: 'flex-start'}}>
-                            <Text style={{lineHeight: 20}}>Created {'\n'}{createdAt}
-                            {/* Created {'\n'}5 Minutes Ago */}
-                            </Text>
+        <View style={{ flex: 1 }}>
+            <View style={{ marginBottom: 35 }}>
+            { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
+            </View>
+            <View style={styles.surfaceContainer}>
+                <ScrollView>
+                    <View style={styles.upperContainer}>
+                        <View style={styles.stepLables}>
+                            <View style={{justifyContent: 'flex-start'}}>
+                                <Text style={{lineHeight: 20}}>Created {'\n'}{createdAt}
+                                {/* Created {'\n'}5 Minutes Ago */}
+                                </Text>
+                            </View>
+                            <View style={{justifyContent: 'flex-end'}}>
+                                <Text style={{lineHeight: 20}}>Estimate Deliver Time {'\n'} {estimatedDeliveryDateTime}</Text>
+                            </View>
                         </View>
-                        <View style={{justifyContent: 'flex-end'}}>
-                            <Text style={{lineHeight: 20}}>Estimate Deliver Time {'\n'} {estimatedDeliveryDateTime}</Text>
-                        </View>
-                    </View>
-                    <View>
-                        <ProgressSteps
-                            labelFontSize={12}
-                            activeStep={1}
-                            disabledStepIconColor="#616161"
-                            labelColor="#616161"
-                            progressBarColor="#616161"
-                        >
-                            <ProgressStep 
-                                label="Created"
-                                removeBtnRow={true}
-                            >   
-                            </ProgressStep>
-                            <ProgressStep 
-                                label="In Progress"
-                                removeBtnRow={true}
+                        <View>
+                            <ProgressSteps
+                                labelFontSize={12}
+                                activeStep={1}
+                                disabledStepIconColor="#616161"
+                                labelColor="#616161"
+                                progressBarColor="#616161"
                             >
-                                <View>
-                                    <View style={{flexDirection: "row", alignItems:"center", justifyContent: 'center'}}>
-                                        <Text style={styles.customerName}>{isName}</Text>
-                                    </View>
-                                    <View style={{flexDirection: "row", alignItems:"center", justifyContent: 'center'}}>
-                                        <Text style={styles.customerPhonenumber}>{isPhoneNumber}</Text>
-                                    </View>
-                                    <View style={{flexDirection: "row", alignItems:"center", justifyContent: 'center'}}>
-                                        <Text style={styles.customerVehicle}>{isBrandName} ({isVehicleRegistrationNumber})</Text>
-                                    </View>
-                                    <View style={{flexDirection:"row", marginBottom: 10, marginTop: 15, flexWrap:"wrap", alignSelf:"center", justifyContent:'center', width:"80%",   flexFlow: "row wrap" }}>
-                                        {userRole == "Super Admin" || userRole == "Admin" ?
-                                            <>
-                                                <TouchableOpacity onPress={()=> Linking.openURL(`tel:${isPhoneNumber}`) } style={styles.smallButton}><Icon name={"phone"} size={20} color={colors.primary} /></TouchableOpacity>
-                                                <TouchableOpacity onPress={()=> Linking.openURL(`sms:${isPhoneNumber}?&body=Hello%20ServAll`) } style={styles.smallButton}><Icon name={"comment-multiple"} size={20} color={colors.primary} /></TouchableOpacity>
-                                                <TouchableOpacity onPress={()=> Linking.openURL(`https://wa.me/${isPhoneNumber}`) } style={styles.smallButton}><Icon name={"whatsapp"} size={20} color={colors.primary} /></TouchableOpacity>
-                                            </>
-                                        : null }
-                                    </View>
-                                    <View style={styles.cardContainer}>
-                                        <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center", marginRight: 10}}>
-                                            <Text style={{color: colors.black, fontSize: 16}}>Total</Text>
-                                            <Text style={{color: colors.black, fontSize: 16}}>₹ {isTotal}</Text>
-                                        </View>
-                                        <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center", marginRight: 10}}>
-                                            <Text style={{color: colors.green, fontSize: 16}}>Received</Text>
-                                            <Text style={{color: colors.green, fontSize: 16}}>₹ { route?.params?.data?.payment_status == 'Completed' ? isTotal : 0 }</Text>
-                                        </View>
-                                    </View>
-                                </View>
-                                <View style={{flexDirection:"row", marginTop: 15, alignSelf:"center", justifyContent:'center'}}>
-                                    <TouchableOpacity onPress={() => {
-                                            const invoiceData = {'order_id': route?.params?.data?.order_id};
-                                            navigation.navigate('InvoicePreview', {'data': invoiceData});  }} >
-                                        <IconX name={"file-pdf"} size={40} color={colors.primary} />
-                                    </TouchableOpacity>
-                                </View>
-                                <View style={{marginTop: 5, alignSelf:"center", justifyContent:'center'}}>
-                                    <Text style={{color: colors.black}}>Repair Order</Text>
-                                </View>
-                                <View style={{flexDirection: 'column', marginTop: 20}}>
-                                    <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.secondary, padding: 10}}>
-                                        <Text style={{fontSize: 18, color: colors.white}}>Services</Text>
-                                    </View>
-                                    <View style={{flexDirection:'column', backgroundColor: colors.white}}>
-                                        <>
-                                            {serviceData.length ==  0 ? 
-                                            <View style={{justifyContent: 'center', alignItems: 'center', height: 50}}>
-                                                <Text>No Services associated with Order!</Text>
-                                            </View>
-                                            :
-                                                <FlatList
-                                                    ItemSeparatorComponent= {() => (<Divider />)}
-                                                    data={serviceData}
-                                                    // onEndReachedThreshold={1}
-                                                    keyExtractor={item => `services-${item.id}`}
-                                                    renderItem={({item, index}) => (
-                                                        <TouchableOpacity  
-                                                            onPress={() => {
-                                                                if(serviceData[index]['is_done'] == 0) {
-                                                                    let serviceValues2 = [...serviceData];
-                                                                    serviceValues2[index]['is_done'] = 1;
-                                                                    setServiceData(serviceValues2);
-                                                                } else {                                                          
-                                                                    let serviceValues2 = [...serviceData];
-                                                                    serviceValues2[index]['is_done'] = 0;
-                                                                    setServiceData(serviceValues2); 
-                                                                }
-                                                            }}
-                                                            style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 5, paddingHorizontal: 10}}
-                                                            activeOpacity={1}
-                                                        >
-                                                            <Text style={{fontSize: 18, color: colors.black}}>- {item?.service?.name}</Text>
-                                                            <Checkbox
-                                                                status={serviceData[index]['is_done'] == 1 ? 'checked' : 'unchecked'}
-                                                            />
-                                                        </TouchableOpacity>
-                                                    )}
-                                                />
-                                            }
-                                        </>
-                                    </View>
-
-                                    <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 25, backgroundColor: colors.secondary, padding: 10}}>
-                                        <Text style={{fontSize: 18, color: colors.white}}>Parts</Text>
-                                    </View>
-                                    <View style={{flexDirection:'column', backgroundColor: colors.white}}>
-                                        <>
-                                            {partData.length ==  0 ? 
-                                                <View style={{justifyContent: 'center', alignItems: 'center', height: 50}}>
-                                                    <Text>No Parts associated with Order!</Text>
-                                                </View>
-                                            :
-                                                <FlatList
-                                                    ItemSeparatorComponent= {() => (<Divider />)}
-                                                    data={partData}
-                                                    // onEndReachedThreshold={1}
-                                                    keyExtractor={item => `parts-${item.id}`}
-                                                    renderItem={({item, index}) => (
-                                                        <TouchableOpacity  
-                                                            onPress={() => {
-                                                                if(partData[index]['is_done'] == 0) {
-                                                                    let partValues2 = [...partData];
-                                                                    partValues2[index]['is_done'] = 1;
-                                                                    setPartData(partValues2);
-                                                                } else {                                                          
-                                                                    let partValues2 = [...partData];
-                                                                    partValues2[index]['is_done'] = 0;
-                                                                    setPartData(partValues2);
-                                                                }
-                                                            }}
-                                                            style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 5, paddingHorizontal: 10}}
-                                                            activeOpacity={1}
-                                                        >
-                                                            <Text style={{fontSize: 18, color: colors.black}}>- {item?.parts?.name}</Text>
-                                                            <Checkbox
-                                                                status={item.is_done == 1 ? 'checked' : 'unchecked'}
-                                                            />
-                                                        </TouchableOpacity>
-                                                    )}
-                                                />
-                                            }
-                                        </>
-                                    </View>
-                                </View>
-
-                                <Button
-                                    mode={'contained'}
-                                    style={{marginTop:15}}
-                                    onPress={() => changeOrderStatus()}
+                                <ProgressStep 
+                                    label="Created"
+                                    removeBtnRow={true}
+                                >   
+                                </ProgressStep>
+                                <ProgressStep 
+                                    label="In Progress"
+                                    removeBtnRow={true}
                                 >
-                                    Update Status
-                                </Button>
-                            </ProgressStep>
-                            <ProgressStep 
-                                label="Vehicle Ready"
-                                removeBtnRow={true}
-                            >
-                            </ProgressStep>
-                            <ProgressStep 
-                                label="Completed Order"
-                                removeBtnRow={true}
-                            >
-                            </ProgressStep>
-                        </ProgressSteps>
+                                    <View>
+                                        <View style={{flexDirection: "row", alignItems:"center", justifyContent: 'center'}}>
+                                            <Text style={styles.customerName}>{isName}</Text>
+                                        </View>
+                                        <View style={{flexDirection: "row", alignItems:"center", justifyContent: 'center'}}>
+                                            <Text style={styles.customerPhonenumber}>{isPhoneNumber}</Text>
+                                        </View>
+                                        <View style={{flexDirection: "row", alignItems:"center", justifyContent: 'center'}}>
+                                            <Text style={styles.customerVehicle}>{isBrandName} ({isVehicleRegistrationNumber})</Text>
+                                        </View>
+                                        <View style={{flexDirection:"row", marginBottom: 10, marginTop: 15, flexWrap:"wrap", alignSelf:"center", justifyContent:'center', width:"80%",   flexFlow: "row wrap" }}>
+                                            {userRole == "Super Admin" || userRole == "Admin" ?
+                                                <>
+                                                    <TouchableOpacity onPress={()=> Linking.openURL(`tel:${isPhoneNumber}`) } style={styles.smallButton}><Icon name={"phone"} size={20} color={colors.primary} /></TouchableOpacity>
+                                                    <TouchableOpacity onPress={()=> Linking.openURL(`sms:${isPhoneNumber}?&body=Hello%20ServAll`) } style={styles.smallButton}><Icon name={"comment-multiple"} size={20} color={colors.primary} /></TouchableOpacity>
+                                                    <TouchableOpacity onPress={()=> Linking.openURL(`https://wa.me/${isPhoneNumber}`) } style={styles.smallButton}><Icon name={"whatsapp"} size={20} color={colors.primary} /></TouchableOpacity>
+                                                </>
+                                            : null }
+                                        </View>
+                                        <View style={styles.cardContainer}>
+                                            <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center", marginRight: 10}}>
+                                                <Text style={{color: colors.black, fontSize: 16}}>Total</Text>
+                                                <Text style={{color: colors.black, fontSize: 16}}>₹ {isTotal}</Text>
+                                            </View>
+                                            <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center", marginRight: 10}}>
+                                                <Text style={{color: colors.green, fontSize: 16}}>Received</Text>
+                                                <Text style={{color: colors.green, fontSize: 16}}>₹ { route?.params?.data?.payment_status == 'Completed' ? isTotal : 0 }</Text>
+                                            </View>
+                                        </View>
+                                    </View>
+                                    <View style={{flexDirection:"row", marginTop: 15, alignSelf:"center", justifyContent:'center'}}>
+                                        <TouchableOpacity onPress={() => {
+                                                const invoiceData = {'order_id': route?.params?.data?.order_id};
+                                                navigation.navigate('InvoicePreview', {'data': invoiceData});  }} >
+                                            <IconX name={"file-pdf"} size={40} color={colors.primary} />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View style={{marginTop: 5, alignSelf:"center", justifyContent:'center'}}>
+                                        <Text style={{color: colors.black}}>Repair Order</Text>
+                                    </View>
+                                    <View style={{flexDirection: 'column', marginTop: 20}}>
+                                        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.secondary, padding: 10}}>
+                                            <Text style={{fontSize: 18, color: colors.white}}>Services</Text>
+                                        </View>
+                                        <View style={{flexDirection:'column', backgroundColor: colors.white}}>
+                                            <>
+                                                {serviceData.length ==  0 ? 
+                                                <View style={{justifyContent: 'center', alignItems: 'center', height: 50}}>
+                                                    <Text>No Services associated with Order!</Text>
+                                                </View>
+                                                :
+                                                    <FlatList
+                                                        ItemSeparatorComponent= {() => (<Divider />)}
+                                                        data={serviceData}
+                                                        // onEndReachedThreshold={1}
+                                                        keyExtractor={item => `services-${item.id}`}
+                                                        renderItem={({item, index}) => (
+                                                            <TouchableOpacity  
+                                                                onPress={() => {
+                                                                    if(serviceData[index]['is_done'] == 0) {
+                                                                        let serviceValues2 = [...serviceData];
+                                                                        serviceValues2[index]['is_done'] = 1;
+                                                                        setServiceData(serviceValues2);
+                                                                    } else {                                                          
+                                                                        let serviceValues2 = [...serviceData];
+                                                                        serviceValues2[index]['is_done'] = 0;
+                                                                        setServiceData(serviceValues2); 
+                                                                    }
+                                                                }}
+                                                                style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 5, paddingHorizontal: 10}}
+                                                                activeOpacity={1}
+                                                            >
+                                                                <Text style={{fontSize: 18, color: colors.black}}>- {item?.service?.name}</Text>
+                                                                <Checkbox
+                                                                    status={serviceData[index]['is_done'] == 1 ? 'checked' : 'unchecked'}
+                                                                />
+                                                            </TouchableOpacity>
+                                                        )}
+                                                    />
+                                                }
+                                            </>
+                                        </View>
+
+                                        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 25, backgroundColor: colors.secondary, padding: 10}}>
+                                            <Text style={{fontSize: 18, color: colors.white}}>Parts</Text>
+                                        </View>
+                                        <View style={{flexDirection:'column', backgroundColor: colors.white}}>
+                                            <>
+                                                {partData.length ==  0 ? 
+                                                    <View style={{justifyContent: 'center', alignItems: 'center', height: 50}}>
+                                                        <Text>No Parts associated with Order!</Text>
+                                                    </View>
+                                                :
+                                                    <FlatList
+                                                        ItemSeparatorComponent= {() => (<Divider />)}
+                                                        data={partData}
+                                                        // onEndReachedThreshold={1}
+                                                        keyExtractor={item => `parts-${item.id}`}
+                                                        renderItem={({item, index}) => (
+                                                            <TouchableOpacity  
+                                                                onPress={() => {
+                                                                    if(partData[index]['is_done'] == 0) {
+                                                                        let partValues2 = [...partData];
+                                                                        partValues2[index]['is_done'] = 1;
+                                                                        setPartData(partValues2);
+                                                                    } else {                                                          
+                                                                        let partValues2 = [...partData];
+                                                                        partValues2[index]['is_done'] = 0;
+                                                                        setPartData(partValues2);
+                                                                    }
+                                                                }}
+                                                                style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 5, paddingHorizontal: 10}}
+                                                                activeOpacity={1}
+                                                            >
+                                                                <Text style={{fontSize: 18, color: colors.black}}>- {item?.parts?.name}</Text>
+                                                                <Checkbox
+                                                                    status={item.is_done == 1 ? 'checked' : 'unchecked'}
+                                                                />
+                                                            </TouchableOpacity>
+                                                        )}
+                                                    />
+                                                }
+                                            </>
+                                        </View>
+                                    </View>
+
+                                    <Button
+                                        mode={'contained'}
+                                        style={{marginTop:15}}
+                                        onPress={() => changeOrderStatus()}
+                                    >
+                                        Update Status
+                                    </Button>
+                                </ProgressStep>
+                                <ProgressStep 
+                                    label="Vehicle Ready"
+                                    removeBtnRow={true}
+                                >
+                                </ProgressStep>
+                                <ProgressStep 
+                                    label="Completed Order"
+                                    removeBtnRow={true}
+                                >
+                                </ProgressStep>
+                            </ProgressSteps>
+                        </View>
+                        
                     </View>
-                    
-                </View>
-            </ScrollView>
+                </ScrollView>
+            </View>
         </View>
     )
 }
 
 const styles = StyleSheet.create({
+    garageNameTitle: {
+        textAlign: 'center', 
+        fontSize: 17, 
+        fontWeight: '500', 
+        color: colors.white, 
+        paddingVertical: 7, 
+        backgroundColor: colors.secondary,
+        position: 'absolute',
+        top: 0,
+        zIndex: 5,
+        width: '100%',
+        flex: 1,
+        left: 0, 
+        right: 0
+    },
     surfaceContainer: {
         flex:1,
         padding:15,
@@ -328,6 +348,9 @@ const styles = StyleSheet.create({
 const mapStateToProps = state => ({
     userRole: state.role.user_role,
     userToken: state.user.userToken,
+    user: state.user.user,
+    selectedGarageId: state.garage.selected_garage_id,
+    selectedGarage: state.garage.selected_garage,
 })
 
 export default connect(mapStateToProps)(OrderWorkInProgress);

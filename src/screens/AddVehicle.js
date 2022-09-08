@@ -12,7 +12,7 @@ import moment from 'moment';
 import DocumentPicker from 'react-native-document-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-const AddVehicle = ({ navigation, userToken, route, userRole }) => {
+const AddVehicle = ({ navigation, userToken, route, userRole, selectedGarageId, selectedGarage, user }) => {
     
     // Vehicle Fields
     const [isBrand, setIsBrand] = useState();
@@ -379,366 +379,386 @@ const AddVehicle = ({ navigation, userToken, route, userRole }) => {
     }, [isBrand]);
 
     return (
-        <View style={styles.pageContainer}>
-            { (isLoading == true) ? <ActivityIndicator></ActivityIndicator> :
-                <InputScrollView
-                    ref={scroll1Ref}
-                    contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
-                    keyboardShouldPersistTaps={'handled'}
-                    showsVerticalScrollIndicator={false}
-                    scrollEventThrottle={8}
-                    behavior="padding"
-                >
-                    <View style={{flex:1}}>
-                        <Text style={[styles.headingStyle]}>Vehicle Details:</Text>
-                            <View style={styles.dropDownContainer}>
-                                <Picker
-                                    selectedValue={isBrand}
-                                    onValueChange={(option) => {setIsBrand(option); if(option == "new_brand") setAddBrandModal(true) }}
-                                    style={styles.dropDownField}
-                                    itemStyle={{padding: 0}}
-                                >
-                                    <Picker.Item label="Select Brand" value="0" />
-                                    {brandList.map((brandList, i) => {
-                                        return (
-                                            <Picker.Item
-                                                key={i}
-                                                label={brandList.name}
-                                                value={brandList.id}
-                                            />
-                                        );
-                                    })}
-                                    {userRole == "Super Admin" || userRole == "Admin" ?
-                                        <Picker.Item label="Add New Brand" value="new_brand" />
-                                    : null }
-                                </Picker>
-                            </View>
-                            {brandError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{brandError}</Text>
-                            }
-
-                            <View style={styles.dropDownContainer}>
-                                <Picker
-                                    selectedValue={isModel}
-                                    onValueChange={(option) => { setIsModel(option); if(option == "new_model") setAddModelModal(true) }}
-                                    style={styles.dropDownField}
-                                    itemStyle={{padding: 0}}
-                                    enabled={modelFieldToggle}
-                                >
-                                    <Picker.Item label="Select Vehicle Model" value="0" />
-                                    {modelList.map((modelList, i) => {
-                                        return (
-                                            <Picker.Item
-                                                key={i}
-                                                label={modelList.model_name}
-                                                value={modelList.id}
-                                            />
-                                        );
-                                    })}
-                                    {userRole == "Super Admin" || userRole == "Admin" ?
-                                        <Picker.Item label="Add New Model" value="new_model" />
-                                    : null }
-                                </Picker>
-                            </View>
-                            {modelError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{modelError}</Text>
-                            }
-
-                            <TextInput
-                                mode="outlined"
-                                label='Vehicle Registration Number'
-                                style={styles.input}
-                                placeholder="Vehicle Registration Number"
-                                value={isVehicleRegistrationNumber}
-                                onChangeText={(text) => setIsVehicleRegistrationNumber(text)}
-                            />
-                            {vehicleRegistrationNumberError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{vehicleRegistrationNumberError}</Text>
-                            }
-
-                            <TouchableOpacity style={{flex:1}} onPress={() => setDisplayPurchaseCalender(true)} activeOpacity={1}>
-                                <View style={styles.datePickerContainer} pointerEvents='none'>
-                                    <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
-                                    <TextInput
-                                        mode="outlined"
-                                        label='Purchase Date'
-                                        style={styles.datePickerField}
-                                        placeholder="Purchase Date"
-                                        value={datePurchase}
-                                    />
-                                    {(displayPurchaseCalender == true) && 
-                                    <DateTimePicker
-                                        value={(isPurchaseDate) ? isPurchaseDate : null}
-                                        mode='date'
-                                        onChange={changePurchaseSelectedDate}
-                                        display="spinner"
-                                    /> }
+        <View style={{ flex: 1 }}>
+            <View style={{ marginBottom: 35 }}>
+                { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
+            </View>
+            <View style={styles.pageContainer}>
+                { (isLoading == true) ? <ActivityIndicator></ActivityIndicator> :
+                    <InputScrollView
+                        ref={scroll1Ref}
+                        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+                        keyboardShouldPersistTaps={'handled'}
+                        showsVerticalScrollIndicator={false}
+                        scrollEventThrottle={8}
+                        behavior="padding"
+                    >
+                        <View style={{flex:1}}>
+                            <Text style={[styles.headingStyle]}>Vehicle Details:</Text>
+                                <View style={styles.dropDownContainer}>
+                                    <Picker
+                                        selectedValue={isBrand}
+                                        onValueChange={(option) => {setIsBrand(option); if(option == "new_brand") setAddBrandModal(true) }}
+                                        style={styles.dropDownField}
+                                        itemStyle={{padding: 0}}
+                                    >
+                                        <Picker.Item label="Select Brand" value="0" />
+                                        {brandList.map((brandList, i) => {
+                                            return (
+                                                <Picker.Item
+                                                    key={i}
+                                                    label={brandList.name}
+                                                    value={brandList.id}
+                                                />
+                                            );
+                                        })}
+                                        {userRole == "Super Admin" || userRole == "Admin" ?
+                                            <Picker.Item label="Add New Brand" value="new_brand" />
+                                        : null }
+                                    </Picker>
                                 </View>
-                            </TouchableOpacity>
-                            
-                            <TouchableOpacity style={{flex:1}} onPress={() => setDisplayManufacturingCalender(true)} activeOpacity={1}>
-                                <View style={styles.datePickerContainer} pointerEvents='none'>
-                                    <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
-                                    <TextInput
-                                        mode="outlined"
-                                        label='Manufacturing Date'
-                                        style={styles.datePickerField}
-                                        placeholder="Manufacturing Date"
-                                        value={dateManufacturing}
-                                    />
-                                    {(displayManufacturingCalender == true) && 
-                                    <DateTimePicker
-                                        value={(isManufacturingDate) ? isManufacturingDate : null}
-                                        mode='date'
-                                        onChange={changeManufacturingSelectedDate}
-                                        display="spinner"
-                                    /> }
+                                {brandError?.length > 0 &&
+                                    <Text style={styles.errorTextStyle}>{brandError}</Text>
+                                }
+
+                                <View style={styles.dropDownContainer}>
+                                    <Picker
+                                        selectedValue={isModel}
+                                        onValueChange={(option) => { setIsModel(option); if(option == "new_model") setAddModelModal(true) }}
+                                        style={styles.dropDownField}
+                                        itemStyle={{padding: 0}}
+                                        enabled={modelFieldToggle}
+                                    >
+                                        <Picker.Item label="Select Vehicle Model" value="0" />
+                                        {modelList.map((modelList, i) => {
+                                            return (
+                                                <Picker.Item
+                                                    key={i}
+                                                    label={modelList.model_name}
+                                                    value={modelList.id}
+                                                />
+                                            );
+                                        })}
+                                        {userRole == "Super Admin" || userRole == "Admin" ?
+                                            <Picker.Item label="Add New Model" value="new_model" />
+                                        : null }
+                                    </Picker>
                                 </View>
-                            </TouchableOpacity>
-                            
-                            <TextInput
-                                mode="outlined"
-                                label='Engine Number'
-                                style={styles.input}
-                                placeholder="Engine Number"
-                                value={isEngineNumber}
-                                onChangeText={(text) => setIsEngineNumber(text)}
-                            />
-                        
-                            <TextInput
-                                mode="outlined"
-                                label='Chasis Number'
-                                style={styles.input}
-                                placeholder="Chasis Number"
-                                value={isChasisNumber}
-                                onChangeText={(text) => setIsChasisNumber(text)}
-                            />
-                            
-                            <View style={styles.dropDownContainer}>
-                                <Picker
-                                    selectedValue={isInsuranceProvider}
-                                    onValueChange={(option) => { setIsInsuranceProvider(option); if(option == "new_insurance_company") setAddInsuranceCompanyModal(true) }}
-                                    style={styles.dropDownField}
-                                    itemStyle={{padding: 0}}
-                                >
-                                    <Picker.Item label="Select Insurance Provider Company" value="0" />
-                                    {insuranceProviderList.map((insuranceProviderList, i) => {
-                                        return (
-                                            <Picker.Item
-                                                key={i}
-                                                label={insuranceProviderList.name}
-                                                value={insuranceProviderList.id}
-                                            />
-                                        );
-                                    })}
-                                    {userRole == "Super Admin" || userRole == "Admin" ?
-                                        <Picker.Item label="Add New Insurance Company" value="new_insurance_company" />
-                                    : null }
-                                </Picker>
-                            </View>
-                            
-                            <TextInput
-                                mode="outlined"
-                                label='Insurer GSTIN'
-                                style={styles.input}
-                                placeholder="Insurer GSTIN"
-                                value={isInsurerGstin}
-                                onChangeText={(text) => setIsInsurerGstin(text)}
-                            />
-                        
-                            <TextInput
-                                mode="outlined"
-                                label='Insurer Address'
-                                style={styles.input}
-                                placeholder="Insurer Address"
-                                value={isInsurerAddress}
-                                onChangeText={(text) => setIsInsurerAddress(text)}
-                            />
-                            
-                            <TextInput
-                                mode="outlined"
-                                label='Policy Number'
-                                style={styles.input}
-                                placeholder="Policy Number"
-                                value={isPolicyNumber}
-                                onChangeText={(text) => setIsPolicyNumber(text)}
-                            />
-                            
-                            <TouchableOpacity style={{flex:1}} onPress={() => setDisplayInsuranceExpiryCalender(true)} activeOpacity={1}>
-                                <View style={styles.datePickerContainer} pointerEvents='none'>
-                                    <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
-                                    <TextInput
-                                        mode="outlined"
-                                        label='Insurance Expiry Date'
-                                        style={styles.datePickerField}
-                                        placeholder="Insurance Expiry Date"
-                                        value={dateInsuranceExpiry}
-                                    />
-                                    {(displayInsuranceExpiryCalender == true) && 
-                                    <DateTimePicker
-                                        value={(isInsuranceExpiryDate) ? isInsuranceExpiryDate : null}
-                                        mode='date'
-                                        onChange={changeInsuranceExpirySelectedDate}
-                                        display="spinner"
-                                    /> }
-                                </View>
-                            </TouchableOpacity>
-                            
-                            <View>
-                                <TouchableOpacity
-                                    activeOpacity={0.5}
-                                    style={styles.uploadButtonStyle}
-                                    onPress={selectRegistrationCrtImg}>
-                                    <Icon name="upload" size={18} color={colors.primary} style={styles.downloadIcon} />
-                                    <Text style={{marginRight: 10, fontSize: 18, color: "#000"}}>
-                                    Upload Registration Certificate
-                                    </Text>
-                                    {isRegistrationCertificateImg != null ? (
-                                        <Text style={styles.textStyle}>
-                                        File Name: {isRegistrationCertificateImg?.name ? isRegistrationCertificateImg.name : ''}
-                                        </Text>
-                                    ) : null}
+                                {modelError?.length > 0 &&
+                                    <Text style={styles.errorTextStyle}>{modelError}</Text>
+                                }
+
+                                <TextInput
+                                    mode="outlined"
+                                    label='Vehicle Registration Number'
+                                    style={styles.input}
+                                    placeholder="Vehicle Registration Number"
+                                    value={isVehicleRegistrationNumber}
+                                    onChangeText={(text) => setIsVehicleRegistrationNumber(text)}
+                                />
+                                {vehicleRegistrationNumberError?.length > 0 &&
+                                    <Text style={styles.errorTextStyle}>{vehicleRegistrationNumberError}</Text>
+                                }
+
+                                <TouchableOpacity style={{flex:1}} onPress={() => setDisplayPurchaseCalender(true)} activeOpacity={1}>
+                                    <View style={styles.datePickerContainer} pointerEvents='none'>
+                                        <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
+                                        <TextInput
+                                            mode="outlined"
+                                            label='Purchase Date'
+                                            style={styles.datePickerField}
+                                            placeholder="Purchase Date"
+                                            value={datePurchase}
+                                        />
+                                        {(displayPurchaseCalender == true) && 
+                                        <DateTimePicker
+                                            value={(isPurchaseDate) ? isPurchaseDate : null}
+                                            mode='date'
+                                            onChange={changePurchaseSelectedDate}
+                                            display="spinner"
+                                        /> }
+                                    </View>
                                 </TouchableOpacity>
-                            </View>
-                            {registrationCertificateImgError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{registrationCertificateImgError}</Text>
-                            }
-
-                            <View>
-                                <TouchableOpacity
-                                    activeOpacity={0.5}
-                                    style={styles.uploadButtonStyle}
-                                    onPress={selectInsurancePolicyImg}>
-                                    <Icon name="upload" size={18} color={colors.primary} style={styles.downloadIcon} />
-                                    <Text style={{marginRight: 10, fontSize: 18, color: "#000"}}>
-                                    Upload Insurance Policy
-                                    </Text>
-                                    {isInsuranceImg != null ? (
-                                        <Text style={styles.textStyle}>
-                                        File Name: {isInsuranceImg.name ? isInsuranceImg.name : ''}
-                                        </Text>
-                                    ) : null}
+                                
+                                <TouchableOpacity style={{flex:1}} onPress={() => setDisplayManufacturingCalender(true)} activeOpacity={1}>
+                                    <View style={styles.datePickerContainer} pointerEvents='none'>
+                                        <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
+                                        <TextInput
+                                            mode="outlined"
+                                            label='Manufacturing Date'
+                                            style={styles.datePickerField}
+                                            placeholder="Manufacturing Date"
+                                            value={dateManufacturing}
+                                        />
+                                        {(displayManufacturingCalender == true) && 
+                                        <DateTimePicker
+                                            value={(isManufacturingDate) ? isManufacturingDate : null}
+                                            mode='date'
+                                            onChange={changeManufacturingSelectedDate}
+                                            display="spinner"
+                                        /> }
+                                    </View>
                                 </TouchableOpacity>
-                            </View>
-                            {insuranceImgError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{insuranceImgError}</Text>
-                            }
+                                
+                                <TextInput
+                                    mode="outlined"
+                                    label='Engine Number'
+                                    style={styles.input}
+                                    placeholder="Engine Number"
+                                    value={isEngineNumber}
+                                    onChangeText={(text) => setIsEngineNumber(text)}
+                                />
+                            
+                                <TextInput
+                                    mode="outlined"
+                                    label='Chasis Number'
+                                    style={styles.input}
+                                    placeholder="Chasis Number"
+                                    value={isChasisNumber}
+                                    onChangeText={(text) => setIsChasisNumber(text)}
+                                />
+                                
+                                <View style={styles.dropDownContainer}>
+                                    <Picker
+                                        selectedValue={isInsuranceProvider}
+                                        onValueChange={(option) => { setIsInsuranceProvider(option); if(option == "new_insurance_company") setAddInsuranceCompanyModal(true) }}
+                                        style={styles.dropDownField}
+                                        itemStyle={{padding: 0}}
+                                    >
+                                        <Picker.Item label="Select Insurance Provider Company" value="0" />
+                                        {insuranceProviderList.map((insuranceProviderList, i) => {
+                                            return (
+                                                <Picker.Item
+                                                    key={i}
+                                                    label={insuranceProviderList.name}
+                                                    value={insuranceProviderList.id}
+                                                />
+                                            );
+                                        })}
+                                        {userRole == "Super Admin" || userRole == "Admin" ?
+                                            <Picker.Item label="Add New Insurance Company" value="new_insurance_company" />
+                                        : null }
+                                    </Picker>
+                                </View>
+                                
+                                <TextInput
+                                    mode="outlined"
+                                    label='Insurer GSTIN'
+                                    style={styles.input}
+                                    placeholder="Insurer GSTIN"
+                                    value={isInsurerGstin}
+                                    onChangeText={(text) => setIsInsurerGstin(text)}
+                                />
+                            
+                                <TextInput
+                                    mode="outlined"
+                                    label='Insurer Address'
+                                    style={styles.input}
+                                    placeholder="Insurer Address"
+                                    value={isInsurerAddress}
+                                    onChangeText={(text) => setIsInsurerAddress(text)}
+                                />
+                                
+                                <TextInput
+                                    mode="outlined"
+                                    label='Policy Number'
+                                    style={styles.input}
+                                    placeholder="Policy Number"
+                                    value={isPolicyNumber}
+                                    onChangeText={(text) => setIsPolicyNumber(text)}
+                                />
+                                
+                                <TouchableOpacity style={{flex:1}} onPress={() => setDisplayInsuranceExpiryCalender(true)} activeOpacity={1}>
+                                    <View style={styles.datePickerContainer} pointerEvents='none'>
+                                        <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
+                                        <TextInput
+                                            mode="outlined"
+                                            label='Insurance Expiry Date'
+                                            style={styles.datePickerField}
+                                            placeholder="Insurance Expiry Date"
+                                            value={dateInsuranceExpiry}
+                                        />
+                                        {(displayInsuranceExpiryCalender == true) && 
+                                        <DateTimePicker
+                                            value={(isInsuranceExpiryDate) ? isInsuranceExpiryDate : null}
+                                            mode='date'
+                                            onChange={changeInsuranceExpirySelectedDate}
+                                            display="spinner"
+                                        /> }
+                                    </View>
+                                </TouchableOpacity>
+                                
+                                <View>
+                                    <TouchableOpacity
+                                        activeOpacity={0.5}
+                                        style={styles.uploadButtonStyle}
+                                        onPress={selectRegistrationCrtImg}>
+                                        <Icon name="upload" size={18} color={colors.primary} style={styles.downloadIcon} />
+                                        <Text style={{marginRight: 10, fontSize: 18, color: "#000"}}>
+                                        Upload Registration Certificate
+                                        </Text>
+                                        {isRegistrationCertificateImg != null ? (
+                                            <Text style={styles.textStyle}>
+                                            File Name: {isRegistrationCertificateImg?.name ? isRegistrationCertificateImg.name : ''}
+                                            </Text>
+                                        ) : null}
+                                    </TouchableOpacity>
+                                </View>
+                                {registrationCertificateImgError?.length > 0 &&
+                                    <Text style={styles.errorTextStyle}>{registrationCertificateImgError}</Text>
+                                }
 
-                        <Button
-                            style={{marginTop:15}}
-                            mode={'contained'}
-                            onPress={submit}
-                        >
-                            Add
-                        </Button>
-                    </View>
-                </InputScrollView>
-            }
-            <Portal>
-                <Modal visible={addBrandModal} onDismiss={() => { setAddBrandModal(false); setNewBrandName(""); setIsBrand(0); }} contentContainerStyle={styles.modalContainerStyle}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Brand</Text>
-                    <TextInput
-                        mode="outlined"
-                        label='Brand Name'
-                        style={styles.input}
-                        placeholder="Brand Name"
-                        value={newBrandName}
-                        onChangeText={(text) => setNewBrandName(text)}
-                    />
-                    {newBrandNameError?.length > 0 &&
-                        <Text style={styles.errorTextStyle}>{newBrandNameError}</Text>
-                    }
-                    <View style={{flexDirection: "row",}}>
-                        <Button
-                            style={{marginTop:15, flex: 1, marginRight: 10}}
-                            mode={'contained'}
-                            onPress={addNewBrand}
-                        >
-                            Add
-                        </Button>
-                        <Button
-                            style={{marginTop:15, flex: 1}}
-                            mode={'contained'}
-                            onPress={() => setAddBrandModal(false)}
-                        >
-                            Close
-                        </Button>
-                    </View>
-                </Modal>
-            </Portal>
+                                <View>
+                                    <TouchableOpacity
+                                        activeOpacity={0.5}
+                                        style={styles.uploadButtonStyle}
+                                        onPress={selectInsurancePolicyImg}>
+                                        <Icon name="upload" size={18} color={colors.primary} style={styles.downloadIcon} />
+                                        <Text style={{marginRight: 10, fontSize: 18, color: "#000"}}>
+                                        Upload Insurance Policy
+                                        </Text>
+                                        {isInsuranceImg != null ? (
+                                            <Text style={styles.textStyle}>
+                                            File Name: {isInsuranceImg.name ? isInsuranceImg.name : ''}
+                                            </Text>
+                                        ) : null}
+                                    </TouchableOpacity>
+                                </View>
+                                {insuranceImgError?.length > 0 &&
+                                    <Text style={styles.errorTextStyle}>{insuranceImgError}</Text>
+                                }
 
-            {/* Add New Vehicle Modal */}
-            <Portal>
-                <Modal visible={addModelModal} onDismiss={() => { setAddModelModal(false); setNewModelName(""); setIsModel(0); }} contentContainerStyle={styles.modalContainerStyle}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
-                    <TextInput
-                        mode="outlined"
-                        label='Model Name'
-                        style={styles.input}
-                        placeholder="Model Name"
-                        value={newModelName}
-                        onChangeText={(text) => setNewModelName(text)}
-                    />
-                    {newModelNameError?.length > 0 &&
-                        <Text style={styles.errorTextStyle}>{newModelNameError}</Text>
-                    }
-                    <View style={{flexDirection: "row",}}>
-                        <Button
-                            style={{marginTop:15, flex: 1, marginRight: 10}}
-                            mode={'contained'}
-                            onPress={addNewModel}
-                        >
-                            Add
-                        </Button>
-                        <Button
-                            style={{marginTop:15, flex: 1}}
-                            mode={'contained'}
-                            onPress={() => setAddModelModal(false)}
-                        >
-                            Close
-                        </Button>
-                    </View>
-                </Modal>
-            </Portal>
+                            <Button
+                                style={{marginTop:15}}
+                                mode={'contained'}
+                                onPress={submit}
+                            >
+                                Add
+                            </Button>
+                        </View>
+                    </InputScrollView>
+                }
+                <Portal>
+                    <Modal visible={addBrandModal} onDismiss={() => { setAddBrandModal(false); setNewBrandName(""); setIsBrand(0); }} contentContainerStyle={styles.modalContainerStyle}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Brand</Text>
+                        <TextInput
+                            mode="outlined"
+                            label='Brand Name'
+                            style={styles.input}
+                            placeholder="Brand Name"
+                            value={newBrandName}
+                            onChangeText={(text) => setNewBrandName(text)}
+                        />
+                        {newBrandNameError?.length > 0 &&
+                            <Text style={styles.errorTextStyle}>{newBrandNameError}</Text>
+                        }
+                        <View style={{flexDirection: "row",}}>
+                            <Button
+                                style={{marginTop:15, flex: 1, marginRight: 10}}
+                                mode={'contained'}
+                                onPress={addNewBrand}
+                            >
+                                Add
+                            </Button>
+                            <Button
+                                style={{marginTop:15, flex: 1}}
+                                mode={'contained'}
+                                onPress={() => setAddBrandModal(false)}
+                            >
+                                Close
+                            </Button>
+                        </View>
+                    </Modal>
+                </Portal>
 
-            {/* Add New Insurance Company Modal */}
-            <Portal>
-                <Modal visible={addInsuranceCompanyModal} onDismiss={() => { setAddInsuranceCompanyModal(false); setNewInsuranceCompanyName(""); setIsInsuranceProvider(0); }} contentContainerStyle={styles.modalContainerStyle}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
-                    <TextInput
-                        mode="outlined"
-                        label='Insurance Company Name'
-                        style={styles.input}
-                        placeholder="Insurance Company Name"
-                        value={newInsuranceCompanyName}
-                        onChangeText={(text) => setNewInsuranceCompanyName(text)}
-                    />
-                    {newInsuranceCompanyNameError?.length > 0 &&
-                        <Text style={styles.errorTextStyle}>{newInsuranceCompanyNameError}</Text>
-                    }
-                    <View style={{flexDirection: "row",}}>
-                        <Button
-                            style={{marginTop:15, flex: 1, marginRight: 10}}
-                            mode={'contained'}
-                            onPress={addNewInsuranceCompany}
-                        >
-                            Add
-                        </Button>
-                        <Button
-                            style={{marginTop:15, flex: 1}}
-                            mode={'contained'}
-                            onPress={() => setAddInsuranceCompanyModal(false)}
-                        >
-                            Close
-                        </Button>
-                    </View>
-                </Modal>
-            </Portal>
+                {/* Add New Vehicle Modal */}
+                <Portal>
+                    <Modal visible={addModelModal} onDismiss={() => { setAddModelModal(false); setNewModelName(""); setIsModel(0); }} contentContainerStyle={styles.modalContainerStyle}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
+                        <TextInput
+                            mode="outlined"
+                            label='Model Name'
+                            style={styles.input}
+                            placeholder="Model Name"
+                            value={newModelName}
+                            onChangeText={(text) => setNewModelName(text)}
+                        />
+                        {newModelNameError?.length > 0 &&
+                            <Text style={styles.errorTextStyle}>{newModelNameError}</Text>
+                        }
+                        <View style={{flexDirection: "row",}}>
+                            <Button
+                                style={{marginTop:15, flex: 1, marginRight: 10}}
+                                mode={'contained'}
+                                onPress={addNewModel}
+                            >
+                                Add
+                            </Button>
+                            <Button
+                                style={{marginTop:15, flex: 1}}
+                                mode={'contained'}
+                                onPress={() => setAddModelModal(false)}
+                            >
+                                Close
+                            </Button>
+                        </View>
+                    </Modal>
+                </Portal>
+
+                {/* Add New Insurance Company Modal */}
+                <Portal>
+                    <Modal visible={addInsuranceCompanyModal} onDismiss={() => { setAddInsuranceCompanyModal(false); setNewInsuranceCompanyName(""); setIsInsuranceProvider(0); }} contentContainerStyle={styles.modalContainerStyle}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
+                        <TextInput
+                            mode="outlined"
+                            label='Insurance Company Name'
+                            style={styles.input}
+                            placeholder="Insurance Company Name"
+                            value={newInsuranceCompanyName}
+                            onChangeText={(text) => setNewInsuranceCompanyName(text)}
+                        />
+                        {newInsuranceCompanyNameError?.length > 0 &&
+                            <Text style={styles.errorTextStyle}>{newInsuranceCompanyNameError}</Text>
+                        }
+                        <View style={{flexDirection: "row",}}>
+                            <Button
+                                style={{marginTop:15, flex: 1, marginRight: 10}}
+                                mode={'contained'}
+                                onPress={addNewInsuranceCompany}
+                            >
+                                Add
+                            </Button>
+                            <Button
+                                style={{marginTop:15, flex: 1}}
+                                mode={'contained'}
+                                onPress={() => setAddInsuranceCompanyModal(false)}
+                            >
+                                Close
+                            </Button>
+                        </View>
+                    </Modal>
+                </Portal>
+            </View>
         </View>
     )
 }
 
 const styles = StyleSheet.create({
+    garageNameTitle: {
+        textAlign: 'center', 
+        fontSize: 17, 
+        fontWeight: '500', 
+        color: colors.white, 
+        paddingVertical: 7, 
+        backgroundColor: colors.secondary,
+        position: 'absolute',
+        top: 0,
+        zIndex: 5,
+        width: '100%',
+        flex: 1,
+        left: 0, 
+        right: 0
+    },
     pageContainer: {
         padding:20,
         flex: 1,
@@ -821,6 +841,9 @@ const styles = StyleSheet.create({
 const mapStateToProps = state => ({
     userToken: state.user.userToken,
     userRole: state.user.user_role,
+    user: state.user.user,
+    selectedGarageId: state.garage.selected_garage_id,
+    selectedGarage: state.garage.selected_garage,
 })
 
 export default connect(mapStateToProps)(AddVehicle);

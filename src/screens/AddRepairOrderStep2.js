@@ -13,7 +13,7 @@ import DocumentPicker from 'react-native-document-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import RadioForm from 'react-native-simple-radio-button';
 
-const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId, selectedGarage, userId, garageId }) => {
+const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId, selectedGarage, user, userId, garageId }) => {
     
     const [isUserVehicleDetails, setIsUserVehicleDetails] = useState('');
 
@@ -50,8 +50,8 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     const [StateList, setStateList] =  useState([]);
 
     // Vehicle Fields
-    const [isBrand, setIsBrand] = useState();
-    const [isModel, setIsModel] = useState();
+    // const [isBrand, setIsBrand] = useState();
+    // const [isModel, setIsModel] = useState();
     const [isVehicleRegistrationNumber, setIsVehicleRegistrationNumber] = useState('');
     const [isPurchaseDate, setIsPurchaseDate] = useState(new Date());
     const [isManufacturingDate, setIsManufacturingDate] = useState(new Date());
@@ -66,8 +66,8 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     const [isInsuranceImg, setIsInsuranceImg] = useState(null);
 
     // Error States
-    const [brandError, setBrandError] = useState('');
-    const [modelError, setModelError] = useState('');
+    // const [brandError, setBrandError] = useState('');
+    // const [modelError, setModelError] = useState('');
     const [vehicleRegistrationNumberError, setVehicleRegistrationNumberError] = useState('');
     const [registrationCertificateImgError, setRegistrationCertificateImgError] = useState('');
     const [insuranceImgError, setInsuranceImgError] = useState('');
@@ -87,11 +87,11 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     const [garageRefreshing, setGarageRefreshing] = useState(false);
 
 
-    const [brandList, setBrandList] =  useState([]);
-    const [modelList, setModelList] =  useState([]);
+    // const [brandList, setBrandList] =  useState([]);
+    // const [modelList, setModelList] =  useState([]);
     const [insuranceProviderList, setInsuranceProviderList] =  useState([]);
     const [cityFieldToggle, setCityFieldToggle] = useState(false);
-    const [modelFieldToggle, setModelFieldToggle] = useState(false);
+    // const [modelFieldToggle, setModelFieldToggle] = useState(false);
 
     const [datePurchase, setDatePurchase] = useState();
     const [displayPurchaseCalender, setDisplayPurchaseCalender] = useState(false);
@@ -110,6 +110,36 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     const [newInsuranceCompanyName, setNewInsuranceCompanyName] = useState();
 
     const [isLoading, setIsLoading] = useState(false);
+
+    // Brand States
+    const [isBrand, setIsBrand] = useState();
+    const [isBrandName, setIsBrandName] = useState();
+    const [brandList, setBrandList] = useState([]);
+    const [brandListModal, setBrandListModal] = useState(false);
+    const [isLoadingBrandList, setIsLoadingBrandList] = useState(true);
+    const [filteredBrandData, setFilteredBrandData] = useState([]);
+    const [searchQueryForBrands, setSearchQueryForBrands] = useState(); 
+    const [brandError, setBrandError] = useState('');   // Error State
+    const [brandIdError, setBrandIdError] = useState();
+
+    const [brandPage, setBrandPage] = useState(1);
+    const [isBrandScrollLoading, setIsBrandScrollLoading] = useState(false);
+    const [brandRefreshing, setBrandRefreshing] = useState(false);
+
+    // Vehicle Model States
+    const [isModel, setIsModel] = useState();
+    const [isModelName, setIsModelName] = useState();
+    const [modelList, setModelList] = useState([]);
+    const [modelListModal, setModelListModal] = useState(false);
+    const [isLoadingModelList, setIsLoadingModelList] = useState(true);
+    const [filteredModelData, setFilteredModelData] = useState([]);
+    const [searchQueryForModels, setSearchQueryForModels] = useState(); 
+    const [modelError, setModelError] = useState('');   // Error State
+    const [modelIdError, setModelIdError] = useState();
+
+    const [modelPage, setModelPage] = useState(1);
+    const [isModelScrollLoading, setIsModelScrollLoading] = useState(false);
+    const [modelRefreshing, setModelRefreshing] = useState(false);
     
     const scroll1Ref = useRef();
 
@@ -495,44 +525,269 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     };
 
     const getBrandList = async () => {
+        { brandPage == 1 && setIsLoadingBrandList(true) }
+        { brandPage != 1 && setIsBrandScrollLoading(true) }
         try {
-            const res = await fetch(`${API_URL}fetch_brand`, {
-                method: 'GET',
+            const res = await fetch(`${API_URL}fetch_brand?page=${brandPage}`, {
+                method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + userToken
                 },
+                body: JSON.stringify({
+                    search: searchQueryForBrands,
+                }),
             });
             const json = await res.json();
             if (json !== undefined) {
-                setBrandList(json.brand_list);
+                setBrandList([
+                    ...brandList,
+                    ...json.brand_list.data
+                ]);
+                setFilteredBrandData([
+                    ...filteredBrandData,
+                    ...json.brand_list.data
+                ]);
+                // setBrandList(json.brand_list);
             }
         } catch (e) {
             console.log(e);
+        } finally {
+            { brandPage == 1 && setIsLoadingBrandList(false) }
+            { brandPage != 1 && setIsBrandScrollLoading(false) }
+            setBrandPage(brandPage + 1);
         }
     };
 
-    const getModelList = async () => {
+    const searchFilterForBrands = async () => {
         try {
-            const res = await fetch(`${API_URL}fetch_vehicle_model?brand_id=${isBrand}`, {
-                method: 'GET',
+            const response = await fetch(`${API_URL}fetch_brand`, {
+                method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + userToken
                 },
+                body: JSON.stringify({
+                    search: searchQueryForBrands,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setBrandList(json.brand_list.data);
+                setFilteredBrandData(json.brand_list.data);
+                setBrandPage(2);
+                setBrandRefreshing(false);
+            } else {
+                setBrandRefreshing(false);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const pullBrandRefresh = async () => {
+        setSearchQueryForBrands(null);
+        try {
+            const response = await fetch(`${API_URL}fetch_brand`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    search: null,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setBrandList(json.brand_list.data);
+                setFilteredBrandData(json.brand_list.data);
+                setBrandPage(2);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setBrandRefreshing(false);
+        }
+    };
+
+    const renderBrandFooter = () => {
+        return (
+            <>
+                {isBrandScrollLoading && (
+                    <View style={styles.footer}>
+                        <ActivityIndicator
+                            size="large"
+                        />
+                    </View>
+                )}
+            </>
+        );
+    };
+
+    const onBrandRefresh = () => {
+        setBrandRefreshing(true);
+        pullBrandRefresh();
+    };
+
+
+    const getModelList = async () => {
+        { modelPage == 1 && setIsLoadingModelList(true) }
+        { modelPage != 1 && setIsModelScrollLoading(true) }
+        try {
+            const res = await fetch(`${API_URL}fetch_vehicle_model?page=${modelPage}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    brand_id: isBrand,
+                    search: searchQueryForModels,
+                }),
             });
             const json = await res.json();
+            console.log('model_json', json);
             if (json !== undefined) {
-                setModelList(json.vehicle_model_list);
-                setModelFieldToggle(true);
+                setModelList([
+                    ...modelList,
+                    ...json.vehicle_model_list.data
+                ]);
+                setFilteredModelData([
+                    ...filteredModelData,
+                    ...json.vehicle_model_list.data
+                ]);
+                // setModelList(json.vehicle_model_list);
             }
         } catch (e) {
             console.log(e);
-            return alert(e);
+        } finally {
+            { modelPage == 1 && setIsLoadingModelList(false) }
+            { modelPage != 1 && setIsModelScrollLoading(false) }
+            setModelPage(modelPage + 1);
         }
     };
+
+    const searchFilterForModels = async () => {
+        try {
+            const response = await fetch(`${API_URL}fetch_vehicle_model`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    brand_id: isBrand,
+                    search: searchQueryForModels,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setModelList(json.vehicle_model_list.data);
+                setFilteredModelData(json.vehicle_model_list.data);
+                setModelPage(2);
+                setModelRefreshing(false);
+            } else {
+                setModelRefreshing(false);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const pullModelRefresh = async () => {
+        setSearchQueryForModels(null);
+        try {
+            const response = await fetch(`${API_URL}fetch_vehicle_model`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    brand_id: isBrand,
+                    search: null,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setModelList(json.vehicle_model_list.data);
+                setFilteredModelData(json.vehicle_model_list.data);
+                setModelPage(2);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setModelRefreshing(false);
+            setIsLoadingModelList(false);
+        }
+    };
+
+    const renderModelFooter = () => {
+        return (
+            <>
+                {isModelScrollLoading && (
+                    <View style={styles.footer}>
+                        <ActivityIndicator
+                            size="large"
+                        />
+                    </View>
+                )}
+            </>
+        );
+    };
+
+    const onModelRefresh = () => {
+        setModelRefreshing(true);
+        pullModelRefresh();
+    };
+
+
+    // const getBrandList = async () => {
+    //     try {
+    //         const res = await fetch(`${API_URL}fetch_brand`, {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Accept': 'application/json',
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': 'Bearer ' + userToken
+    //             },
+    //         });
+    //         const json = await res.json();
+    //         if (json !== undefined) {
+    //             setBrandList(json.brand_list);
+    //         }
+    //     } catch (e) {
+    //         console.log(e);
+    //     }
+    // };
+
+    // const getModelList = async () => {
+    //     try {
+    //         const res = await fetch(`${API_URL}fetch_vehicle_model?brand_id=${isBrand}`, {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Accept': 'application/json',
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': 'Bearer ' + userToken
+    //             },
+    //         });
+    //         const json = await res.json();
+    //         if (json !== undefined) {
+    //             setModelList(json.vehicle_model_list);
+    //             setModelFieldToggle(true);
+    //         }
+    //     } catch (e) {
+    //         console.log(e);
+    //         return alert(e);
+    //     }
+    // };
 
     const getInsuranceProviderList = async () => {
         try {
@@ -800,7 +1055,11 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
    
     useEffect(() => {
         if(isBrand != undefined) {
-            getModelList();
+            setIsLoadingModelList(true);
+            pullModelRefresh();
+            setIsModel();
+            setIsModelName('');
+            // getModelList();
         }
     }, [isBrand]);
 
@@ -813,7 +1072,11 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     // }, [isUserVehicleDetails]);
 
     return (
-        <View style={styles.pageContainer}>
+        <View style={{ flex: 1 }}>
+            <View style={{ marginBottom: 35 }}>
+            { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
+            </View>
+            <View style={styles.pageContainer}>
                 { (isLoading == true) ? <ActivityIndicator></ActivityIndicator> :
                     <InputScrollView
                         ref={scroll1Ref}
@@ -1014,7 +1277,53 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                             <Divider style={{marginTop: 20}} />
 
                             <Text style={[styles.headingStyle, { marginTop:20 }]}>Vehicle Details:</Text>
-                                <View style={styles.dropDownContainer}>
+                                <>
+                                    <View>
+                                        <TouchableOpacity 
+                                            style={styles.brandDropDownField} 
+                                            onPress={() => {
+                                                setBrandListModal(true);
+                                            }}
+                                        >
+                                        </TouchableOpacity>
+                                        <TextInput
+                                            mode="outlined"
+                                            label='Brand'
+                                            style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                            placeholder="Select Brand"
+                                            value={isBrandName}
+                                            right={<TextInput.Icon name="menu-down" />}
+                                        />
+                                    </View>
+                                    {brandError?.length > 0 &&
+                                        <Text style={styles.errorTextStyle}>{brandError}</Text>
+                                    }
+                                </>
+
+                                <>
+                                    <View>
+                                        <TouchableOpacity 
+                                            style={styles.modelDropDownField} 
+                                            onPress={() => {
+                                                setModelListModal(true);
+                                            }}
+                                        >
+                                        </TouchableOpacity>
+                                        <TextInput
+                                            mode="outlined"
+                                            label='Vehicle Model'
+                                            style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                            placeholder="Select Vehicle Model"
+                                            value={isModelName}
+                                            right={<TextInput.Icon name="menu-down" />}
+                                        />
+                                    </View>
+                                    {modelError?.length > 0 &&
+                                        <Text style={styles.errorTextStyle}>{modelError}</Text>
+                                    }
+                                </>
+
+                                {/* <View style={styles.dropDownContainer}>
                                     <Picker
                                         selectedValue={isBrand}
                                         onValueChange={(option) => {setIsBrand(option); if(option == "new_brand") setAddBrandModal(true) }}
@@ -1036,9 +1345,9 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                 </View>
                                 {brandError?.length > 0 &&
                                     <Text style={styles.errorTextStyle}>{brandError}</Text>
-                                }
+                                } */}
                                 
-                                <View style={styles.dropDownContainer}>
+                                {/* <View style={styles.dropDownContainer}>
                                     <Picker
                                         selectedValue={isModel}
                                         onValueChange={(option) => { setIsModel(option); if(option == "new_model") setAddModelModal(true) }}
@@ -1061,7 +1370,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                 </View>
                                 {modelError?.length > 0 &&
                                     <Text style={styles.errorTextStyle}>{modelError}</Text>
-                                }
+                                } */}
 
                                 <TextInput
                                     mode="outlined"
@@ -1251,200 +1560,199 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                         </View>
                     </InputScrollView>
                 }
-            <Portal>
-                <Modal visible={addBrandModal} onDismiss={() => { setAddBrandModal(false); setNewBrandName(""); setIsBrand(0); }} contentContainerStyle={styles.modalContainerStyle}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Brand</Text>
-                    <TextInput
-                        mode="outlined"
-                        label='Brand Name'
-                        style={styles.input}
-                        placeholder="Brand Name"
-                        value={newBrandName}
-                        onChangeText={(text) => setNewBrandName(text)}
-                    />
-           
-                    <View style={{flexDirection: "row",}}>
-                        <Button
-                            style={{marginTop:15, flex: 1, marginRight: 10}}
-                            mode={'contained'}
-                            onPress={addNewBrand}
-                        >
-                            Add
-                        </Button>
-                        <Button
-                            style={{marginTop:15, flex: 1}}
-                            mode={'contained'}
-                            onPress={() => setAddBrandModal(false)}
-                        >
-                            Close
-                        </Button>
-                    </View>
-                </Modal>
-      
-                <Modal visible={addModelModal} onDismiss={() => { setAddModelModal(false); setNewModelName(""); setIsModel(0); }} contentContainerStyle={styles.modalContainerStyle}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
-                    <TextInput
-                        mode="outlined"
-                        label='Model Name'
-                        style={styles.input}
-                        placeholder="Model Name"
-                        value={newModelName}
-                        onChangeText={(text) => setNewModelName(text)}
-                    />
-              
-                    <View style={{flexDirection: "row",}}>
-                        <Button
-                            style={{marginTop:15, flex: 1, marginRight: 10}}
-                            mode={'contained'}
-                            onPress={addNewModel}
-                        >
-                            Add
-                        </Button>
-                        <Button
-                            style={{marginTop:15, flex: 1}}
-                            mode={'contained'}
-                            onPress={() => setAddModelModal(false)}
-                        >
-                            Close
-                        </Button>
-                    </View>
-                </Modal>
-          
-                <Modal visible={addInsuranceCompanyModal} onDismiss={() => { setAddInsuranceCompanyModal(false); setNewInsuranceCompanyName(""); setIsInsuranceProvider(0); }} contentContainerStyle={styles.modalContainerStyle}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
-                    <TextInput
-                        mode="outlined"
-                        label='Insurance Company Name'
-                        style={styles.input}
-                        placeholder="Insurance Company Name"
-                        value={newInsuranceCompanyName}
-                        onChangeText={(text) => setNewInsuranceCompanyName(text)}
-                    />
-                 
-                    <View style={{flexDirection: "row",}}>
-                        <Button
-                            style={{marginTop:15, flex: 1, marginRight: 10}}
-                            mode={'contained'}
-                            onPress={addNewInsuranceCompany}
-                        >
-                            Add
-                        </Button>
-                        <Button
-                            style={{marginTop:15, flex: 1}}
-                            mode={'contained'}
-                            onPress={() => setAddInsuranceCompanyModal(false)}
-                        >
-                            Close
-                        </Button>
-                    </View>
-                </Modal>
-        
-                {/* Users List Modal */}
-                <Modal visible={userListModal} onDismiss={() => { setUserListModal(false); setIsUser(0); setIsUserName(''); setUserError(''); setSearchQueryForUsers('');  searchFilterForUsers();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select User</Text>
-                    {(isLoadingUserList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
-                        <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
-                            <View>
-                                <View style={{ marginBottom: 15, flexDirection: 'row'}}>
-                                    <TextInput
-                                        mode={'flat'}
-                                        placeholder="Search here..."
-                                        onChangeText={(text) => setSearchQueryForUsers(text)}
-                                        value={searchQueryForUsers}
-                                        activeUnderlineColor={colors.transparent}
-                                        underlineColor={colors.transparent}
-                                        style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
-                                        right={(searchQueryForUsers != null && searchQueryForUsers != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => {setSearchQueryForUsers != ''; searchFilterForUsers('') }} />}
-                                    />
-                                    <TouchableOpacity onPress={() => searchFilterForUsers(searchQueryForUsers)} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
-                                        <IconX name={'search'} size={17} color={colors.white} />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                            {filteredUserData?.length > 0 ?  
-                                <FlatList
-                                    ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
-                                    data={filteredUserData}
-                                    onEndReached={getUserList}
-                                    onEndReachedThreshold={0.5}
-                                    refreshControl={
-                                        <RefreshControl
-                                            refreshing={userRefreshing}
-                                            onRefresh={onUserRefresh}
-                                            colors={['green']}
-                                        />
-                                    }
-                                    ListFooterComponent={renderUserFooter}
-                                    style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
-                                    keyExtractor={item => `user-${item.id}`}
-                                    renderItem={({item}) => (
-                                        <List.Item
-                                            title={
-                                                <View style={{flexDirection:"row", display:'flex'}}>
-                                                    <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
-                                                </View>
-                                            }
-                                            onPress={() => {
-                                                    setIsUserName(item.name); 
-                                                    setIsUser(item.id); 
-                                                    setUserError('');
-                                                    setUserListModal(false);  
-                                                    // searchFilterForUsers('');
-                                                }
-                                            }
-                                        />
-                                    )} 
-                                />
-                                :
-                                <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
-                                    <Text style={{ color: colors.black, textAlign: 'center'}}>No such user is associated!</Text>
-                                </View>
-                            }
+                <Portal>
+                    <Modal visible={addBrandModal} onDismiss={() => { setAddBrandModal(false); setNewBrandName(""); setIsBrand(0); }} contentContainerStyle={styles.modalContainerStyle}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Brand</Text>
+                        <TextInput
+                            mode="outlined"
+                            label='Brand Name'
+                            style={styles.input}
+                            placeholder="Brand Name"
+                            value={newBrandName}
+                            onChangeText={(text) => setNewBrandName(text)}
+                        />
+            
+                        <View style={{flexDirection: "row",}}>
+                            <Button
+                                style={{marginTop:15, flex: 1, marginRight: 10}}
+                                mode={'contained'}
+                                onPress={addNewBrand}
+                            >
+                                Add
+                            </Button>
+                            <Button
+                                style={{marginTop:15, flex: 1}}
+                                mode={'contained'}
+                                onPress={() => setAddBrandModal(false)}
+                            >
+                                Close
+                            </Button>
                         </View>
-                    }
-                </Modal>
-
-                {/* Garage List Modal */}
-                <Modal visible={garageListModal} onDismiss={() => { setGarageListModal(false); setIsGarageId(0); setIsGarageName(''); setGarageError(''); setSearchQueryForGarages('');  searchFilterForGarages();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Garage</Text>
-                    {(isLoadingGarageList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
-                        <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
-                            {/* Search Bar */}
-                            <View>
-                                <View style={{ marginBottom: 15, flexDirection: 'row'}}>
-                                    <TextInput
-                                        mode={'flat'}
-                                        placeholder="Search here..."
-                                        onChangeText={(text) => setSearchQueryForGarages(text)}
-                                        value={searchQueryForGarages}
-                                        activeUnderlineColor={colors.transparent}
-                                        underlineColor={colors.transparent}
-                                        style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
-                                        right={(searchQueryForGarages != null && searchQueryForGarages != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => onGarageRefresh()} />}
-                                    />
-                                    <TouchableOpacity onPress={() => searchFilterForGarages()} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
-                                        <IconX name={'search'} size={17} color={colors.white} />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                            {filteredGarageData?.length > 0 ?  
-                                <FlatList
-                                    ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
-                                    data={filteredGarageData}
-                                    onEndReached={getGarageList}
-                                    onEndReachedThreshold={0.5}
-                                    refreshControl={
-                                        <RefreshControl
-                                            refreshing={garageRefreshing}
-                                            onRefresh={onGarageRefresh}
-                                            colors={['green']}
+                    </Modal>
+        
+                    <Modal visible={addModelModal} onDismiss={() => { setAddModelModal(false); setNewModelName(""); setIsModel(0); }} contentContainerStyle={styles.modalContainerStyle}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
+                        <TextInput
+                            mode="outlined"
+                            label='Model Name'
+                            style={styles.input}
+                            placeholder="Model Name"
+                            value={newModelName}
+                            onChangeText={(text) => setNewModelName(text)}
+                        />
+                
+                        <View style={{flexDirection: "row",}}>
+                            <Button
+                                style={{marginTop:15, flex: 1, marginRight: 10}}
+                                mode={'contained'}
+                                onPress={addNewModel}
+                            >
+                                Add
+                            </Button>
+                            <Button
+                                style={{marginTop:15, flex: 1}}
+                                mode={'contained'}
+                                onPress={() => setAddModelModal(false)}
+                            >
+                                Close
+                            </Button>
+                        </View>
+                    </Modal>
+            
+                    <Modal visible={addInsuranceCompanyModal} onDismiss={() => { setAddInsuranceCompanyModal(false); setNewInsuranceCompanyName(""); setIsInsuranceProvider(0); }} contentContainerStyle={styles.modalContainerStyle}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
+                        <TextInput
+                            mode="outlined"
+                            label='Insurance Company Name'
+                            style={styles.input}
+                            placeholder="Insurance Company Name"
+                            value={newInsuranceCompanyName}
+                            onChangeText={(text) => setNewInsuranceCompanyName(text)}
+                        />
+                    
+                        <View style={{flexDirection: "row",}}>
+                            <Button
+                                style={{marginTop:15, flex: 1, marginRight: 10}}
+                                mode={'contained'}
+                                onPress={addNewInsuranceCompany}
+                            >
+                                Add
+                            </Button>
+                            <Button
+                                style={{marginTop:15, flex: 1}}
+                                mode={'contained'}
+                                onPress={() => setAddInsuranceCompanyModal(false)}
+                            >
+                                Close
+                            </Button>
+                        </View>
+                    </Modal>
+            
+                    {/* Users List Modal */}
+                    <Modal visible={userListModal} onDismiss={() => { setUserListModal(false); setIsUser(0); setIsUserName(''); setUserError(''); setSearchQueryForUsers('');  searchFilterForUsers();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select User</Text>
+                        {(isLoadingUserList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
+                            <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
+                                <View>
+                                    <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                                        <TextInput
+                                            mode={'flat'}
+                                            placeholder="Search here..."
+                                            onChangeText={(text) => setSearchQueryForUsers(text)}
+                                            value={searchQueryForUsers}
+                                            activeUnderlineColor={colors.transparent}
+                                            underlineColor={colors.transparent}
+                                            style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                                            right={(searchQueryForUsers != null && searchQueryForUsers != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => {setSearchQueryForUsers != ''; searchFilterForUsers('') }} />}
                                         />
-                                    }
-                                    ListFooterComponent={renderGarageFooter}
-                                    style={{borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
-                                    keyExtractor={item => item.id}
-                                    renderItem={({item}) => (
-                                        <>
+                                        <TouchableOpacity onPress={() => searchFilterForUsers(searchQueryForUsers)} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                                            <IconX name={'search'} size={17} color={colors.white} />
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                                {filteredUserData?.length > 0 ?  
+                                    <FlatList
+                                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                        data={filteredUserData}
+                                        onEndReached={getUserList}
+                                        onEndReachedThreshold={0.5}
+                                        refreshControl={
+                                            <RefreshControl
+                                                refreshing={userRefreshing}
+                                                onRefresh={onUserRefresh}
+                                                colors={['green']}
+                                            />
+                                        }
+                                        ListFooterComponent={renderUserFooter}
+                                        style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
+                                        keyExtractor={item => `user-${item.id}`}
+                                        renderItem={({item}) => (
+                                            <List.Item
+                                                title={
+                                                    <View style={{flexDirection:"row", display:'flex'}}>
+                                                        <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
+                                                    </View>
+                                                }
+                                                onPress={() => {
+                                                        setIsUserName(item.name); 
+                                                        setIsUser(item.id); 
+                                                        setUserError('');
+                                                        setUserListModal(false);  
+                                                        // searchFilterForUsers('');
+                                                    }
+                                                }
+                                            />
+                                        )} 
+                                    />
+                                    :
+                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
+                                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such user is associated!</Text>
+                                    </View>
+                                }
+                            </View>
+                        }
+                    </Modal>
+
+                    {/* Garage List Modal */}
+                    <Modal visible={garageListModal} onDismiss={() => { setGarageListModal(false); setIsGarageId(0); setIsGarageName(''); setGarageError(''); setSearchQueryForGarages('');  searchFilterForGarages();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Garage</Text>
+                        {(isLoadingGarageList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
+                            <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
+                                {/* Search Bar */}
+                                <View>
+                                    <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                                        <TextInput
+                                            mode={'flat'}
+                                            placeholder="Search here..."
+                                            onChangeText={(text) => setSearchQueryForGarages(text)}
+                                            value={searchQueryForGarages}
+                                            activeUnderlineColor={colors.transparent}
+                                            underlineColor={colors.transparent}
+                                            style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                                            right={(searchQueryForGarages != null && searchQueryForGarages != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => onGarageRefresh()} />}
+                                        />
+                                        <TouchableOpacity onPress={() => searchFilterForGarages()} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                                            <IconX name={'search'} size={17} color={colors.white} />
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                                {filteredGarageData?.length > 0 ?  
+                                    <FlatList
+                                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                        data={filteredGarageData}
+                                        onEndReached={filteredGarageData?.length > 9 && getGarageList}
+                                        onEndReachedThreshold={0.5}
+                                        refreshControl={
+                                            <RefreshControl
+                                                refreshing={garageRefreshing}
+                                                onRefresh={onGarageRefresh}
+                                                colors={['green']}
+                                            />
+                                        }
+                                        ListFooterComponent={filteredGarageData?.length > 9 && renderGarageFooter}
+                                        style={{borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
+                                        keyExtractor={item => item.id}
+                                        renderItem={({item}) => (
                                             <List.Item
                                                 title={
                                                     <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
@@ -1459,24 +1767,181 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                                     }
                                                 }
                                             />
-                                        </>
-                                    )} 
-                                />
-                                :
-                                <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
-                                    <Text style={{ color: colors.black, textAlign: 'center'}}>No such garage found!</Text>
-                                </View>
-                            }
-                        </View>
-                    }
-                </Modal>
+                                        )} 
+                                    />
+                                    :
+                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50, flex: 1 }}>
+                                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such garage found!</Text>
+                                    </View>
+                                }
+                            </View>
+                        }
+                    </Modal>
 
-            </Portal>
+                    {/* Brand List Modal */}
+                    <Modal visible={brandListModal} onDismiss={() => { setBrandListModal(false); setIsBrand(0); setIsBrandName(''); setBrandError(''); setSearchQueryForBrands('');  searchFilterForBrands();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Brand</Text>
+                        {(isLoadingBrandList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
+                            <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
+                                {/* Search Bar */}
+                                <View>
+                                    <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                                        <TextInput
+                                            mode={'flat'}
+                                            placeholder="Search here..."
+                                            onChangeText={(text) => setSearchQueryForBrands(text)}
+                                            value={searchQueryForBrands}
+                                            activeUnderlineColor={colors.transparent}
+                                            underlineColor={colors.transparent}
+                                            style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                                            right={(searchQueryForBrands != null && searchQueryForBrands != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => onBrandRefresh()} />}
+                                        />
+                                        <TouchableOpacity onPress={() => searchFilterForBrands()} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                                            <IconX name={'search'} size={17} color={colors.white} />
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                                {filteredBrandData?.length > 0 ?  
+                                    <FlatList
+                                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                        data={filteredBrandData}
+                                        onEndReached={filteredBrandData?.length > 9 && getBrandList}
+                                        onEndReachedThreshold={0.5}
+                                        refreshControl={
+                                            <RefreshControl
+                                                refreshing={brandRefreshing}
+                                                onRefresh={onBrandRefresh}
+                                                colors={['green']}
+                                            />
+                                        }
+                                        ListFooterComponent={filteredBrandData?.length > 9 && renderBrandFooter}
+                                        style={{borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
+                                        keyExtractor={item => item.id}
+                                        renderItem={({item}) => (
+                                            <List.Item
+                                                title={
+                                                    <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                        <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
+                                                    </View>
+                                                }
+                                                onPress={() => {
+                                                        setIsBrandName(item.name); 
+                                                        setIsBrand(item.id); 
+                                                        setBrandError('');
+                                                        setBrandListModal(false);  
+                                                    }
+                                                }
+                                            />
+                                        )} 
+                                    />
+                                    :
+                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50, flex: 1 }}>
+                                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such brand found!</Text>
+                                    </View>
+                                }
+                                <View style={{justifyContent:"flex-end", flexDirection: 'row'}}>
+                                    <TouchableOpacity  style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: colors.primary, marginTop: 7, paddingVertical: 3, paddingHorizontal: 10, borderRadius: 4}} onPress={() => { setAddBrandModal(true); setBrandListModal(false); }}>
+                                        <Icon style={{color: colors.white, marginRight: 4}} name="plus" size={16} />
+                                        <Text style={{color: colors.white}}>Add Brand</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        }
+                    </Modal>
+
+                    {/* Vehicle Model List Modal */}
+                    <Modal visible={modelListModal} onDismiss={() => { setModelListModal(false); setIsModel(0); setIsModelName(''); setModelError(''); setSearchQueryForModels('');  searchFilterForModels();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Model</Text>
+                        {(isLoadingModelList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
+                            <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
+                                {/* Search Bar */}
+                                <View>
+                                    <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                                        <TextInput
+                                            mode={'flat'}
+                                            placeholder="Search here..."
+                                            onChangeText={(text) => setSearchQueryForModels(text)}
+                                            value={searchQueryForModels}
+                                            activeUnderlineColor={colors.transparent}
+                                            underlineColor={colors.transparent}
+                                            style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                                            right={(searchQueryForModels != null && searchQueryForModels != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => onModelRefresh()} />}
+                                        />
+                                        <TouchableOpacity onPress={() => searchFilterForModels()} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                                            <IconX name={'search'} size={17} color={colors.white} />
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                                {filteredModelData?.length > 0 ?  
+                                    <FlatList
+                                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                        data={filteredModelData}
+                                        onEndReached={filteredModelData?.length > 9 && getModelList}
+                                        onEndReachedThreshold={0.5}
+                                        refreshControl={
+                                            <RefreshControl
+                                                refreshing={modelRefreshing}
+                                                onRefresh={onModelRefresh}
+                                                colors={['green']}
+                                            />
+                                        }
+                                        ListFooterComponent={filteredModelData?.length > 9 && renderModelFooter}
+                                        style={{borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
+                                        keyExtractor={item => item.id}
+                                        renderItem={({item}) => (
+                                            <List.Item
+                                                title={
+                                                    <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                        <Text style={{fontSize:16, color: colors.black}}>{item.model_name}</Text>
+                                                    </View>
+                                                }
+                                                onPress={() => {
+                                                        setIsModelName(item.model_name); 
+                                                        setIsModel(item.id); 
+                                                        setModelError('');
+                                                        setModelListModal(false);  
+                                                    }
+                                                }
+                                            />
+                                        )} 
+                                    />
+                                    :
+                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50, flex: 1 }}>
+                                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such vehicle model found!</Text>
+                                    </View>
+                                }
+                                <View style={{justifyContent:"flex-end", flexDirection: 'row'}}>
+                                    <TouchableOpacity  style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: colors.primary, marginTop: 7, paddingVertical: 3, paddingHorizontal: 10, borderRadius: 4}} onPress={() => { setAddModelModal(true); setModelListModal(false); }}>
+                                        <Icon style={{color: colors.white, marginRight: 4}} name="plus" size={16} />
+                                        <Text style={{color: colors.white}}>Add Model</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        }
+                    </Modal>
+
+                </Portal>
+            </View>
         </View>
     )
 }
 
 const styles = StyleSheet.create({
+    garageNameTitle: {
+        textAlign: 'center', 
+        fontSize: 17, 
+        fontWeight: '500', 
+        color: colors.white, 
+        paddingVertical: 7, 
+        backgroundColor: colors.secondary,
+        position: 'absolute',
+        top: 0,
+        zIndex: 5,
+        width: '100%',
+        flex: 1,
+        left: 0, 
+        right: 0
+    },
     pageContainer: {
         padding:20,
         flex: 1,
@@ -1579,11 +2044,34 @@ const styles = StyleSheet.create({
         height: '80%',
         zIndex: 2,
     },
+    brandDropDownField: {
+        fontSize: 16,
+        color: colors.black,
+        position: 'absolute',
+        marginTop: 15,
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '80%',
+        zIndex: 2,
+    },
+    modelDropDownField: {
+        fontSize: 16,
+        color: colors.black,
+        position: 'absolute',
+        marginTop: 15,
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '80%',
+        zIndex: 2,
+    },
 })
 
 const mapStateToProps = state => ({
     userToken: state.user.userToken,
     userRole: state.role.user_role,
+    user: state.user.user,
     userId: state.user?.user?.id,
     selectedGarageId: state.garage.selected_garage_id,
     selectedGarage: state.garage.selected_garage,

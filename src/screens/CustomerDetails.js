@@ -15,7 +15,7 @@ import ServAllLogo from '../assets/images/placeholder_servall.jpg';
 
 const customerTopTabs = createMaterialTopTabNavigator();
 
-const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
+const CustomerDetails = ({ navigation, route, userToken, userRole, selectedGarageId, selectedGarage, user }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isCustomerData, setIsCustomerData] = useState('');
     const [imageUri, setImageUri] = useState(Image.resolveAssetSource(ServAllLogo).uri);
@@ -119,7 +119,7 @@ const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
     };
 
     const CustomerOrders = () => {
-        return(
+        return(   
             <ScrollView style={styles.innerTabContainer}>
                 {isLoading ?  <ActivityIndicator style={{marginVertical: 50}}></ActivityIndicator> :
                     ((isCustomerData.order.length != 0 || isCustomerData.order == undefined) ?
@@ -213,215 +213,220 @@ const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
     }, [isFocused]);
     
     return (
-        <View style={styles.surfaceContainer}>
-            <View style={styles.upperContainer}>
-                <View>
-                   {imageUri &&  <Lightbox onOpen={() => setResizeImage("contain")} willClose={() => setResizeImage("cover")} activeProps={styles.activeImage} navigator={navigator} style={styles.lightBoxWrapper}><Image resizeMode={resizeImage} style={styles.verticleImage} source={{uri: imageUri}} /></Lightbox>}
-                   <Icon style={styles.iconChangeImage} onPress={changeProfileImage} name={"camera"} size={16} color={colors.white} />
-                </View>
-                <View style={{flexDirection: "row", alignItems:"center",}}>
-                    <Text style={styles.customerName}>{ isCustomerData != null ? isCustomerData.name : null }</Text>
-                    <Icon onPress={() => navigation.navigate('CustomerInfo', { userId: route?.params?.userId })} name={"pencil"} size={20} color={colors.gray} />
-                </View>
-                <View>
-                    <Text style={styles.customerPhonenumber}>{ isCustomerData != null ? isCustomerData?.phone_number : '' }</Text>
-                </View>
-                <View style={{flexDirection:"row", marginTop: 15, flexWrap:"wrap", alignSelf:"center", justifyContent:'center', width:"80%",   flexFlow: "row wrap" }}>
-                    {userRole == "Super Admin" || userRole == "Admin" ?
-                        <>
-                            <TouchableOpacity onPress={()=> Linking.openURL(`tel:${isCustomerData.phone_number}`) } style={styles.smallButton}><Icon name={"phone"} size={20} color={colors.primary} /></TouchableOpacity>
-                            <TouchableOpacity onPress={()=> Linking.openURL(`sms:${isCustomerData.phone_number}?&body=Hello%20ServAll`) } style={styles.smallButton}><Icon name={"comment-multiple"} size={20} color={colors.primary} /></TouchableOpacity>
-                            <TouchableOpacity onPress={()=> Linking.openURL(`https://wa.me/${isCustomerData.phone_number}`) } style={styles.smallButton}><Icon name={"whatsapp"} size={20} color={colors.primary} /></TouchableOpacity>
-                            {/* <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Icon name={"bell"} size={20} color={colors.primary} /><Text style={{marginLeft:4, color:colors.primary}}>Reminders</Text></TouchableOpacity> */}
-                        </>
-                    : null }
-                    <TouchableOpacity onPress={()=>{navigation.navigate('UserVehicleTab', { userId: route?.params?.userId }) }} style={styles.smallButton}><Text style={{color:colors.primary}}>Vehicles</Text></TouchableOpacity>
-                    {/* <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Text style={{color:colors.primary}}>Appointments</Text></TouchableOpacity> */}
-                </View>
-                <View style={styles.cardContainer}>
-                    <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center", marginRight: 10}}>
-                        <Text style={{color: colors.danger2, fontSize: 16}}>Outstanding</Text>
-                        <Text style={{color: colors.danger2, fontSize: 16}}>₹ {isCustomerData.due_payment}</Text>
-                    </View>
-                    <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center"}}>
-                        <Text style={{color: colors.green, fontSize: 16}}>Paid</Text>
-                        <Text style={{color: colors.green, fontSize: 16}}>₹ {isCustomerData.completed_payment}</Text>
-                    </View>
-                </View>
+        <View style={{ flex: 1 }}>
+            <View style={{ marginBottom: 35 }}>
+            { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
             </View>
+            <View style={styles.surfaceContainer}>
+                <View style={styles.upperContainer}>
+                    <View>
+                    {imageUri &&  <Lightbox onOpen={() => setResizeImage("contain")} willClose={() => setResizeImage("cover")} activeProps={styles.activeImage} navigator={navigator} style={styles.lightBoxWrapper}><Image resizeMode={resizeImage} style={styles.verticleImage} source={{uri: imageUri}} /></Lightbox>}
+                    <Icon style={styles.iconChangeImage} onPress={changeProfileImage} name={"camera"} size={16} color={colors.white} />
+                    </View>
+                    <View style={{flexDirection: "row", alignItems:"center",}}>
+                        <Text style={styles.customerName}>{ isCustomerData != null ? isCustomerData.name : null }</Text>
+                        <Icon onPress={() => navigation.navigate('CustomerInfo', { userId: route?.params?.userId })} name={"pencil"} size={20} color={colors.gray} />
+                    </View>
+                    <View>
+                        <Text style={styles.customerPhonenumber}>{ isCustomerData != null ? isCustomerData?.phone_number : '' }</Text>
+                    </View>
+                    <View style={{flexDirection:"row", marginTop: 15, flexWrap:"wrap", alignSelf:"center", justifyContent:'center', width:"80%",   flexFlow: "row wrap" }}>
+                        {userRole == "Super Admin" || userRole == "Admin" ?
+                            <>
+                                <TouchableOpacity onPress={()=> Linking.openURL(`tel:${isCustomerData.phone_number}`) } style={styles.smallButton}><Icon name={"phone"} size={20} color={colors.primary} /></TouchableOpacity>
+                                <TouchableOpacity onPress={()=> Linking.openURL(`sms:${isCustomerData.phone_number}?&body=Hello%20ServAll`) } style={styles.smallButton}><Icon name={"comment-multiple"} size={20} color={colors.primary} /></TouchableOpacity>
+                                <TouchableOpacity onPress={()=> Linking.openURL(`https://wa.me/${isCustomerData.phone_number}`) } style={styles.smallButton}><Icon name={"whatsapp"} size={20} color={colors.primary} /></TouchableOpacity>
+                                {/* <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Icon name={"bell"} size={20} color={colors.primary} /><Text style={{marginLeft:4, color:colors.primary}}>Reminders</Text></TouchableOpacity> */}
+                            </>
+                        : null }
+                        <TouchableOpacity onPress={()=>{navigation.navigate('UserVehicleTab', { userId: route?.params?.userId }) }} style={styles.smallButton}><Text style={{color:colors.primary}}>Vehicles</Text></TouchableOpacity>
+                        {/* <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Text style={{color:colors.primary}}>Appointments</Text></TouchableOpacity> */}
+                    </View>
+                    <View style={styles.cardContainer}>
+                        <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center", marginRight: 10}}>
+                            <Text style={{color: colors.danger2, fontSize: 16}}>Outstanding</Text>
+                            <Text style={{color: colors.danger2, fontSize: 16}}>₹ {isCustomerData.due_payment}</Text>
+                        </View>
+                        <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center"}}>
+                            <Text style={{color: colors.green, fontSize: 16}}>Paid</Text>
+                            <Text style={{color: colors.green, fontSize: 16}}>₹ {isCustomerData.completed_payment}</Text>
+                        </View>
+                    </View>
+                </View>
 
-            <View style={styles.lowerContainer}>
-                <customerTopTabs.Navigator>
-                    <customerTopTabs.Screen 
-                        name="CustomerOrders" 
-                        component={CustomerOrders}
-                        // initialParams={{ isCustomerData: isCustomerData }}
-                        options={{ 
-                            title: () => ( 
-                                <View style={styles.haveBadge}>
-                                    <Badge style={styles.badgeTag} rounded="full" mb={-14} mr={-4} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>
-                                        {isCustomerData?.order?.length}
-                                    </Badge>
-                                    <Text style={styles.badgeBtn}>
-                                        Orders
-                                    </Text>
-                                </View>
-                            ),
-                        }}
-                    />
-                    <customerTopTabs.Screen name="CustomerNotifications" 
-                        component={CustomerNotifications} 
-                        options={{ 
-                            title: () => ( 
-                                <View style={styles.haveBadge}>
-                                    <Badge style={styles.badgeTag} rounded="full" mb={-14} mr={-4} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>
-                                        {isCustomerData?.order?.length}
-                                    </Badge>
-                                    <Text style={styles.badgeBtn}>
-                                        Notifications
-                                    </Text>
-                                </View>
-                            ),
-                        }} 
-                    />
-                </customerTopTabs.Navigator>
-            </View>
+                <View style={styles.lowerContainer}>
+                    <customerTopTabs.Navigator>
+                        <customerTopTabs.Screen 
+                            name="CustomerOrders" 
+                            component={CustomerOrders}
+                            // initialParams={{ isCustomerData: isCustomerData }}
+                            options={{ 
+                                title: () => ( 
+                                    <View style={styles.haveBadge}>
+                                        <Badge style={styles.badgeTag} rounded="full" mb={-14} mr={-4} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>
+                                            {isCustomerData?.order?.length}
+                                        </Badge>
+                                        <Text style={styles.badgeBtn}>
+                                            Orders
+                                        </Text>
+                                    </View>
+                                ),
+                            }}
+                        />
+                        <customerTopTabs.Screen name="CustomerNotifications" 
+                            component={CustomerNotifications} 
+                            options={{ 
+                                title: () => ( 
+                                    <View style={styles.haveBadge}>
+                                        <Badge style={styles.badgeTag} rounded="full" mb={-14} mr={-4} zIndex={1} variant="solid" alignSelf="flex-end" _text={{fontSize: 12}}>
+                                            {isCustomerData?.order?.length}
+                                        </Badge>
+                                        <Text style={styles.badgeBtn}>
+                                            Notifications
+                                        </Text>
+                                    </View>
+                                ),
+                            }} 
+                        />
+                    </customerTopTabs.Navigator>
+                </View>
 
-            <Portal>
-                <Modal visible={orderDataModal} onDismiss={() => {setOrderDataModal(false); }} contentContainerStyle={styles.modalContainerStyle}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Order Details</Text>
-                    {orderDataLoading 
-                    ? 
-                        <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> 
-                    :
-                        <ScrollView>
-                            <Text style={styles.cardDetailsHeading}>Order ID:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.id}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Order Status:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.status}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Odometer:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.odometer}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Fuel Level:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.fuel_level}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Order Date:</Text>
-                            <Text style={styles.cardDetailsData}>{moment(orderData.created_at, 'YYYY-MM-DD HH:mm:ss').format('DD-MM-YYYY')}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Estimated Delivery Time:</Text>
-                            <Text style={styles.cardDetailsData}>{moment(orderData.estimated_delivery_time, 'YYYY-MM-DD HH:mm:ss').format('DD-MM-YYYY hh:mm A')}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Services Total:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.labor_total}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Parts Total:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.parts_total}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Total Discount:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.discount}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Order Total:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.total}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Order Belongs to Garage:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.garage.garage_name}</Text>
-                            {/* <Divider /> */}
+                <Portal>
+                    <Modal visible={orderDataModal} onDismiss={() => {setOrderDataModal(false); }} contentContainerStyle={styles.modalContainerStyle}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Order Details</Text>
+                        {orderDataLoading 
+                        ? 
+                            <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> 
+                        :
+                            <ScrollView>
+                                <Text style={styles.cardDetailsHeading}>Order ID:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.id}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Order Status:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.status}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Odometer:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.odometer}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Fuel Level:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.fuel_level}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Order Date:</Text>
+                                <Text style={styles.cardDetailsData}>{moment(orderData.created_at, 'YYYY-MM-DD HH:mm:ss').format('DD-MM-YYYY')}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Estimated Delivery Time:</Text>
+                                <Text style={styles.cardDetailsData}>{moment(orderData.estimated_delivery_time, 'YYYY-MM-DD HH:mm:ss').format('DD-MM-YYYY hh:mm A')}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Services Total:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.labor_total}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Parts Total:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.parts_total}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Total Discount:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.discount}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Order Total:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.total}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Order Belongs to Garage:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.garage.garage_name}</Text>
+                                {/* <Divider /> */}
+                    
+                                <Text style={[styles.headingStyle, { marginTop: 10, color: colors.white, textAlign: "center", backgroundColor: colors.primary, width: '100%', justifyContent: 'center'}]}>User Details</Text>                                                   
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Name:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.user.name}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Phone Number:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.user.phone_number}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Email Address:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.user.email}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Address:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.user.address}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>State:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.user.state}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>City:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.user.city}</Text>
+                                {/* <Divider /> */}
+
+                                <Text style={[styles.headingStyle, { marginTop: 10, color: colors.white, textAlign: "center", backgroundColor: colors.primary, width: '100%', justifyContent: 'center'}]}>Vehicle Details</Text>                                                   
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Vehicle Registration Number:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.vehicle?.vehicle_registration_number ? orderData.vehicle?.vehicle_registration_number : null}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Vehicle Brand:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.vehicle?.brand?.name ? orderData.vehicle?.brand?.name : null}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Vehicle Model:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.vehicle?.vehicle_model?.model_name ? orderData.vehicle?.vehicle_model?.model_name : null}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Purchase Date:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.vehicle?.purchase_date ? moment(orderData.vehicle?.purchase_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Manufacturing Date:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.vehicle?.manufacturing_date ? moment(orderData.vehicle?.manufacturing_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Engine Number:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.vehicle?.engine_number ? orderData.vehicle?.engine_number : null}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Chasis Number:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.vehicle?.chasis_number ? orderData.vehicle?.chasis_number : null}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Insurance Provider Company:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.vehicle?.insurance_provider?.name ? orderData.vehicle?.insurance_provider?.name : null}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Insurer GSTIN:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.vehicle?.insurer_gstin ? orderData.vehicle?.insurer_gstin : null}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Insurer Address:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.vehicle?.insurer_address ? orderData.vehicle?.insurer_address : null}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Policy Number:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.vehicle?.policy_number ? orderData.vehicle?.policy_number : null}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Insurance Expiry Date:</Text>
+                                <Text style={styles.cardDetailsData}>{orderData.vehicle?.insurance_expiry_date ? moment(orderData.vehicle?.insurance_expiry_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Registration Certificate:</Text>
+                                {orderData.vehicle?.registration_certificate_img !== null ?
+                                    <Lightbox navigator={navigator} style={styles.lightBoxWrapperModal}>
+                                        <Image resizeMode={'cover'} style={styles.verticleImageModal} source={{uri: WEB_URL + 'uploads/registration_certificate_img/' + orderData.vehicle?.registration_certificate_img }} /> 
+                                    </Lightbox>
+                                :
+                                    <Text style={styles.cardDetailsData}>Not Uploaded Registration Certificate</Text>
+                                }
+                                <Divider />
+                                <Text style={styles.cardDetailsHeading}>Insurance Policy:</Text>
+                                {orderData.vehicle?.insurance_img !== null ?
+                                    <Lightbox navigator={navigator} style={styles.lightBoxWrapperModal}>
+                                        <Image resizeMode={'cover'} style={styles.verticleImageModal} source={{uri: WEB_URL + 'uploads/insurance_img/' + orderData.vehicle?.insurance_img }} />
+                                    </Lightbox>
+                                :
+                                    <Text style={styles.cardDetailsData}>Not Uploaded Insurance Policy</Text>
+                                }
+
+                            </ScrollView>
+                        }
+                        <View style={{flexDirection: "row",}}>
                 
-                            <Text style={[styles.headingStyle, { marginTop: 10, color: colors.white, textAlign: "center", backgroundColor: colors.primary, width: '100%', justifyContent: 'center'}]}>User Details</Text>                                                   
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Name:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.user.name}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Phone Number:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.user.phone_number}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Email Address:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.user.email}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Address:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.user.address}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>State:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.user.state}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>City:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.user.city}</Text>
-                            {/* <Divider /> */}
-
-                            <Text style={[styles.headingStyle, { marginTop: 10, color: colors.white, textAlign: "center", backgroundColor: colors.primary, width: '100%', justifyContent: 'center'}]}>Vehicle Details</Text>                                                   
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Vehicle Registration Number:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.vehicle_registration_number ? orderData.vehicle?.vehicle_registration_number : null}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Vehicle Brand:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.brand?.name ? orderData.vehicle?.brand?.name : null}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Vehicle Model:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.vehicle_model?.model_name ? orderData.vehicle?.vehicle_model?.model_name : null}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Purchase Date:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.purchase_date ? moment(orderData.vehicle?.purchase_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Manufacturing Date:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.manufacturing_date ? moment(orderData.vehicle?.manufacturing_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Engine Number:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.engine_number ? orderData.vehicle?.engine_number : null}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Chasis Number:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.chasis_number ? orderData.vehicle?.chasis_number : null}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Insurance Provider Company:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.insurance_provider?.name ? orderData.vehicle?.insurance_provider?.name : null}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Insurer GSTIN:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.insurer_gstin ? orderData.vehicle?.insurer_gstin : null}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Insurer Address:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.insurer_address ? orderData.vehicle?.insurer_address : null}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Policy Number:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.policy_number ? orderData.vehicle?.policy_number : null}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Insurance Expiry Date:</Text>
-                            <Text style={styles.cardDetailsData}>{orderData.vehicle?.insurance_expiry_date ? moment(orderData.vehicle?.insurance_expiry_date, 'YYYY MMMM D').format('DD-MM-YYYY') : null}</Text>
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Registration Certificate:</Text>
-                            {orderData.vehicle?.registration_certificate_img !== null ?
-                                <Lightbox navigator={navigator} style={styles.lightBoxWrapperModal}>
-                                    <Image resizeMode={'cover'} style={styles.verticleImageModal} source={{uri: WEB_URL + 'uploads/registration_certificate_img/' + orderData.vehicle?.registration_certificate_img }} /> 
-                                </Lightbox>
-                            :
-                                <Text style={styles.cardDetailsData}>Not Uploaded Registration Certificate</Text>
-                            }
-                            <Divider />
-                            <Text style={styles.cardDetailsHeading}>Insurance Policy:</Text>
-                            {orderData.vehicle?.insurance_img !== null ?
-                                <Lightbox navigator={navigator} style={styles.lightBoxWrapperModal}>
-                                    <Image resizeMode={'cover'} style={styles.verticleImageModal} source={{uri: WEB_URL + 'uploads/insurance_img/' + orderData.vehicle?.insurance_img }} />
-                                </Lightbox>
-                            :
-                                <Text style={styles.cardDetailsData}>Not Uploaded Insurance Policy</Text>
-                            }
-
-                        </ScrollView>
-                    }
-                    <View style={{flexDirection: "row",}}>
-            
-                        <View style={{flex: 1}}></View>
-                        <Button
-                            style={{marginTop:15, flex: 1.4, alignSelf: 'center'}}
-                            mode={'contained'}
-                            onPress={() => { setOrderDataModal(false); }}
-                        >
-                            Close
-                        </Button>
-                        <View style={{flex: 1}}></View>
-                    </View>
-                </Modal>
-            </Portal>
+                            <View style={{flex: 1}}></View>
+                            <Button
+                                style={{marginTop:15, flex: 1.4, alignSelf: 'center'}}
+                                mode={'contained'}
+                                onPress={() => { setOrderDataModal(false); }}
+                            >
+                                Close
+                            </Button>
+                            <View style={{flex: 1}}></View>
+                        </View>
+                    </Modal>
+                </Portal>
+            </View>
         </View>
     )
 }
@@ -444,6 +449,21 @@ const CustomerDetails = ({ navigation, route, userToken, userRole }) => {
 // }
 
 const styles = StyleSheet.create({
+    garageNameTitle: {
+        textAlign: 'center', 
+        fontSize: 17, 
+        fontWeight: '500', 
+        color: colors.white, 
+        paddingVertical: 7, 
+        backgroundColor: colors.secondary,
+        position: 'absolute',
+        top: 0,
+        zIndex: 5,
+        width: '100%',
+        flex: 1,
+        left: 0, 
+        right: 0
+    },
     surfaceContainer: {
         flexDirection: "column",
         flex: 1,
@@ -658,6 +678,9 @@ const styles = StyleSheet.create({
 const mapStateToProps = state => ({
     userToken: state.user.userToken,
     userRole: state.role.user_role,
+    user: state.user.user,
+    selectedGarageId: state.garage.selected_garage_id,
+    selectedGarage: state.garage.selected_garage,
 })
 
 export default connect(mapStateToProps)(CustomerDetails);

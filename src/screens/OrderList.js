@@ -8,7 +8,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import moment from 'moment';
 import RBSheet from "react-native-raw-bottom-sheet";
 
-const OrderList = ({navigation, userToken, selectedGarageId, navigator  }) => {
+const OrderList = ({navigation, userToken, navigator, selectedGarageId, selectedGarage, user  }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [data, setData] = useState([]);
@@ -124,179 +124,199 @@ const OrderList = ({navigation, userToken, selectedGarageId, navigator  }) => {
     }, []);
 
     return (
-        <View style={styles.surfaceContainer}>
-            <Searchbar
-                placeholder="Search here..."
-                onChangeText={(text) => searchFilter(text)}
-                value={searchQuery}
-            />
-            <View style={{flexDirection: "column", marginVertical: 30}}>
-                {isLoading ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> :
-                    (filteredData.length != 0 ?             
-                        <View>
-                            <FlatList
-                                ItemSeparatorComponent= {() => (<Divider />)}
-                                data={filteredData}
-                                onEndReached={getOrderList}
-                                onEndReachedThreshold={0.5}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={refreshing}
-                                        onRefresh={onRefresh}
-                                        colors={['green']}
-                                    />
-                                }
-                                ListFooterComponent={renderFooter}
-                                ListEmptyComponent={() => (
-                                    <View style={styles.nodata}>
-                                        <Text
-                                            style={{
-                                                fontSize: 18,
-                                                color: '#0B2E40',
-                                            }}>
-                                            No data found.
-                                        </Text>
-                                    </View>
-                                )}
-                                keyExtractor={item => item.id}
-                                renderItem={({item, index}) => (
-                                    <>
-                                        <View style={styles.cards}>
-                                            <View style={styles.upperInfo}>
-                                                <View style={styles.cardOrderDetails}>
-                                                    <Text style={styles.orderID}>Order Id: {item.id}</Text>
-                                                    <Text style={styles.orderStatus}>{item.status}</Text>
-                                                </View>
-                                                <View style={{right: 30, top: 35,position: 'absolute'}} >
-                                                    <Icon onPress={() => { this[RBSheet + index].open();}} type={"MaterialCommunityIcons"} name={'dots-vertical'} size={22}  color={colors.gray} />
-                                                </View>
-                                                <View>
-                                                    <View style={{flexDirection: 'row'}}>
-                                                        <Text style={styles.orderAmount}>Order Amount:</Text><Text style={styles.orderAmount}> ₹ {item.total}</Text>
-                                                    </View>
-                                                    <Divider />
-                                                    <View style={{flexDirection: 'row'}}>
-                                                        <Text style={styles.cardCustomerName}>Name:</Text><Text style={styles.cardCustomerName}> {item.user.name}</Text>
-                                                    </View>
-                                                    <Divider />
-                                                    <View style={{flexDirection: 'row'}}>
-                                                        <Text style={styles.orderDate}>Order Date: {moment(item.created_at, 'Y-m-d H:i:s').format('DD-MM-YYYY')}</Text>
-                                                    </View>
-                                                    <Divider />
-                                                    <View style={{flexDirection: 'row'}}>
-                                                        <Text style={styles.cardCustomerName}>Registration Number:</Text><Text style={styles.cardCustomerName}>{item.vehicle.vehicle_registration_number}</Text>
-                                                    </View>
-                                                    <Divider />
-                                                    <View style={{flexDirection: 'row'}}>
-                                                        <Text style={styles.cardCustomerName}>Estimate Delivery Date:</Text><Text style={styles.cardCustomerName}>{moment(item.estimated_delivery_time, 'YYYY MMMM D').format('DD-MM-YYYY')}</Text>
-                                                    </View>
-                                                </View>
-                                                <View style={styles.cardActions}></View>
-                                            </View>
-                                            <View style={styles.btnActions}>
-                                                <View style={styles.btnAction}>
-                                                    <Button
-                                                        onPress={() => Linking.openURL(`tel:${item.user.phone_number}`) }
-                                                        color={colors.white}
-                                                        icon={ (color) => <Icon name={'phone'} size={24} color={colors.white}  /> }
-                                                        uppercase={false} 
-                                                    ><Text style={styles.btnActionText}>Call</Text></Button>
-                                                </View>
-                                                <View style={[styles.btnAction, {borderColor: "#ffffff20", borderWidth: 1, borderTopWidth: 0, borderBottomWidth: 0 }]}>
-                                                    <Button
-                                                        onPress={() => Linking.openURL(`sms:${item.user.phone_number}`) }
-                                                        color={colors.white}
-                                                        icon={ (color) => <Icon name={'message'} size={24} color={colors.white}  /> }
-                                                        uppercase={false} 
-                                                    ><Text style={styles.btnActionText}>Message</Text></Button>
-                                                </View>
-                                                <View style={styles.btnAction}>
-                                                    <Button
-                                                        onPress={() => Linking.openURL(`https://wa.me/${item.user.phone_number}`) }
-                                                        color={colors.white}
-                                                        icon={ (color) => <Icon name={'whatsapp'} size={24} color={colors.white}  /> }
-                                                        uppercase={false} 
-                                                    ><Text style={styles.btnActionText}>WhatsApp</Text></Button>
-                                                </View>
-                                            </View>
-                                        </View>
-                                        
-                                        <RBSheet
-                                            ref={ref => {
-                                                this[RBSheet + index] = ref;
-                                            }}
-                                            height={189}
-                                            openDuration={250}
-                                            >
-                                            <View style={{flexDirection:"column", flex:1}}>
-                                                <List.Item
-                                                    title="View Order Details"
-                                                    style={{paddingVertical:15}}
-                                                    onPress={() => { setOrderDataModal(true);  this[RBSheet + index].close(); }}
-                                                    left={() => (<Icon type={"MaterialCommunityIcons"} name="eye" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
-                                                />
-                                                <Divider />
-                                                <List.Item
-                                                    title="Change Order Status"
-                                                    style={{paddingVertical:15}}
-                                                    onPress={() =>  { navigation.navigate("ServicesStack", {screen: 'OrderCreated'});  this[RBSheet + index].close(); }}
-                                                    left={() => (<Icon type={"MaterialCommunityIcons"} name="clipboard-list-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
-                                                />
-                                                <Divider />
-                                                <List.Item
-                                                    title="Edit Order"
-                                                    style={{paddingVertical:15}}
-                                                    onPress={() =>  { 
-                                                        let arrData = {
-                                                            'order_id': item.id,
-                                                            'user_id': item.user_id,
-                                                            'garage_id': item.garage_id,
-                                                            'vehicle_id': item.vehicle_id,
-                                                            'name': item.user.name,
-                                                            'email': item.user.email,
-                                                            'phone_number': item.user.phone_number,
-                                                            'brand_id': item.vehicle.brand_id,
-                                                            'brand_name': item?.vehicle?.brand?.name,
-                                                            'model_id': item?.vehicle?.model_id,
-                                                            'model_name': item?.vehicle?.vehicle_model?.model_name,
-                                                            'vehicle_registration_number': item?.vehicle?.vehicle_registration_number,
-                                                            'odometer': item?.odometer,
-                                                            'fuel_level': item?.fuel_level,
-                                                            'comment': item?.comment,
-                                                            'estimated_delivery_time': item?.estimated_delivery_time,
-                                                            'labor_total': item?.labor_total,
-                                                            'parts_total': item?.parts_total,
-                                                            'services_list': item?.orderservice,
-                                                            'parts_list': item?.orderparts,
-                                                            'total': item?.total,
-                                                            'applicable_discount': item?.discount
-                                                        }
-                                                        console.log('data:', arrData);
-                                                        navigation.navigate('EditRepairOrder', {'data': arrData}); 
-                                                        this[RBSheet + index].close(); 
-                                                    }}
-                                                    left={() => (<Icon type={"MaterialCommunityIcons"} name="clipboard-list-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
-                                                />
-                                                <Divider />
-                                            </View>
-                                        </RBSheet>
-                                    </>
-                                )}
-                            />  
-                        </View>
-                    :
-                        <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 50,  backgroundColor:colors.white,}}>
-                            <Text style={{ color: colors.black, textAlign: 'center'}}>No Orders are exist for this Garage!</Text>
-                        </View>
-                    )
-                }
+        <View style={{ flex: 1 }}>
+            <View style={{ marginBottom: 35 }}>
+                { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
             </View>
-        
+            <View style={styles.surfaceContainer}>
+                <Searchbar
+                    placeholder="Search here..."
+                    onChangeText={(text) => searchFilter(text)}
+                    value={searchQuery}
+                />
+                <View style={{flexDirection: "column", marginVertical: 30}}>
+                    {isLoading ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> :
+                        (filteredData.length != 0 ?             
+                            <View>
+                                <FlatList
+                                    ItemSeparatorComponent= {() => (<Divider />)}
+                                    data={filteredData}
+                                    onEndReached={getOrderList}
+                                    onEndReachedThreshold={0.5}
+                                    refreshControl={
+                                        <RefreshControl
+                                            refreshing={refreshing}
+                                            onRefresh={onRefresh}
+                                            colors={['green']}
+                                        />
+                                    }
+                                    ListFooterComponent={renderFooter}
+                                    ListEmptyComponent={() => (
+                                        <View style={styles.nodata}>
+                                            <Text
+                                                style={{
+                                                    fontSize: 18,
+                                                    color: '#0B2E40',
+                                                }}>
+                                                No data found.
+                                            </Text>
+                                        </View>
+                                    )}
+                                    keyExtractor={item => item.id}
+                                    renderItem={({item, index}) => (
+                                        <>
+                                            <View style={styles.cards}>
+                                                <View style={styles.upperInfo}>
+                                                    <View style={styles.cardOrderDetails}>
+                                                        <Text style={styles.orderID}>Order Id: {item.id}</Text>
+                                                        <Text style={styles.orderStatus}>{item.status}</Text>
+                                                    </View>
+                                                    <View style={{right: 30, top: 35,position: 'absolute'}} >
+                                                        <Icon onPress={() => { this[RBSheet + index].open();}} type={"MaterialCommunityIcons"} name={'dots-vertical'} size={22}  color={colors.gray} />
+                                                    </View>
+                                                    <View>
+                                                        <View style={{flexDirection: 'row'}}>
+                                                            <Text style={styles.orderAmount}>Order Amount:</Text><Text style={styles.orderAmount}> ₹ {item.total}</Text>
+                                                        </View>
+                                                        <Divider />
+                                                        <View style={{flexDirection: 'row'}}>
+                                                            <Text style={styles.cardCustomerName}>Name:</Text><Text style={styles.cardCustomerName}> {item.user.name}</Text>
+                                                        </View>
+                                                        <Divider />
+                                                        <View style={{flexDirection: 'row'}}>
+                                                            <Text style={styles.orderDate}>Order Date: {moment(item.created_at, 'Y-m-d H:i:s').format('DD-MM-YYYY')}</Text>
+                                                        </View>
+                                                        <Divider />
+                                                        <View style={{flexDirection: 'row'}}>
+                                                            <Text style={styles.cardCustomerName}>Registration Number:</Text><Text style={styles.cardCustomerName}>{item.vehicle.vehicle_registration_number}</Text>
+                                                        </View>
+                                                        <Divider />
+                                                        <View style={{flexDirection: 'row'}}>
+                                                            <Text style={styles.cardCustomerName}>Estimate Delivery Date:</Text><Text style={styles.cardCustomerName}>{moment(item.estimated_delivery_time, 'YYYY MMMM D').format('DD-MM-YYYY')}</Text>
+                                                        </View>
+                                                    </View>
+                                                    <View style={styles.cardActions}></View>
+                                                </View>
+                                                <View style={styles.btnActions}>
+                                                    <View style={styles.btnAction}>
+                                                        <Button
+                                                            onPress={() => Linking.openURL(`tel:${item.user.phone_number}`) }
+                                                            color={colors.white}
+                                                            icon={ (color) => <Icon name={'phone'} size={24} color={colors.white}  /> }
+                                                            uppercase={false} 
+                                                        ><Text style={styles.btnActionText}>Call</Text></Button>
+                                                    </View>
+                                                    <View style={[styles.btnAction, {borderColor: "#ffffff20", borderWidth: 1, borderTopWidth: 0, borderBottomWidth: 0 }]}>
+                                                        <Button
+                                                            onPress={() => Linking.openURL(`sms:${item.user.phone_number}`) }
+                                                            color={colors.white}
+                                                            icon={ (color) => <Icon name={'message'} size={24} color={colors.white}  /> }
+                                                            uppercase={false} 
+                                                        ><Text style={styles.btnActionText}>Message</Text></Button>
+                                                    </View>
+                                                    <View style={styles.btnAction}>
+                                                        <Button
+                                                            onPress={() => Linking.openURL(`https://wa.me/${item.user.phone_number}`) }
+                                                            color={colors.white}
+                                                            icon={ (color) => <Icon name={'whatsapp'} size={24} color={colors.white}  /> }
+                                                            uppercase={false} 
+                                                        ><Text style={styles.btnActionText}>WhatsApp</Text></Button>
+                                                    </View>
+                                                </View>
+                                            </View>
+                                            
+                                            <RBSheet
+                                                ref={ref => {
+                                                    this[RBSheet + index] = ref;
+                                                }}
+                                                height={189}
+                                                openDuration={250}
+                                                >
+                                                <View style={{flexDirection:"column", flex:1}}>
+                                                    <List.Item
+                                                        title="View Order Details"
+                                                        style={{paddingVertical:15}}
+                                                        onPress={() => { setOrderDataModal(true);  this[RBSheet + index].close(); }}
+                                                        left={() => (<Icon type={"MaterialCommunityIcons"} name="eye" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
+                                                    />
+                                                    <Divider />
+                                                    <List.Item
+                                                        title="Change Order Status"
+                                                        style={{paddingVertical:15}}
+                                                        onPress={() =>  { navigation.navigate("ServicesStack", {screen: 'OrderCreated'});  this[RBSheet + index].close(); }}
+                                                        left={() => (<Icon type={"MaterialCommunityIcons"} name="clipboard-list-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
+                                                    />
+                                                    <Divider />
+                                                    <List.Item
+                                                        title="Edit Order"
+                                                        style={{paddingVertical:15}}
+                                                        onPress={() =>  { 
+                                                            let arrData = {
+                                                                'order_id': item.id,
+                                                                'user_id': item.user_id,
+                                                                'garage_id': item.garage_id,
+                                                                'vehicle_id': item.vehicle_id,
+                                                                'name': item.user.name,
+                                                                'email': item.user.email,
+                                                                'phone_number': item.user.phone_number,
+                                                                'brand_id': item.vehicle.brand_id,
+                                                                'brand_name': item?.vehicle?.brand?.name,
+                                                                'model_id': item?.vehicle?.model_id,
+                                                                'model_name': item?.vehicle?.vehicle_model?.model_name,
+                                                                'vehicle_registration_number': item?.vehicle?.vehicle_registration_number,
+                                                                'odometer': item?.odometer,
+                                                                'fuel_level': item?.fuel_level,
+                                                                'comment': item?.comment,
+                                                                'estimated_delivery_time': item?.estimated_delivery_time,
+                                                                'labor_total': item?.labor_total,
+                                                                'parts_total': item?.parts_total,
+                                                                'services_list': item?.orderservice,
+                                                                'parts_list': item?.orderparts,
+                                                                'total': item?.total,
+                                                                'applicable_discount': item?.discount
+                                                            }
+                                                            console.log('data:', arrData);
+                                                            navigation.navigate('EditRepairOrder', {'data': arrData}); 
+                                                            this[RBSheet + index].close(); 
+                                                        }}
+                                                        left={() => (<Icon type={"MaterialCommunityIcons"} name="clipboard-list-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
+                                                    />
+                                                    <Divider />
+                                                </View>
+                                            </RBSheet>
+                                        </>
+                                    )}
+                                />  
+                            </View>
+                        :
+                            <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 50,  backgroundColor:colors.white,}}>
+                                <Text style={{ color: colors.black, textAlign: 'center'}}>No Orders are exist for this Garage!</Text>
+                            </View>
+                        )
+                    }
+                </View>
+            
+            </View>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
+    garageNameTitle: {
+        textAlign: 'center', 
+        fontSize: 17, 
+        fontWeight: '500', 
+        color: colors.white, 
+        paddingVertical: 7, 
+        backgroundColor: colors.secondary,
+        position: 'absolute',
+        top: 0,
+        zIndex: 5,
+        width: '100%',
+        flex: 1,
+        left: 0, 
+        right: 0
+    },
     surfaceContainer: {
         flex:1,
         padding:15,
@@ -480,7 +500,9 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => ({
     userToken: state.user.userToken,
+    user: state.user.user,
     selectedGarageId: state.garage.selected_garage_id,
+    selectedGarage: state.garage.selected_garage,
 })
 
 export default connect(mapStateToProps)(OrderList);

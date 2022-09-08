@@ -7,7 +7,7 @@ import { API_URL } from '../constants/config';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import IconX from "react-native-vector-icons/FontAwesome5";
 
-const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
+const AddRepairOrder = ({navigation, userToken, selectedGarageId, selectedGarage, user }) => {
 
     const [isLoading, setIsLoading] = useState(true);
     const [isGarageId, setGarageId] = useState(selectedGarageId);
@@ -162,75 +162,95 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId }) => {
     }, []);
 
     return (
-        <View style={styles.surfaceContainer}>
-            <View>
-                <View style={{ marginBottom: 15, flexDirection: 'row'}}>
-                    <TextInput
-                        mode={'flat'}
-                        placeholder="Search here..."
-                        onChangeText={(text) => setSearchQuery(text)}
-                        value={searchQuery}
-                        activeUnderlineColor={colors.transparent}
-                        underlineColor={colors.transparent}
-                        style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
-                        right={(searchQuery != null && searchQuery != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => onRefresh()} />}
-                    />
-                    <TouchableOpacity onPress={() => searchFilter()} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
-                        <IconX name={'search'} size={17} color={colors.white} />
-                    </TouchableOpacity>
-                </View>
+        <View style={{ flex: 1 }}>
+            <View style={{ marginBottom: 35 }}>
+            { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
             </View>
-            <View style={{ flexDirection: "column", flex: 1 }}>
-                {isLoading ? <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View> :
-                    (filteredData.length != 0 ? 
-                        <View>
-                            <FlatList
-                                ItemSeparatorComponent= {() => (<Divider />)}
-                                data={filteredData}
-                                onEndReached={filteredData?.length > 9 && getVehicleList}
-                                onEndReachedThreshold={0.5}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={refreshing}
-                                        onRefresh={onRefresh}
-                                        colors={['green']}
-                                    />
-                                }
-                                ListFooterComponent={filteredData?.length > 9 && renderFooter}
-                                keyExtractor={item => item.id}
-                                renderItem={({item, index}) => (
-                                    <View style={styles.cards}>
-                                        <View>
-                                            <Text style={styles.cardCustomerName}>Owner Name: {item.users[0] ? item?.users[0].name : null}</Text>
-                                            <Divider />
-                                            <Text style={styles.cardCustomerName}>Owner`s Phone Number: {item.users[0] ? item?.users[0].phone_number : null}</Text>
-                                            <Divider />
-                                            <Text style={styles.cardCustomerName}>Brand: {item.brand.name}</Text>
-                                            <Divider />
-                                            <Text style={styles.cardCustomerName}>Model: {item.vehicle_model.model_name}</Text>
-                                            <Divider />
-                                            <Text style={styles.cardCustomerName}>Registration Number: {item.vehicle_registration_number}</Text>
+            <View style={styles.surfaceContainer}>
+                <View>
+                    <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                        <TextInput
+                            mode={'flat'}
+                            placeholder="Search here..."
+                            onChangeText={(text) => setSearchQuery(text)}
+                            value={searchQuery}
+                            activeUnderlineColor={colors.transparent}
+                            underlineColor={colors.transparent}
+                            style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                            right={(searchQuery != null && searchQuery != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => onRefresh()} />}
+                        />
+                        <TouchableOpacity onPress={() => searchFilter()} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                            <IconX name={'search'} size={17} color={colors.white} />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+                <View style={{ flexDirection: "column", flex: 1 }}>
+                    {isLoading ? <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View> :
+                        (filteredData.length != 0 ? 
+                            <View>
+                                <FlatList
+                                    ItemSeparatorComponent= {() => (<Divider />)}
+                                    data={filteredData}
+                                    onEndReached={filteredData?.length > 9 && getVehicleList}
+                                    onEndReachedThreshold={0.5}
+                                    refreshControl={
+                                        <RefreshControl
+                                            refreshing={refreshing}
+                                            onRefresh={onRefresh}
+                                            colors={['green']}
+                                        />
+                                    }
+                                    ListFooterComponent={filteredData?.length > 9 && renderFooter}
+                                    keyExtractor={item => item.id}
+                                    renderItem={({item, index}) => (
+                                        <View style={styles.cards}>
+                                            <View>
+                                                <Text style={styles.cardCustomerName}>Owner Name: {item.users[0] ? item?.users[0].name : null}</Text>
+                                                <Divider />
+                                                <Text style={styles.cardCustomerName}>Owner`s Phone Number: {item.users[0] ? item?.users[0].phone_number : null}</Text>
+                                                <Divider />
+                                                <Text style={styles.cardCustomerName}>Brand: {item.brand.name}</Text>
+                                                <Divider />
+                                                <Text style={styles.cardCustomerName}>Model: {item.vehicle_model.model_name}</Text>
+                                                <Divider />
+                                                <Text style={styles.cardCustomerName}>Registration Number: {item.vehicle_registration_number}</Text>
+                                            </View>
+                                            <View style={styles.cardActions}>
+                                                <TouchableOpacity onPress={()=> sendVehicleData(index)} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>Select Vehicle</Text></TouchableOpacity>
+                                            </View>
                                         </View>
-                                        <View style={styles.cardActions}>
-                                            <TouchableOpacity onPress={()=> sendVehicleData(index)} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>Select Vehicle</Text></TouchableOpacity>
-                                        </View>
-                                    </View>
-                                )}
-                            />     
-                        </View>
-                    :
-                        <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1,  backgroundColor:colors.white,}}>
-                            <Text style={{ color: colors.black, textAlign: 'center'}}>No Vehicles are associated with this Garage!</Text>
-                            <TouchableOpacity style={[styles.buttonStyle, { marginTop: 15 }]} onPress={ () => navigation.navigate('AddRepairOrderStep2')}><Text style={{ color: colors.black, padding: 5 }}><Icon name={'plus'} size={16} color={colors.secondary} /> Add New Vehicle</Text></TouchableOpacity>
-                        </View>
-                    )
-                }
+                                    )}
+                                />     
+                            </View>
+                        :
+                            <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1,  backgroundColor:colors.white,}}>
+                                <Text style={{ color: colors.black, textAlign: 'center'}}>No Vehicles are associated with this Garage!</Text>
+                                <TouchableOpacity style={[styles.buttonStyle, { marginTop: 15 }]} onPress={ () => navigation.navigate('AddRepairOrderStep2')}><Text style={{ color: colors.black, padding: 5 }}><Icon name={'plus'} size={16} color={colors.secondary} /> Add New Vehicle</Text></TouchableOpacity>
+                            </View>
+                        )
+                    }
+                </View>
             </View>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
+    garageNameTitle: {
+        textAlign: 'center', 
+        fontSize: 17, 
+        fontWeight: '500', 
+        color: colors.white, 
+        paddingVertical: 7, 
+        backgroundColor: colors.secondary,
+        position: 'absolute',
+        top: 0,
+        zIndex: 5,
+        width: '100%',
+        flex: 1,
+        left: 0, 
+        right: 0
+    },
     // Vehicle Search Css
     surfaceContainer: {
         flex:1,
@@ -382,7 +402,9 @@ const mapStateToProps = state => ({
     userToken: state.user.userToken,
     userRole: state.role.user_role,
     userId: state.user?.user?.id,
+    user: state.user.user,
     selectedGarageId: state.garage.selected_garage_id,
+    selectedGarage: state.garage.selected_garage,
     garageId: state.garage.garage_id,
 })
 

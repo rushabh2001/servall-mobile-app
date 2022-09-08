@@ -11,7 +11,7 @@ import IconX from 'react-native-vector-icons/FontAwesome5';
 import moment from 'moment';
 import { API_URL } from "../constants/config";
 
-const AddPayment = ({ navigation, userRole, route, userToken }) => {
+const AddPayment = ({ navigation, userRole, route, userToken, selectedGarageId, selectedGarage, user }) => {
 
     const scroll1Ref = useRef();
 
@@ -101,149 +101,169 @@ const AddPayment = ({ navigation, userRole, route, userToken }) => {
 
     
     return (
-        <View style={styles.surfaceContainer}>
-            <ScrollView>
-                <View style={styles.cardContainer}>
-                    <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center", marginRight: 10}}>
-                        <Text style={{color: colors.black, fontSize: 16}}>Total</Text>
-                        <Text style={{color: colors.black, fontSize: 16}}>₹ {isTotal}</Text>
-                    </View>
-                    <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center", marginRight: 10}}>
-                        <Text style={{color: colors.green, fontSize: 16}}>Received</Text>
-                        <Text style={{color: colors.green, fontSize: 16}}>₹ { route?.params?.data?.payment_status == 'completed' ? isTotal : 0 }</Text>
-                    </View>
-                    {/* <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center"}}>
-                        <Text style={{color: colors.danger2, fontSize: 16}}>Due</Text>
-                        <Text style={{color: colors.danger2, fontSize: 16}}>₹ 8,818</Text>
-                    </View>
-                    <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center"}}>
-                        <Text style={{color: colors.danger2, fontSize: 16}}>Discount</Text>
-                        <Text style={{color: colors.danger2, fontSize: 16}}>₹ 82</Text>
-                    </View> */}
-                </View>
-                <InputScrollView
-                    ref={scroll1Ref}
-                    contentContainerStyle={{ justifyContent: 'center' }}
-                    keyboardShouldPersistTaps={'handled'}
-                    showsVerticalScrollIndicator={false}
-                    scrollEventThrottle={8}
-                    behavior="padding"
-                >
-                    <View style={{backgroundColor: colors.white, paddingVertical: 20, paddingHorizontal: 15, marginTop: 25, marginBottom: 15,}}>
-                        <View style={{ alignSelf:"center", justifyContent:'center'}}>
-                            <Text style={{color: colors.black, fontSize: 20, fontWeight: '600'}}>Payment Details</Text>
+        <View style={{ flex: 1 }}>
+            <View style={{ marginBottom: 35 }}>
+            { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
+            </View>
+            <View style={styles.surfaceContainer}>
+                <ScrollView>
+                    <View style={styles.cardContainer}>
+                        <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center", marginRight: 10}}>
+                            <Text style={{color: colors.black, fontSize: 16}}>Total</Text>
+                            <Text style={{color: colors.black, fontSize: 16}}>₹ {isTotal}</Text>
                         </View>
-                        <View style={{borderBottomWidth:1, borderColor: colors.light_gray, borderRadius: 4, marginTop: 20, backgroundColor: '#F0F2F5'}}>
-                            <Picker
-                                selectedValue={isPaymentMethod}
-                                onValueChange={(v) => {setIsPaymentMethod(v)}}
-                                style={{padding: 0}}
-                                itemStyle={{padding: 0}}
-                            >
-                                <Picker.Item label="Select Payment Method" value="0" />
-                                <Picker.Item key={1} label="Cash" value="Cash" />
-                                <Picker.Item key={1} label="Paytm" value="Paytm" />
-                                <Picker.Item key={1} label="Debit Card" value="Debit Card" />
-                                <Picker.Item key={1} label="Credit Card" value="Credit Card" />
-                                <Picker.Item key={1} label="Cheque" value="Cheque" />
-                                <Picker.Item key={1} label="Bank Transfer" value="Bank Transfer" />
-                                <Picker.Item key={1} label="Credit Note" value="Credit Note" />
-                                <Picker.Item key={1} label="PhonePe" value="PhonePe" />
-                                <Picker.Item key={1} label="Google Pay" value="Google Pay" />
-                                <Picker.Item key={1} label="UPI" value="UPI" />
-                                <Picker.Item key={1} label="TDS" value="TDS" />
-                            </Picker>
+                        <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center", marginRight: 10}}>
+                            <Text style={{color: colors.green, fontSize: 16}}>Received</Text>
+                            <Text style={{color: colors.green, fontSize: 16}}>₹ { route?.params?.data?.payment_status == 'completed' ? isTotal : 0 }</Text>
                         </View>
-                        {paymentMethodError?.length > 0 &&
-                            <Text style={{color: colors.danger}}>{paymentMethodError}</Text>
-                        }
-
-                        <TextInput
-                            mode="outlined"
-                            label='Amount'
-                            style={[styles.input, {backgroundColor: '#F0F2F5'}]}
-                            placeholder="Amount"
-                            value={isAmount}
-                            keyboardType={"phone-pad"}
-                            editable={false}
-                            onChangeText={(text) => setIsAmount(text)}
-                            left={
-                                <TextInput.Icon
-                                    name="currency-inr"
-                                    color={colors.black}
-                                    // onPress={() => {
-                                    //     changeIconColor('flatLeftIcon');
-                                    // }}
-                                />
-                            }
-                        />
-                        {/* <Text>{isAmount}</Text> */}
-                        {/* </TextInput> */}
-                        {amountError?.length > 0 &&
-                            <Text style={{color: colors.danger}}>{amountError}</Text>
-                        }
-
-                        <TextInput
-                            mode="outlined"
-                            label='Payment Reference Number'
-                            style={[styles.input, { backgroundColor: '#F0F2F5'}]}
-                            placeholder="Payment Reference Number"
-                            value={isPaymentReferenceNumber}
-                            onChangeText={(text) => setIsPaymentReferenceNumber(text)}
-                        />
-                        {paymentReferenceNumberError?.length > 0 &&
-                            <Text style={{color: colors.danger}}>{paymentReferenceNumberError}</Text>
-                        }
-                    
-                        <TouchableOpacity style={{flex:1}} onPress={() => setDisplayPaymentCalender(true)} activeOpacity={1}>
-                            <View style={styles.datePickerContainer} pointerEvents='none'>
-                                <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
-                                <TextInput
-                                    mode="outlined"
-                                    label='Payment Date'
-                                    style={styles.datePickerField}
-                                    placeholder="Payment Date"
-                                    value={datePayment}
-                                />
-                                {(displayPaymentCalender == true) && 
-                                <DateTimePicker
-                                    value={(isPaymentDate) ? isPaymentDate : null}
-                                    mode='date'
-                                    onChange={changePurchaseSelectedDate}
-                                    display="spinner"
-                                /> }
+                        {/* <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center"}}>
+                            <Text style={{color: colors.danger2, fontSize: 16}}>Due</Text>
+                            <Text style={{color: colors.danger2, fontSize: 16}}>₹ 8,818</Text>
+                        </View>
+                        <View style={{flexDirection: "column", alignItems:"center",justifyContent:"center"}}>
+                            <Text style={{color: colors.danger2, fontSize: 16}}>Discount</Text>
+                            <Text style={{color: colors.danger2, fontSize: 16}}>₹ 82</Text>
+                        </View> */}
+                    </View>
+                    <InputScrollView
+                        ref={scroll1Ref}
+                        contentContainerStyle={{ justifyContent: 'center' }}
+                        keyboardShouldPersistTaps={'handled'}
+                        showsVerticalScrollIndicator={false}
+                        scrollEventThrottle={8}
+                        behavior="padding"
+                    >
+                        <View style={{backgroundColor: colors.white, paddingVertical: 20, paddingHorizontal: 15, marginTop: 25, marginBottom: 15,}}>
+                            <View style={{ alignSelf:"center", justifyContent:'center'}}>
+                                <Text style={{color: colors.black, fontSize: 20, fontWeight: '600'}}>Payment Details</Text>
                             </View>
-                        </TouchableOpacity>
-                        {paymentDateError?.length > 0 &&
-                            <Text style={styles.errorTextStyle}>{paymentDateError}</Text>
-                        }
+                            <View style={{borderBottomWidth:1, borderColor: colors.light_gray, borderRadius: 4, marginTop: 20, backgroundColor: '#F0F2F5'}}>
+                                <Picker
+                                    selectedValue={isPaymentMethod}
+                                    onValueChange={(v) => {setIsPaymentMethod(v)}}
+                                    style={{padding: 0}}
+                                    itemStyle={{padding: 0}}
+                                >
+                                    <Picker.Item label="Select Payment Method" value="0" />
+                                    <Picker.Item key={1} label="Cash" value="Cash" />
+                                    <Picker.Item key={1} label="Paytm" value="Paytm" />
+                                    <Picker.Item key={1} label="Debit Card" value="Debit Card" />
+                                    <Picker.Item key={1} label="Credit Card" value="Credit Card" />
+                                    <Picker.Item key={1} label="Cheque" value="Cheque" />
+                                    <Picker.Item key={1} label="Bank Transfer" value="Bank Transfer" />
+                                    <Picker.Item key={1} label="Credit Note" value="Credit Note" />
+                                    <Picker.Item key={1} label="PhonePe" value="PhonePe" />
+                                    <Picker.Item key={1} label="Google Pay" value="Google Pay" />
+                                    <Picker.Item key={1} label="UPI" value="UPI" />
+                                    <Picker.Item key={1} label="TDS" value="TDS" />
+                                </Picker>
+                            </View>
+                            {paymentMethodError?.length > 0 &&
+                                <Text style={{color: colors.danger}}>{paymentMethodError}</Text>
+                            }
 
-                        <TextInput
-                            mode="outlined"
-                            label='Comment'
-                            style={styles.input}
-                            placeholder="Comment"
-                            value={isComment}
-                            onChangeText={(text) => setIsComment(text)}
-                            numberOfLines={3}
-                            multiline={true}
-                        />
+                            <TextInput
+                                mode="outlined"
+                                label='Amount'
+                                style={[styles.input, {backgroundColor: '#F0F2F5'}]}
+                                placeholder="Amount"
+                                value={isAmount}
+                                keyboardType={"phone-pad"}
+                                editable={false}
+                                onChangeText={(text) => setIsAmount(text)}
+                                left={
+                                    <TextInput.Icon
+                                        name="currency-inr"
+                                        color={colors.black}
+                                        // onPress={() => {
+                                        //     changeIconColor('flatLeftIcon');
+                                        // }}
+                                    />
+                                }
+                            />
+                            {/* <Text>{isAmount}</Text> */}
+                            {/* </TextInput> */}
+                            {amountError?.length > 0 &&
+                                <Text style={{color: colors.danger}}>{amountError}</Text>
+                            }
+
+                            <TextInput
+                                mode="outlined"
+                                label='Payment Reference Number'
+                                style={[styles.input, { backgroundColor: '#F0F2F5'}]}
+                                placeholder="Payment Reference Number"
+                                value={isPaymentReferenceNumber}
+                                onChangeText={(text) => setIsPaymentReferenceNumber(text)}
+                            />
+                            {paymentReferenceNumberError?.length > 0 &&
+                                <Text style={{color: colors.danger}}>{paymentReferenceNumberError}</Text>
+                            }
                         
-                        <Button
-                            style={{marginTop:25,}}
-                            mode={'contained'}
-                            onPress={submit}
-                        >
-                            Submit
-                        </Button>
-                    </View>
-                </InputScrollView>
-            </ScrollView>
+                            <TouchableOpacity style={{flex:1}} onPress={() => setDisplayPaymentCalender(true)} activeOpacity={1}>
+                                <View style={styles.datePickerContainer} pointerEvents='none'>
+                                    <Icon style={styles.datePickerIcon} name="calendar-month" size={24} color="#000" />
+                                    <TextInput
+                                        mode="outlined"
+                                        label='Payment Date'
+                                        style={styles.datePickerField}
+                                        placeholder="Payment Date"
+                                        value={datePayment}
+                                    />
+                                    {(displayPaymentCalender == true) && 
+                                    <DateTimePicker
+                                        value={(isPaymentDate) ? isPaymentDate : null}
+                                        mode='date'
+                                        onChange={changePurchaseSelectedDate}
+                                        display="spinner"
+                                    /> }
+                                </View>
+                            </TouchableOpacity>
+                            {paymentDateError?.length > 0 &&
+                                <Text style={styles.errorTextStyle}>{paymentDateError}</Text>
+                            }
+
+                            <TextInput
+                                mode="outlined"
+                                label='Comment'
+                                style={styles.input}
+                                placeholder="Comment"
+                                value={isComment}
+                                onChangeText={(text) => setIsComment(text)}
+                                numberOfLines={3}
+                                multiline={true}
+                            />
+                            
+                            <Button
+                                style={{marginTop:25,}}
+                                mode={'contained'}
+                                onPress={submit}
+                            >
+                                Submit
+                            </Button>
+                        </View>
+                    </InputScrollView>
+                </ScrollView>
+            </View>
         </View>
     )
 }
 
 const styles = StyleSheet.create({
+    garageNameTitle: {
+        textAlign: 'center', 
+        fontSize: 17, 
+        fontWeight: '500', 
+        color: colors.white, 
+        paddingVertical: 7, 
+        backgroundColor: colors.secondary,
+        position: 'absolute',
+        top: 0,
+        zIndex: 5,
+        width: '100%',
+        flex: 1,
+        left: 0, 
+        right: 0
+    },
     surfaceContainer: {
         flex:1,
         padding:15,
@@ -294,6 +314,9 @@ const styles = StyleSheet.create({
 const mapStateToProps = state => ({
     userRole: state.role.user_role,
     userToken: state.user.userToken,
+    user: state.user.user,
+    selectedGarageId: state.garage.selected_garage_id,
+    selectedGarage: state.garage.selected_garage,
 })
 
 export default connect(mapStateToProps)(AddPayment);

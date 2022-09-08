@@ -11,7 +11,7 @@ import moment from 'moment';
 import DocumentPicker from 'react-native-document-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId, garageId, selectedGarage }) => {
+const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId, garageId, selectedGarage, user }) => {
     
     // Customer Fields
     const [isName, setIsName] = useState('');
@@ -477,7 +477,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                 }),
             });
             const json = await res.json();
-            console.log(json);
+            // console.log(json);
             if (json !== undefined) {
                 setGarageList([
                     ...garageList,
@@ -562,7 +562,11 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
     }, [isBrand]);
 
     return (
-        <View style={styles.pageContainer}>
+        <View style={{ flex: 1 }}>
+            <View style={{ marginBottom: 35 }}>
+            { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
+            </View>
+            <View style={styles.pageContainer}>
                 { (isLoading == true) ? <ActivityIndicator></ActivityIndicator> :
                     <InputScrollView
                         ref={scroll1Ref}
@@ -931,159 +935,175 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                         </View>
                     </InputScrollView>
                 }
-            <Portal>
-                <Modal visible={addBrandModal} onDismiss={() => { setAddBrandModal(false); setNewBrandName(""); setIsBrand(0); }} contentContainerStyle={styles.modalContainerStyle}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Brand</Text>
-                    <TextInput
-                        mode="outlined"
-                        label='Brand Name'
-                        style={styles.input}
-                        placeholder="Brand Name"
-                        value={newBrandName}
-                        onChangeText={(text) => setNewBrandName(text)}
-                    />
-           
-                    <View style={{flexDirection: "row",}}>
-                        <Button
-                            style={{marginTop:15, flex: 1, marginRight: 10}}
-                            mode={'contained'}
-                            onPress={addNewBrand}
-                        >
-                            Add
-                        </Button>
-                        <Button
-                            style={{marginTop:15, flex: 1}}
-                            mode={'contained'}
-                            onPress={() => setAddBrandModal(false)}
-                        >
-                            Close
-                        </Button>
-                    </View>
-                </Modal>
-    
-                <Modal visible={addModelModal} onDismiss={() => { setAddModelModal(false); setNewModelName(""); setIsModel(0); }} contentContainerStyle={styles.modalContainerStyle}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
-                    <TextInput
-                        mode="outlined"
-                        label='Model Name'
-                        style={styles.input}
-                        placeholder="Model Name"
-                        value={newModelName}
-                        onChangeText={(text) => setNewModelName(text)}
-                    />
-              
-                    <View style={{flexDirection: "row",}}>
-                        <Button
-                            style={{marginTop:15, flex: 1, marginRight: 10}}
-                            mode={'contained'}
-                            onPress={addNewModel}
-                        >
-                            Add
-                        </Button>
-                        <Button
-                            style={{marginTop:15, flex: 1}}
-                            mode={'contained'}
-                            onPress={() => setAddModelModal(false)}
-                        >
-                            Close
-                        </Button>
-                    </View>
-                </Modal>
-       
-                <Modal visible={addInsuranceCompanyModal} onDismiss={() => { setAddInsuranceCompanyModal(false); setNewInsuranceCompanyName(""); setIsInsuranceProvider(0); }} contentContainerStyle={styles.modalContainerStyle}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
-                    <TextInput
-                        mode="outlined"
-                        label='Insurance Company Name'
-                        style={styles.input}
-                        placeholder="Insurance Company Name"
-                        value={newInsuranceCompanyName}
-                        onChangeText={(text) => setNewInsuranceCompanyName(text)}
-                    />
-                 
-                    <View style={{flexDirection: "row",}}>
-                        <Button
-                            style={{marginTop:15, flex: 1, marginRight: 10}}
-                            mode={'contained'}
-                            onPress={addNewInsuranceCompany}
-                        >
-                            Add
-                        </Button>
-                        <Button
-                            style={{marginTop:15, flex: 1}}
-                            mode={'contained'}
-                            onPress={() => setAddInsuranceCompanyModal(false)}
-                        >
-                            Close
-                        </Button>
-                    </View>
-                </Modal>
+                <Portal>
+                    <Modal visible={addBrandModal} onDismiss={() => { setAddBrandModal(false); setNewBrandName(""); setIsBrand(0); }} contentContainerStyle={styles.modalContainerStyle}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Brand</Text>
+                        <TextInput
+                            mode="outlined"
+                            label='Brand Name'
+                            style={styles.input}
+                            placeholder="Brand Name"
+                            value={newBrandName}
+                            onChangeText={(text) => setNewBrandName(text)}
+                        />
+            
+                        <View style={{flexDirection: "row",}}>
+                            <Button
+                                style={{marginTop:15, flex: 1, marginRight: 10}}
+                                mode={'contained'}
+                                onPress={addNewBrand}
+                            >
+                                Add
+                            </Button>
+                            <Button
+                                style={{marginTop:15, flex: 1}}
+                                mode={'contained'}
+                                onPress={() => setAddBrandModal(false)}
+                            >
+                                Close
+                            </Button>
+                        </View>
+                    </Modal>
+        
+                    <Modal visible={addModelModal} onDismiss={() => { setAddModelModal(false); setNewModelName(""); setIsModel(0); }} contentContainerStyle={styles.modalContainerStyle}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
+                        <TextInput
+                            mode="outlined"
+                            label='Model Name'
+                            style={styles.input}
+                            placeholder="Model Name"
+                            value={newModelName}
+                            onChangeText={(text) => setNewModelName(text)}
+                        />
+                
+                        <View style={{flexDirection: "row",}}>
+                            <Button
+                                style={{marginTop:15, flex: 1, marginRight: 10}}
+                                mode={'contained'}
+                                onPress={addNewModel}
+                            >
+                                Add
+                            </Button>
+                            <Button
+                                style={{marginTop:15, flex: 1}}
+                                mode={'contained'}
+                                onPress={() => setAddModelModal(false)}
+                            >
+                                Close
+                            </Button>
+                        </View>
+                    </Modal>
+        
+                    <Modal visible={addInsuranceCompanyModal} onDismiss={() => { setAddInsuranceCompanyModal(false); setNewInsuranceCompanyName(""); setIsInsuranceProvider(0); }} contentContainerStyle={styles.modalContainerStyle}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
+                        <TextInput
+                            mode="outlined"
+                            label='Insurance Company Name'
+                            style={styles.input}
+                            placeholder="Insurance Company Name"
+                            value={newInsuranceCompanyName}
+                            onChangeText={(text) => setNewInsuranceCompanyName(text)}
+                        />
+                    
+                        <View style={{flexDirection: "row",}}>
+                            <Button
+                                style={{marginTop:15, flex: 1, marginRight: 10}}
+                                mode={'contained'}
+                                onPress={addNewInsuranceCompany}
+                            >
+                                Add
+                            </Button>
+                            <Button
+                                style={{marginTop:15, flex: 1}}
+                                mode={'contained'}
+                                onPress={() => setAddInsuranceCompanyModal(false)}
+                            >
+                                Close
+                            </Button>
+                        </View>
+                    </Modal>
 
-                {/* Garage List Modal */}
-                <Modal visible={garageListModal} onDismiss={() => { setGarageListModal(false); setIsGarageId(0); setIsGarageName(''); setGarageError(''); setSearchQueryForGarages('');  searchFilterForGarages();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Garage</Text>
-                    {(isLoadingGarageList == true) ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator>
-                    :
-                        <>
-                            <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
-                                <Searchbar
-                                    placeholder="Search here..."
-                                    onChangeText={(text) => { if(text != null) searchFilterForGarages(text)}}
-                                    value={searchQueryForGarages}
-                                    elevation={0}
-                                    style={{ elevation: 0.8, marginBottom: 10 }}
-                                />
-                                {filteredGarageData?.length > 0 ?  
-                                    <FlatList
-                                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
-                                        data={filteredGarageData}
-                                        onEndReached={getGarageList}
-                                        onEndReachedThreshold={0.5}
-                                        refreshControl={
-                                            <RefreshControl
-                                                refreshing={garageRefreshing}
-                                                onRefresh={onGarageRefresh}
-                                                colors={['green']}
-                                            />
-                                        }
-                                        ListFooterComponent={renderGarageFooter}
-                                        style={{borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
-                                        keyExtractor={item => item.id}
-                                        renderItem={({item}) => (
-                                            <>
-                                                <List.Item
-                                                    title={
-                                                        <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
-                                                            <Text style={{fontSize:16, color: colors.black}}>{item.garage_name}</Text>
-                                                        </View>
-                                                    }
-                                                    onPress={() => {
-                                                            setIsGarageName(item.garage_name); 
-                                                            setIsGarageId(item.id); 
-                                                            setGarageError('');
-                                                            setGarageListModal(false);  
-                                                        }
-                                                    }
-                                                />
-                                            </>
-                                        )} 
+                    {/* Garage List Modal */}
+                    <Modal visible={garageListModal} onDismiss={() => { setGarageListModal(false); setIsGarageId(0); setIsGarageName(''); setGarageError(''); setSearchQueryForGarages('');  searchFilterForGarages();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Garage</Text>
+                        {(isLoadingGarageList == true) ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator>
+                        :
+                            <>
+                                <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
+                                    <Searchbar
+                                        placeholder="Search here..."
+                                        onChangeText={(text) => { if(text != null) searchFilterForGarages(text)}}
+                                        value={searchQueryForGarages}
+                                        elevation={0}
+                                        style={{ elevation: 0.8, marginBottom: 10 }}
                                     />
-                                    :
-                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
-                                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such garage found!</Text>
-                                    </View>
-                                }
-                            </View>
-                        </>
-                    }
-                </Modal>
+                                    {filteredGarageData?.length > 0 ?  
+                                        <FlatList
+                                            ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                            data={filteredGarageData}
+                                            onEndReached={getGarageList}
+                                            onEndReachedThreshold={0.5}
+                                            refreshControl={
+                                                <RefreshControl
+                                                    refreshing={garageRefreshing}
+                                                    onRefresh={onGarageRefresh}
+                                                    colors={['green']}
+                                                />
+                                            }
+                                            ListFooterComponent={renderGarageFooter}
+                                            style={{borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
+                                            keyExtractor={item => item.id}
+                                            renderItem={({item}) => (
+                                                <>
+                                                    <List.Item
+                                                        title={
+                                                            <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                                <Text style={{fontSize:16, color: colors.black}}>{item.garage_name}</Text>
+                                                            </View>
+                                                        }
+                                                        onPress={() => {
+                                                                setIsGarageName(item.garage_name); 
+                                                                setIsGarageId(item.id); 
+                                                                setGarageError('');
+                                                                setGarageListModal(false);  
+                                                            }
+                                                        }
+                                                    />
+                                                </>
+                                            )} 
+                                        />
+                                        :
+                                        <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
+                                            <Text style={{ color: colors.black, textAlign: 'center'}}>No such garage found!</Text>
+                                        </View>
+                                    }
+                                </View>
+                            </>
+                        }
+                    </Modal>
 
-            </Portal>
+                </Portal>
+            </View>
         </View>
     )
 }
 
 const styles = StyleSheet.create({
+    garageNameTitle: {
+        textAlign: 'center', 
+        fontSize: 17, 
+        fontWeight: '500', 
+        color: colors.white, 
+        paddingVertical: 7, 
+        backgroundColor: colors.secondary,
+        position: 'absolute',
+        top: 0,
+        zIndex: 5,
+        width: '100%',
+        flex: 1,
+        left: 0, 
+        right: 0
+    },
     pageContainer: {
         padding:20,
         flex: 1,
@@ -1184,6 +1204,7 @@ const mapStateToProps = state => ({
     selectedGarageId: state.garage.selected_garage_id,
     selectedGarage: state.garage.selected_garage,
     garageId: state.garage.garage_id,
+    user: state.user.user,
 })
 
 export default connect(mapStateToProps)(AddCustomer);

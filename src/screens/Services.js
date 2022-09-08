@@ -9,7 +9,6 @@ import { useIsFocused } from '@react-navigation/native';
 import { set } from 'react-hook-form';
 
 const Services = ({ navigation, selectedGarageId, userToken, selectedGarage, user }) => {
-  const { colors } = useTheme();
   const [isGarageId, setIsGarageId] = useState(selectedGarageId);
   const [isOpenOrders, setIsOpenOrders] = useState(0);
   const [isWipOrders, setIsWipOrders] = useState(0);
@@ -63,7 +62,7 @@ const Services = ({ navigation, selectedGarageId, userToken, selectedGarage, use
   useEffect(() => {
     // setIsGarageId(selectedGarageId);
     getDashboardData();
-    console.log('selectedGarage', selectedGarageId);
+    // console.log('selectedGarage', selectedGarageId);
   }, [isFocused]);
 
   return (
