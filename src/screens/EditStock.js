@@ -270,6 +270,21 @@ const EditStock = ({ navigation, userRole, userId, userToken, route, garageId, s
 
 
 const styles = StyleSheet.create({
+    garageNameTitle: {
+        textAlign: 'center', 
+        fontSize: 17, 
+        fontWeight: '500', 
+        color: colors.white, 
+        paddingVertical: 7, 
+        backgroundColor: colors.secondary,
+        position: 'absolute',
+        top: 0,
+        zIndex: 5,
+        width: '100%',
+        flex: 1,
+        left: 0, 
+        right: 0
+    },
     garageDropDownField: {
         fontSize: 16,
         color: colors.black,

@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View , Text, StyleSheet, Keyboard, ActivityIndicator, TouchableOpacity } from 'react-native';
-import { Modal, TextInput, Portal } from 'react-native-paper';
+import { View , Text, StyleSheet, Keyboard, ActivityIndicator, TouchableOpacity, RefreshControl, FlatList } from 'react-native';
+import { Modal, TextInput, Portal, Divider, List, Button, Searchbar } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { colors } from '../constants';
 import { API_URL } from '../constants/config';
-import { Button } from 'react-native-paper';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import IconX from "react-native-vector-icons/FontAwesome5";
 import InputScrollView from 'react-native-input-scroll-view';
 import { Picker } from '@react-native-picker/picker';
 import moment from 'moment';
@@ -15,14 +15,12 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 const AddVehicle = ({ navigation, userToken, route, userRole, selectedGarageId, selectedGarage, user }) => {
     
     // Vehicle Fields
-    const [isBrand, setIsBrand] = useState();
-    const [isModel, setIsModel] = useState();
     const [isVehicleRegistrationNumber, setIsVehicleRegistrationNumber] = useState('');
     const [isPurchaseDate, setIsPurchaseDate] = useState(new Date());
     const [isManufacturingDate, setIsManufacturingDate] = useState(new Date());
     const [isEngineNumber, setIsEngineNumber] = useState('');
     const [isChasisNumber, setIsChasisNumber] = useState('');
-    const [isInsuranceProvider, setIsInsuranceProvider] = useState();
+    // const [isInsuranceProvider, setIsInsuranceProvider] = useState();
     const [isInsurerGstin, setIsInsurerGstin] = useState('');
     const [isInsurerAddress, setIsInsurerAddress] = useState('');
     const [isPolicyNumber, setIsPolicyNumber] = useState('');
@@ -30,15 +28,11 @@ const AddVehicle = ({ navigation, userToken, route, userRole, selectedGarageId, 
     const [isRegistrationCertificateImg, setIsRegistrationCertificateImg] = useState(null);
     const [isInsuranceImg, setIsInsuranceImg] = useState(null);
 
-    const [brandError, setBrandError] = useState('');   // Error States
-    const [modelError, setModelError] = useState('');
     const [vehicleRegistrationNumberError, setVehicleRegistrationNumberError] = useState('');
     const [registrationCertificateImgError, setRegistrationCertificateImgError] = useState('');
     const [insuranceImgError, setInsuranceImgError] = useState('');
 
-    const [brandList, setBrandList] =  useState([]);
-    const [modelList, setModelList] =  useState([]);
-    const [insuranceProviderList, setInsuranceProviderList] =  useState([]);
+    // const [insuranceProviderList, setInsuranceProviderList] =  useState([]);
     const [modelFieldToggle, setModelFieldToggle] = useState(false);
 
     const [datePurchase, setDatePurchase] = useState();
@@ -59,6 +53,50 @@ const AddVehicle = ({ navigation, userToken, route, userRole, selectedGarageId, 
     const [addInsuranceCompanyModal, setAddInsuranceCompanyModal] = useState(false);
     const [newInsuranceCompanyName, setNewInsuranceCompanyName] = useState();
     const [newInsuranceCompanyNameError, setNewInsuranceCompanyNameError] = useState();
+
+    // Brand States
+    const [isBrand, setIsBrand] = useState();
+    const [isBrandName, setIsBrandName] = useState();
+    const [brandList, setBrandList] = useState([]);
+    const [brandListModal, setBrandListModal] = useState(false);
+    const [isLoadingBrandList, setIsLoadingBrandList] = useState(true);
+    const [filteredBrandData, setFilteredBrandData] = useState([]);
+    const [searchQueryForBrands, setSearchQueryForBrands] = useState(); 
+    const [brandError, setBrandError] = useState('');   // Error State
+    const [brandIdError, setBrandIdError] = useState();
+
+    const [brandPage, setBrandPage] = useState(1);
+    const [isBrandScrollLoading, setIsBrandScrollLoading] = useState(false);
+    const [brandRefreshing, setBrandRefreshing] = useState(false);
+
+    // Vehicle Model States
+    const [isModel, setIsModel] = useState();
+    const [isModelName, setIsModelName] = useState();
+    const [modelList, setModelList] = useState([]);
+    const [modelListModal, setModelListModal] = useState(false);
+    const [isLoadingModelList, setIsLoadingModelList] = useState(true);
+    const [filteredModelData, setFilteredModelData] = useState([]);
+    const [searchQueryForModels, setSearchQueryForModels] = useState(); 
+    const [modelError, setModelError] = useState('');   // Error State
+    const [modelIdError, setModelIdError] = useState();
+
+    const [modelPage, setModelPage] = useState(1);
+    const [isModelScrollLoading, setIsModelScrollLoading] = useState(false);
+    const [modelRefreshing, setModelRefreshing] = useState(false);
+
+    // Insurance Provider Company for Dropdown
+    const [isInsuranceProvider, setIsInsuranceProvider] = useState('');
+    const [isInsuranceProviderName, setIsInsuranceProviderName] = useState('');
+    const [insuranceProviderList, setInsuranceProviderList] = useState([]);
+    const [insuranceProviderListModal, setInsuranceProviderListModal] = useState(false);
+    const [isLoadingInsuranceProviderList, setIsLoadingInsuranceProviderList] = useState(false);
+    const [filteredInsuranceProviderData, setFilteredInsuranceProviderData] = useState([]);
+    const [searchQueryForInsuranceProviders, setSearchQueryForInsuranceProviders] = useState(); 
+    const [insuranceProviderError, setInsuranceProviderError] = useState();
+
+    const [isNewInsuranceProvider, setIsNewInsuranceProvider] = useState('');
+    const [newInsuranceProviderError, setNewInsuranceProviderError] = useState();
+    const [addNewInsuranceProviderModal, setAddNewInsuranceProviderModal] = useState(false);
 
     const [isLoading, setIsLoading] = useState(false);
     
@@ -102,31 +140,6 @@ const AddVehicle = ({ navigation, userToken, route, userRole, selectedGarageId, 
 
         addVehicle(data);
     }
-
-    const addNewInsuranceCompany = async () => {
-        let data = {'name': newInsuranceCompanyName}
-        try {
-            const res = await fetch(`${API_URL}add_insurance_provider`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + userToken
-                },
-                body: JSON.stringify(data)
-            });
-            const json = await res.json();
-            if (json !== undefined) {
-                await getInsuranceProviderList();
-            }
-        } catch (e) {
-            console.log(e);
-        } finally {
-            setAddInsuranceCompanyModal(false);
-            setNewInsuranceCompanyName("");
-            setIsInsuranceProvider(0);
-        }
-    };
 
     const addNewBrand = async () => {
         let data = {'name': newBrandName}
@@ -283,74 +296,276 @@ const AddVehicle = ({ navigation, userToken, route, userRole, selectedGarageId, 
         }
     };
 
-    const vehicleCheck = (dataCheck) => { 
-        fetch(`${API_URL}user_vehicle_check`,
-        {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + userToken
-            },
-            body: JSON.stringify(dataCheck)
-        })
-        .then(res => {
-            const statusCode = res.status;
-            let data;
-            return res.json().then(obj => {
-                data = obj;
-                return { statusCode, data };
-            });
-        })
-        .then((res) => {
-            if(res.statusCode == 400) {
-              { res.data.message.vehicle_registration_number && setVehicleRegistrationNumberError(res.data.message.vehicle_registration_number); }
-              return;
-            }
-        });
-    }
-
     const getBrandList = async () => {
+        { brandPage == 1 && setIsLoadingBrandList(true) }
+        { brandPage != 1 && setIsBrandScrollLoading(true) }
         try {
-            const res = await fetch(`${API_URL}fetch_brand`, {
-                method: 'GET',
+            const res = await fetch(`${API_URL}fetch_brand?page=${brandPage}`, {
+                method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + userToken
                 },
+                body: JSON.stringify({
+                    search: searchQueryForBrands,
+                }),
             });
             const json = await res.json();
             if (json !== undefined) {
-                setBrandList(json.brand_list);
+                setBrandList([
+                    ...brandList,
+                    ...json.brand_list.data
+                ]);
+                setFilteredBrandData([
+                    ...filteredBrandData,
+                    ...json.brand_list.data
+                ]);
+      
+                // setBrandList(json.brand_list);
             }
         } catch (e) {
             console.log(e);
+        } finally {
+            { brandPage == 1 && setIsLoadingBrandList(false) }
+            { brandPage != 1 && setIsBrandScrollLoading(false) }
+            setBrandPage(brandPage + 1);
         }
     };
 
-    const getModelList = async () => {
+    const searchFilterForBrands = async () => {
         try {
-            const res = await fetch(`${API_URL}fetch_vehicle_model?brand_id=${isBrand}`, {
-                method: 'GET',
+            const response = await fetch(`${API_URL}fetch_brand`, {
+                method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + userToken
                 },
+                body: JSON.stringify({
+                    search: searchQueryForBrands,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setBrandList(json.brand_list.data);
+                setFilteredBrandData(json.brand_list.data);
+                setBrandPage(2);
+                setBrandRefreshing(false);
+            } else {
+                setBrandRefreshing(false);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const pullBrandRefresh = async () => {
+        setSearchQueryForBrands(null);
+        try {
+            const response = await fetch(`${API_URL}fetch_brand`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    search: null,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setBrandList(json.brand_list.data);
+                setFilteredBrandData(json.brand_list.data);
+                setBrandPage(2);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setBrandRefreshing(false);
+        }
+    };
+
+    const renderBrandFooter = () => {
+        return (
+            <>
+                {isBrandScrollLoading && (
+                    <View style={styles.footer}>
+                        <ActivityIndicator
+                            size="large"
+                        />
+                    </View>
+                )}
+            </>
+        );
+    };
+
+    const onBrandRefresh = () => {
+        setBrandRefreshing(true);
+        pullBrandRefresh();
+    };
+
+
+    const getModelList = async () => {
+        { modelPage == 1 && setIsLoadingModelList(true) }
+        { modelPage != 1 && setIsModelScrollLoading(true) }
+        try {
+            const res = await fetch(`${API_URL}fetch_vehicle_model?page=${modelPage}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    brand_id: isBrand,
+                    search: searchQueryForModels,
+                }),
             });
             const json = await res.json();
+            console.log('model_json', json);
             if (json !== undefined) {
-                setModelList(json.vehicle_model_list);
-                setModelFieldToggle(true);
+                setModelList([
+                    ...modelList,
+                    ...json.vehicle_model_list.data
+                ]);
+                setFilteredModelData([
+                    ...filteredModelData,
+                    ...json.vehicle_model_list.data
+                ]);
+                // setModelList(json.vehicle_model_list);
             }
         } catch (e) {
             console.log(e);
-            return alert(e);
+        } finally {
+            { modelPage == 1 && setIsLoadingModelList(false) }
+            { modelPage != 1 && setIsModelScrollLoading(false) }
+            setModelPage(modelPage + 1);
+        }
+    };
+
+    const searchFilterForModels = async () => {
+        try {
+            const response = await fetch(`${API_URL}fetch_vehicle_model`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    brand_id: isBrand,
+                    search: searchQueryForModels,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setModelList(json.vehicle_model_list.data);
+                setFilteredModelData(json.vehicle_model_list.data);
+                setModelPage(2);
+                setModelRefreshing(false);
+            } else {
+                setModelRefreshing(false);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const pullModelRefresh = async () => {
+        setSearchQueryForModels(null);
+        try {
+            const response = await fetch(`${API_URL}fetch_vehicle_model`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    brand_id: isBrand,
+                    search: null,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setModelList(json.vehicle_model_list.data);
+                setFilteredModelData(json.vehicle_model_list.data);
+                setModelPage(2);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setModelRefreshing(false);
+            setIsLoadingModelList(false);
+        }
+    };
+
+    const renderModelFooter = () => {
+        return (
+            <>
+                {isModelScrollLoading && (
+                    <View style={styles.footer}>
+                        <ActivityIndicator
+                            size="large"
+                        />
+                    </View>
+                )}
+            </>
+        );
+    };
+
+    const onModelRefresh = () => {
+        setModelRefreshing(true);
+        pullModelRefresh();
+    };
+
+    // Functions Dropdown for Insurance Provider
+    const addNewInsuranceProvider = async () => {
+        let data = { 'name': isNewInsuranceProvider }
+        try {
+            const res = await fetch(`${API_URL}add_insurance_provider`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify(data)
+            });
+            const json = await res.json();
+    
+            if (json !== undefined) {
+                // console.log('setInsuranceProviderList', json.data);
+                getInsuranceProviderList();
+                setIsInsuranceProvider(parseInt(json.data.id));
+                setIsInsuranceProviderName(json.data.name);
+            }
+        } catch (e) {
+            console.log(e);
+        } 
+    }
+
+    const searchFilterForInsuranceProviders = (text) => {
+        if (text) {
+            let newData = insuranceProviderList.filter(
+                function (listData) {
+                let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
+                let textData = text.toUpperCase();
+                return itemData.indexOf(textData) > -1;
+                }
+            );
+            setFilteredInsuranceProviderData(newData);
+            setSearchQueryForInsuranceProviders(text);
+        } else {
+            setFilteredInsuranceProviderData(insuranceProviderList);
+            setSearchQueryForInsuranceProviders(text);
         }
     };
 
     const getInsuranceProviderList = async () => {
+        setIsLoadingInsuranceProviderList(true);
         try {
             const res = await fetch(`${API_URL}fetch_insurance_provider`, {
                 method: 'GET',
@@ -363,9 +578,12 @@ const AddVehicle = ({ navigation, userToken, route, userRole, selectedGarageId, 
             const json = await res.json();
             if (json !== undefined) {
                 setInsuranceProviderList(json.insurance_provider_list);
+                setFilteredInsuranceProviderData(json.insurance_provider_list);
             }
         } catch (e) {
             console.log(e);
+        } finally {
+            setIsLoadingInsuranceProviderList(false)
         }
     };
 
@@ -375,7 +593,14 @@ const AddVehicle = ({ navigation, userToken, route, userRole, selectedGarageId, 
     }, []);
    
     useEffect(() => {
-        if(isBrand != undefined) getModelList();
+        if(isBrand != undefined) {
+            setIsLoadingModelList(true);
+            pullModelRefresh();
+            setIsModel();
+            setIsModelName('');
+            setModelFieldToggle(true);
+            // getModelList();
+        }
     }, [isBrand]);
 
     return (
@@ -395,58 +620,55 @@ const AddVehicle = ({ navigation, userToken, route, userRole, selectedGarageId, 
                     >
                         <View style={{flex:1}}>
                             <Text style={[styles.headingStyle]}>Vehicle Details:</Text>
-                                <View style={styles.dropDownContainer}>
-                                    <Picker
-                                        selectedValue={isBrand}
-                                        onValueChange={(option) => {setIsBrand(option); if(option == "new_brand") setAddBrandModal(true) }}
-                                        style={styles.dropDownField}
-                                        itemStyle={{padding: 0}}
-                                    >
-                                        <Picker.Item label="Select Brand" value="0" />
-                                        {brandList.map((brandList, i) => {
-                                            return (
-                                                <Picker.Item
-                                                    key={i}
-                                                    label={brandList.name}
-                                                    value={brandList.id}
-                                                />
-                                            );
-                                        })}
-                                        {userRole == "Super Admin" || userRole == "Admin" ?
-                                            <Picker.Item label="Add New Brand" value="new_brand" />
-                                        : null }
-                                    </Picker>
-                                </View>
-                                {brandError?.length > 0 &&
-                                    <Text style={styles.errorTextStyle}>{brandError}</Text>
-                                }
 
-                                <View style={styles.dropDownContainer}>
-                                    <Picker
-                                        selectedValue={isModel}
-                                        onValueChange={(option) => { setIsModel(option); if(option == "new_model") setAddModelModal(true) }}
-                                        style={styles.dropDownField}
-                                        itemStyle={{padding: 0}}
-                                        enabled={modelFieldToggle}
-                                    >
-                                        <Picker.Item label="Select Vehicle Model" value="0" />
-                                        {modelList.map((modelList, i) => {
-                                            return (
-                                                <Picker.Item
-                                                    key={i}
-                                                    label={modelList.model_name}
-                                                    value={modelList.id}
-                                                />
-                                            );
-                                        })}
-                                        {userRole == "Super Admin" || userRole == "Admin" ?
-                                            <Picker.Item label="Add New Model" value="new_model" />
-                                        : null }
-                                    </Picker>
-                                </View>
-                                {modelError?.length > 0 &&
-                                    <Text style={styles.errorTextStyle}>{modelError}</Text>
-                                }
+                                <> 
+                                    <View>
+                                        <TouchableOpacity 
+                                            style={styles.brandDropDownField} 
+                                            onPress={() => {
+                                                setBrandListModal(true);
+                                            }}
+                                        >
+                                        </TouchableOpacity>
+                                        <TextInput
+                                            mode="outlined"
+                                            label='Brand'
+                                            style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                            placeholder="Select Brand"
+                                            value={isBrandName}
+                                            right={<TextInput.Icon name="menu-down" />}
+                                        />
+                                    </View>
+                                    {brandError?.length > 0 &&
+                                        <Text style={styles.errorTextStyle}>{brandError}</Text>
+                                    }
+                                </>
+
+                                <>
+                                    <View>
+                                        {modelFieldToggle == false &&
+                                            <View style={[styles.modelDropDownField, {zIndex: 10, opacity: 0.6, backgroundColor: colors.white}]} ></View>
+                                        }
+                                        <TouchableOpacity 
+                                            style={[styles.modelDropDownField, modelFieldToggle == false && {opacity: 0.5}]} 
+                                            onPress={() => {
+                                                setModelListModal(true);
+                                            }}
+                                        >
+                                        </TouchableOpacity>
+                                        <TextInput
+                                            mode="outlined"
+                                            label='Vehicle Model'
+                                            style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                            placeholder="Select Vehicle Model"
+                                            value={isModelName}
+                                            right={<TextInput.Icon name="menu-down" />}
+                                        />
+                                    </View>
+                                    {modelError?.length > 0 &&
+                                        <Text style={styles.errorTextStyle}>{modelError}</Text>
+                                    }
+                                </>
 
                                 <TextInput
                                     mode="outlined"
@@ -518,28 +740,28 @@ const AddVehicle = ({ navigation, userToken, route, userRole, selectedGarageId, 
                                     onChangeText={(text) => setIsChasisNumber(text)}
                                 />
                                 
-                                <View style={styles.dropDownContainer}>
-                                    <Picker
-                                        selectedValue={isInsuranceProvider}
-                                        onValueChange={(option) => { setIsInsuranceProvider(option); if(option == "new_insurance_company") setAddInsuranceCompanyModal(true) }}
-                                        style={styles.dropDownField}
-                                        itemStyle={{padding: 0}}
+                                <View>
+                                    <TouchableOpacity 
+                                        style={styles.insuranceProviderDropDownField} 
+                                        onPress={() => {
+                                            setInsuranceProviderListModal(true);
+                                            setIsNewInsuranceProvider('');
+                                            setNewInsuranceProviderError('');
+                                        }}
                                     >
-                                        <Picker.Item label="Select Insurance Provider Company" value="0" />
-                                        {insuranceProviderList.map((insuranceProviderList, i) => {
-                                            return (
-                                                <Picker.Item
-                                                    key={i}
-                                                    label={insuranceProviderList.name}
-                                                    value={insuranceProviderList.id}
-                                                />
-                                            );
-                                        })}
-                                        {userRole == "Super Admin" || userRole == "Admin" ?
-                                            <Picker.Item label="Add New Insurance Company" value="new_insurance_company" />
-                                        : null }
-                                    </Picker>
+                                    </TouchableOpacity>
+                                    <TextInput
+                                        mode="outlined"
+                                        label='Insurance Provider'
+                                        style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                        placeholder="Select Insurance Provider"
+                                        value={isInsuranceProviderName}
+                                        right={<TextInput.Icon name="menu-down" />}
+                                    />
                                 </View>
+                                {insuranceProviderError?.length > 0 &&
+                                    <Text style={styles.errorTextStyle}>{insuranceProviderError}</Text>
+                                } 
                                 
                                 <TextInput
                                     mode="outlined"
@@ -669,10 +891,8 @@ const AddVehicle = ({ navigation, userToken, route, userRole, selectedGarageId, 
                             </Button>
                         </View>
                     </Modal>
-                </Portal>
 
-                {/* Add New Vehicle Modal */}
-                <Portal>
+                    {/* Add New Vehicle Modal */}
                     <Modal visible={addModelModal} onDismiss={() => { setAddModelModal(false); setNewModelName(""); setIsModel(0); }} contentContainerStyle={styles.modalContainerStyle}>
                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
                         <TextInput
@@ -703,40 +923,250 @@ const AddVehicle = ({ navigation, userToken, route, userRole, selectedGarageId, 
                             </Button>
                         </View>
                     </Modal>
-                </Portal>
 
-                {/* Add New Insurance Company Modal */}
-                <Portal>
-                    <Modal visible={addInsuranceCompanyModal} onDismiss={() => { setAddInsuranceCompanyModal(false); setNewInsuranceCompanyName(""); setIsInsuranceProvider(0); }} contentContainerStyle={styles.modalContainerStyle}>
-                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
-                        <TextInput
-                            mode="outlined"
-                            label='Insurance Company Name'
-                            style={styles.input}
-                            placeholder="Insurance Company Name"
-                            value={newInsuranceCompanyName}
-                            onChangeText={(text) => setNewInsuranceCompanyName(text)}
-                        />
-                        {newInsuranceCompanyNameError?.length > 0 &&
-                            <Text style={styles.errorTextStyle}>{newInsuranceCompanyNameError}</Text>
+                    {/* Insurance Providers List Modal */}
+                    <Modal visible={insuranceProviderListModal} onDismiss={() => { setInsuranceProviderListModal(false); setIsInsuranceProvider(0); setIsInsuranceProviderName(''); setInsuranceProviderError(''); setSearchQueryForInsuranceProviders('');  searchFilterForInsuranceProviders();}} contentContainerStyle={[styles.modalContainerStyle, {flex: 0.9}]}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Insurance Provider</Text>
+                        {(isLoadingInsuranceProviderList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View>
+                        :
+                            <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
+                                <Searchbar
+                                    placeholder="Search here..."
+                                    onChangeText={(text) => { if(text != null) searchFilterForInsuranceProviders(text)}}
+                                    value={searchQueryForInsuranceProviders}
+                                    elevation={0}
+                                    style={{ elevation: 0.8, marginBottom: 10}}
+                                />
+                                {filteredInsuranceProviderData?.length > 0 ?  
+                                    <FlatList
+                                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                        data={filteredInsuranceProviderData}
+                                        // onEndReachedThreshold={1}
+                                        style={{ borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
+                                        keyExtractor={item => item.id}
+                                        renderItem={({item}) => (
+                                            <>
+                                                <List.Item
+                                                    title={
+                                                        // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setInsuranceProviderListModal(false);  setAddInsuranceProviderModal(true); }}>
+                                                        <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                            <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
+                                                        </View>
+                                                        // </TouchableOpacity> 
+                                                    }
+                                                    onPress={() => {
+                                                            setIsInsuranceProviderName(item.name); 
+                                                            setIsInsuranceProvider(item.id); 
+                                                            setInsuranceProviderError('');
+                                                            setInsuranceProviderListModal(false);  
+                                                        }
+                                                    }
+                                                />
+                                            </>
+                                        )} 
+                                    />
+                                    :
+                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50, flex: 1 }}>
+                                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such insurance provider is associated!</Text>
+                                    </View>
+                                }
+                                <View style={{justifyContent:"flex-end", flexDirection: 'row'}}>
+                                    <TouchableOpacity  style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: colors.primary, marginTop: 7, paddingVertical: 3, paddingHorizontal: 10, borderRadius: 4}} onPress={() => { setAddNewInsuranceProviderModal(true); setInsuranceProviderListModal(false); }}>
+                                        <Icon style={{color: colors.white, marginRight: 4}} name="plus" size={16} />
+                                        <Text style={{color: colors.white}}>Add Insurance Provider</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
                         }
-                        <View style={{flexDirection: "row",}}>
+                    </Modal>
+
+                    <Modal visible={addNewInsuranceProviderModal} onDismiss={() => { setAddNewInsuranceProviderModal(false); setInsuranceProviderListModal(true);  setIsNewInsuranceProvider(0); setNewInsuranceProviderError(''); }} contentContainerStyle={styles.modalContainerStyle}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Insurance Provider</Text>
+                        <View>
+                            <TextInput
+                                mode="outlined"
+                                label='Insurance Provider Name'
+                                style={styles.input}
+                                placeholder="Insurance Provider Name"
+                                value={isNewInsuranceProvider}
+                                onChangeText={(text) => setIsNewInsuranceProvider(text)}
+                            />
+                        </View>
+                        {newInsuranceProviderError?.length > 0 &&
+                            <Text style={styles.errorTextStyle}>{newInsuranceProviderError}</Text>
+                        }
+                        <View style={{ flexDirection: "row", marginTop: 10}}>
                             <Button
-                                style={{marginTop:15, flex: 1, marginRight: 10}}
+                                style={{ marginTop: 15, flex: 1, marginRight: 10 }}
                                 mode={'contained'}
-                                onPress={addNewInsuranceCompany}
+                                onPress={() => {
+                                    if(isNewInsuranceProvider == "") {
+                                        setNewInsuranceProviderError("Please Enter Insurance Provider Name");
+                                    } else {
+                                        setAddNewInsuranceProviderModal(false);
+                                        addNewInsuranceProvider();
+                                    }
+                                }}
                             >
                                 Add
                             </Button>
                             <Button
-                                style={{marginTop:15, flex: 1}}
+                                style={{ marginTop: 15, flex: 1 }}
                                 mode={'contained'}
-                                onPress={() => setAddInsuranceCompanyModal(false)}
+                                onPress={() => {
+                                    setAddNewInsuranceProviderModal(false);
+                                    setInsuranceProviderListModal(true);
+                                    setIsNewInsuranceProvider('');
+                                    setNewInsuranceProviderError('');
+                                }}
                             >
                                 Close
                             </Button>
                         </View>
                     </Modal>
+
+                    {/* Brand List Modal */}
+                    <Modal visible={brandListModal} onDismiss={() => { setBrandListModal(false); setIsBrand(0); setIsBrandName(''); setBrandError(''); setSearchQueryForBrands('');  searchFilterForBrands();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Brand</Text>
+                        {(isLoadingBrandList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
+                            <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
+                                {/* Search Bar */}
+                                <View>
+                                    <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                                        <TextInput
+                                            mode={'flat'}
+                                            placeholder="Search here..."
+                                            onChangeText={(text) => setSearchQueryForBrands(text)}
+                                            value={searchQueryForBrands}
+                                            activeUnderlineColor={colors.transparent}
+                                            underlineColor={colors.transparent}
+                                            style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                                            right={(searchQueryForBrands != null && searchQueryForBrands != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => onBrandRefresh()} />}
+                                        />
+                                        <TouchableOpacity onPress={() => searchFilterForBrands()} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                                            <IconX name={'search'} size={17} color={colors.white} />
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                                {filteredBrandData?.length > 0 ?  
+                                    <FlatList
+                                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                        data={filteredBrandData}
+                                        onEndReached={filteredBrandData?.length > 9 && getBrandList}
+                                        onEndReachedThreshold={0.5}
+                                        refreshControl={
+                                            <RefreshControl
+                                                refreshing={brandRefreshing}
+                                                onRefresh={onBrandRefresh}
+                                                colors={['green']}
+                                            />
+                                        }
+                                        ListFooterComponent={filteredBrandData?.length > 9 && renderBrandFooter}
+                                        style={{borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
+                                        keyExtractor={item => item.id}
+                                        renderItem={({item}) => (
+                                            <List.Item
+                                                title={
+                                                    <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                        <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
+                                                    </View>
+                                                }
+                                                onPress={() => {
+                                                        setIsBrandName(item.name); 
+                                                        setIsBrand(item.id); 
+                                                        setBrandError('');
+                                                        setBrandListModal(false);  
+                                                    }
+                                                }
+                                            />
+                                        )} 
+                                    />
+                                    :
+                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50, flex: 1 }}>
+                                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such brand found!</Text>
+                                    </View>
+                                }
+                                <View style={{justifyContent:"flex-end", flexDirection: 'row'}}>
+                                    <TouchableOpacity  style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: colors.primary, marginTop: 7, paddingVertical: 3, paddingHorizontal: 10, borderRadius: 4}} onPress={() => { setAddBrandModal(true); setBrandListModal(false); }}>
+                                        <Icon style={{color: colors.white, marginRight: 4}} name="plus" size={16} />
+                                        <Text style={{color: colors.white}}>Add Brand</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        }
+                    </Modal>
+
+                    {/* Vehicle Model List Modal */}
+                    <Modal visible={modelListModal} onDismiss={() => { setModelListModal(false); setIsModel(0); setIsModelName(''); setModelError(''); setSearchQueryForModels('');  searchFilterForModels();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Model</Text>
+                        {(isLoadingModelList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
+                            <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
+                                {/* Search Bar */}
+                                <View>
+                                    <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                                        <TextInput
+                                            mode={'flat'}
+                                            placeholder="Search here..."
+                                            onChangeText={(text) => setSearchQueryForModels(text)}
+                                            value={searchQueryForModels}
+                                            activeUnderlineColor={colors.transparent}
+                                            underlineColor={colors.transparent}
+                                            style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                                            right={(searchQueryForModels != null && searchQueryForModels != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => onModelRefresh()} />}
+                                        />
+                                        <TouchableOpacity onPress={() => searchFilterForModels()} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                                            <IconX name={'search'} size={17} color={colors.white} />
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                                {filteredModelData?.length > 0 ?  
+                                    <FlatList
+                                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                        data={filteredModelData}
+                                        onEndReached={filteredModelData?.length > 9 && getModelList}
+                                        onEndReachedThreshold={0.5}
+                                        refreshControl={
+                                            <RefreshControl
+                                                refreshing={modelRefreshing}
+                                                onRefresh={onModelRefresh}
+                                                colors={['green']}
+                                            />
+                                        }
+                                        ListFooterComponent={filteredModelData?.length > 9 && renderModelFooter}
+                                        style={{borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
+                                        keyExtractor={item => item.id}
+                                        renderItem={({item}) => (
+                                            <List.Item
+                                                title={
+                                                    <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                        <Text style={{fontSize:16, color: colors.black}}>{item.model_name}</Text>
+                                                    </View>
+                                                }
+                                                onPress={() => {
+                                                        setIsModelName(item.model_name); 
+                                                        setIsModel(item.id); 
+                                                        setModelError('');
+                                                        setModelListModal(false);  
+                                                    }
+                                                }
+                                            />
+                                        )} 
+                                    />
+                                    :
+                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50, flex: 1 }}>
+                                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such vehicle model found!</Text>
+                                    </View>
+                                }
+                                <View style={{justifyContent:"flex-end", flexDirection: 'row'}}>
+                                    <TouchableOpacity  style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: colors.primary, marginTop: 7, paddingVertical: 3, paddingHorizontal: 10, borderRadius: 4}} onPress={() => { setAddModelModal(true); setModelListModal(false); }}>
+                                        <Icon style={{color: colors.white, marginRight: 4}} name="plus" size={16} />
+                                        <Text style={{color: colors.white}}>Add Model</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        }
+                    </Modal>
+
                 </Portal>
             </View>
         </View>
@@ -835,6 +1265,42 @@ const styles = StyleSheet.create({
         backgroundColor: 'white', 
         padding: 20,
         marginHorizontal: 30
+    },
+    brandDropDownField: {
+        fontSize: 16,
+        color: colors.black,
+        position: 'absolute',
+        marginTop: 15,
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '80%',
+        zIndex: 2,
+    },
+    modelDropDownField: {
+        fontSize: 16,
+        color: colors.black,
+        position: 'absolute',
+        marginTop: 15,
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '80%',
+        zIndex: 2,
+    },
+    footer: {
+        marginVertical: 15,
+    },
+    insuranceProviderDropDownField: {
+        fontSize: 16,
+        color: colors.black,
+        position: 'absolute',
+        marginTop: 15,
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '80%',
+        zIndex: 2,
     },
 })
 

@@ -62,13 +62,15 @@ const Services = ({ navigation, selectedGarageId, userToken, selectedGarage, use
   useEffect(() => {
     // setIsGarageId(selectedGarageId);
     getDashboardData();
+    console.log('user', user);
+    console.log('user name', user.name);
     // console.log('selectedGarage', selectedGarageId);
   }, [isFocused]);
 
   return (
     <View style={{ flex: 1 }}>
       <View style={{ marginBottom: 35 }}>
-        { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
+        { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user?.name}</Text> }
       </View>
       <View style= {styles.customSurface}>
         {/* {isLoadingDashboard == true ? <ActivityIndicator></ActivityIndicator> : */}

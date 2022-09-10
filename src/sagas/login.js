@@ -15,7 +15,7 @@ const login = function* login({ data }) {
             console.log(res);
             yield all([
                 put(setUserToken({
-                    user: JSON.stringify(res.data.user_data),
+                    user: res.data.user_data,
                     user_token: res.data.access_token,
                 })),
                 put(loginSuccess()),

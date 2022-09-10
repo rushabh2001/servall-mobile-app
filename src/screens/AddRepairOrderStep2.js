@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View , Text, StyleSheet, Keyboard, ActivityIndicator, TouchableOpacity, RefreshControl, FlatList } from 'react-native';
-import { Modal, Portal, Divider, TextInput, Button, Searchbar, List } from 'react-native-paper';
+import { Modal, Portal, Divider, TextInput, Button, List, Searchbar } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { colors } from '../constants';
 import { API_URL } from '../constants/config';
@@ -57,7 +57,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     const [isManufacturingDate, setIsManufacturingDate] = useState(new Date());
     const [isEngineNumber, setIsEngineNumber] = useState('');
     const [isChasisNumber, setIsChasisNumber] = useState('');
-    const [isInsuranceProvider, setIsInsuranceProvider] = useState();
+    // const [isInsuranceProvider, setIsInsuranceProvider] = useState();
     const [isInsurerGstin, setIsInsurerGstin] = useState('');
     const [isInsurerAddress, setIsInsurerAddress] = useState('');
     const [isPolicyNumber, setIsPolicyNumber] = useState('');
@@ -89,9 +89,9 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
 
     // const [brandList, setBrandList] =  useState([]);
     // const [modelList, setModelList] =  useState([]);
-    const [insuranceProviderList, setInsuranceProviderList] =  useState([]);
+    // const [insuranceProviderList, setInsuranceProviderList] =  useState([]);
     const [cityFieldToggle, setCityFieldToggle] = useState(false);
-    // const [modelFieldToggle, setModelFieldToggle] = useState(false);
+    const [modelFieldToggle, setModelFieldToggle] = useState(false);
 
     const [datePurchase, setDatePurchase] = useState();
     const [displayPurchaseCalender, setDisplayPurchaseCalender] = useState(false);
@@ -140,38 +140,28 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     const [modelPage, setModelPage] = useState(1);
     const [isModelScrollLoading, setIsModelScrollLoading] = useState(false);
     const [modelRefreshing, setModelRefreshing] = useState(false);
+
+    // Insurance Provider Company for Dropdown
+    const [isInsuranceProvider, setIsInsuranceProvider] = useState('');
+    const [isInsuranceProviderName, setIsInsuranceProviderName] = useState('');
+    const [insuranceProviderList, setInsuranceProviderList] = useState([]);
+    const [insuranceProviderListModal, setInsuranceProviderListModal] = useState(false);
+    const [isLoadingInsuranceProviderList, setIsLoadingInsuranceProviderList] = useState(false);
+    const [filteredInsuranceProviderData, setFilteredInsuranceProviderData] = useState([]);
+    const [searchQueryForInsuranceProviders, setSearchQueryForInsuranceProviders] = useState(); 
+    const [insuranceProviderError, setInsuranceProviderError] = useState();
+    
+    const [isNewInsuranceProvider, setIsNewInsuranceProvider] = useState('');
+    const [newInsuranceProviderError, setNewInsuranceProviderError] = useState();
+    const [addNewInsuranceProviderModal, setAddNewInsuranceProviderModal] = useState(false);
+    
     
     const scroll1Ref = useRef();
 
     var radio_props = [
         {label: 'New User', value: 'new_user' },
         {label: 'Existing User', value: 'existing_user' }
-      ];
-
-    const addNewInsuranceCompany = async () => {
-        let data = {'name': newInsuranceCompanyName}
-        try {
-            const res = await fetch(`${API_URL}add_insurance_provider`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + userToken
-                },
-                body: JSON.stringify(data)
-            });
-            const json = await res.json();
-            if (json !== undefined) {
-                await getInsuranceProviderList();
-            }
-        } catch (e) {
-            console.log(e);
-        } finally {
-            setAddInsuranceCompanyModal(false);
-            setNewInsuranceCompanyName("");
-            setIsInsuranceProvider(0);
-        }
-    };
+    ];
 
     const addNewBrand = async () => {
         let data = {'name': newBrandName}
@@ -549,7 +539,6 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                     ...filteredBrandData,
                     ...json.brand_list.data
                 ]);
-                // setBrandList(json.brand_list);
             }
         } catch (e) {
             console.log(e);
@@ -789,7 +778,52 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
     //     }
     // };
 
+
+   // Functions Dropdown for Insurance Provider
+   const addNewInsuranceProvider = async () => {
+        let data = { 'name': isNewInsuranceProvider }
+        try {
+            const res = await fetch(`${API_URL}add_insurance_provider`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify(data)
+            });
+            const json = await res.json();
+    
+            if (json !== undefined) {
+                console.log('setInsuranceProviderList', json.data);
+                getInsuranceProviderList();
+                setIsInsuranceProvider(parseInt(json.insurance_provider_list.id));
+                setIsInsuranceProviderName(json.insurance_provider_list.name);
+            }
+        } catch (e) {
+            console.log(e);
+        } 
+    }
+
+    const searchFilterForInsuranceProviders = (text) => {
+        if (text) {
+            let newData = insuranceProviderList.filter(
+                function (listData) {
+                let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
+                let textData = text.toUpperCase();
+                return itemData.indexOf(textData) > -1;
+                }
+            );
+            setFilteredInsuranceProviderData(newData);
+            setSearchQueryForInsuranceProviders(text);
+        } else {
+            setFilteredInsuranceProviderData(insuranceProviderList);
+            setSearchQueryForInsuranceProviders(text);
+        }
+    };
+
     const getInsuranceProviderList = async () => {
+        setIsLoadingInsuranceProviderList(true);
         try {
             const res = await fetch(`${API_URL}fetch_insurance_provider`, {
                 method: 'GET',
@@ -802,9 +836,12 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
             const json = await res.json();
             if (json !== undefined) {
                 setInsuranceProviderList(json.insurance_provider_list);
+                setFilteredInsuranceProviderData(json.insurance_provider_list);
             }
         } catch (e) {
             console.log(e);
+        } finally {
+            setIsLoadingInsuranceProviderList(false)
         }
     };
 
@@ -1059,6 +1096,7 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
             pullModelRefresh();
             setIsModel();
             setIsModelName('');
+            setModelFieldToggle(true);
             // getModelList();
         }
     }, [isBrand]);
@@ -1277,7 +1315,8 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                             <Divider style={{marginTop: 20}} />
 
                             <Text style={[styles.headingStyle, { marginTop:20 }]}>Vehicle Details:</Text>
-                                <>
+
+                                <> 
                                     <View>
                                         <TouchableOpacity 
                                             style={styles.brandDropDownField} 
@@ -1302,8 +1341,11 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
 
                                 <>
                                     <View>
+                                        {modelFieldToggle == false &&
+                                            <View style={[styles.modelDropDownField, {zIndex: 10, opacity: 0.6, backgroundColor: colors.white}]} ></View>
+                                        }
                                         <TouchableOpacity 
-                                            style={styles.modelDropDownField} 
+                                            style={[styles.modelDropDownField, modelFieldToggle == false && {opacity: 0.5}]} 
                                             onPress={() => {
                                                 setModelListModal(true);
                                             }}
@@ -1442,26 +1484,29 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                                     onChangeText={(text) => setIsChasisNumber(text)}
                                 />
                                
-                                <View style={styles.dropDownContainer}>
-                                    <Picker
-                                        selectedValue={isInsuranceProvider}
-                                        onValueChange={(option) => { setIsInsuranceProvider(option); if(option == "new_insurance_company") setAddInsuranceCompanyModal(true) }}
-                                        style={styles.dropDownField}
-                                        itemStyle={{padding: 0}}
+                                <View>
+                                    <TouchableOpacity 
+                                        style={styles.insuranceProviderDropDownField} 
+                                        onPress={() => {
+                                            setInsuranceProviderListModal(true);
+                                            setIsNewInsuranceProvider('');
+                                            setNewInsuranceProviderError('');
+                                        }}
                                     >
-                                        <Picker.Item label="Select Insurance Provider Company" value="0" />
-                                        {insuranceProviderList.map((insuranceProviderList, i) => {
-                                            return (
-                                                <Picker.Item
-                                                    key={i}
-                                                    label={insuranceProviderList.name}
-                                                    value={insuranceProviderList.id}
-                                                />
-                                            );
-                                        })}
-                                         <Picker.Item label="Add New Insurance Company" value="new_insurance_company" />
-                                    </Picker>
+                                    </TouchableOpacity>
+                                    <TextInput
+                                        mode="outlined"
+                                        label='Insurance Provider'
+                                        style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                        placeholder="Select Insurance Provider"
+                                        value={isInsuranceProviderName}
+                                        right={<TextInput.Icon name="menu-down" />}
+                                    />
                                 </View>
+                                {insuranceProviderError?.length > 0 &&
+                                    <Text style={styles.errorTextStyle}>{insuranceProviderError}</Text>
+                                } 
+
                                 
                                 <TextInput
                                     mode="outlined"
@@ -1619,29 +1664,101 @@ const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId
                         </View>
                     </Modal>
             
-                    <Modal visible={addInsuranceCompanyModal} onDismiss={() => { setAddInsuranceCompanyModal(false); setNewInsuranceCompanyName(""); setIsInsuranceProvider(0); }} contentContainerStyle={styles.modalContainerStyle}>
-                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
-                        <TextInput
-                            mode="outlined"
-                            label='Insurance Company Name'
-                            style={styles.input}
-                            placeholder="Insurance Company Name"
-                            value={newInsuranceCompanyName}
-                            onChangeText={(text) => setNewInsuranceCompanyName(text)}
-                        />
-                    
-                        <View style={{flexDirection: "row",}}>
+                    {/* Insurance Providers List Modal */}
+                    <Modal visible={insuranceProviderListModal} onDismiss={() => { setInsuranceProviderListModal(false); setIsInsuranceProvider(0); setIsInsuranceProviderName(''); setInsuranceProviderError(''); setSearchQueryForInsuranceProviders('');  searchFilterForInsuranceProviders();}} contentContainerStyle={[styles.modalContainerStyle, {flex: 0.9}]}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Insurance Provider</Text>
+                        {(isLoadingInsuranceProviderList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View>
+                        :
+                            <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
+                                <Searchbar
+                                    placeholder="Search here..."
+                                    onChangeText={(text) => { if(text != null) searchFilterForInsuranceProviders(text)}}
+                                    value={searchQueryForInsuranceProviders}
+                                    elevation={0}
+                                    style={{ elevation: 0.8, marginBottom: 10}}
+                                />
+                                {filteredInsuranceProviderData?.length > 0 ?  
+                                    <FlatList
+                                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                        data={filteredInsuranceProviderData}
+                                        // onEndReachedThreshold={1}
+                                        style={{borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
+                                        keyExtractor={item => item.id}
+                                        renderItem={({item}) => (
+                                            <>
+                                                <List.Item
+                                                    title={
+                                                        // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setInsuranceProviderListModal(false);  setAddInsuranceProviderModal(true); }}>
+                                                        <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                            <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
+                                                        </View>
+                                                        // </TouchableOpacity> 
+                                                    }
+                                                    onPress={() => {
+                                                            setIsInsuranceProviderName(item.name); 
+                                                            setIsInsuranceProvider(item.id); 
+                                                            setInsuranceProviderError('');
+                                                            setInsuranceProviderListModal(false);  
+                                                        }
+                                                    }
+                                                />
+                                            </>
+                                        )} 
+                                    />
+                                    :
+                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50, flex: 1 }}>
+                                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such insurance provider is associated!</Text>
+                                    </View>
+                                }
+                                <View style={{justifyContent:"flex-end", flexDirection: 'row'}}>
+                                    <TouchableOpacity  style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: colors.primary, marginTop: 7, paddingVertical: 3, paddingHorizontal: 10, borderRadius: 4}} onPress={() => { setAddNewInsuranceProviderModal(true); setInsuranceProviderListModal(false); }}>
+                                        <Icon style={{color: colors.white, marginRight: 4}} name="plus" size={16} />
+                                        <Text style={{color: colors.white}}>Add Insurance Provider</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        }
+                    </Modal>
+
+                    <Modal visible={addNewInsuranceProviderModal} onDismiss={() => { setAddNewInsuranceProviderModal(false); setInsuranceProviderListModal(true);  setIsNewInsuranceProvider(0); setNewInsuranceProviderError(''); }} contentContainerStyle={styles.modalContainerStyle}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Insurance Provider</Text>
+                        <View>
+                            <TextInput
+                                mode="outlined"
+                                label='Insurance Provider Name'
+                                style={styles.input}
+                                placeholder="Insurance Provider Name"
+                                value={isNewInsuranceProvider}
+                                onChangeText={(text) => setIsNewInsuranceProvider(text)}
+                            />
+                        </View>
+                        {newInsuranceProviderError?.length > 0 &&
+                            <Text style={styles.errorTextStyle}>{newInsuranceProviderError}</Text>
+                        }
+                        <View style={{ flexDirection: "row", marginTop: 10}}>
                             <Button
-                                style={{marginTop:15, flex: 1, marginRight: 10}}
+                                style={{ marginTop: 15, flex: 1, marginRight: 10 }}
                                 mode={'contained'}
-                                onPress={addNewInsuranceCompany}
+                                onPress={() => {
+                                    if(isNewInsuranceProvider == "") {
+                                        setNewInsuranceProviderError("Please Enter Insurance Provider Name");
+                                    } else {
+                                        setAddNewInsuranceProviderModal(false);
+                                        addNewInsuranceProvider();
+                                    }
+                                }}
                             >
                                 Add
                             </Button>
                             <Button
-                                style={{marginTop:15, flex: 1}}
+                                style={{ marginTop: 15, flex: 1 }}
                                 mode={'contained'}
-                                onPress={() => setAddInsuranceCompanyModal(false)}
+                                onPress={() => {
+                                    setAddNewInsuranceProviderModal(false);
+                                    setInsuranceProviderListModal(true);
+                                    setIsNewInsuranceProvider('');
+                                    setNewInsuranceProviderError('');
+                                }}
                             >
                                 Close
                             </Button>
@@ -2056,6 +2173,17 @@ const styles = StyleSheet.create({
         zIndex: 2,
     },
     modelDropDownField: {
+        fontSize: 16,
+        color: colors.black,
+        position: 'absolute',
+        marginTop: 15,
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '80%',
+        zIndex: 2,
+    },
+    insuranceProviderDropDownField: {
         fontSize: 16,
         color: colors.black,
         position: 'absolute',
