@@ -221,6 +221,7 @@ const VehicleSearch = ({ userToken, selectedGarageId, selectedGarage, user, navi
                                 />     
                                 <Portal>
                                     <Modal visible={viewVehicleDetailsModal} onDismiss={() => { setVehicleDataLoading(true); setViewVehicleDetailsModal(false); }} contentContainerStyle={styles.modalContainerStyle}>
+                                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => { setVehicleDataLoading(true); setViewVehicleDetailsModal(false); }} />
                                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Vehicle Details</Text>
                                         {vehicleDataLoading ? 
                                             <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> 

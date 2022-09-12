@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, Linking, TouchableOpacity, RefreshControl } from "react-native";
 import { connect } from 'react-redux';
 import { Button, Divider, TextInput, List } from "react-native-paper";
 import { colors } from  "../../constants";
-import  { API_URL, WEB_URL } from "../../constants/config"
+import  { API_URL } from "../../constants/config"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import IconX from "react-native-vector-icons/FontAwesome5";
 import moment from 'moment';

@@ -104,6 +104,7 @@ const VehicleList = ({
     };
 
     const searchFilter = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(
                 `${API_URL}fetch_customer_vehicle/${user.id}`,
@@ -125,8 +126,10 @@ const VehicleList = ({
                 setFilteredData(json.vehicle_list.data);
                 setPage(2);
                 setRefreshing(false);
+                setIsLoading(false);
             } else {
                 setRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
@@ -368,9 +371,10 @@ const VehicleList = ({
                                     >
                                         Vehicle Details
                                     </Text>
+                                    <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => { setVehicleDataLoading(true); setViewVehicleDetailsModal(false); }} />
                                     {vehicleDataLoading ? (
                                         <ActivityIndicator
-                                            style={{ marginVertical: 30 }}
+                                            style={{ marginVertical: 30, flex: 1 }}
                                         ></ActivityIndicator>
                                     ) : (
                                         <ScrollView>
@@ -708,9 +712,7 @@ const VehicleList = ({
                                             mode={"contained"}
                                             onPress={() => {
                                                 setVehicleDataLoading(true);
-                                                setViewVehicleDetailsModal(
-                                                    false
-                                                );
+                                                setViewVehicleDetailsModal(false);
                                             }}
                                         >
                                             Close
@@ -735,7 +737,7 @@ const VehicleList = ({
                                     textAlign: "center",
                                 }}
                             >
-                                No Vehicles are associated with this Garage!
+                                No such vehicle found!
                             </Text>
                         </View>
                     )}
@@ -863,6 +865,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 30,
         marginTop: 40,
         marginBottom: 70,
+        flex: 0.9
     },
     cardDetailsHeading: {
         color: colors.black,

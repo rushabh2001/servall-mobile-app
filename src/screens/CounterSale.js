@@ -107,7 +107,7 @@ const CounterSale = ({navigation, userToken, selectedGarageId, selectedGarage, u
                                 />     
                             </View>
                         :
-                            <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 50,  backgroundColor:colors.white,}}>
+                            <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 ,  backgroundColor:colors.white,}}>
                                 <Text style={{ color: colors.black, textAlign: 'center'}}>No Users are associated with this Garage!</Text>
                             </View>
                         )

@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View , Text, StyleSheet, Keyboard, ActivityIndicator, TouchableOpacity, FlatList } from 'react-native';
+import { View , Text, StyleSheet, Keyboard, ActivityIndicator, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
 import { Modal, Portal, Button, TextInput, Searchbar, Divider, List } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { colors } from '../constants';
 import { API_URL } from '../constants/config';
-import { IconX, ICON_TYPE } from '../icons';
+// import { IconX, ICON_TYPE } from '../icons';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import IconX from "react-native-vector-icons/FontAwesome5";
 import InputScrollView from 'react-native-input-scroll-view';
 import DocumentPicker from 'react-native-document-picker';
 import { Picker } from '@react-native-picker/picker';
@@ -17,15 +18,11 @@ const AddGarage = ({navigation, userToken, selectedGarageId, selectedGarage, use
     // Garage Fields
     const [isGarageName, setIsGarageName] = useState('');
     const [isGarageContactNumber, setIsGarageContactNumber] = useState('');
-    const [isCity, setIsCity] = useState();
-    const [isState, setIsState] = useState();
     const [isLocation, setIsLocation] = useState('');
 
     // Error States
     const [garageNameError, setGarageNameError] = useState('');
     const [garageContactNumberError, setGarageContactNumberError] = useState('');
-    const [cityError, setCityError] = useState('');
-    const [stateError, setStateError] = useState('');
     const [locationError, setLocationError] = useState('');
     const [ownerOption, setOwnerOption] = useState('new_user');
     const [ownerId, setOwnerId] = useState(0);
@@ -43,8 +40,6 @@ const AddGarage = ({navigation, userToken, selectedGarageId, selectedGarage, use
     const [emailError, setEmailError] = useState('');
     const [phoneNumberError, setPhoneNumberError] = useState('');
 
-    const [CityList, setCityList] =  useState([]);
-    const [StateList, setStateList] =  useState([]);
     const [adminList, setAdminList] =  useState([]);
 
     const [isLoading, setIsLoading] = useState(false);
@@ -53,12 +48,37 @@ const AddGarage = ({navigation, userToken, selectedGarageId, selectedGarage, use
     // States for Dropdown
     // const [isUser, setIsUser] = useState('');
     const [isUserName, setIsUserName] = useState('');
-    // const [userList, setUserList] = useState([]);
+    // const [userList, setAdminList] = useState([]);
     const [userListModal, setUserListModal] = useState(false);
     const [isLoadingUserList, setIsLoadingUserList] = useState(false);
     const [filteredUserData, setFilteredUserData] = useState([]);
     const [searchQueryForUsers, setSearchQueryForUsers] = useState(); 
     const [userError, setUserError] = useState();
+
+    const [userPage, setUserPage] = useState(1);
+    const [isUserScrollLoading, setIsUserScrollLoading] = useState(false);
+    const [userRefreshing, setUserRefreshing] = useState(false);
+
+    // States for Dropdown
+    const [isState, setIsState] = useState();
+    const [isStateName, setIsStateName] = useState('');
+    const [stateList, setStateList] = useState([]);
+    const [stateListModal, setStateListModal] = useState(false);
+    const [isLoadingStateList, setIsLoadingStateList] = useState(false);
+    const [filteredStateData, setFilteredStateData] = useState([]);
+    const [searchQueryForStates, setSearchQueryForStates] = useState(); 
+    const [stateError, setStateError] = useState();
+
+    // Cities state for Dropdown
+    const [isCity, setIsCity] = useState();
+    const [isCityName, setIsCityName] = useState('');
+    const [cityList, setCityList] = useState([]);
+    const [cityListModal, setCityListModal] = useState(false);
+    const [isLoadingCityList, setIsLoadingCityList] = useState(false);
+    const [filteredCityData, setFilteredCityData] = useState([]);
+    const [searchQueryForCity, setSearchQueryForCity] = useState(); 
+    const [cityError, setCityError] = useState();
+  
     
     var radio_props = [
         {label: 'New User', value: 'new_user' },
@@ -151,9 +171,10 @@ const AddGarage = ({navigation, userToken, selectedGarageId, selectedGarage, use
         }
     };
 
-    const searchFilterForUsers = (text) => {
+    // State Functions Dropdown
+    const searchFilterForStates = (text) => {
         if (text) {
-            let newData = adminList.filter(
+            let newData = stateList.filter(
                 function (listData) {
                 // let arr2 = listData.phone_number ? listData.phone_number : ''.toUpperCase() 
                 let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
@@ -163,15 +184,16 @@ const AddGarage = ({navigation, userToken, selectedGarageId, selectedGarage, use
                 return itemData.indexOf(textData) > -1;
                 }
             );
-            setFilteredUserData(newData);
-            setSearchQueryForUsers(text);
+            setFilteredStateData(newData);
+            setSearchQueryForStates(text);
         } else {
-            setFilteredUserData(adminList);
-            setSearchQueryForUsers(text);
+            setFilteredStateData(stateList);
+            setSearchQueryForStates(text);
         }
     };
 
-    const getStatesList = async () => {
+    const getStateList = async () => {
+        setIsLoadingStateList(true);
         try {
             const res = await fetch(`${API_URL}fetch_states`, {
                 method: 'GET',
@@ -182,15 +204,40 @@ const AddGarage = ({navigation, userToken, selectedGarageId, selectedGarage, use
                 },
             });
             const json = await res.json();
+            // console.log(json);
             if (json !== undefined) {
+                // console.log('setStateList', json.data);
                 setStateList(json.states);
+                setFilteredStateData(json.states);
             }
         } catch (e) {
             console.log(e);
+        } finally {
+            // setIsLoading2(false);
+            setIsLoadingStateList(false)
+        }
+    };
+
+    // City Functionalities
+    const searchFilterForCity = (text) => {
+        if (text) {
+            let newData = cityList.filter(
+                function (listData) {
+                let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
+                let textData = text.toUpperCase();
+                return itemData.indexOf(textData) > -1;
+                }
+            );
+            setFilteredCityData(newData);
+            setSearchQueryForCity(text);
+        } else {
+            setFilteredCityData(cityList);
+            setSearchQueryForCity(text);
         }
     };
 
     const getCityList = async () => {
+        setIsLoadingCityList(true);
         try {
             const res = await fetch(`${API_URL}fetch_cities?state_id=${isState}`, {
                 method: 'GET',
@@ -203,32 +250,126 @@ const AddGarage = ({navigation, userToken, selectedGarageId, selectedGarage, use
             const json = await res.json();
             if (json !== undefined) {
                 setCityList(json.cities);
+                setFilteredCityData(json.cities);
                 setCityFieldToggle(true);
             }
         } catch (e) {
             console.log(e);
-            return alert(e);
+        } finally {
+            setIsLoadingCityList(false)
+
         }
     };
 
     const getAdminList = async () => {
+        { userPage == 1 && setIsLoadingUserList(true) }
+        { userPage != 1 && setIsUserScrollLoading(true) }
         try {
-            const res = await fetch(`${API_URL}fetch_admin_list`, {
-                method: 'GET',
+            const res = await fetch(`${API_URL}fetch_admin_list?page=${userPage}`, {
+                method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + userToken
                 },
+                body: JSON.stringify({
+                    search: searchQueryForUsers,
+                }),
             });
             const json = await res.json();
             if (json !== undefined) {
-                setAdminList(json.admin_user_list);
-                setFilteredUserData(json.admin_user_list);
+                setAdminList([
+                    ...adminList,
+                    ...json.admin_user_list.data
+                ]);
+                setFilteredUserData([
+                    ...filteredUserData,
+                    ...json.admin_user_list.data
+                ]);
+                // setAdminList(json.admin_user_list);
+                // setFilteredUserData(json.admin_user_list);
             }
         } catch (e) {
             console.log(e);
+        } finally {
+            { userPage == 1 && setIsLoadingUserList(false) }
+            { userPage != 1 && setIsUserScrollLoading(false) }
+            setUserPage(userPage + 1);
         }
+    };
+
+    const searchFilterForUsers = async () => {
+        try {
+            const response = await fetch(`${API_URL}fetch_admin_list`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    search: searchQueryForUsers,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setAdminList(json.admin_user_list.data);
+                setFilteredUserData(json.admin_user_list.data);
+                setUserPage(2);
+                setUserRefreshing(false);
+            } else {
+                setUserRefreshing(false);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const pullUserRefresh = async () => {
+        try {
+            const response = await fetch(`${API_URL}fetch_admin_list`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    search: '',
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setSearchQueryForUsers('');
+                setAdminList(json.admin_user_list.data);
+                setFilteredUserData(json.admin_user_list.data);
+                setUserPage(2);
+                setUserRefreshing(false);
+            } else {
+                setUserRefreshing(false);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const renderUserFooter = () => {
+        return (
+            <>
+                {isUserScrollLoading && (
+                    <View style={styles.footer}>
+                        <ActivityIndicator
+                            size="large"
+                        />
+                    </View>
+                )}
+            </>
+        );
+    };
+
+    const onUserRefresh = () => {
+        setUserRefreshing(true);
+        pullUserRefresh();
     };
  
     const selectFile = async () => {
@@ -255,7 +396,7 @@ const AddGarage = ({navigation, userToken, selectedGarageId, selectedGarage, use
     }, [isState]);
 
     useEffect(() => {
-        getStatesList();
+        getStateList();
         getAdminList();
     }, []);
 
@@ -301,52 +442,51 @@ const AddGarage = ({navigation, userToken, selectedGarageId, selectedGarage, use
                                 <Text style={{color: colors.danger}}>{garageContactNumberError}</Text>
                             }
 
-                            <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 20}}>
-                                <Picker
-                                    selectedValue={isState}
-                                    onValueChange={(v) => setIsState(v)}
-                                    style={{padding: 0}}
-                                    itemStyle={{padding: 0}}
+                            <View>
+                                <TouchableOpacity 
+                                    style={styles.stateDropDownField} 
+                                    onPress={() => {
+                                        setStateListModal(true);
+                                    }}
                                 >
-                                    <Picker.Item label="Select State" value="0" />
-                                    {StateList.map((StateList, i) => {
-                                        return (
-                                            <Picker.Item
-                                                key={i}
-                                                label={StateList.name}
-                                                value={StateList.id}
-                                            />
-                                        );
-                                    })}
-                                </Picker>
+                                </TouchableOpacity>
+                                <TextInput
+                                    mode="outlined"
+                                    label='State'
+                                    style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                    placeholder="Select State"
+                                    value={isStateName}
+                                    right={<TextInput.Icon name="menu-down" />}
+                                />
                             </View>
                             {stateError?.length > 0 &&
-                                <Text style={{color: colors.danger}}>{stateError}</Text>
-                            }
+                                <Text style={styles.errorTextStyle}>{stateError}</Text>
+                            } 
 
-                            <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 20}}>
-                                <Picker
-                                    selectedValue={isCity}
-                                    onValueChange={(v) => setIsCity(v) }
-                                    style={{padding: 0}}
-                                    itemStyle={{padding: 0}}
-                                    enabled={cityFieldToggle}
+                       
+                            <View>
+                                {cityFieldToggle == false &&
+                                    <View style={[styles.cityDropDownField, {zIndex: 10, opacity: 0.6, backgroundColor: colors.white}]} ></View>
+                                }
+                                <TouchableOpacity 
+                                    style={styles.cityDropDownField} 
+                                    onPress={() => {
+                                        setCityListModal(true);
+                                    }}
                                 >
-                                    <Picker.Item label="Select City" value="0" />
-                                    {CityList.map((CityList, i) => {
-                                        return (
-                                            <Picker.Item
-                                                key={i}
-                                                label={CityList.name}
-                                                value={CityList.id}
-                                            />
-                                        );
-                                    })} 
-                                </Picker>
+                                </TouchableOpacity>
+                                <TextInput
+                                    mode="outlined"
+                                    label='City'
+                                    style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                    placeholder="Select City"
+                                    value={isCityName}
+                                    right={<TextInput.Icon name="menu-down" />}
+                                />
                             </View>
                             {cityError?.length > 0 &&
-                                <Text style={{color: colors.danger}}>{cityError}</Text>
-                            }
+                                <Text style={styles.errorTextStyle}>{cityError}</Text>
+                            } 
 
                             <TextInput
                                 mode="outlined"
@@ -495,70 +635,177 @@ const AddGarage = ({navigation, userToken, selectedGarageId, selectedGarage, use
                                 Submit
                             </Button>
                         </View>
-                        <Portal>
-                            {/* Users List Modal */}
-                            <Modal visible={userListModal} onDismiss={() => { setUserListModal(false); setOwnerId(0); setIsUserName(''); setUserError(''); setSearchQueryForUsers('');  searchFilterForUsers();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
-                                <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select User</Text>
-                                {(isLoadingUserList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
-                                    <View style={{marginTop: 20, marginBottom: 10, flex: 1 }}>
-                                        <View>
-                                            <View style={{ marginBottom: 15, flexDirection: 'row'}}>
-                                                <TextInput
-                                                    mode={'flat'}
-                                                    placeholder="Search here..."
-                                                    onChangeText={(text) => setSearchQueryForUsers(text)}
-                                                    value={searchQueryForUsers}
-                                                    activeUnderlineColor={colors.transparent}
-                                                    underlineColor={colors.transparent}
-                                                    style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
-                                                    right={(searchQueryForUsers != null && searchQueryForUsers != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => {setSearchQueryForUsers != ''; searchFilterForUsers('') }} />}
-                                                />
-                                                <TouchableOpacity onPress={() => searchFilterForUsers(searchQueryForUsers)} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
-                                                    <IconX name={'search'} size={17} color={colors.white} />
-                                                </TouchableOpacity>
-                                            </View>
-                                        </View>
-                                        {filteredUserData?.length > 0 ?  
-                                            <FlatList
-                                                ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
-                                                data={filteredUserData}
-                                                // onEndReachedThreshold={1}
-                                                style={{borderColor: '#0000000a', borderWidth: 1, maxHeight: 400 }}
-                                                keyExtractor={item => item.id}
-                                                renderItem={({item}) => (
-                                                    <>
-                                                        <List.Item
-                                                            title={
-                                                                // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setUserListModal(false);  setAddUserModal(true); }}>
-                                                                    <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
-                                                                        <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
-                                                                    </View>
-                                                                // </TouchableOpacity> 
-                                                            }
-                                                            onPress={() => {
-                                                                    setIsUserName(item.name); 
-                                                                    setOwnerId(item.id); 
-                                                                    setUserError('');
-                                                                    setUserListModal(false);  
-                                                                }
-                                                            }
-                                                        />
-                                                    </>
-                                                )} 
-                                            />
-                                            :
-                                            <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
-                                                <Text style={{ color: colors.black, textAlign: 'center'}}>No such user is associated!</Text>
-                                            </View>
-                                        }
-                                    </View>
-                                }
-                            </Modal>
-                        </Portal>
+                      
                     </InputScrollView>
                     // Modal Popup Code
                 }
             </View>
+            <Portal>
+                {/* Users List Modal */}
+                <Modal visible={userListModal} onDismiss={() => { setUserListModal(false); setOwnerId(0); setIsUserName(''); setUserError(''); setSearchQueryForUsers('');  searchFilterForUsers();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center" }]}>Select User</Text>
+                    <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99  }} onPress={() => { setUserListModal(false); setOwnerId(0); setIsUserName(''); setUserError(''); setSearchQueryForUsers('');  searchFilterForUsers(); }} />
+                    {(isLoadingUserList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
+                        <View style={{marginTop: 20, marginBottom: 10, flex: 1 }}>
+                            <View>
+                                <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                                    <TextInput
+                                        mode={'flat'}
+                                        placeholder="Search here..."
+                                        onChangeText={(text) => setSearchQueryForUsers(text)}
+                                        value={searchQueryForUsers}
+                                        activeUnderlineColor={colors.transparent}
+                                        underlineColor={colors.transparent}
+                                        style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                                        right={(searchQueryForUsers != null && searchQueryForUsers != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => onUserRefresh()} />}
+                                    />
+                                    <TouchableOpacity onPress={() => searchFilterForUsers()} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                                        <IconX name={'search'} size={17} color={colors.white} />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                            {filteredUserData?.length > 0 ?  
+                                <FlatList
+                                    ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                    data={filteredUserData}
+                                    onEndReached={filteredUserData?.length > 9 && getAdminList}
+                                    onEndReachedThreshold={0.5}
+                                    refreshControl={
+                                        <RefreshControl
+                                            refreshing={userRefreshing}
+                                            onRefresh={onUserRefresh}
+                                            colors={['green']}
+                                        />
+                                    }
+                                    ListFooterComponent={filteredUserData?.length > 9 && renderUserFooter}
+                                    style={{ borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
+                                    keyExtractor={item => item.id}
+                                    renderItem={({item}) => (
+                                        <>
+                                            <List.Item
+                                                title={
+                                                    // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setUserListModal(false);  setAddUserModal(true); }}>
+                                                        <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                            <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
+                                                        </View>
+                                                    // </TouchableOpacity> 
+                                                }
+                                                onPress={() => {
+                                                        setIsUserName(item.name); 
+                                                        setOwnerId(item.id); 
+                                                        setUserError('');
+                                                        setUserListModal(false);  
+                                                    }
+                                                }
+                                            />
+                                        </>
+                                    )} 
+                                />
+                                :
+                                <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50, flex: 1 }}>
+                                    <Text style={{ color: colors.black, textAlign: 'center'}}>No such user is associated!</Text>
+                                </View>
+                            }
+                        </View>
+                    }
+                </Modal>
+
+                {/* States List Modal */}
+                <Modal visible={stateListModal} onDismiss={() => { setStateListModal(false); setIsState(0); setIsStateName(''); setStateError(''); setSearchQueryForStates('');  searchFilterForStates(); setCityFieldToggle(false); }} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center" }]}>Select State</Text>
+                    <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99  }} onPress={() => { setStateListModal(false); setIsState(0); setIsStateName(''); setStateError(''); setSearchQueryForStates('');  searchFilterForStates(); setCityFieldToggle(false); }} />
+                    {(isLoadingStateList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View>
+                    :
+                        <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
+                            <Searchbar
+                                placeholder="Search here..."
+                                onChangeText={(text) => { if(text != null) searchFilterForStates(text)}}
+                                value={searchQueryForStates}
+                                elevation={0}
+                                style={{ elevation: 0.8, marginBottom: 10}}
+                            />
+                            {filteredStateData?.length > 0 ?  
+                                <FlatList
+                                    ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                    data={filteredStateData}
+                                    // onEndReachedThreshold={1}
+                                    style={{borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
+                                    keyExtractor={item => item.id}
+                                    renderItem={({item}) => (
+                                        <List.Item
+                                            title={
+                                                <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                    <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
+                                                </View>
+                                            }
+                                            onPress={() => {
+                                                    setIsStateName(item.name); 
+                                                    setIsState(item.id); 
+                                                    setStateError('');
+                                                    setStateListModal(false);  
+                                                }
+                                            }
+                                        />
+                                    )} 
+                                />
+                                :
+                                <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50, flex: 1 }}>
+                                    <Text style={{ color: colors.black, textAlign: 'center'}}>No such state is associated!</Text>
+                                </View>
+                            }
+                        </View>
+                    }
+                </Modal>
+
+                {/* City List Modal */}
+                <Modal visible={cityListModal} onDismiss={() => { setCityListModal(false); setIsCity(0); setIsCityName(''); setCityError(''); setSearchQueryForCity('');  searchFilterForCity(); }} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center" }]}>Select City</Text>
+                    <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99  }} onPress={() => { setCityListModal(false); setIsCity(0); setIsCityName(''); setCityError(''); setSearchQueryForCity('');  searchFilterForCity(); }} />
+                    {(isLoadingCityList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View>
+                    :
+                        <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
+                            <Searchbar
+                                placeholder="Search here..."
+                                onChangeText={(text) => { if(text != null) searchFilterForCity(text)}}
+                                value={searchQueryForCity}
+                                elevation={0}
+                                style={{ elevation: 0.8, marginBottom: 10}}
+                            />
+                            {filteredCityData?.length > 0 ?  
+                                <FlatList
+                                    ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                    data={filteredCityData}
+                                    // onEndReachedThreshold={1}
+                                    style={{borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
+                                    keyExtractor={item => item.id}
+                                    renderItem={({item}) => (
+                                        <>
+                                            <List.Item
+                                                title={
+                                                    <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                        <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
+                                                    </View>
+                                                }
+                                                onPress={() => {
+                                                        setIsCityName(item.name); 
+                                                        setIsCity(item.id); 
+                                                        setCityError('');
+                                                        setCityListModal(false);  
+                                                    }
+                                                }
+                                            />
+                                        </>
+                                    )} 
+                                />
+                                :
+                                <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50, flex: 1 }}>
+                                    <Text style={{ color: colors.black, textAlign: 'center'}}>No such city is associated!</Text>
+                                </View>
+                            }
+                        </View>
+                    }
+                </Modal>
+            </Portal>
         </View>
     )
 }
@@ -628,6 +875,31 @@ const styles = StyleSheet.create({
         backgroundColor: 'white', 
         padding: 20,
         marginHorizontal: 30
+    },
+    footer: {
+        marginVertical: 15,
+    },
+    stateDropDownField: {
+        fontSize: 16,
+        color: colors.black,
+        position: 'absolute',
+        marginTop: 15,
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '80%',
+        zIndex: 2,
+    },
+    cityDropDownField: {
+        fontSize: 16,
+        color: colors.black,
+        position: 'absolute',
+        marginTop: 15,
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '80%',
+        zIndex: 2,
     },
 })
 

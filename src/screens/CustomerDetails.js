@@ -3,6 +3,7 @@ import { Image, Text, View, StyleSheet, TouchableOpacity, ScrollView, Linking, A
 import { Badge, Divider, Modal, Portal, Button, List } from "react-native-paper";
 import { colors } from "../constants";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import IconX from "react-native-vector-icons/FontAwesome5";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { API_URL, WEB_URL } from "../constants/config";
 import { connect } from "react-redux";
@@ -39,7 +40,7 @@ const CustomerDetails = ({ navigation, route, userToken, userRole, selectedGarag
             });
             const json = await res.json();
             if (json !== undefined) {
-                console.log('setIsCustomerData',json?.user_details);
+                // console.log('setIsCustomerData',json?.user_details);
                 setIsCustomerData(json?.user_details);
                 if(json.user_details.profile_image != null) {
                     setImageUri( WEB_URL + 'uploads/profile_image/' + json?.user_details.profile_image);
@@ -151,7 +152,7 @@ const CustomerDetails = ({ navigation, route, userToken, userRole, selectedGarag
                             })}
                         </>
                     :
-                        <View style={[styles.cards, {alignItems: 'center', height: 200, justifyContent: 'center', backgroundColor: "transparent", }]}>
+                        <View style={[styles.cards, {alignItems: 'center', flex: 1, justifyContent: 'center', backgroundColor: "transparent", marginVertical: 50 }]}>
                             <Text>No Order Found for this user!</Text>
                         </View>
                     )
@@ -169,11 +170,11 @@ const CustomerDetails = ({ navigation, route, userToken, userRole, selectedGarag
                             {isCustomerData.order.map((order, i) => {
                                 return (
                                     <View style={styles.cards}>
-                                        <View style={styles.cardTags} >
+                                        {/* <View style={styles.cardTags} >
                                             <Text style={styles.tags}>Running Repair</Text>
                                             <Text style={styles.tags}>Running Repair</Text>
                                             <Text style={styles.tags}>Running Repair</Text>
-                                        </View>
+                                        </View> */}
                                         <View style={styles.cardOrderDetails}>
                                             <Text style={styles.orderID}>Order ID: {order.id}</Text>
                                             <Text style={styles.orderStatus}>{order.status}</Text>
@@ -193,7 +194,7 @@ const CustomerDetails = ({ navigation, route, userToken, userRole, selectedGarag
                             })}
                         </>
                     :
-                        <View style={[styles.cards, {alignItems: 'center', height: 200, justifyContent: 'center', backgroundColor: "transparent", }]}>
+                        <View style={[styles.cards, { marginVertical: 50, alignItems: 'center', flex: 1, justifyContent: 'center', backgroundColor: "transparent" }]}>
                             <Text>No Order Found for this user!</Text>
                         </View>
                     )
@@ -293,6 +294,7 @@ const CustomerDetails = ({ navigation, route, userToken, userRole, selectedGarag
 
                 <Portal>
                     <Modal visible={orderDataModal} onDismiss={() => {setOrderDataModal(false); }} contentContainerStyle={styles.modalContainerStyle}>
+                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => { setOrderDataModal(false); }} />
                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Order Details</Text>
                         {orderDataLoading 
                         ? 
@@ -531,7 +533,8 @@ const styles = StyleSheet.create({
     },
     innerTabContainer: {
         padding:10,
-        marginBottom: 10
+        marginBottom: 10,
+        flex: 1,
     },
     cards: {
         padding: 25,

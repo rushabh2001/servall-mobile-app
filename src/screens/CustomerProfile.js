@@ -119,7 +119,7 @@ const CustomerProfile = ({
         } catch (err) {
             setSingleFile(null);
             if (DocumentPicker.isCancel(err)) {
-                alert("Canceled");
+               // alert("Canceled");
             } else {
                 alert("Unknown Error: " + JSON.stringify(err));
                 throw err;
@@ -180,7 +180,7 @@ const CustomerProfile = ({
                     </Text>
                 ) : (
                     <Text style={styles.garageNameTitle}>
-                        Hello {user.name}
+                        Hello {user.name}!
                     </Text>
                 )}
             </View>
@@ -190,7 +190,7 @@ const CustomerProfile = ({
                         <ActivityIndicator></ActivityIndicator>
                     </View>
                 ) : (
-                    <>
+              
                         <View style={styles.upperContainer}>
                             <View>
                                 {imageUri && (
@@ -229,24 +229,9 @@ const CustomerProfile = ({
                                         ? isCustomerData.name
                                         : null}
                                 </Text>
-                                {/* <Icon
-                            onPress={() =>
-                                navigation.navigate("CustomerInfo", {
-                                    userId: route?.params?.userId,
-                                })
-                            }
-                            name={"pencil"}
-                            size={20}
-                            color={colors.gray}
-                        /> */}
+                             
                             </View>
-                            {/* <View>
-                        <Text style={styles.customerPhonenumber}>
-                            {isCustomerData != null
-                                ? isCustomerData?.phone_number
-                                : ""}
-                        </Text>
-                    </View> */}
+                       
                             <View
                                 style={{
                                     flexDirection: "row",
@@ -303,22 +288,8 @@ const CustomerProfile = ({
                                                 color={colors.primary}
                                             />
                                         </TouchableOpacity>
-                                        {/* <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Icon name={"bell"} size={20} color={colors.primary} /><Text style={{marginLeft:4, color:colors.primary}}>Reminders</Text></TouchableOpacity> */}
                                     </>
                                 ) : null}
-                                {/* <TouchableOpacity
-                            onPress={() => {
-                                navigation.navigate("UserVehicleTab", {
-                                    userId: route?.params?.userId,
-                                });
-                            }}
-                            style={styles.smallButton}
-                        >
-                            <Text style={{ color: colors.primary }}>
-                                Vehicles
-                            </Text>
-                        </TouchableOpacity> */}
-                                {/* <TouchableOpacity onPress={()=>{console.log("Pressed Me!")}} style={styles.smallButton}><Text style={{color:colors.primary}}>Appointments</Text></TouchableOpacity> */}
                             </View>
                             <View style={styles.cardContainer}>
                                 <View
@@ -371,9 +342,6 @@ const CustomerProfile = ({
                                     </Text>
                                 </View>
                             </View>
-                        </View>
-
-                        <View style={styles.lowerContainer}>
                             <View style={styles.cards}>
                                 <View style={styles.upperInfo}>
                                     <View>
@@ -435,12 +403,10 @@ const CustomerProfile = ({
                                         </View>
                                     </View>
 
-                                    {/* <View style={styles.cardActions}></View> */}
                                 </View>
                             </View>
                         </View>
-                    </>
-                )}
+                  )}
             </View>
         </View>
     );
@@ -485,13 +451,15 @@ const styles = StyleSheet.create({
     },
     upperContainer: {
         flex: 1,
-        justifyContent: "center",
+        justifyContent: "flex-start",
         alignItems: "center",
         padding: 0,
+        paddingTop: 20
         //backgroundColor: "red",
     },
     lowerContainer: {
         flex: 1,
+        margin: 15
     },
     customerName: {
         fontSize: 18,
@@ -554,6 +522,8 @@ const styles = StyleSheet.create({
         elevation: 3,
         backgroundColor: colors.white,
         marginBottom: 10,
+        width: '85%',
+        marginTop: 20,
     },
     cardTags: {
         flexDirection: "row",

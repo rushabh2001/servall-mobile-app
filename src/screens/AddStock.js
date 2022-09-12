@@ -624,6 +624,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                     {/* Parts List Modal */}
                     <Modal visible={partListModal} onDismiss={() => { setPartListModal(false); setIsPart(0); setIsPartName(''); setPartError(''); setSearchQueryForParts('');  searchFilterForParts();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Part</Text>
+                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => { setPartListModal(false); setIsPart(0); setIsPartName(''); setPartError(''); setSearchQueryForParts('');  searchFilterForParts();}} />
                         {(isLoadingPartList == true) ? <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View> :
                             <View style={{ marginTop: 20, flex: 1 }}>
                                 {/* Search Bar */}
@@ -697,6 +698,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                     {/* Add New Part Model */}
                     <Modal visible={addNewPartModal} onDismiss={() => { setAddNewPartModal(false); setPartListModal(true);  setIsNewPart(''); setNewPartError(''); }} contentContainerStyle={styles.modalContainerStyle}>
                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Part</Text>
+                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => { setAddNewPartModal(false); setPartListModal(true);  setIsNewPart(''); setNewPartError(''); }} />
                         <View>
                             <TextInput
                                 mode="outlined"
@@ -743,6 +745,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                     {/* Garage List Modal */}
                     <Modal visible={garageListModal} onDismiss={() => { setGarageListModal(false); setIsGarageId(0); setIsGarageName(''); setGarageError(''); setSearchQueryForGarages('');  searchFilterForGarages();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Garage</Text>
+                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => { setGarageListModal(false); setIsGarageId(0); setIsGarageName(''); setGarageError(''); setSearchQueryForGarages('');  searchFilterForGarages();}} />
                         {(isLoadingGarageList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
                             <View style={{ marginTop: 20, flex: 1 }}>
                                 {/* Search Bar */}
@@ -799,7 +802,7 @@ const AddStock = ({ navigation, selectedGarageId, userRole, userId, userToken, g
                                         )} 
                                     />
                                     :
-                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
+                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50, flex: 1 }}>
                                         <Text style={{ color: colors.black, textAlign: 'center'}}>No such garage found!</Text>
                                     </View>
                                 }

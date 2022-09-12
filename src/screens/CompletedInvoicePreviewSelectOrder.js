@@ -268,6 +268,7 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, sel
                                 />  
                                 <Portal>
                                     <Modal visible={orderDataModal} onDismiss={() => {setOrderDataModal(false); }} contentContainerStyle={styles.modalContainerStyle}>
+                                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => { setOrderDataModal(false); }} />
                                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Order Details</Text>
                                         {orderDataLoading 
                                         ? 
@@ -403,7 +404,7 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, sel
                                 </Portal>
                             </View>
                         :
-                            <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 50,  backgroundColor:colors.white,}}>
+                            <View style={{ alignItems: 'center', justifyContent: 'center',  backgroundColor:colors.white, flex: 1 }}>
                                 <Text style={{ color: colors.black, textAlign: 'center'}}>No Orders are exist for this Garage!</Text>
                             </View>
                         )
@@ -414,7 +415,7 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, sel
                         height={63}
                         openDuration={250}
                         >
-                        <View style={{flexDirection:"column", flex:1}}>
+                        <View style={{ flexDirection:"column", flex:1 }}>
                             <List.Item
                                 title="View Order Details"
                                 style={{paddingVertical:15}}

@@ -223,7 +223,7 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId, selectedGarage
                                 />     
                             </View>
                         :
-                            <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1,  backgroundColor:colors.white,}}>
+                            <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1,  backgroundColor:colors.white }}>
                                 <Text style={{ color: colors.black, textAlign: 'center'}}>No Vehicles are associated with this Garage!</Text>
                                 <TouchableOpacity style={[styles.buttonStyle, { marginTop: 15 }]} onPress={ () => navigation.navigate('AddRepairOrderStep2')}><Text style={{ color: colors.black, padding: 5 }}><Icon name={'plus'} size={16} color={colors.secondary} /> Add New Vehicle</Text></TouchableOpacity>
                             </View>

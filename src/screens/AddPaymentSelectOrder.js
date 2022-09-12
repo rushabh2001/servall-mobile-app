@@ -268,11 +268,11 @@ const AddPaymentSelectOrder = ({navigation, userToken, selectedGarageId, selecte
                                     )}
                                 />  
                                 <Portal>
-                                    <Modal visible={orderDataModal} onDismiss={() => {setOrderDataModal(false); }} contentContainerStyle={styles.modalContainerStyle}>
+                                    <Modal visible={orderDataModal} onDismiss={() => {setOrderDataModal(false); }} contentContainerStyle={[styles.modalContainerStyle, {flex: 0.9}]}>
+                                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99  }} onPress={() => {setOrderDataModal(false); }} />
                                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Order Details</Text>
-                                        {orderDataLoading 
-                                        ? 
-                                            <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> 
+                                        {orderDataLoading ? 
+                                            <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator></View>
                                         :
                                             <ScrollView>
                                                 <Text style={styles.cardDetailsHeading}>Order ID:</Text>
@@ -404,7 +404,7 @@ const AddPaymentSelectOrder = ({navigation, userToken, selectedGarageId, selecte
                                 </Portal>
                             </View>
                         :
-                            <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 50,  backgroundColor:colors.white,}}>
+                            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 50,  backgroundColor:colors.white,}}>
                                 <Text style={{ color: colors.black, textAlign: 'center'}}>No Orders are exist for this Garage!</Text>
                             </View>
                         )

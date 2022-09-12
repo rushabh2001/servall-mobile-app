@@ -71,7 +71,7 @@ const Orders = ({
                 }
             );
             const json = await res.json();
-            console.log(json);
+            // console.log(json);
             if (json !== undefined) {
                 setData([...data, ...json.data.data]);
                 setFilteredData([...filteredData, ...json.data.data]);
@@ -90,6 +90,7 @@ const Orders = ({
     };
 
     const searchFilter = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(
                 `${API_URL}fetch_customer_order/${user.id}`,
@@ -111,8 +112,10 @@ const Orders = ({
                 setFilteredData(json.data.data);
                 setPage(2);
                 setRefreshing(false);
+                setIsLoading(false);
             } else {
                 setRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
@@ -200,7 +203,7 @@ const Orders = ({
                     </Text>
                 ) : (
                     <Text style={styles.garageNameTitle}>
-                        Hello {user.name}
+                        Hello {user.name}!
                     </Text>
                 )}
             </View>
@@ -516,9 +519,10 @@ const Orders = ({
                     >
                         Order Details
                     </Text>
+                    <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => { setOrderDataModal(false); }} />
                     {orderDataLoading ? (
                         <ActivityIndicator
-                            style={{ marginVertical: 30 }}
+                            style={{ marginVertical: 30, flex: 1 }}
                         ></ActivityIndicator>
                     ) : (
                         <ScrollView>
@@ -934,7 +938,8 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     cardActions: {
-        alignItems: "center",
+        alignItems: "flex-start",
+        marginBottom: 15
     },
     smallActionButton: {
         fontSize: 18,
@@ -947,38 +952,9 @@ const styles = StyleSheet.create({
         width: 150,
         marginTop: 8,
     },
-    btnActions: {
-        width: "100%",
-        flexDirection: "row",
-    },
-    btnAction: {
-        flex: 1,
-        paddingHorizontal: 15,
-        paddingVertical: 6,
-        backgroundColor: colors.secondary,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    btnActionText: {
-        color: colors.white,
-        fontSize: 12,
-    },
     upperInfo: {
         padding: 25,
         paddingBottom: 10,
-    },
-    cardTags: {
-        flexDirection: "row",
-    },
-    tags: {
-        fontSize: 12,
-        paddingVertical: 2,
-        paddingHorizontal: 6,
-        borderWidth: 1,
-        borderRadius: 3,
-        borderColor: colors.black,
-        color: colors.black,
-        marginRight: 3,
     },
     cardOrderDetails: {
         flexDirection: "row",
@@ -1027,6 +1003,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 30,
         marginTop: 40,
         marginBottom: 70,
+        flex: 0.9
     },
     cardDetailsHeading: {
         color: colors.black,

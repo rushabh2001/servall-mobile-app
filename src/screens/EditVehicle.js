@@ -21,7 +21,6 @@ const EditVehicle = ({ navigation, userToken, route, selectedGarageId, selectedG
     const [isManufacturingDate, setIsManufacturingDate] = useState();
     const [isEngineNumber, setIsEngineNumber] = useState();
     const [isChasisNumber, setIsChasisNumber] = useState();
-    // const [isInsuranceProvider, setIsInsuranceProvider] = useState();
     const [isInsurerGstin, setIsInsurerGstin] = useState();
     const [isInsurerAddress, setIsInsurerAddress] = useState();
     const [isPolicyNumber, setIsPolicyNumber] = useState();
@@ -34,7 +33,6 @@ const EditVehicle = ({ navigation, userToken, route, selectedGarageId, selectedG
     const [manufacturingDateError, setManufacturingDateError] = useState('');
     const [engineNumberError, setEngineNumberError] = useState('');
     const [chasisNumberError, setChasisNumberError] = useState('');
-    // const [insuranceProviderError, setInsuranceProviderError] = useState('');
     const [insurerGstinError, setInsurerGstinError] = useState('');
     const [insurerAddressError, setinsurerAddressError] = useState('');
     const [policyNumberError, setPolicyNumberError] = useState('');
@@ -45,7 +43,6 @@ const EditVehicle = ({ navigation, userToken, route, selectedGarageId, selectedG
     const [selectedVehicle, setSelectedVehicle] =  useState(0);
     const [selectedVehicleData, setSelectedVehicleData] =  useState();
     const [vehicleList, setVehicleList] =  useState([]);
-    // const [insuranceProviderList, setInsuranceProviderList] =  useState([]);
     const [modelFieldToggle, setModelFieldToggle] = useState(true);
 
     const [datePurchase, setDatePurchase] = useState();
@@ -63,9 +60,6 @@ const EditVehicle = ({ navigation, userToken, route, selectedGarageId, selectedG
     const [addModelModal, setAddModelModal] = useState(false);
     const [newModelName, setNewModelName] = useState();
     const [newModelNameError, setNewModelNameError] = useState();
-    const [addInsuranceCompanyModal, setAddInsuranceCompanyModal] = useState(false);
-    const [newInsuranceCompanyName, setNewInsuranceCompanyName] = useState();
-    const [newInsuranceCompanyNameError, setNewInsuranceCompanyNameError] = useState();
 
     const [isLoading, setIsLoading] = useState(false);
     const [isScreenLoading, setIsScreenLoading] = useState(true);
@@ -84,7 +78,6 @@ const EditVehicle = ({ navigation, userToken, route, selectedGarageId, selectedG
     const [filteredBrandData, setFilteredBrandData] = useState([]);
     const [searchQueryForBrands, setSearchQueryForBrands] = useState(); 
     const [brandError, setBrandError] = useState('');   // Error State
-    const [brandIdError, setBrandIdError] = useState();
 
     const [brandPage, setBrandPage] = useState(1);
     const [isBrandScrollLoading, setIsBrandScrollLoading] = useState(false);
@@ -99,7 +92,6 @@ const EditVehicle = ({ navigation, userToken, route, selectedGarageId, selectedG
     const [filteredModelData, setFilteredModelData] = useState([]);
     const [searchQueryForModels, setSearchQueryForModels] = useState(); 
     const [modelError, setModelError] = useState('');   // Error State
-    const [modelIdError, setModelIdError] = useState();
 
     const [modelPage, setModelPage] = useState(1);
     const [isModelScrollLoading, setIsModelScrollLoading] = useState(false);
@@ -872,7 +864,7 @@ const EditVehicle = ({ navigation, userToken, route, selectedGarageId, selectedG
                 { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
             </View>
             <View style={styles.pageContainer}>
-                { (isScreenLoading == true) ? <ActivityIndicator style={{flex:1, jusifyContent: 'center', alignItems: 'center'}}></ActivityIndicator> :
+                { (isScreenLoading == true) ? <ActivityIndicator style={{ flex:1, jusifyContent: 'center', alignItems: 'center'}}></ActivityIndicator> :
                     (vehicleList.length > 0 ? 
                         <InputScrollView
                             ref={scroll1Ref}
@@ -904,7 +896,7 @@ const EditVehicle = ({ navigation, userToken, route, selectedGarageId, selectedG
                                     </Picker>
                                 </View>
 
-                                { (isLoading == true) ? <ActivityIndicator style={{flex:1, jusifyContent: 'center', alignItems: 'center'}}></ActivityIndicator> :
+                                { (isLoading == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
                                     (selectedVehicle != 0 ?
                                         <View>
                                             <Text style={[styles.headingStyle]}>Vehicle Details:</Text>
@@ -1272,7 +1264,8 @@ const EditVehicle = ({ navigation, userToken, route, selectedGarageId, selectedG
                                 }
                             </View>
                             <Portal>
-                                <Modal visible={addBrandModal} onDismiss={() => { setAddBrandModal(false); setNewBrandName(""); setIsBrand(0); }} contentContainerStyle={styles.modalContainerStyle}>
+                                <Modal visible={addBrandModal} onDismiss={() => { setAddBrandModal(false); setNewBrandName(""); setIsBrand(); }} contentContainerStyle={styles.modalContainerStyle}>
+                                    <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => { setAddBrandModal(false); setNewBrandName(""); setIsBrand(); }} />
                                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Brand</Text>
                                     <TextInput
                                         mode="outlined"
@@ -1304,6 +1297,7 @@ const EditVehicle = ({ navigation, userToken, route, selectedGarageId, selectedG
                                 </Modal>
                     
                                 <Modal visible={addModelModal} onDismiss={() => { setAddModelModal(false); setNewModelName(""); setIsModel(0); }} contentContainerStyle={styles.modalContainerStyle}>
+                                    <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => { setAddModelModal(false); setNewModelName(""); setIsModel(0); }} />
                                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
                                     <TextInput
                                         mode="outlined"
@@ -1335,7 +1329,8 @@ const EditVehicle = ({ navigation, userToken, route, selectedGarageId, selectedG
                                 </Modal>
                     
                                 {/* Insurance Providers List Modal */}
-                                <Modal visible={insuranceProviderListModal} onDismiss={() => { setInsuranceProviderListModal(false); setIsInsuranceProvider(0); setIsInsuranceProviderName(''); setInsuranceProviderError(''); setSearchQueryForInsuranceProviders('');  searchFilterForInsuranceProviders();}} contentContainerStyle={[styles.modalContainerStyle, {flex: 0.9}]}>
+                                <Modal visible={insuranceProviderListModal} onDismiss={() => { setInsuranceProviderListModal(false); setIsInsuranceProvider(0); setIsInsuranceProviderName(''); setInsuranceProviderError(''); setSearchQueryForInsuranceProviders('');  searchFilterForInsuranceProviders(); }} contentContainerStyle={[styles.modalContainerStyle, {flex: 0.9}]}>
+                                    <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => { setInsuranceProviderListModal(false); setIsInsuranceProvider(0); setIsInsuranceProviderName(''); setInsuranceProviderError(''); setSearchQueryForInsuranceProviders('');  searchFilterForInsuranceProviders(); }} />
                                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Insurance Provider</Text>
                                     {(isLoadingInsuranceProviderList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View>
                                     :
@@ -1391,6 +1386,7 @@ const EditVehicle = ({ navigation, userToken, route, selectedGarageId, selectedG
                                 </Modal>
 
                                 <Modal visible={addNewInsuranceProviderModal} onDismiss={() => { setAddNewInsuranceProviderModal(false); setInsuranceProviderListModal(true);  setIsNewInsuranceProvider(0); setNewInsuranceProviderError(''); }} contentContainerStyle={styles.modalContainerStyle}>
+                                    <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => { setAddNewInsuranceProviderModal(false); setInsuranceProviderListModal(true);  setIsNewInsuranceProvider(0); setNewInsuranceProviderError(''); }} />
                                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Insurance Provider</Text>
                                     <View>
                                         <TextInput
@@ -1436,7 +1432,8 @@ const EditVehicle = ({ navigation, userToken, route, selectedGarageId, selectedG
                                 </Modal>
 
                                 {/* Brand List Modal */}
-                                <Modal visible={brandListModal} onDismiss={() => { setBrandListModal(false); setIsBrand(0); setIsBrandName(''); setBrandError(''); setSearchQueryForBrands('');  searchFilterForBrands();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                                <Modal visible={brandListModal} onDismiss={() => { setBrandListModal(false); setIsBrand(0); setIsBrandName(''); setBrandError(''); setSearchQueryForBrands('');  searchFilterForBrands(); setModelFieldToggle(false); }} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                                    <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => { setBrandListModal(false); setIsBrand(0); setIsBrandName(''); setBrandError(''); setSearchQueryForBrands('');  searchFilterForBrands(); setModelFieldToggle(false); }} />
                                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Brand</Text>
                                     {(isLoadingBrandList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
                                         <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
@@ -1509,7 +1506,8 @@ const EditVehicle = ({ navigation, userToken, route, selectedGarageId, selectedG
                                 </Modal>
 
                                 {/* Vehicle Model List Modal */}
-                                <Modal visible={modelListModal} onDismiss={() => { setModelListModal(false); setIsModel(0); setIsModelName(''); setModelError(''); setSearchQueryForModels('');  searchFilterForModels();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                                <Modal visible={modelListModal} onDismiss={() => { setModelListModal(false); setIsModel(0); setIsModelName(''); setModelError(''); setSearchQueryForModels('');  searchFilterForModels(); }} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                                    <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => { setModelListModal(false); setIsModel(0); setIsModelName(''); setModelError(''); setSearchQueryForModels('');  searchFilterForModels(); }} />
                                     <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Model</Text>
                                     {(isLoadingModelList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
                                         <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
@@ -1578,11 +1576,10 @@ const EditVehicle = ({ navigation, userToken, route, selectedGarageId, selectedG
                                         </View>
                                     }
                                 </Modal>
-
                             </Portal>
                         </InputScrollView>
                     :  
-                    <View style={{ alignItems: 'center', justifyContent: 'center', }}><Text style={{ color: colors.black, textAlign: 'center'}}>No Vehicle is associated with this Customer!</Text></View>
+                    <View style={{ alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: colors.black, textAlign: 'center'}}>No Vehicle is associated with this Customer!</Text></View>
                 )}
             </View>
         </View>

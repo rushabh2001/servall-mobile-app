@@ -134,8 +134,8 @@ const OrderList = ({navigation, userToken, navigator, selectedGarageId, selected
                     onChangeText={(text) => searchFilter(text)}
                     value={searchQuery}
                 />
-                <View style={{flexDirection: "column", marginVertical: 30}}>
-                    {isLoading ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> :
+                <View style={{flexDirection: "column", marginVertical: 30, flex: 1 }}>
+                    {isLoading ? <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View> :
                         (filteredData.length != 0 ?             
                             <View>
                                 <FlatList

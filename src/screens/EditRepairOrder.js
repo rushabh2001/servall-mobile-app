@@ -1080,7 +1080,8 @@ const EditRepairOrder = ({ navigation, route, userToken, selectedGarageId, selec
 
                 <Portal>
                     {/* Parts List Modal */}
-                    <Modal visible={partListModal} onDismiss={() => { setPartListModal(false); setIsPart(0); setIsPartName(''); setPartError(''); setSearchQueryForParts('');  searchFilterForParts();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                    <Modal visible={partListModal} onDismiss={() => { setPartListModal(false); setIsPart(0); setIsPartName(''); setPartError(''); setSearchQueryForParts('');  searchFilterForParts(); }} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => { setPartListModal(false); setIsPart(0); setIsPartName(''); setPartError(''); setSearchQueryForParts('');  searchFilterForParts(); }} />
                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Part</Text>
                         {(isLoadingPartList == true) ? <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View>
                         :
@@ -1148,7 +1149,7 @@ const EditRepairOrder = ({ navigation, route, userToken, selectedGarageId, selec
                                         )} 
                                     />
                                 :
-                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
+                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50, flex: 1 }}>
                                         <Text style={{ color: colors.black, textAlign: 'center'}}>No such part is associated!</Text>
                                     </View>
                                 }
@@ -1163,7 +1164,8 @@ const EditRepairOrder = ({ navigation, route, userToken, selectedGarageId, selec
                     </Modal>
 
                     {/* Services List Modal */}
-                    <Modal visible={serviceListModal} onDismiss={() => { setServiceListModal(false); setIsService(0); setIsServiceName(''); setServiceError(''); setSearchQueryForParts('');  searchFilterForParts();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                    <Modal visible={serviceListModal} onDismiss={() => { setServiceListModal(false); setIsService(0); setIsServiceName(''); setServiceError(''); setSearchQueryForServices('');  searchFilterForServices(); }} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => { setServiceListModal(false); setIsService(0); setIsServiceName(''); setServiceError(''); setSearchQueryForServices('');  searchFilterForServices(); }} />
                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Service</Text>
                         {(isLoadingServiceList == true) ? <View style={{ flex: 1, justifyContent: "center" }}> ? <ActivityIndicator></ActivityIndicator></View> :
                             <View style={{marginTop: 20, flex: 1 }}>
@@ -1229,7 +1231,7 @@ const EditRepairOrder = ({ navigation, route, userToken, selectedGarageId, selec
                                         )} 
                                     />
                                 :
-                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
+                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50, flex: 1 }}>
                                         <Text style={{ color: colors.black, textAlign: 'center'}}>No such service is associated!</Text>
                                     </View>
                                 }
@@ -1244,6 +1246,7 @@ const EditRepairOrder = ({ navigation, route, userToken, selectedGarageId, selec
                     </Modal>
 
                     <Modal visible={addNewPartModal} onDismiss={() => { setAddNewPartModal(false); setPartListModal(true);  setIsNewPart(''); setNewPartError(''); }} contentContainerStyle={styles.modalContainerStyle}>
+                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => { setAddNewPartModal(false); setPartListModal(true);  setIsNewPart(''); setNewPartError(''); }} />
                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Part</Text>
                         <View>
                             <TextInput
@@ -1289,6 +1292,7 @@ const EditRepairOrder = ({ navigation, route, userToken, selectedGarageId, selec
                     </Modal>
 
                     <Modal visible={addNewServiceModal} onDismiss={() => { setAddNewServiceModal(false); setServiceListModal(true);  setIsNewService(''); setNewServiceError(''); }} contentContainerStyle={styles.modalContainerStyle}>
+                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => {setAddNewServiceModal(false); setServiceListModal(true);  setIsNewService(''); setNewServiceError(''); }} />
                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Service</Text>
                         <View>
                             <TextInput

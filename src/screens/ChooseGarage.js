@@ -8,7 +8,7 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import { API_URL } from "../constants/config";
 import { setSelectedGarage } from '../actions/garage';
 
-const ChooseGarage = ({ navigation, userToken, userRole, setSelectedGarage, userId, selectedGarageId, user }) => {
+const ChooseGarage = ({ navigation, userToken, userRole, setSelectedGarage, selectedGarage, userId, selectedGarageId, user }) => {
 
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -148,7 +148,7 @@ const ChooseGarage = ({ navigation, userToken, userRole, setSelectedGarage, user
                             }
                             ListFooterComponent={renderFooter}
                             ListEmptyComponent={() => (
-                                <View style={styles.nodata}>
+                                <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                                     <Text
                                         style={{
                                             fontSize: 18,

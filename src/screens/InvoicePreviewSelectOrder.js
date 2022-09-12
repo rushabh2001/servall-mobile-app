@@ -267,7 +267,8 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, sel
                                     )}
                                 />  
                                 <Portal>
-                                    <Modal visible={orderDataModal} onDismiss={() => {setOrderDataModal(false); }} contentContainerStyle={styles.modalContainerStyle}>
+                                    <Modal visible={orderDataModal} onDismiss={() => { setOrderDataModal(false); }} contentContainerStyle={styles.modalContainerStyle}>
+                                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => { setOrderDataModal(false); }} />
                                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Order Details</Text>
                                         {orderDataLoading 
                                         ? 

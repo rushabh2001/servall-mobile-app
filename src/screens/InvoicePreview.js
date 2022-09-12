@@ -132,7 +132,7 @@ const InvoicePreview = ({ userToken, route, selectedGarageId, selectedGarage, us
                 { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
             </View>
             <View style={styles.surfaceContainer}>
-                {isLoading ? <ActivityIndicator style={{ marginVertical: 30 }}></ActivityIndicator> :
+                {isLoading ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
                     <>  
                         <View style={{ marginHorizontal: 20, flexDirection: 'row' }}>
                             <Button

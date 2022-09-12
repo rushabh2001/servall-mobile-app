@@ -80,8 +80,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
     const [newBrandName, setNewBrandName] = useState();
     const [addModelModal, setAddModelModal] = useState(false);
     const [newModelName, setNewModelName] = useState();
-    const [addInsuranceCompanyModal, setAddInsuranceCompanyModal] = useState(false);
-    const [newInsuranceCompanyName, setNewInsuranceCompanyName] = useState();
 
     // Brand States
     const [isBrand, setIsBrand] = useState();
@@ -92,7 +90,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
     const [filteredBrandData, setFilteredBrandData] = useState([]);
     const [searchQueryForBrands, setSearchQueryForBrands] = useState(); 
     const [brandError, setBrandError] = useState('');   // Error State
-    const [brandIdError, setBrandIdError] = useState();
 
     const [brandPage, setBrandPage] = useState(1);
     const [isBrandScrollLoading, setIsBrandScrollLoading] = useState(false);
@@ -107,7 +104,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
     const [filteredModelData, setFilteredModelData] = useState([]);
     const [searchQueryForModels, setSearchQueryForModels] = useState(); 
     const [modelError, setModelError] = useState('');   // Error State
-    const [modelIdError, setModelIdError] = useState();
 
     const [modelPage, setModelPage] = useState(1);
     const [isModelScrollLoading, setIsModelScrollLoading] = useState(false);
@@ -127,35 +123,25 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
     const [newInsuranceProviderError, setNewInsuranceProviderError] = useState();
     const [addNewInsuranceProviderModal, setAddNewInsuranceProviderModal] = useState(false);
 
-    // State States
+    // States for Dropdown
     const [isState, setIsState] = useState();
-    const [isStateName, setIsStateName] = useState();
+    const [isStateName, setIsStateName] = useState('');
     const [stateList, setStateList] = useState([]);
     const [stateListModal, setStateListModal] = useState(false);
-    const [isLoadingStateList, setIsLoadingStateList] = useState(true);
+    const [isLoadingStateList, setIsLoadingStateList] = useState(false);
     const [filteredStateData, setFilteredStateData] = useState([]);
     const [searchQueryForStates, setSearchQueryForStates] = useState(); 
-    const [stateError, setStateError] = useState('');   // Error State
-    const [stateIdError, setStateIdError] = useState();
+    const [stateError, setStateError] = useState();
 
-    const [statePage, setStatePage] = useState(1);
-    const [isStateScrollLoading, setIsStateScrollLoading] = useState(false);
-    const [stateRefreshing, setStateRefreshing] = useState(false);
-
-    // City States
+    // Cities state for Dropdown
     const [isCity, setIsCity] = useState();
-    const [isCityName, setIsCityName] = useState();
+    const [isCityName, setIsCityName] = useState('');
     const [cityList, setCityList] = useState([]);
     const [cityListModal, setCityListModal] = useState(false);
-    const [isLoadingCityList, setIsLoadingCityList] = useState(true);
+    const [isLoadingCityList, setIsLoadingCityList] = useState(false);
     const [filteredCityData, setFilteredCityData] = useState([]);
     const [searchQueryForCity, setSearchQueryForCity] = useState(); 
-    const [cityError, setCityError] = useState('');   // Error State
-    const [cityIdError, setCityIdError] = useState();
-
-    const [cityPage, setCityPage] = useState(1);
-    const [isCityScrollLoading, setIsCityScrollLoading] = useState(false);
-    const [cityRefreshing, setCityRefreshing] = useState(false);
+    const [cityError, setCityError] = useState();
 
     const [isLoading, setIsLoading] = useState(false);
     
@@ -383,7 +369,29 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
         }
     };
 
-    const getStatesList = async () => {
+    // State Functions Dropdown
+    const searchFilterForStates = (text) => {
+        if (text) {
+            let newData = stateList.filter(
+                function (listData) {
+                // let arr2 = listData.phone_number ? listData.phone_number : ''.toUpperCase() 
+                let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
+                // let itemData = arr1.concat(arr2);
+                // console.log(itemData);
+                let textData = text.toUpperCase();
+                return itemData.indexOf(textData) > -1;
+                }
+            );
+            setFilteredStateData(newData);
+            setSearchQueryForStates(text);
+        } else {
+            setFilteredStateData(stateList);
+            setSearchQueryForStates(text);
+        }
+    };
+
+    const getStateList = async () => {
+        setIsLoadingStateList(true);
         try {
             const res = await fetch(`${API_URL}fetch_states`, {
                 method: 'GET',
@@ -394,15 +402,40 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                 },
             });
             const json = await res.json();
+            // console.log(json);
             if (json !== undefined) {
+                // console.log('setStateList', json.data);
                 setStateList(json.states);
+                setFilteredStateData(json.states);
             }
         } catch (e) {
             console.log(e);
+        } finally {
+            // setIsLoading2(false);
+            setIsLoadingStateList(false)
+        }
+    };
+
+    // City Functionalities
+    const searchFilterForCity = (text) => {
+        if (text) {
+            let newData = cityList.filter(
+                function (listData) {
+                let itemData = listData.name ? listData.name.toUpperCase() : ''.toUpperCase()
+                let textData = text.toUpperCase();
+                return itemData.indexOf(textData) > -1;
+                }
+            );
+            setFilteredCityData(newData);
+            setSearchQueryForCity(text);
+        } else {
+            setFilteredCityData(cityList);
+            setSearchQueryForCity(text);
         }
     };
 
     const getCityList = async () => {
+        setIsLoadingCityList(true);
         try {
             const res = await fetch(`${API_URL}fetch_cities?state_id=${isState}`, {
                 method: 'GET',
@@ -415,13 +448,37 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
             const json = await res.json();
             if (json !== undefined) {
                 setCityList(json.cities);
+                setFilteredCityData(json.cities);
                 setCityFieldToggle(true);
             }
         } catch (e) {
             console.log(e);
-            return alert(e);
+        } finally {
+            setIsLoadingCityList(false)
+
         }
     };
+
+    // const getCityList = async () => {
+    //     try {
+    //         const res = await fetch(`${API_URL}fetch_cities?state_id=${isState}`, {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Accept': 'application/json',
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': 'Bearer ' + userToken
+    //             },
+    //         });
+    //         const json = await res.json();
+    //         if (json !== undefined) {
+    //             setCityList(json.cities);
+    //             setCityFieldToggle(true);
+    //         }
+    //     } catch (e) {
+    //         console.log(e);
+    //         return alert(e);
+    //     }
+    // };
 
     const getBrandList = async () => {
         { brandPage == 1 && setIsLoadingBrandList(true) }
@@ -648,7 +705,6 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
         pullModelRefresh();
     };
 
-
     // Functions Dropdown for Insurance Provider
     const addNewInsuranceProvider = async () => {
         let data = { 'name': isNewInsuranceProvider }
@@ -716,20 +772,32 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
     };
 
     // Function for Garages    
-    const searchFilterForGarages = (text) => {
-        if (text) {
-            let newData = garageList.filter(
-                function (listData) {
-                    let itemData = listData.garage_name ? listData.garage_name.toUpperCase() : ''.toUpperCase()
-                    let textData = text.toUpperCase();
-                    return itemData.indexOf(textData) > -1;
-                }
-            );
-            setFilteredGarageData(newData);
-            setSearchQueryForGarages(text);
-        } else {
-            setFilteredGarageData(garageList);
-            setSearchQueryForGarages(text);
+    const searchFilterForGarages = async () => {
+        try {
+            const response = await fetch(`${API_URL}fetch_owner_garages`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + userToken
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    user_role: userRole,
+                    search: searchQueryForGarages,
+                }),
+            });
+            const json = await response.json();
+            if (response.status == '200') {
+                setGarageList(json.garage_list.data);
+                setFilteredGarageData(json.garage_list.data);
+                setGaragePage(2);
+                setGarageRefreshing(false);
+            } else {
+                setGarageRefreshing(false);
+            }
+        } catch (error) {
+            console.error(error);
         }
     };
 
@@ -747,6 +815,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                 body: JSON.stringify({
                     user_id: userId,
                     user_role: userRole,
+                    search: searchQueryForGarages,
                 }),
             });
             const json = await res.json();
@@ -772,6 +841,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
     };
 
     const pullGarageRefresh = async () => {
+        setSearchQueryForGarages(null);
         try {
             const response = await fetch(`${API_URL}fetch_owner_garages`, {
                 method: 'POST',
@@ -783,20 +853,19 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                 body: JSON.stringify({
                     user_id: userId,
                     user_role: userRole,
+                    search: null,
                 }),
             });
             const json = await response.json();
             if (response.status == '200') {
-                setSearchQueryForGarages('');
                 setGarageList(json.garage_list.data);
                 setFilteredGarageData(json.garage_list.data);
                 setGaragePage(2);
-                setGarageRefreshing(false);
-            } else {
-                setGarageRefreshing(false);
             }
         } catch (error) {
             console.error(error);
+        } finally {
+            setGarageRefreshing(false);
         }
     };
 
@@ -820,7 +889,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
     };
 
     useEffect(() => {
-        getStatesList();
+        getStateList();
         getBrandList();
         getGarageList();
         getInsuranceProviderList();
@@ -896,53 +965,51 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                 <Text style={styles.errorTextStyle}>{phoneNumberError}</Text>
                             }
 
-                            <View style={styles.dropDownContainer}>
-                                <Picker
-                                    selectedValue={isState}
-                                    onValueChange={(v) => {setIsState(v)}}
-                                    style={styles.dropDownField}
-                                    itemStyle={{padding: 0}}
+                            <View>
+                                <TouchableOpacity 
+                                    style={styles.stateDropDownField} 
+                                    onPress={() => {
+                                        setStateListModal(true);
+                                    }}
                                 >
-                                    <Picker.Item label="Select State" value="0" />
-                                    {StateList.map((StateList, i) => {
-                                        return (
-                                            <Picker.Item
-                                                key={i}
-                                                label={StateList.name}
-                                                value={StateList.id}
-                                            />
-                                        );
-                                    })}
-                                </Picker>
+                                </TouchableOpacity>
+                                <TextInput
+                                    mode="outlined"
+                                    label='State'
+                                    style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                    placeholder="Select State"
+                                    value={isStateName}
+                                    right={<TextInput.Icon name="menu-down" />}
+                                />
                             </View>
                             {stateError?.length > 0 &&
                                 <Text style={styles.errorTextStyle}>{stateError}</Text>
-                            }
+                            } 
 
-                            <View style={styles.dropDownContainer}>
-                                <Picker
-                                    selectedValue={isCity}
-                                    onValueChange={(v) => setIsCity(v)}
-                                    style={styles.dropDownStyle}
-                                    itemStyle={{padding: 0}}
-                                    enabled={cityFieldToggle}
+                       
+                            <View>
+                                {cityFieldToggle == false &&
+                                    <View style={[styles.cityDropDownField, {zIndex: 10, opacity: 0.6, backgroundColor: colors.white}]} ></View>
+                                }
+                                <TouchableOpacity 
+                                    style={styles.cityDropDownField} 
+                                    onPress={() => {
+                                        setCityListModal(true);
+                                    }}
                                 >
-                                    <Picker.Item label="Select City" value="0" />
-                                    {CityList.map((CityList, i) => {
-                                        return (
-                                            <Picker.Item
-                                                key={i}
-                                                label={CityList.name}
-                                                value={CityList.id}
-                                            />
-                                        );
-                                    })}
-                                    
-                                </Picker>
+                                </TouchableOpacity>
+                                <TextInput
+                                    mode="outlined"
+                                    label='City'
+                                    style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                    placeholder="Select City"
+                                    value={isCityName}
+                                    right={<TextInput.Icon name="menu-down" />}
+                                />
                             </View>
                             {cityError?.length > 0 &&
                                 <Text style={styles.errorTextStyle}>{cityError}</Text>
-                            }
+                            } 
 
                             <TextInput
                                 mode="outlined"
@@ -1222,6 +1289,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                 <Portal>
                     <Modal visible={addBrandModal} onDismiss={() => { setAddBrandModal(false); setNewBrandName(""); setIsBrand(0); }} contentContainerStyle={styles.modalContainerStyle}>
                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Brand</Text>
+                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99  }} onPress={() => { setAddBrandModal(false); setNewBrandName(""); setIsBrand(0); }} />
                         <TextInput
                             mode="outlined"
                             label='Brand Name'
@@ -1251,6 +1319,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
         
                     <Modal visible={addModelModal} onDismiss={() => { setAddModelModal(false); setNewModelName(""); setIsModel(0); }} contentContainerStyle={styles.modalContainerStyle}>
                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Model</Text>
+                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99  }} onPress={() => { setAddModelModal(false); setNewModelName(""); setIsModel(0); }} />
                         <TextInput
                             mode="outlined"
                             label='Model Name'
@@ -1281,6 +1350,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                     {/* Insurance Providers List Modal */}
                     <Modal visible={insuranceProviderListModal} onDismiss={() => { setInsuranceProviderListModal(false); setIsInsuranceProvider(0); setIsInsuranceProviderName(''); setInsuranceProviderError(''); setSearchQueryForInsuranceProviders('');  searchFilterForInsuranceProviders();}} contentContainerStyle={[styles.modalContainerStyle, {flex: 0.9}]}>
                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Insurance Provider</Text>
+                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99  }} onPress={() => { setInsuranceProviderListModal(false); setIsInsuranceProvider(0); setIsInsuranceProviderName(''); setInsuranceProviderError(''); setSearchQueryForInsuranceProviders('');  searchFilterForInsuranceProviders();}} />
                         {(isLoadingInsuranceProviderList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View>
                         :
                             <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
@@ -1333,6 +1403,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                     </Modal>
                     <Modal visible={addNewInsuranceProviderModal} onDismiss={() => { setAddNewInsuranceProviderModal(false); setInsuranceProviderListModal(true);  setIsNewInsuranceProvider(0); setNewInsuranceProviderError(''); }} contentContainerStyle={styles.modalContainerStyle}>
                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Insurance Provider</Text>
+                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99  }} onPress={() => { setAddNewInsuranceProviderModal(false); setInsuranceProviderListModal(true);  setIsNewInsuranceProvider(0); setNewInsuranceProviderError(''); }}/>
                         <View>
                             <TextInput
                                 mode="outlined"
@@ -1379,65 +1450,73 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                     {/* Garage List Modal */}
                     <Modal visible={garageListModal} onDismiss={() => { setGarageListModal(false); setIsGarageId(0); setIsGarageName(''); setGarageError(''); setSearchQueryForGarages('');  searchFilterForGarages();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Garage</Text>
-                        {(isLoadingGarageList == true) ? <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator>
-                        :
-                            <>
-                                <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
-                                    <Searchbar
-                                        placeholder="Search here..."
-                                        onChangeText={(text) => { if(text != null) searchFilterForGarages(text)}}
-                                        value={searchQueryForGarages}
-                                        elevation={0}
-                                        style={{ elevation: 0.8, marginBottom: 10 }}
-                                    />
-                                    {filteredGarageData?.length > 0 ?  
-                                        <FlatList
-                                            ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
-                                            data={filteredGarageData}
-                                            onEndReached={getGarageList}
-                                            onEndReachedThreshold={0.5}
-                                            refreshControl={
-                                                <RefreshControl
-                                                    refreshing={garageRefreshing}
-                                                    onRefresh={onGarageRefresh}
-                                                    colors={['green']}
-                                                />
-                                            }
-                                            ListFooterComponent={renderGarageFooter}
-                                            style={{borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
-                                            keyExtractor={item => item.id}
-                                            renderItem={({item}) => (
-                                                <>
-                                                    <List.Item
-                                                        title={
-                                                            <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
-                                                                <Text style={{fontSize:16, color: colors.black}}>{item.garage_name}</Text>
-                                                            </View>
-                                                        }
-                                                        onPress={() => {
-                                                                setIsGarageName(item.garage_name); 
-                                                                setIsGarageId(item.id); 
-                                                                setGarageError('');
-                                                                setGarageListModal(false);  
-                                                            }
-                                                        }
-                                                    />
-                                                </>
-                                            )} 
+                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99  }} onPress={() => { setGarageListModal(false); setIsGarageId(0); setIsGarageName(''); setGarageError(''); setSearchQueryForGarages('');  searchFilterForGarages();}} />
+                        {(isLoadingGarageList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
+                            <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
+                                {/* Search Bar */}
+                                <View>
+                                    <View style={{ marginBottom: 15, flexDirection: 'row'}}>
+                                        <TextInput
+                                            mode={'flat'}
+                                            placeholder="Search here..."
+                                            onChangeText={(text) => setSearchQueryForGarages(text)}
+                                            value={searchQueryForGarages}
+                                            activeUnderlineColor={colors.transparent}
+                                            underlineColor={colors.transparent}
+                                            style={{ elevation: 4, height: 50, backgroundColor: colors.white, flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 5, borderBottomLeftRadius: 5  }}
+                                            right={(searchQueryForGarages != null && searchQueryForGarages != '') && <TextInput.Icon icon="close" color={colors.light_gray} onPress={() => onGarageRefresh()} />}
                                         />
-                                        :
-                                        <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
-                                            <Text style={{ color: colors.black, textAlign: 'center'}}>No such garage found!</Text>
-                                        </View>
-                                    }
+                                        <TouchableOpacity onPress={() => searchFilterForGarages()} style={{ elevation: 4, borderTopRightRadius: 5, borderBottomRightRadius: 5, paddingRight: 25, paddingLeft: 25, zIndex: 2, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                                            <IconX name={'search'} size={17} color={colors.white} />
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
-                            </>
+                                {filteredGarageData?.length > 0 ?  
+                                    <FlatList
+                                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                        data={filteredGarageData}
+                                        onEndReached={filteredGarageData?.length > 9 && getGarageList}
+                                        onEndReachedThreshold={0.5}
+                                        refreshControl={
+                                            <RefreshControl
+                                                refreshing={garageRefreshing}
+                                                onRefresh={onGarageRefresh}
+                                                colors={['green']}
+                                            />
+                                        }
+                                        ListFooterComponent={filteredGarageData?.length > 9 && renderGarageFooter}
+                                        style={{borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
+                                        keyExtractor={item => item.id}
+                                        renderItem={({item}) => (
+                                            <List.Item
+                                                title={
+                                                    <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                        <Text style={{fontSize:16, color: colors.black}}>{item.garage_name}</Text>
+                                                    </View>
+                                                }
+                                                onPress={() => {
+                                                        setIsGarageName(item.garage_name); 
+                                                        setIsGarageId(item.id); 
+                                                        setGarageError('');
+                                                        setGarageListModal(false);  
+                                                    }
+                                                }
+                                            />
+                                        )} 
+                                    />
+                                    :
+                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50, flex: 1 }}>
+                                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such garage found!</Text>
+                                    </View>
+                                }
+                            </View>
                         }
                     </Modal>
 
                      {/* Brand List Modal */}
-                     <Modal visible={brandListModal} onDismiss={() => { setBrandListModal(false); setIsBrand(0); setIsBrandName(''); setBrandError(''); setSearchQueryForBrands('');  searchFilterForBrands();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                     <Modal visible={brandListModal} onDismiss={() => { setBrandListModal(false); setIsBrand(0); setIsBrandName(''); setBrandError(''); setSearchQueryForBrands('');  searchFilterForBrands(); setModelFieldToggle(false); }} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Brand</Text>
+                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99  }} onPress={() => { setBrandListModal(false); setIsBrand(0); setIsBrandName(''); setBrandError(''); setSearchQueryForBrands('');  searchFilterForBrands(); setModelFieldToggle(false); }} />
                         {(isLoadingBrandList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
                             <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
                                 {/* Search Bar */}
@@ -1509,6 +1588,7 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                     {/* Vehicle Model List Modal */}
                     <Modal visible={modelListModal} onDismiss={() => { setModelListModal(false); setIsModel(0); setIsModelName(''); setModelError(''); setSearchQueryForModels('');  searchFilterForModels();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Select Model</Text>
+                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99  }} onPress={() => { setModelListModal(false); setIsModel(0); setIsModelName(''); setModelError(''); setSearchQueryForModels('');  searchFilterForModels();}} />
                         {(isLoadingModelList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
                             <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
                                 {/* Search Bar */}
@@ -1573,6 +1653,102 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
                                         <Text style={{color: colors.white}}>Add Model</Text>
                                     </TouchableOpacity>
                                 </View>
+                            </View>
+                        }
+                    </Modal>
+
+                    {/* States List Modal */}
+                    <Modal visible={stateListModal} onDismiss={() => { setStateListModal(false); setIsState(); setIsStateName(''); setStateError(''); setSearchQueryForStates('');  searchFilterForStates(); setCityFieldToggle(false); }} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center" }]}>Select State</Text>
+                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99  }} onPress={() => { setStateListModal(false); setIsState(); setIsStateName(''); setStateError(''); setSearchQueryForStates('');  searchFilterForStates(); setCityFieldToggle(false); }} />
+                        {(isLoadingStateList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View>
+                        :
+                            <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
+                                <Searchbar
+                                    placeholder="Search here..."
+                                    onChangeText={(text) => { if(text != null) searchFilterForStates(text)}}
+                                    value={searchQueryForStates}
+                                    elevation={0}
+                                    style={{ elevation: 0.8, marginBottom: 10}}
+                                />
+                                {filteredStateData?.length > 0 ?  
+                                    <FlatList
+                                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                        data={filteredStateData}
+                                        // onEndReachedThreshold={1}
+                                        style={{borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
+                                        keyExtractor={item => item.id}
+                                        renderItem={({item}) => (
+                                            <List.Item
+                                                title={
+                                                    <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                        <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
+                                                    </View>
+                                                }
+                                                onPress={() => {
+                                                        setIsStateName(item.name); 
+                                                        setIsState(item.id); 
+                                                        setStateError('');
+                                                        setStateListModal(false);  
+                                                    }
+                                                }
+                                            />
+                                        )} 
+                                    />
+                                    :
+                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50, flex: 1 }}>
+                                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such state is associated!</Text>
+                                    </View>
+                                }
+                            </View>
+                        }
+                    </Modal>
+
+                    {/* City List Modal */}
+                    <Modal visible={cityListModal} onDismiss={() => { setCityListModal(false); setIsCity(0); setIsCityName(''); setCityError(''); setSearchQueryForCity(''); searchFilterForCity();}} contentContainerStyle={[styles.modalContainerStyle, { flex: 0.9 }]}>
+                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center" }]}>Select City</Text>
+                        <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99  }} onPress={() => { setCityListModal(false); setIsCity(0); setIsCityName(''); setCityError(''); setSearchQueryForCity('');  searchFilterForCity(); }} />
+                        {(isLoadingCityList == true) ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View>
+                        :
+                            <View style={{ marginTop: 20, marginBottom: 10, flex: 1 }}>
+                                <Searchbar
+                                    placeholder="Search here..."
+                                    onChangeText={(text) => { if(text != null) searchFilterForCity(text)}}
+                                    value={searchQueryForCity}
+                                    elevation={0}
+                                    style={{ elevation: 0.8, marginBottom: 10}}
+                                />
+                                {filteredCityData?.length > 0 ?  
+                                    <FlatList
+                                        ItemSeparatorComponent= {() => (<><Divider /><Divider /></>)}
+                                        data={filteredCityData}
+                                        // onEndReachedThreshold={1}
+                                        style={{borderColor: '#0000000a', borderWidth: 1, flex: 1 }}
+                                        keyExtractor={item => item.id}
+                                        renderItem={({item}) => (
+                                            <>
+                                                <List.Item
+                                                    title={
+                                                        <View style={{flexDirection:"row", display:'flex', flexWrap: "wrap"}}>
+                                                            <Text style={{fontSize:16, color: colors.black}}>{item.name}</Text>
+                                                        </View>
+                                                    }
+                                                    onPress={() => {
+                                                            setIsCityName(item.name); 
+                                                            setIsCity(item.id); 
+                                                            setCityError('');
+                                                            setCityListModal(false);  
+                                                        }
+                                                    }
+                                                />
+                                            </>
+                                        )} 
+                                    />
+                                    :
+                                    <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50, flex: 1 }}>
+                                        <Text style={{ color: colors.black, textAlign: 'center'}}>No such city is associated!</Text>
+                                    </View>
+                                }
                             </View>
                         }
                     </Modal>
@@ -1713,6 +1889,28 @@ const styles = StyleSheet.create({
         zIndex: 2,
     },
     insuranceProviderDropDownField: {
+        fontSize: 16,
+        color: colors.black,
+        position: 'absolute',
+        marginTop: 15,
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '80%',
+        zIndex: 2,
+    },
+    stateDropDownField: {
+        fontSize: 16,
+        color: colors.black,
+        position: 'absolute',
+        marginTop: 15,
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '80%',
+        zIndex: 2,
+    },
+    cityDropDownField: {
         fontSize: 16,
         color: colors.black,
         position: 'absolute',
