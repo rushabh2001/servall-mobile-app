@@ -1345,7 +1345,7 @@ const EditVehicle = ({ navigation, userToken, route, selectedGarageId, selectedG
                                                 onChangeText={(text) => { if(text != null) searchFilterForInsuranceProviders(text)}}
                                                 value={searchQueryForInsuranceProviders}
                                                 elevation={0}
-                                                style={{ elevation: 0.8, marginBottom: 10, flex: 1 }}
+                                                style={{ elevation: 0.8, marginBottom: 10 }}
                                             />
                                             {filteredInsuranceProviderData?.length > 0 ?  
                                                 <FlatList

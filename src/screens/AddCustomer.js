@@ -18,19 +18,19 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
     const [isName, setIsName] = useState('');
     const [isEmail, setIsEmail] = useState('');
     const [isPhoneNumber, setIsPhoneNumber] = useState('');
-    const [isCity, setIsCity] = useState();
-    const [isState, setIsState] = useState();
+    // const [isCity, setIsCity] = useState();
+    // const [isState, setIsState] = useState();
     const [isAddress, setIsAddress] = useState('');
 
     // Error States
     const [nameError, setNameError] = useState(''); 
     const [emailError, setEmailError] = useState('');
     const [phoneNumberError, setPhoneNumberError] = useState('');
-    const [cityError, setCityError] = useState('');
-    const [stateError, setStateError] = useState('');
+    // const [cityError, setCityError] = useState('');
+    // const [stateError, setStateError] = useState('');
 
-    const [CityList, setCityList] =  useState([]);
-    const [StateList, setStateList] =  useState([]);
+    // const [CityList, setCityList] =  useState([]);
+    // const [StateList, setStateList] =  useState([]);
 
     // Vehicle Fields
     const [isVehicleRegistrationNumber, setIsVehicleRegistrationNumber] = useState('');
@@ -126,6 +126,36 @@ const AddCustomer = ({ navigation, userRole, userToken, selectedGarageId, userId
     const [isNewInsuranceProvider, setIsNewInsuranceProvider] = useState('');
     const [newInsuranceProviderError, setNewInsuranceProviderError] = useState();
     const [addNewInsuranceProviderModal, setAddNewInsuranceProviderModal] = useState(false);
+
+    // State States
+    const [isState, setIsState] = useState();
+    const [isStateName, setIsStateName] = useState();
+    const [stateList, setStateList] = useState([]);
+    const [stateListModal, setStateListModal] = useState(false);
+    const [isLoadingStateList, setIsLoadingStateList] = useState(true);
+    const [filteredStateData, setFilteredStateData] = useState([]);
+    const [searchQueryForStates, setSearchQueryForStates] = useState(); 
+    const [stateError, setStateError] = useState('');   // Error State
+    const [stateIdError, setStateIdError] = useState();
+
+    const [statePage, setStatePage] = useState(1);
+    const [isStateScrollLoading, setIsStateScrollLoading] = useState(false);
+    const [stateRefreshing, setStateRefreshing] = useState(false);
+
+    // City States
+    const [isCity, setIsCity] = useState();
+    const [isCityName, setIsCityName] = useState();
+    const [cityList, setCityList] = useState([]);
+    const [cityListModal, setCityListModal] = useState(false);
+    const [isLoadingCityList, setIsLoadingCityList] = useState(true);
+    const [filteredCityData, setFilteredCityData] = useState([]);
+    const [searchQueryForCity, setSearchQueryForCity] = useState(); 
+    const [cityError, setCityError] = useState('');   // Error State
+    const [cityIdError, setCityIdError] = useState();
+
+    const [cityPage, setCityPage] = useState(1);
+    const [isCityScrollLoading, setIsCityScrollLoading] = useState(false);
+    const [cityRefreshing, setCityRefreshing] = useState(false);
 
     const [isLoading, setIsLoading] = useState(false);
     
