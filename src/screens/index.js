@@ -7,6 +7,7 @@ import ChooseGarage from "./ChooseGarage";
 import AddGarage from "./AddGarage";
 import MyCustomers from "./MyCustomers";
 import CustomerDetails from "./CustomerDetails";
+import CustomerProfile from "./CustomerProfile";
 import CustomerInfo from "./CustomerInfo";
 import AddCustomer from "./AddCustomer";
 import AddVehicle from "./AddVehicle";
@@ -20,6 +21,7 @@ import OrderCreated from "./OrderStatus/OrderCreated";
 import AddPayment from "./AddPayment";
 import AddPaymentSelectOrder from "./AddPaymentSelectOrder";
 import AddStock from "./AddStock";
+import Orders from "./Orders";
 import EditStock from "./EditStock";
 import CounterSale from "./CounterSale";
 import CounterSaleStep2 from "./CounterSaleStep2";
@@ -27,17 +29,18 @@ import PurchaseOrder from "./PurchaseOrder";
 import PurchaseOrderSelectOrder from "./PurchaseOrderSelectOrder";
 import EditRepairOrder from "./EditRepairOrder";
 import OpenOrderList from "./OrderListScreens/OpenOrderList";
-import OrderWorkInProgress from './OrderStatus/OrderWorkInProgress';
-import WIPOrderList from './OrderListScreens/WIPOrderList';
-import OrderSearch from './OrderSearch';
-import OrderCompletedList from './OrderListScreens/OrderCompletedList';
-import OrderCompleted from './OrderStatus/OrderCompleted';
-import OrderVehicleReady from './OrderStatus/OrderVehicleReady';
-import VehicleReadyOrderList from './OrderListScreens/VehicleReadyOrderList';
-import InvoicePreview from './InvoicePreview';
-import InvoicePreviewSelectOrder from './InvoicePreviewSelectOrder';
-import CompletedInvoicePreview from './CompletedInvoicePreview';
-import CompletedInvoicePreviewSelectOrder from './CompletedInvoicePreviewSelectOrder';
+import OrderWorkInProgress from "./OrderStatus/OrderWorkInProgress";
+import WIPOrderList from "./OrderListScreens/WIPOrderList";
+import OrderSearch from "./OrderSearch";
+import OrderCompletedList from "./OrderListScreens/OrderCompletedList";
+import OrderCompleted from "./OrderStatus/OrderCompleted";
+import OrderVehicleReady from "./OrderStatus/OrderVehicleReady";
+import VehicleReadyOrderList from "./OrderListScreens/VehicleReadyOrderList";
+import InvoicePreview from "./InvoicePreview";
+import InvoicePreviewSelectOrder from "./InvoicePreviewSelectOrder";
+import CompletedInvoicePreview from "./CompletedInvoicePreview";
+import VehicleList from "./VehicleList";
+import CompletedInvoicePreviewSelectOrder from "./CompletedInvoicePreviewSelectOrder";
 
 export {
     Accounts,
@@ -48,6 +51,7 @@ export {
     ChooseGarage,
     AddGarage,
     MyCustomers,
+    CustomerProfile,
     CustomerDetails,
     CustomerInfo,
     AddCustomer,
@@ -57,6 +61,7 @@ export {
     AddRepairOrder,
     AddRepairOrderStep2,
     AddRepairOrderStep3,
+    Orders,
     OrderList,
     OrderCreated,
     AddPayment,
@@ -72,6 +77,7 @@ export {
     WIPOrderList,
     OrderWorkInProgress,
     OrderSearch,
+    VehicleList,
     OrderCompletedList,
     OrderCompleted,
     OrderVehicleReady,
@@ -79,4 +85,4 @@ export {
     InvoicePreview,
     InvoicePreviewSelectOrder,
     CompletedInvoicePreviewSelectOrder,
-}
+};
