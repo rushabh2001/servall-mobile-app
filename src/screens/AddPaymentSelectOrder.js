@@ -62,6 +62,7 @@ const AddPaymentSelectOrder = ({navigation, userToken, selectedGarageId, selecte
     };
 
     const searchFilter = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_payments_order/status/${selectedGarageId}`, {
                 method: 'POST',
@@ -87,6 +88,7 @@ const AddPaymentSelectOrder = ({navigation, userToken, selectedGarageId, selecte
         } catch (error) {
             console.error(error);
         }
+        setIsLoading(false);
     };
 
     const getOrderDetails = async (orderId) => {

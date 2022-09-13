@@ -58,6 +58,7 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId, selectedGarage,
     };
 
     const searchFilter = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_garage_order/status/${isGarageId}`, {
                 method: 'POST',
@@ -83,6 +84,7 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId, selectedGarage,
         } catch (error) {
             console.error(error);
         }
+        setIsLoading(false);
     };
 
     useEffect(() => {
@@ -349,7 +351,7 @@ const OpenOrderList = ({navigation, userToken, selectedGarageId, selectedGarage,
                                 />  
                             </View>
                         :
-                            <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 50,  backgroundColor:colors.white,}}>
+                            <View style={{ alignItems: 'center', justifyContent: 'center',  backgroundColor:colors.white, flex: 1 }}>
                                 <Text style={{ color: colors.black, textAlign: 'center'}}>No Orders are exist for this Garage!</Text>
                             </View>
                         )

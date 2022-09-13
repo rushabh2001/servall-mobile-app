@@ -80,6 +80,7 @@ const VehicleSearch = ({ userToken, selectedGarageId, selectedGarage, user, navi
     };
 
     const searchFilter = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_all_vehicle_by_query/${isGarageId}`, {
                 method: 'POST',
@@ -104,6 +105,7 @@ const VehicleSearch = ({ userToken, selectedGarageId, selectedGarage, user, navi
         } catch (error) {
             console.error(error);
         }
+        setIsLoading(false);
     };
 
     const pullRefresh = async () => {

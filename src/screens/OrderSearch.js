@@ -55,6 +55,7 @@ const OrderSearch = ({navigation, userToken, selectedGarageId, selectedGarage, u
     };
 
     const searchFilter = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_garage_order/${isGarageId}`, {
                 method: 'POST',
@@ -79,6 +80,7 @@ const OrderSearch = ({navigation, userToken, selectedGarageId, selectedGarage, u
         } catch (error) {
             console.error(error);
         }
+        setIsLoading(false);
     };
 
     const pullRefresh = async () => {

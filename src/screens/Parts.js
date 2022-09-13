@@ -83,6 +83,7 @@ const Parts = ({ navigation, userToken, selectedGarageId, user, selectedGarage }
   };
 
   const searchFilterForParts = async () => {
+    setIsLoading(true);
     try {
       const response = await fetch(`${API_URL}fetch_garage_inventory/${selectedGarageId}`, {
           method: 'POST',
@@ -107,6 +108,7 @@ const Parts = ({ navigation, userToken, selectedGarageId, user, selectedGarage }
     } catch (error) {
         console.error(error);
     }
+    setIsLoading(false);
   };
 
   const pullRefresh = async () => {
@@ -228,7 +230,7 @@ const Parts = ({ navigation, userToken, selectedGarageId, user, selectedGarage }
                           )} 
                       />
                       :
-                      <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50,}}>
+                      <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50}}>
                           <Text style={{ color: colors.black, textAlign: 'center'}}>No such part is associated to your garage!</Text>
                       </View>
                     }

@@ -54,6 +54,7 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId, selectedGarage
     };
 
     const searchFilter = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_all_vehicle_by_query/${isGarageId}`, {
                 method: 'POST',
@@ -78,6 +79,7 @@ const AddRepairOrder = ({navigation, userToken, selectedGarageId, selectedGarage
         } catch (error) {
             console.error(error);
         }
+        setIsLoading(false);
     };
 
     const sendVehicleData = (index) => {

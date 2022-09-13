@@ -62,6 +62,7 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, sel
     };
 
     const searchFilter = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_payments_order/status/${selectedGarageId}`, {
                 method: 'POST',
@@ -87,6 +88,7 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, sel
         } catch (error) {
             console.error(error);
         }
+        setIsLoading(false);
     };
 
     const getOrderDetails = async (orderId) => {
@@ -267,12 +269,12 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, sel
                                     )}
                                 />  
                                 <Portal>
-                                    <Modal visible={orderDataModal} onDismiss={() => { setOrderDataModal(false); }} contentContainerStyle={styles.modalContainerStyle}>
+                                    <Modal visible={orderDataModal} onDismiss={() => { setOrderDataModal(false); }} contentContainerStyle={[styles.modalContainerStyle, { flex: 1 }]}>
                                         <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => { setOrderDataModal(false); }} />
                                         <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Order Details</Text>
                                         {orderDataLoading 
                                         ? 
-                                            <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> 
+                                            <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View>
                                         :
                                             <ScrollView>
                                                 <Text style={styles.cardDetailsHeading}>Order ID:</Text>
@@ -404,7 +406,7 @@ const InvoicePreviewSelectOrder = ({navigation, userToken, selectedGarageId, sel
                                 </Portal>
                             </View>
                         :
-                            <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 50,  backgroundColor:colors.white,}}>
+                            <View style={{ alignItems: 'center', justifyContent: 'center', backgroundColor:colors.white, flex: 1 }}>
                                 <Text style={{ color: colors.black, textAlign: 'center'}}>No Orders are exist for this Garage!</Text>
                             </View>
                         )
