@@ -119,7 +119,8 @@ const CustomerProfile = ({
         } catch (err) {
             setSingleFile(null);
             if (DocumentPicker.isCancel(err)) {
-               // alert("Canceled");
+                // alert("Canceled");
+                // alert("Canceled");
             } else {
                 alert("Unknown Error: " + JSON.stringify(err));
                 throw err;
@@ -190,223 +191,216 @@ const CustomerProfile = ({
                         <ActivityIndicator></ActivityIndicator>
                     </View>
                 ) : (
-              
-                        <View style={styles.upperContainer}>
-                            <View>
-                                {imageUri && (
-                                    <Lightbox
-                                        onOpen={() => setResizeImage("contain")}
-                                        willClose={() =>
-                                            setResizeImage("cover")
-                                        }
-                                        activeProps={styles.activeImage}
-                                        navigator={navigator}
-                                        style={styles.lightBoxWrapper}
-                                    >
-                                        <Image
-                                            resizeMode={resizeImage}
-                                            style={styles.verticleImage}
-                                            source={{ uri: imageUri }}
-                                        />
-                                    </Lightbox>
-                                )}
-                                <Icon
-                                    style={styles.iconChangeImage}
-                                    onPress={changeProfileImage}
-                                    name={"camera"}
-                                    size={16}
-                                    color={colors.white}
-                                />
-                            </View>
-                            <View
-                                style={{
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                }}
-                            >
-                                <Text style={styles.customerName}>
-                                    {isCustomerData != null
-                                        ? isCustomerData.name
-                                        : null}
-                                </Text>
-                             
-                            </View>
-                       
-                            <View
-                                style={{
-                                    flexDirection: "row",
-                                    marginTop: 5,
-                                    flexWrap: "wrap",
-                                    alignSelf: "center",
-                                    justifyContent: "center",
-                                    width: "80%",
-                                    flexFlow: "row wrap",
-                                }}
-                            >
-                                {userRole == "Super Admin" ||
-                                userRole == "Admin" ? (
-                                    <>
-                                        <TouchableOpacity
-                                            onPress={() =>
-                                                Linking.openURL(
-                                                    `tel:${isCustomerData.phone_number}`
-                                                )
-                                            }
-                                            style={styles.smallButton}
-                                        >
-                                            <Icon
-                                                name={"phone"}
-                                                size={20}
-                                                color={colors.primary}
-                                            />
-                                        </TouchableOpacity>
-                                        <TouchableOpacity
-                                            onPress={() =>
-                                                Linking.openURL(
-                                                    `sms:${isCustomerData.phone_number}?&body=Hello%20ServAll`
-                                                )
-                                            }
-                                            style={styles.smallButton}
-                                        >
-                                            <Icon
-                                                name={"comment-multiple"}
-                                                size={20}
-                                                color={colors.primary}
-                                            />
-                                        </TouchableOpacity>
-                                        <TouchableOpacity
-                                            onPress={() =>
-                                                Linking.openURL(
-                                                    `https://wa.me/${isCustomerData.phone_number}`
-                                                )
-                                            }
-                                            style={styles.smallButton}
-                                        >
-                                            <Icon
-                                                name={"whatsapp"}
-                                                size={20}
-                                                color={colors.primary}
-                                            />
-                                        </TouchableOpacity>
-                                    </>
-                                ) : null}
-                            </View>
-                            <View style={styles.cardContainer}>
-                                <View
-                                    style={{
-                                        flexDirection: "column",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        marginRight: 10,
-                                    }}
+                    <View style={styles.upperContainer}>
+                        <View>
+                            {imageUri && (
+                                <Lightbox
+                                    onOpen={() => setResizeImage("contain")}
+                                    willClose={() => setResizeImage("cover")}
+                                    activeProps={styles.activeImage}
+                                    navigator={navigator}
+                                    style={styles.lightBoxWrapper}
                                 >
-                                    <Text
-                                        style={{
-                                            color: colors.danger2,
-                                            fontSize: 16,
-                                        }}
-                                    >
-                                        Outstanding
-                                    </Text>
-                                    <Text
-                                        style={{
-                                            color: colors.danger2,
-                                            fontSize: 16,
-                                        }}
-                                    >
-                                        ₹ {isCustomerData.due_payment}
-                                    </Text>
-                                </View>
-                                <View
-                                    style={{
-                                        flexDirection: "column",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                    }}
-                                >
-                                    <Text
-                                        style={{
-                                            color: colors.green,
-                                            fontSize: 16,
-                                        }}
-                                    >
-                                        Paid
-                                    </Text>
-                                    <Text
-                                        style={{
-                                            color: colors.green,
-                                            fontSize: 16,
-                                        }}
-                                    >
-                                        ₹ {isCustomerData.completed_payment}
-                                    </Text>
-                                </View>
-                            </View>
-                            <View style={styles.cards}>
-                                <View style={styles.upperInfo}>
-                                    <View>
-                                        <View style={{ flexDirection: "row" }}>
-                                            <Text style={styles.LabelLeft}>
-                                                Phone Number:
-                                            </Text>
-                                            <Text style={styles.LabelRight}>
-                                                {isCustomerData != null
-                                                    ? isCustomerData?.phone_number
-                                                    : ""}
-                                            </Text>
-                                        </View>
-                                        <Divider />
-                                        <View style={{ flexDirection: "row" }}>
-                                            <Text style={styles.LabelLeft}>
-                                                Email:
-                                            </Text>
-                                            <Text style={styles.LabelRight}>
-                                                {isCustomerData != null
-                                                    ? isCustomerData?.email
-                                                    : ""}
-                                            </Text>
-                                        </View>
-                                        <Divider />
-                                        <View style={{ flexDirection: "row" }}>
-                                            <Text style={styles.LabelLeft}>
-                                                State:
-                                            </Text>
-                                            <Text style={styles.LabelRight}>
-                                                {isCustomerData != null
-                                                    ? isCustomerData?.states
-                                                          ?.name
-                                                    : ""}
-                                            </Text>
-                                        </View>
-                                        <Divider />
-                                        <View style={{ flexDirection: "row" }}>
-                                            <Text style={styles.LabelLeft}>
-                                                City:
-                                            </Text>
-                                            <Text style={styles.LabelRight}>
-                                                {isCustomerData != null
-                                                    ? isCustomerData?.cities
-                                                          ?.name
-                                                    : ""}
-                                            </Text>
-                                        </View>
-                                        <Divider />
-                                        <View style={{ flexDirection: "row" }}>
-                                            <Text style={styles.LabelLeft}>
-                                                Address:
-                                            </Text>
-                                            <Text style={styles.LabelRight}>
-                                                {isCustomerData != null
-                                                    ? isCustomerData?.address
-                                                    : ""}
-                                            </Text>
-                                        </View>
-                                    </View>
+                                    <Image
+                                        resizeMode={resizeImage}
+                                        style={styles.verticleImage}
+                                        source={{ uri: imageUri }}
+                                    />
+                                </Lightbox>
+                            )}
+                            <Icon
+                                style={styles.iconChangeImage}
+                                onPress={changeProfileImage}
+                                name={"camera"}
+                                size={16}
+                                color={colors.white}
+                            />
+                        </View>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                            }}
+                        >
+                            <Text style={styles.customerName}>
+                                {isCustomerData != null
+                                    ? isCustomerData.name
+                                    : null}
+                            </Text>
+                        </View>
 
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                marginTop: 5,
+                                flexWrap: "wrap",
+                                alignSelf: "center",
+                                justifyContent: "center",
+                                width: "80%",
+                                flexFlow: "row wrap",
+                            }}
+                        >
+                            {userRole == "Super Admin" ||
+                            userRole == "Admin" ? (
+                                <>
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            Linking.openURL(
+                                                `tel:${isCustomerData.phone_number}`
+                                            )
+                                        }
+                                        style={styles.smallButton}
+                                    >
+                                        <Icon
+                                            name={"phone"}
+                                            size={20}
+                                            color={colors.primary}
+                                        />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            Linking.openURL(
+                                                `sms:${isCustomerData.phone_number}?&body=Hello%20ServAll`
+                                            )
+                                        }
+                                        style={styles.smallButton}
+                                    >
+                                        <Icon
+                                            name={"comment-multiple"}
+                                            size={20}
+                                            color={colors.primary}
+                                        />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            Linking.openURL(
+                                                `https://wa.me/${isCustomerData.phone_number}`
+                                            )
+                                        }
+                                        style={styles.smallButton}
+                                    >
+                                        <Icon
+                                            name={"whatsapp"}
+                                            size={20}
+                                            color={colors.primary}
+                                        />
+                                    </TouchableOpacity>
+                                </>
+                            ) : null}
+                        </View>
+                        <View style={styles.cardContainer}>
+                            <View
+                                style={{
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    marginRight: 10,
+                                }}
+                            >
+                                <Text
+                                    style={{
+                                        color: colors.danger2,
+                                        fontSize: 16,
+                                    }}
+                                >
+                                    Outstanding
+                                </Text>
+                                <Text
+                                    style={{
+                                        color: colors.danger2,
+                                        fontSize: 16,
+                                    }}
+                                >
+                                    ₹ {isCustomerData.due_payment}
+                                </Text>
+                            </View>
+                            <View
+                                style={{
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                <Text
+                                    style={{
+                                        color: colors.green,
+                                        fontSize: 16,
+                                    }}
+                                >
+                                    Paid
+                                </Text>
+                                <Text
+                                    style={{
+                                        color: colors.green,
+                                        fontSize: 16,
+                                    }}
+                                >
+                                    ₹ {isCustomerData.completed_payment}
+                                </Text>
+                            </View>
+                        </View>
+                        <View style={styles.cards}>
+                            <View style={styles.upperInfo}>
+                                <View>
+                                    <View style={{ flexDirection: "row" }}>
+                                        <Text style={styles.LabelLeft}>
+                                            Phone Number:
+                                        </Text>
+                                        <Text style={styles.LabelRight}>
+                                            {isCustomerData != null
+                                                ? isCustomerData?.phone_number
+                                                : ""}
+                                        </Text>
+                                    </View>
+                                    <Divider />
+                                    <View style={{ flexDirection: "row" }}>
+                                        <Text style={styles.LabelLeft}>
+                                            Email:
+                                        </Text>
+                                        <Text style={styles.LabelRight}>
+                                            {isCustomerData != null
+                                                ? isCustomerData?.email
+                                                : ""}
+                                        </Text>
+                                    </View>
+                                    <Divider />
+                                    <View style={{ flexDirection: "row" }}>
+                                        <Text style={styles.LabelLeft}>
+                                            State:
+                                        </Text>
+                                        <Text style={styles.LabelRight}>
+                                            {isCustomerData != null
+                                                ? isCustomerData?.states?.name
+                                                : ""}
+                                        </Text>
+                                    </View>
+                                    <Divider />
+                                    <View style={{ flexDirection: "row" }}>
+                                        <Text style={styles.LabelLeft}>
+                                            City:
+                                        </Text>
+                                        <Text style={styles.LabelRight}>
+                                            {isCustomerData != null
+                                                ? isCustomerData?.cities?.name
+                                                : ""}
+                                        </Text>
+                                    </View>
+                                    <Divider />
+                                    <View style={{ flexDirection: "row" }}>
+                                        <Text style={styles.LabelLeft}>
+                                            Address:
+                                        </Text>
+                                        <Text style={styles.LabelRight}>
+                                            {isCustomerData != null
+                                                ? isCustomerData?.address
+                                                : ""}
+                                        </Text>
+                                    </View>
                                 </View>
                             </View>
                         </View>
-                  )}
+                    </View>
+                )}
             </View>
         </View>
     );
@@ -454,12 +448,12 @@ const styles = StyleSheet.create({
         justifyContent: "flex-start",
         alignItems: "center",
         padding: 0,
-        paddingTop: 20
+        paddingTop: 20,
         //backgroundColor: "red",
     },
     lowerContainer: {
         flex: 1,
-        margin: 15
+        margin: 15,
     },
     customerName: {
         fontSize: 18,
@@ -522,7 +516,7 @@ const styles = StyleSheet.create({
         elevation: 3,
         backgroundColor: colors.white,
         marginBottom: 10,
-        width: '85%',
+        width: "85%",
         marginTop: 20,
     },
     cardTags: {

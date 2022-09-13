@@ -209,6 +209,7 @@ const VehicleList = ({
                             onChangeText={(text) => setSearchQuery(text)}
                             value={searchQuery}
                             activeUnderlineColor={colors.transparent}
+                            selectionColor="black"
                             underlineColor={colors.transparent}
                             style={{
                                 elevation: 4,

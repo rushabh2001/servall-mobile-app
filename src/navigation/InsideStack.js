@@ -77,6 +77,7 @@ const ServicesStack = ({ navigation }) => {
                             }}
                         >
                             {userRole == "Super Admin" ||
+                            userRole == "Admin" ||
                             garageId?.length > 1 ? (
                                 <Button
                                     onPress={() =>

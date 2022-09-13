@@ -216,6 +216,7 @@ const Orders = ({
                             onChangeText={(text) => setSearchQuery(text)}
                             value={searchQuery}
                             activeUnderlineColor={colors.transparent}
+                            selectionColor="black"
                             underlineColor={colors.transparent}
                             style={{
                                 elevation: 4,
@@ -519,7 +520,20 @@ const Orders = ({
                     >
                         Order Details
                     </Text>
-                    <IconX name="times" size={20} color={colors.black} style={{ position: 'absolute', top: 25, right: 25, zIndex: 99 }} onPress={() => { setOrderDataModal(false); }} />
+                    <IconX
+                        name="times"
+                        size={20}
+                        color={colors.black}
+                        style={{
+                            position: "absolute",
+                            top: 25,
+                            right: 25,
+                            zIndex: 99,
+                        }}
+                        onPress={() => {
+                            setOrderDataModal(false);
+                        }}
+                    />
                     {orderDataLoading ? (
                         <ActivityIndicator
                             style={{ marginVertical: 30, flex: 1 }}
@@ -939,7 +953,7 @@ const styles = StyleSheet.create({
     },
     cardActions: {
         alignItems: "flex-start",
-        marginBottom: 15
+        marginBottom: 15,
     },
     smallActionButton: {
         fontSize: 18,
@@ -1003,7 +1017,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 30,
         marginTop: 40,
         marginBottom: 70,
-        flex: 0.9
+        flex: 0.9,
     },
     cardDetailsHeading: {
         color: colors.black,
