@@ -1,46 +1,54 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
-import { Modal, Portal, Button, TextInput } from 'react-native-paper';
-import { connect } from 'react-redux';
-import { colors } from '../constants';
-import { API_URL, WEB_URL } from '../constants/config';
+import React, { useState, useEffect } from "react";
+import {
+    View,
+    Text,
+    StyleSheet,
+    ActivityIndicator,
+    TouchableOpacity,
+    Image,
+} from "react-native";
+import { Modal, Portal, Button, TextInput } from "react-native-paper";
+import { connect } from "react-redux";
+import { colors } from "../constants";
+import { API_URL, WEB_URL } from "../constants/config";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import InputScrollView from 'react-native-input-scroll-view';
-import { Picker } from '@react-native-picker/picker';
+import InputScrollView from "react-native-input-scroll-view";
+import { Picker } from "@react-native-picker/picker";
 import { useIsFocused } from "@react-navigation/native";
-import DocumentPicker from 'react-native-document-picker';
+import DocumentPicker from "react-native-document-picker";
 
 const PurchaseOrder = ({ route, userToken, navigation }) => {
-
     const [isRepairOrderId, setIsRepairOrderId] = useState();
     const [isCustomerName, setIsCustomerName] = useState();
     const [isVendor, setIsVendor] = useState();
     const [isComment, setIsComment] = useState();
 
     const [isPart, setIsPart] = useState();
-    const [isPartName, setIsPartName] = useState('');
+    const [isPartName, setIsPartName] = useState("");
 
     const [vendorList, setVendorList] = useState([]);
     const [repairOrderList, setRepairOrderList] = useState([]);
 
-    const [fieldsParts, setFieldsParts] = useState([{ partId: null, partName: null, quantity: 0, imageName: 0 }]);
+    const [fieldsParts, setFieldsParts] = useState([
+        { partId: null, partName: null, quantity: 0, imageName: 0 },
+    ]);
 
     const [isLoading, setIsLoading] = useState(false);
     const [isLoading2, setIsLoading2] = useState(false);
 
     const [addPartModal, setAddPartModal] = useState(false);
-    const [isNewPartName, setIsNewPartName] = useState('');
+    const [isNewPartName, setIsNewPartName] = useState("");
     const [addNewPartModal, setAddNewPartModal] = useState(false);
 
-    const [isNewPart, setIsNewPart] = useState('');
+    const [isNewPart, setIsNewPart] = useState("");
     const [newPartError, setNewPartError] = useState();
 
-    const [isNewVendorName, setIsNewVendorName] = useState('');
+    const [isNewVendorName, setIsNewVendorName] = useState("");
     const [addNewVendorModal, setAddNewVendorModal] = useState(false);
 
     const [firstPartField, setFirstPartField] = useState(false);
     const [addRepairOrderModal, setAddRepairOrderModal] = useState(false);
-    
+
     const [vendorError, setVendorError] = useState();
     const [repairOrderError, setRepairOrderError] = useState();
     const [partError, setPartError] = useState();
@@ -56,7 +64,7 @@ const PurchaseOrder = ({ route, userToken, navigation }) => {
 
     const [isPartImg, setIsPartImg] = useState(null);
     const [isPartImgLoading, setIsPartImgLoading] = useState(false);
-    const [partImgError, setPartImgError] = useState('');
+    const [partImgError, setPartImgError] = useState("");
     const [isNewPartImg, setIsNewPartImg] = useState(null);
 
     const isFocused = useIsFocused();
@@ -69,7 +77,12 @@ const PurchaseOrder = ({ route, userToken, navigation }) => {
 
     function handlePartAdd() {
         const partValues = [...fieldsParts];
-        partValues.push({ partId: null, partName: null, quantity: 0, imageName: 0 });
+        partValues.push({
+            partId: null,
+            partName: null,
+            quantity: 0,
+            imageName: 0,
+        });
         setFieldsParts(partValues);
     }
 
@@ -88,13 +101,12 @@ const PurchaseOrder = ({ route, userToken, navigation }) => {
             // console.log(res);
             setIsNewPartImg(res[0]);
             setIsPartImgLoading(true);
-            
         } catch (err) {
             setIsPartImg(null);
             if (DocumentPicker.isCancel(err)) {
-                setPartImgError('Canceled');
+                setPartImgError("Canceled");
             } else {
-                setPartImgError('Unknown Error: ' + JSON.stringify(err));
+                setPartImgError("Unknown Error: " + JSON.stringify(err));
                 throw err;
             }
         } finally {
@@ -105,11 +117,11 @@ const PurchaseOrder = ({ route, userToken, navigation }) => {
     const getVendorList = async () => {
         try {
             const res = await fetch(`${API_URL}fetch_vendor`, {
-                method: 'GET',
+                method: "GET",
                 headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + userToken
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + userToken,
                 },
             });
             const json = await res.json();
@@ -128,17 +140,17 @@ const PurchaseOrder = ({ route, userToken, navigation }) => {
         setIsLoading2(true);
         try {
             const res = await fetch(`${API_URL}fetch_parts`, {
-                method: 'GET',
+                method: "GET",
                 headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + userToken
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + userToken,
                 },
             });
             const json = await res.json();
             // console.log(json);
             if (json !== undefined) {
-                console.log('setPartList', json.data);
+                console.log("setPartList", json.data);
                 setPartList(json.data);
                 // handleServiceAdd();
             }
@@ -155,29 +167,43 @@ const PurchaseOrder = ({ route, userToken, navigation }) => {
 
     useEffect(() => {
         getPartList();
-        if(route.params) {
-            {route.params.data.order_id && setIsRepairOrderId(parseInt(route.params.data.order_id))}
-            {route.params.data.customer_name && setIsCustomerName(route.params.data.customer_name)}
+        if (route.params) {
+            {
+                route.params.data.order_id &&
+                    setIsRepairOrderId(parseInt(route.params.data.order_id));
+            }
+            {
+                route.params.data.customer_name &&
+                    setIsCustomerName(route.params.data.customer_name);
+            }
         }
     }, [isFocused]);
 
     return (
         <View style={styles.pageContainer}>
-            {(isLoading == true) ? <ActivityIndicator></ActivityIndicator> :
+            {isLoading == true ? (
+                <ActivityIndicator></ActivityIndicator>
+            ) : (
                 <InputScrollView
-                    keyboardShouldPersistTaps={'handled'}
+                    keyboardOffset={200}
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    keyboardShouldPersistTaps={"always"}
                     showsVerticalScrollIndicator={false}
-                    scrollEventThrottle={8}
-                    behavior="padding"
                 >
                     <View style={{ flex: 1 }}>
-                        <Text style={[styles.headingStyle, { marginTop: 20 }]}>Order Details: </Text>
+                        <Text style={[styles.headingStyle, { marginTop: 20 }]}>
+                            Order Details:{" "}
+                        </Text>
                         <View style={styles.dropDownContainer}>
                             <Picker
                                 selectedValue={isVendor}
-                                onValueChange={(option) => {setIsVendor(option); if(option == "new_vendor") setAddNewVendorModal(true) }}
+                                onValueChange={(option) => {
+                                    setIsVendor(option);
+                                    if (option == "new_vendor")
+                                        setAddNewVendorModal(true);
+                                }}
                                 style={styles.dropDownField}
-                                itemStyle={{padding: 0}}
+                                itemStyle={{ padding: 0 }}
                             >
                                 <Picker.Item label="Select Vendor" value="0" />
                                 {vendorList.map((vendorList, i) => {
@@ -189,84 +215,205 @@ const PurchaseOrder = ({ route, userToken, navigation }) => {
                                         />
                                     );
                                 })}
-                                <Picker.Item label="Add New Vendor" value="new_vendor" />
+                                <Picker.Item
+                                    label="Add New Vendor"
+                                    value="new_vendor"
+                                />
                             </Picker>
                         </View>
-                        {vendorError?.length > 0 &&
-                            <Text style={styles.errorTextStyle}>{vendorError}</Text>
-                        }
+                        {vendorError?.length > 0 && (
+                            <Text style={styles.errorTextStyle}>
+                                {vendorError}
+                            </Text>
+                        )}
 
                         <View>
-                            <TouchableOpacity style={styles.repairOrderField} onPress={() => navigation.navigate('PurchaseOrderSelectOrder') }></TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.repairOrderField}
+                                onPress={() =>
+                                    navigation.navigate(
+                                        "PurchaseOrderSelectOrder"
+                                    )
+                                }
+                            ></TouchableOpacity>
                             <TextInput
                                 mode="outlined"
-                                label='Repair Order'
-                                style={{marginTop: 10, backgroundColor: colors.white, width:'100%' }}
+                                label="Repair Order"
+                                style={{
+                                    marginTop: 10,
+                                    backgroundColor: colors.white,
+                                    width: "100%",
+                                }}
                                 placeholder="Select Repair Order"
                                 value={isCustomerName}
                             />
                         </View>
-                        {repairOrderError?.length > 0 &&
-                            <Text style={styles.errorTextStyle}>{repairOrderError}</Text>
-                        }
+                        {repairOrderError?.length > 0 && (
+                            <Text style={styles.errorTextStyle}>
+                                {repairOrderError}
+                            </Text>
+                        )}
 
-                        <Text style={[styles.headingStyle, { marginTop: 20 }]}>Parts:</Text>
+                        <Text style={[styles.headingStyle, { marginTop: 20 }]}>
+                            Parts:
+                        </Text>
                         {fieldsParts.map((field, idx) => {
                             return (
                                 <>
-                                    {(idx != 0) &&
-                                        <View style={styles.addFieldContainerGroup} key={'fieldsParts'+idx}>
-                                            <TouchableOpacity style={styles.removeEntryIconContainer} onPress={() => handlePartRemove(idx)}>
-                                                <Icon style={styles.removeEntryIcon} name="close" size={30} color="#000" />
+                                    {idx != 0 && (
+                                        <View
+                                            style={
+                                                styles.addFieldContainerGroup
+                                            }
+                                            key={"fieldsParts" + idx}
+                                        >
+                                            <TouchableOpacity
+                                                style={
+                                                    styles.removeEntryIconContainer
+                                                }
+                                                onPress={() =>
+                                                    handlePartRemove(idx)
+                                                }
+                                            >
+                                                <Icon
+                                                    style={
+                                                        styles.removeEntryIcon
+                                                    }
+                                                    name="close"
+                                                    size={30}
+                                                    color="#000"
+                                                />
                                             </TouchableOpacity>
-                                        
-                                            <View style={[styles.cardRightContent, { flex: 1, flexDirection: 'row', marginTop: 10, marginBottom: 0 }]}>
-                                                <Text style={[styles.partNameContent, {fontWeight: '600'}]}>Part Name: </Text>
-                                                <Text style={styles.partNameContent}>{fieldsParts[idx].partName}</Text>
+
+                                            <View
+                                                style={[
+                                                    styles.cardRightContent,
+                                                    {
+                                                        flex: 1,
+                                                        flexDirection: "row",
+                                                        marginTop: 10,
+                                                        marginBottom: 0,
+                                                    },
+                                                ]}
+                                            >
+                                                <Text
+                                                    style={[
+                                                        styles.partNameContent,
+                                                        { fontWeight: "600" },
+                                                    ]}
+                                                >
+                                                    Part Name:{" "}
+                                                </Text>
+                                                <Text
+                                                    style={
+                                                        styles.partNameContent
+                                                    }
+                                                >
+                                                    {fieldsParts[idx].partName}
+                                                </Text>
                                             </View>
-                                            <View style={[styles.cardRightContent, { flex: 1 }]}>
-                                                <View style={styles.addFieldContainer} key={`parts-${field}-${idx}`}>
+                                            <View
+                                                style={[
+                                                    styles.cardRightContent,
+                                                    { flex: 1 },
+                                                ]}
+                                            >
+                                                <View
+                                                    style={
+                                                        styles.addFieldContainer
+                                                    }
+                                                    key={`parts-${field}-${idx}`}
+                                                >
                                                     <TextInput
                                                         mode="outlined"
-                                                        label='Quantity'
-                                                        style={styles.textEntryInput}
-                                                        placeholder="Quantity"
-                                                        onChangeText={
-                                                            e => {
-                                                                let parameter = {
-                                                                    name: 'quantity',
-                                                                    value: e,
-                                                                };
-                                                                handlePartChange(idx, parameter);
-                                                            }
+                                                        label="Quantity"
+                                                        style={
+                                                            styles.textEntryInput
                                                         }
+                                                        placeholder="Quantity"
+                                                        onChangeText={(e) => {
+                                                            let parameter = {
+                                                                name: "quantity",
+                                                                value: e,
+                                                            };
+                                                            handlePartChange(
+                                                                idx,
+                                                                parameter
+                                                            );
+                                                        }}
                                                     />
-                                                    {isPartImgLoading == true ?
-                                                        <ActivityIndicator style={{flex:1, jusifyContent: 'center', alignItems: 'center', marginVertical: 20}}></ActivityIndicator>
-                                                    :
-                                                        <View style={{position: 'relative', marginTop: 20 }}>
-                                                            <Image resizeMode={'cover'} style={styles.verticleImage} source={{uri: WEB_URL + 'uploads/part_img/' + isPartImg }} />
-                                                            <Icon style={styles.iconChangeImage} onPress={selectPartImg} name={"camera"} size={16} color={colors.white} />
+                                                    {isPartImgLoading ==
+                                                    true ? (
+                                                        <ActivityIndicator
+                                                            style={{
+                                                                flex: 1,
+                                                                jusifyContent:
+                                                                    "center",
+                                                                alignItems:
+                                                                    "center",
+                                                                marginVertical: 20,
+                                                            }}
+                                                        ></ActivityIndicator>
+                                                    ) : (
+                                                        <View
+                                                            style={{
+                                                                position:
+                                                                    "relative",
+                                                                marginTop: 20,
+                                                            }}
+                                                        >
+                                                            <Image
+                                                                resizeMode={
+                                                                    "cover"
+                                                                }
+                                                                style={
+                                                                    styles.verticleImage
+                                                                }
+                                                                source={{
+                                                                    uri:
+                                                                        WEB_URL +
+                                                                        "uploads/part_img/" +
+                                                                        isPartImg,
+                                                                }}
+                                                            />
+                                                            <Icon
+                                                                style={
+                                                                    styles.iconChangeImage
+                                                                }
+                                                                onPress={
+                                                                    selectPartImg
+                                                                }
+                                                                name={"camera"}
+                                                                size={16}
+                                                                color={
+                                                                    colors.white
+                                                                }
+                                                            />
                                                         </View>
-                                                    }
+                                                    )}
                                                 </View>
                                             </View>
                                         </View>
-                                    } 
+                                    )}
                                 </>
                             );
                         })}
                         <View style={styles.addFieldBtnContainer}>
                             <Button
                                 style={{ marginTop: 15, flex: 0.3 }}
-                                mode={'contained'}
+                                mode={"contained"}
                                 icon="plus"
                                 onPress={() => {
-                                    if(fieldsParts.length!=0) {
+                                    if (fieldsParts.length != 0) {
                                         setAddPartModal(true);
                                     } else {
                                         const partValues = [...fieldsParts];
-                                        partValues.push({ partId: null, partName: null, quantity: 0, imageName: 0 });
+                                        partValues.push({
+                                            partId: null,
+                                            partName: null,
+                                            quantity: 0,
+                                            imageName: 0,
+                                        });
                                         setFieldsParts(partValues);
                                         setAddPartModal(true);
                                         setFirstPartField(false);
@@ -278,75 +425,108 @@ const PurchaseOrder = ({ route, userToken, navigation }) => {
                             <View style={{ flex: 0.5 }}></View>
                         </View>
 
-                        <Button
-                            style={{ marginTop: 15 }}
-                            mode={'contained'}
-                        >
+                        <Button style={{ marginTop: 15 }} mode={"contained"}>
                             Prepare Invoice
                         </Button>
                     </View>
                 </InputScrollView>
-            }
+            )}
 
             <Portal>
-                <Modal visible={addPartModal} onDismiss={() => { setAddPartModal(false); setIsPart(0); }} contentContainerStyle={styles.modalContainerStyle}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add Part for Purchase Order</Text>
-                    {(isLoading2 == true) ? <ActivityIndicator></ActivityIndicator>
-                    :
+                <Modal
+                    visible={addPartModal}
+                    onDismiss={() => {
+                        setAddPartModal(false);
+                        setIsPart(0);
+                    }}
+                    contentContainerStyle={styles.modalContainerStyle}
+                >
+                    <Text
+                        style={[
+                            styles.headingStyle,
+                            { marginTop: 0, alignSelf: "center" },
+                        ]}
+                    >
+                        Add Part for Purchase Order
+                    </Text>
+                    {isLoading2 == true ? (
+                        <ActivityIndicator></ActivityIndicator>
+                    ) : (
                         <>
                             <View style={styles.dropDownContainer}>
                                 <Picker
                                     selectedValue={isPart}
-                                    onValueChange={
-                                        (itemValue, itemIndex) => { 
-                                            setIsPart(itemValue);
-                                            if(itemIndex != 0) setIsPartName(partList[itemIndex - 1].name);
-                                        }}
+                                    onValueChange={(itemValue, itemIndex) => {
+                                        setIsPart(itemValue);
+                                        if (itemIndex != 0)
+                                            setIsPartName(
+                                                partList[itemIndex - 1].name
+                                            );
+                                    }}
                                     style={styles.dropDownField}
                                     itemStyle={{ padding: 0 }}
                                 >
-                                    <Picker.Item label="Select Part for Purchase Order" value="0" />
+                                    <Picker.Item
+                                        label="Select Part for Purchase Order"
+                                        value="0"
+                                    />
                                     {partList?.map((partList, i) => {
                                         return (
                                             <Picker.Item
-                                                key={'part'+i}
+                                                key={"part" + i}
                                                 label={partList?.name}
                                                 value={partList?.id}
                                             />
                                         );
                                     })}
-                                    <Picker.Item label="Add Part" value="new_part" />
+                                    <Picker.Item
+                                        label="Add Part"
+                                        value="new_part"
+                                    />
                                 </Picker>
                             </View>
-                            {partError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{partError}</Text>
-                            }
-                            <View style={{ flexDirection: "row", }}>
+                            {partError?.length > 0 && (
+                                <Text style={styles.errorTextStyle}>
+                                    {partError}
+                                </Text>
+                            )}
+                            <View style={{ flexDirection: "row" }}>
                                 <Button
-                                    style={{ marginTop: 15, flex: 1, marginRight: 10 }}
-                                    mode={'contained'}
+                                    style={{
+                                        marginTop: 15,
+                                        flex: 1,
+                                        marginRight: 10,
+                                    }}
+                                    mode={"contained"}
                                     onPress={() => {
-                                        if(isPart == 0) {
-                                            (setPartError('Please Select Any Part'))
+                                        if (isPart == 0) {
+                                            setPartError(
+                                                "Please Select Any Part"
+                                            );
                                         } else {
-                                            if(firstPartField === false) {
-
+                                            if (firstPartField === false) {
                                                 let parameter = {
-                                                    name: 'partId',
-                                                    value: isPart
+                                                    name: "partId",
+                                                    value: isPart,
                                                 };
-                                                handlePartChange(fieldsParts.length - 1, parameter);
+                                                handlePartChange(
+                                                    fieldsParts.length - 1,
+                                                    parameter
+                                                );
 
                                                 let parameter2 = {
-                                                    name: 'partName',
+                                                    name: "partName",
                                                     value: isPartName,
                                                 };
-                                                handlePartChange(fieldsParts.length - 1, parameter2);
+                                                handlePartChange(
+                                                    fieldsParts.length - 1,
+                                                    parameter2
+                                                );
 
                                                 setFirstPartField(true);
                                                 setIsPart(0);
                                                 setIsPartName(null);
-                                                setPartError('');
+                                                setPartError("");
                                                 setAddPartModal(false);
                                             } else {
                                                 handlePartAdd();
@@ -358,43 +538,66 @@ const PurchaseOrder = ({ route, userToken, navigation }) => {
                                 </Button>
                                 <Button
                                     style={{ marginTop: 15, flex: 1 }}
-                                    mode={'contained'}
+                                    mode={"contained"}
                                     onPress={() => setAddPartModal(false)}
                                 >
                                     Close
                                 </Button>
                             </View>
                         </>
-                    }
+                    )}
                 </Modal>
-                <Modal visible={addNewPartModal} onDismiss={() => { setAddNewPartModal(false); setIsPart(0); }} contentContainerStyle={styles.modalContainerStyle}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Part</Text>
-                    {(isLoading2 == true) ? <ActivityIndicator></ActivityIndicator>
-                    :
+                <Modal
+                    visible={addNewPartModal}
+                    onDismiss={() => {
+                        setAddNewPartModal(false);
+                        setIsPart(0);
+                    }}
+                    contentContainerStyle={styles.modalContainerStyle}
+                >
+                    <Text
+                        style={[
+                            styles.headingStyle,
+                            { marginTop: 0, alignSelf: "center" },
+                        ]}
+                    >
+                        Add New Part
+                    </Text>
+                    {isLoading2 == true ? (
+                        <ActivityIndicator></ActivityIndicator>
+                    ) : (
                         <>
-                            <View style={{ marginVertical: 10,}}>
+                            <View style={{ marginVertical: 10 }}>
                                 <TextInput
                                     mode="outlined"
-                                    label='New Part Name'
+                                    label="New Part Name"
                                     style={styles.modalTextInput}
                                     placeholder="New Part Name"
                                     value={isNewPartName}
                                 />
                             </View>
-                            {partError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{partError}</Text>
-                            }
-                            <View style={{ flexDirection: "row", }}>
+                            {partError?.length > 0 && (
+                                <Text style={styles.errorTextStyle}>
+                                    {partError}
+                                </Text>
+                            )}
+                            <View style={{ flexDirection: "row" }}>
                                 <Button
-                                    style={{ marginTop: 15, flex: 1, marginRight: 10 }}
-                                    mode={'contained'}
-                                     onPress={() => {
-                                        if(newPartError == "") {
-                                            setNewPartError("Please Enter Part Name");
+                                    style={{
+                                        marginTop: 15,
+                                        flex: 1,
+                                        marginRight: 10,
+                                    }}
+                                    mode={"contained"}
+                                    onPress={() => {
+                                        if (newPartError == "") {
+                                            setNewPartError(
+                                                "Please Enter Part Name"
+                                            );
                                         } else {
                                             setAddNewPartModal(false);
-                                            setIsNewPart('');
-                                            setNewPartError('');
+                                            setIsNewPart("");
+                                            setNewPartError("");
                                             addNewPart();
                                         }
                                     }}
@@ -403,66 +606,87 @@ const PurchaseOrder = ({ route, userToken, navigation }) => {
                                 </Button>
                                 <Button
                                     style={{ marginTop: 15, flex: 1 }}
-                                    mode={'contained'}
+                                    mode={"contained"}
                                     onPress={() => setAddNewPartModal(false)}
                                 >
                                     Close
                                 </Button>
                             </View>
                         </>
-                    }
+                    )}
                 </Modal>
 
-                <Modal visible={addNewVendorModal} onDismiss={() => { setAddNewVendorModal(false); setIsVendor(0); }} contentContainerStyle={styles.modalContainerStyle}>
-                    <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Vendor</Text>
-                    {(isLoading2 == true) ? <ActivityIndicator></ActivityIndicator>
-                        :
+                <Modal
+                    visible={addNewVendorModal}
+                    onDismiss={() => {
+                        setAddNewVendorModal(false);
+                        setIsVendor(0);
+                    }}
+                    contentContainerStyle={styles.modalContainerStyle}
+                >
+                    <Text
+                        style={[
+                            styles.headingStyle,
+                            { marginTop: 0, alignSelf: "center" },
+                        ]}
+                    >
+                        Add New Vendor
+                    </Text>
+                    {isLoading2 == true ? (
+                        <ActivityIndicator></ActivityIndicator>
+                    ) : (
                         <>
-                            <View style={{ marginVertical: 10,}}>
+                            <View style={{ marginVertical: 10 }}>
                                 <TextInput
                                     mode="outlined"
-                                    label='New Vendor Name'
+                                    label="New Vendor Name"
                                     style={styles.modalTextInput}
                                     placeholder="New Vendor Name"
                                 />
                             </View>
-                            {vendorError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{vendorError}</Text>
-                            }
-                            <View style={{ flexDirection: "row", }}>
+                            {vendorError?.length > 0 && (
+                                <Text style={styles.errorTextStyle}>
+                                    {vendorError}
+                                </Text>
+                            )}
+                            <View style={{ flexDirection: "row" }}>
                                 <Button
-                                    style={{ marginTop: 15, flex: 1, marginRight: 10 }}
-                                    mode={'contained'}
+                                    style={{
+                                        marginTop: 15,
+                                        flex: 1,
+                                        marginRight: 10,
+                                    }}
+                                    mode={"contained"}
                                     onPress={() => setAddNewVendorModal(false)}
                                 >
                                     Add
                                 </Button>
                                 <Button
                                     style={{ marginTop: 15, flex: 1 }}
-                                    mode={'contained'}
+                                    mode={"contained"}
                                     onPress={() => setAddNewVendorModal(false)}
                                 >
                                     Close
                                 </Button>
                             </View>
                         </>
-                    }
+                    )}
                 </Modal>
             </Portal>
         </View>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     repairOrderField: {
         fontSize: 16,
         color: colors.black,
-        position: 'absolute',
+        position: "absolute",
         marginTop: 15,
         left: 0,
         top: 0,
-        width: '100%',
-        height: '80%',
+        width: "100%",
+        height: "80%",
         zIndex: 2,
     },
     uploadBtn: {
@@ -479,18 +703,18 @@ const styles = StyleSheet.create({
     },
     partNameContent: {
         fontSize: 18,
-        color: colors.black
+        color: colors.black,
     },
     addFieldContainerGroup: {
         marginTop: 10,
         flex: 1,
-        flexDirection: 'column',
+        flexDirection: "column",
         backgroundColor: "#ecf5f9",
         padding: 10,
     },
     addFieldContainer: {
-        flexDirection: 'row',
-        display: 'flex',
+        flexDirection: "row",
+        display: "flex",
         flex: 1,
         marginTop: 15,
     },
@@ -504,22 +728,22 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     removeEntryIconContainer: {
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: "center",
+        alignItems: "center",
         zIndex: 2,
         borderColor: colors.light_gray,
         borderWidth: 1,
         borderRadius: 5,
         backgroundColor: colors.gray,
-        position: 'absolute',
+        position: "absolute",
         top: 10,
         right: 10,
-        },
+    },
     removeEntryIcon: {
         color: colors.white,
     },
     addFieldBtnContainer: {
-        flexDirection: 'row',
+        flexDirection: "row",
     },
     pageContainer: {
         padding: 20,
@@ -532,7 +756,7 @@ const styles = StyleSheet.create({
     headingStyle: {
         fontSize: 20,
         color: colors.black,
-        fontWeight: '500',
+        fontWeight: "500",
     },
     uploadButtonStyle: {
         backgroundColor: "#F3F6F8",
@@ -540,8 +764,8 @@ const styles = StyleSheet.create({
         borderStyle: "dashed",
         borderWidth: 1,
         height: 100,
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: "center",
+        alignItems: "center",
         marginTop: 15,
     },
     dropDownContainer: {
@@ -565,9 +789,9 @@ const styles = StyleSheet.create({
         backgroundColor: "#2196F3",
     },
     modalContainerStyle: {
-        backgroundColor: 'white',
+        backgroundColor: "white",
         padding: 20,
-        marginHorizontal: 30
+        marginHorizontal: 30,
     },
     odometerContainer: {
         textAlign: "center",
@@ -578,7 +802,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         elevation: 1,
         flex: 1,
-        flexDirection: 'row',
+        flexDirection: "row",
         borderColor: colors.black,
         backgroundColor: "#ecf5f9",
         padding: 10,
@@ -586,20 +810,20 @@ const styles = StyleSheet.create({
     cardMainTitle: {
         color: "#000",
         fontSize: 17,
-        fontWeight: '600'
+        fontWeight: "600",
     },
     cardTitle: {
         color: "#000",
         fontSize: 16,
     },
-})
+});
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     userToken: state.user.userToken,
     userRole: state.role.user_role,
     userId: state.user?.user?.id,
     selectedGarageId: state.garage.selected_garage_id,
     garageId: state.garage.garage_id,
-})
+});
 
 export default connect(mapStateToProps)(PurchaseOrder);

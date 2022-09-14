@@ -10,7 +10,7 @@ import { createMaterialTopTabNavigator } from "@react-navigation/material-top-ta
 import { colors } from "../constants";
 import { connect, useSelector, useDispatch } from "react-redux";
 import { signOut as signOutAction } from "../actions/login";
-import MyTabBar from './components/MyTabBar';
+import MyTabBar from "./components/MyTabBar";
 import {
     EditStock,
     AddStock,
@@ -82,8 +82,7 @@ const ServicesStack = ({ navigation }) => {
                             garageId?.length > 1 ? (
                                 <Button
                                     onPress={() =>
-                                        navigation.navigate( "ChooseGarage",
-                                        )
+                                        navigation.navigate("ChooseGarage")
                                     }
                                     style={[
                                         styles.buttonStyle,
@@ -124,7 +123,7 @@ const ServicesStack = ({ navigation }) => {
                             {userRole == "Super Admin" && (
                                 <Button
                                     onPress={() =>
-                              navigation.navigate("AddGarage")
+                                        navigation.navigate("AddGarage")
                                     }
                                     style={styles.buttonStyle}
                                     color={colors.secondary}
@@ -589,11 +588,7 @@ const PartsStack = ({ navigation }) => {
                             }}
                         >
                             <Button
-                                onPress={() =>
-                                    navigation.navigate("PartsStack", {
-                                        screen: "AddStock",
-                                    })
-                                }
+                                onPress={() => navigation.navigate("AddStock")}
                                 style={[
                                     styles.buttonStyle,
                                     { marginRight: 15 },
@@ -1091,46 +1086,47 @@ const InsideCustomerStack = () => {
         //         }}
         //     />
         // </Tab.Navigator>
-      <Tab.Navigator
-        backBehavior={'initialRoute'}
-        screenOptions={{
-          headerShown: false
-        }}
-        tabBarOptions={{
-          keyboardHidesTabBar: true
-        }}
-        tabBar={props => <MyTabBar {...props} />}>
-        <Tab.Screen
-          name="Orders"
-          component={OrderStack}
-          options={({ route }) => {
-            return ({
-              title: 'Orders',
-              icon: 'Orders'
-            })
-          }}
-        />
-        <Tab.Screen
-          name="MyVehicles"
-          component={UserVehicleStack}
-          options={({ route }) => {
-            return ({
-              title: 'Vehicles',
-              icon: 'MyVehicles'
-            })
-          }}
-        />
-        <Tab.Screen
-          name="My Profile"
-          component={AllCustomerStack}
-          options={({ route }) => {
-            return ({
-              title: 'My Profile',
-              icon: 'My Profile'
-            })
-          }}
-        />
-      </Tab.Navigator>
+        <Tab.Navigator
+            backBehavior={"initialRoute"}
+            screenOptions={{
+                headerShown: false,
+            }}
+            tabBarOptions={{
+                keyboardHidesTabBar: true,
+            }}
+            tabBar={(props) => <MyTabBar {...props} />}
+        >
+            <Tab.Screen
+                name="Orders"
+                component={OrderStack}
+                options={({ route }) => {
+                    return {
+                        title: "Orders",
+                        icon: "Orders",
+                    };
+                }}
+            />
+            <Tab.Screen
+                name="MyVehicles"
+                component={UserVehicleStack}
+                options={({ route }) => {
+                    return {
+                        title: "Vehicles",
+                        icon: "MyVehicles",
+                    };
+                }}
+            />
+            <Tab.Screen
+                name="My Profile"
+                component={AllCustomerStack}
+                options={({ route }) => {
+                    return {
+                        title: "My Profile",
+                        icon: "My Profile",
+                    };
+                }}
+            />
+        </Tab.Navigator>
     );
 };
 
@@ -1186,47 +1182,47 @@ const InsideStack = ({ navigation }) => {
         //         })}
         //     />
         // </Tab.Navigator>
-      <Tab.Navigator
-        backBehavior={'initialRoute'}
-        screenOptions={{
-          headerShown: false
-        }}
-        tabBarOptions={{
-          keyboardHidesTabBar: true
-        }}
-        tabBar={props => <MyTabBar {...props} />}>
-        <Tab.Screen
-              name="Service"
-               component={ServicesStack}
-          options={({ route }) => {
-            return ({
-              title: 'Service',
-              icon: 'Service'
-            })
-          }}
-        />
-        <Tab.Screen
-          name="Parts"
-          component={PartsStack}
-          options={({ route }) => {
-            return ({
-              title: 'Parts',
-              icon: 'Parts'
-            })
-          }}
-        />
-        <Tab.Screen
-          name="More"
-            component={AllStack}
-          options={({ route }) => {
-            return ({
-              title: 'More',
-              icon: 'More'
-            })
-          }}
-        />
-      </Tab.Navigator>
-    
+        <Tab.Navigator
+            backBehavior={"initialRoute"}
+            screenOptions={{
+                headerShown: false,
+            }}
+            tabBarOptions={{
+                keyboardHidesTabBar: true,
+            }}
+            tabBar={(props) => <MyTabBar {...props} />}
+        >
+            <Tab.Screen
+                name="Service"
+                component={ServicesStack}
+                options={({ route }) => {
+                    return {
+                        title: "Service",
+                        icon: "Service",
+                    };
+                }}
+            />
+            <Tab.Screen
+                name="Parts"
+                component={PartsStack}
+                options={({ route }) => {
+                    return {
+                        title: "Parts",
+                        icon: "Parts",
+                    };
+                }}
+            />
+            <Tab.Screen
+                name="More"
+                component={AllStack}
+                options={({ route }) => {
+                    return {
+                        title: "More",
+                        icon: "More",
+                    };
+                }}
+            />
+        </Tab.Navigator>
     );
 };
 

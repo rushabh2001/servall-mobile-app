@@ -1379,15 +1379,10 @@ const AddRepairOrderStep2 = ({
                     <ActivityIndicator></ActivityIndicator>
                 ) : (
                     <InputScrollView
-                        ref={scroll1Ref}
-                        contentContainerStyle={{
-                            flexGrow: 1,
-                            justifyContent: "center",
-                        }}
-                        keyboardShouldPersistTaps={"handled"}
+                        keyboardOffset={200}
+                        behavior={Platform.OS === "ios" ? "padding" : "height"}
+                        keyboardShouldPersistTaps={"always"}
                         showsVerticalScrollIndicator={false}
-                        scrollEventThrottle={8}
-                        behavior="padding"
                     >
                         <View style={{ flex: 1 }}>
                             {(userRole == "Super Admin" ||
@@ -2254,6 +2249,7 @@ const AddRepairOrderStep2 = ({
                                             </>
                                         )}
                                         data={filteredInsuranceProviderData}
+                                        showsVerticalScrollIndicator={false}
                                         // onEndReachedThreshold={1}
                                         style={{
                                             borderColor: "#0000000a",
@@ -2299,6 +2295,10 @@ const AddRepairOrderStep2 = ({
                                                         setInsuranceProviderListModal(
                                                             false
                                                         );
+                                                        setSearchQueryForInsuranceProviders(
+                                                            ""
+                                                        );
+                                                        searchFilterForInsuranceProviders();
                                                     }}
                                                 />
                                             </>
@@ -2463,6 +2463,7 @@ const AddRepairOrderStep2 = ({
                             // setIsUser();
                             // setIsUserName("");
                             // setUserError("");
+                            onUserRefresh();
                             setSearchQueryForUsers("");
                             searchFilterForUsers();
                         }}
@@ -2494,6 +2495,7 @@ const AddRepairOrderStep2 = ({
                                 // setIsUser();
                                 // setIsUserName("");
                                 // setUserError("");
+                                onUserRefresh();
                                 setSearchQueryForUsers("");
                                 searchFilterForUsers();
                             }}
@@ -2527,6 +2529,7 @@ const AddRepairOrderStep2 = ({
                                             activeUnderlineColor={
                                                 colors.transparent
                                             }
+                                            selectionColor="black"
                                             underlineColor={colors.transparent}
                                             style={{
                                                 elevation: 4,
@@ -2594,6 +2597,7 @@ const AddRepairOrderStep2 = ({
                                         data={filteredUserData}
                                         onEndReached={getUserList}
                                         onEndReachedThreshold={0.5}
+                                        showsVerticalScrollIndicator={false}
                                         refreshControl={
                                             <RefreshControl
                                                 refreshing={userRefreshing}
@@ -2635,6 +2639,7 @@ const AddRepairOrderStep2 = ({
                                                     setIsUser(item.id);
                                                     setUserError("");
                                                     setUserListModal(false);
+                                                    onUserRefresh();
                                                     // searchFilterForUsers('');
                                                 }}
                                             />
@@ -2671,6 +2676,7 @@ const AddRepairOrderStep2 = ({
                             // setIsGarageId(0);
                             // setIsGarageName("");
                             // setGarageError("");
+                            onGarageRefresh();
                             setSearchQueryForGarages("");
                             searchFilterForGarages();
                         }}
@@ -2701,6 +2707,7 @@ const AddRepairOrderStep2 = ({
                                 setGarageListModal(false);
                                 setSearchQueryForGarages("");
                                 searchFilterForGarages();
+                                onGarageRefresh();
                             }}
                         />
                         {isLoadingGarageList == true ? (
@@ -2733,6 +2740,7 @@ const AddRepairOrderStep2 = ({
                                             activeUnderlineColor={
                                                 colors.transparent
                                             }
+                                            selectionColor="black"
                                             underlineColor={colors.transparent}
                                             style={{
                                                 elevation: 4,
@@ -2796,6 +2804,7 @@ const AddRepairOrderStep2 = ({
                                             filteredGarageData?.length > 9 &&
                                             getGarageList
                                         }
+                                        showsVerticalScrollIndicator={false}
                                         onEndReachedThreshold={0.5}
                                         refreshControl={
                                             <RefreshControl
@@ -2842,6 +2851,7 @@ const AddRepairOrderStep2 = ({
                                                     setIsGarageId(item.id);
                                                     setGarageError("");
                                                     setGarageIdError("");
+                                                    onGarageRefresh();
                                                     setGarageListModal(false);
                                                 }}
                                             />
@@ -2880,6 +2890,7 @@ const AddRepairOrderStep2 = ({
                             // setBrandError("");
                             setSearchQueryForBrands("");
                             searchFilterForBrands();
+                            onBrandRefresh();
                             // setModelFieldToggle(false);
                         }}
                         contentContainerStyle={[
@@ -2904,6 +2915,7 @@ const AddRepairOrderStep2 = ({
                                 // setBrandError("");
                                 setSearchQueryForBrands("");
                                 searchFilterForBrands();
+                                onBrandRefresh();
                                 // setModelFieldToggle(false);
                             }}
                         />
@@ -2945,6 +2957,7 @@ const AddRepairOrderStep2 = ({
                                             activeUnderlineColor={
                                                 colors.transparent
                                             }
+                                            selectionColor="black"
                                             underlineColor={colors.transparent}
                                             style={{
                                                 elevation: 4,
@@ -3008,6 +3021,7 @@ const AddRepairOrderStep2 = ({
                                             filteredBrandData?.length > 9 &&
                                             getBrandList
                                         }
+                                        showsVerticalScrollIndicator={false}
                                         onEndReachedThreshold={0.5}
                                         refreshControl={
                                             <RefreshControl
@@ -3051,6 +3065,7 @@ const AddRepairOrderStep2 = ({
                                                     setIsBrandName(item.name);
                                                     setIsBrand(item.id);
                                                     setBrandError("");
+                                                    onBrandRefresh();
                                                     setBrandListModal(false);
                                                 }}
                                             />
@@ -3122,6 +3137,7 @@ const AddRepairOrderStep2 = ({
                             // setIsModel(0);
                             // setIsModelName("");
                             // setModelError("");
+                            onModelRefresh();
                             setSearchQueryForModels("");
                             searchFilterForModels();
                         }}
@@ -3153,6 +3169,7 @@ const AddRepairOrderStep2 = ({
                                 // setIsModel(0);
                                 // setIsModelName("");
                                 // setModelError("");
+                                onModelRefresh();
                                 setSearchQueryForModels("");
                                 searchFilterForModels();
                             }}
@@ -3187,6 +3204,7 @@ const AddRepairOrderStep2 = ({
                                             activeUnderlineColor={
                                                 colors.transparent
                                             }
+                                            selectionColor="black"
                                             underlineColor={colors.transparent}
                                             style={{
                                                 elevation: 4,
@@ -3250,6 +3268,7 @@ const AddRepairOrderStep2 = ({
                                             filteredModelData?.length > 9 &&
                                             getModelList
                                         }
+                                        showsVerticalScrollIndicator={false}
                                         onEndReachedThreshold={0.5}
                                         refreshControl={
                                             <RefreshControl
@@ -3295,6 +3314,7 @@ const AddRepairOrderStep2 = ({
                                                     );
                                                     setIsModel(item.id);
                                                     setModelError("");
+                                                    onModelRefresh();
                                                     setModelListModal(false);
                                                 }}
                                             />
@@ -3433,6 +3453,7 @@ const AddRepairOrderStep2 = ({
                                                 <Divider />
                                             </>
                                         )}
+                                        showsVerticalScrollIndicator={false}
                                         data={filteredStateData}
                                         style={{
                                             borderColor: "#0000000a",
@@ -3465,6 +3486,8 @@ const AddRepairOrderStep2 = ({
                                                     setIsStateName(item.name);
                                                     setIsState(item.id);
                                                     setStateError("");
+                                                    setSearchQueryForStates("");
+                                                    searchFilterForStates();
                                                     setStateListModal(false);
                                                 }}
                                             />
@@ -3566,6 +3589,7 @@ const AddRepairOrderStep2 = ({
                                                 <Divider />
                                             </>
                                         )}
+                                        showsVerticalScrollIndicator={false}
                                         data={filteredCityData}
                                         style={{
                                             borderColor: "#0000000a",
@@ -3602,6 +3626,10 @@ const AddRepairOrderStep2 = ({
                                                         );
                                                         setIsCity(item.id);
                                                         setCityError("");
+                                                        setSearchQueryForCity(
+                                                            ""
+                                                        );
+                                                        searchFilterForCity();
                                                         setCityListModal(false);
                                                     }}
                                                 />

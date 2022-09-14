@@ -1,33 +1,56 @@
-import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Keyboard } from 'react-native';
-import { Portal, Button, TextInput } from 'react-native-paper';
-import { connect } from 'react-redux';
-import { colors } from '../constants';
-import { API_URL } from '../constants/config';
-import InputScrollView from 'react-native-input-scroll-view';
+import React, { useRef, useState } from "react";
+import {
+    View,
+    Text,
+    StyleSheet,
+    ActivityIndicator,
+    Keyboard,
+} from "react-native";
+import { Portal, Button, TextInput } from "react-native-paper";
+import { connect } from "react-redux";
+import { colors } from "../constants";
+import { API_URL } from "../constants/config";
+import InputScrollView from "react-native-input-scroll-view";
 
-const EditStock = ({ navigation, userRole, userId, userToken, route, garageId, selectedGarageId, selectedGarage, user }) => {
-
+const EditStock = ({
+    navigation,
+    userRole,
+    userId,
+    userToken,
+    route,
+    garageId,
+    selectedGarageId,
+    selectedGarage,
+    user,
+}) => {
     // User / Customer Fields
     const [isPart, setIsPart] = useState(route?.params?.data?.parts?.id);
-    const [isPartName, setIsPartName] = useState(route?.params?.data?.parts?.name);
+    const [isPartName, setIsPartName] = useState(
+        route?.params?.data?.parts?.name
+    );
     const [isStockId, setIsStockId] = useState(route?.params?.data?.id);
     const [isPrice, setIsPrice] = useState(route?.params?.data?.purchase_price);
     const [isMRP, setIsMRP] = useState(route?.params?.data?.mrp);
-    const [isCurrentStock, setIsCurrentStock] = useState(route?.params?.data?.current_stock);
-    const [isMinStock, setIsMinStock] = useState(route?.params?.data?.min_stock);
-    const [isMaxStock, setIsMaxStock] = useState(route?.params?.data?.max_stock);
+    const [isCurrentStock, setIsCurrentStock] = useState(
+        route?.params?.data?.current_stock
+    );
+    const [isMinStock, setIsMinStock] = useState(
+        route?.params?.data?.min_stock
+    );
+    const [isMaxStock, setIsMaxStock] = useState(
+        route?.params?.data?.max_stock
+    );
     const [isRackId, setIsRackId] = useState(route?.params?.data?.rack_id);
     const [isComment, setIsComment] = useState(route?.params?.data?.comment);
-    
+
     // Error States
-    const [priceError, setPriceError] = useState('');    
-    const [mrpError, setMrpError] = useState('');
-    const [currentStockError, setCurrentStockError] = useState('');
-    const [minStockError, setMinStockError] = useState('');
-    const [maxStockError, setMaxStockError] = useState('');
-    const [rackIdError, setAddressError] = useState('');
-    const [commentError, setCommentError] = useState('');
+    const [priceError, setPriceError] = useState("");
+    const [mrpError, setMrpError] = useState("");
+    const [currentStockError, setCurrentStockError] = useState("");
+    const [minStockError, setMinStockError] = useState("");
+    const [maxStockError, setMaxStockError] = useState("");
+    const [rackIdError, setAddressError] = useState("");
+    const [commentError, setCommentError] = useState("");
 
     // Vendor Fields
     // const [isVendor, setIsVendor] = useState();
@@ -40,117 +63,175 @@ const EditStock = ({ navigation, userRole, userId, userToken, route, garageId, s
 
     // States for Garage Dropdown
     const [isGarage, setIsGarage] = useState(route?.params?.data?.garage?.id);
-    const [isGarageName, setIsGarageName] = useState(!route?.params?.data?.garage?.garage_name ? "" : route?.params?.data?.garage?.garage_name);
+    const [isGarageName, setIsGarageName] = useState(
+        !route?.params?.data?.garage?.garage_name
+            ? ""
+            : route?.params?.data?.garage?.garage_name
+    );
     const [garageError, setGarageError] = useState();
-  
+
     const [isLoading, setIsLoading] = useState(false);
     const scroll1Ref = useRef();
 
     const validate = () => {
         return !(
-            !isPart || isPart === 0 ||
-            !isPrice || isPrice?.trim().length === 0 ||
-            !isCurrentStock || isCurrentStock?.trim().length === 0 ||
-            !isMRP || isMRP?.trim().length === 0 ||
-            !isRackId || isRackId?.trim().length === 0 ||
-            !isMinStock || isMinStock?.trim().length === 0 ||
-            !isMaxStock || isMaxStock?.trim().length === 0 ||
+            !isPart ||
+            isPart === 0 ||
+            !isPrice ||
+            isPrice?.trim().length === 0 ||
+            !isCurrentStock ||
+            isCurrentStock?.trim().length === 0 ||
+            !isMRP ||
+            isMRP?.trim().length === 0 ||
+            !isRackId ||
+            isRackId?.trim().length === 0 ||
+            !isMinStock ||
+            isMinStock?.trim().length === 0 ||
+            !isMaxStock ||
+            isMaxStock?.trim().length === 0 ||
             // !isVendor || isVendor === 0 ||
-            !isGarage || isGarage === 0 
-        )
-    }
+            !isGarage ||
+            isGarage === 0
+        );
+    };
 
     const submit = () => {
         Keyboard.dismiss();
         if (!validate()) {
-            if (!isPart) setPartError("Part is required"); else setPartError('');
-            if (!isPrice) setPriceError("Price is required"); else setPriceError('');
-            if (!isMRP) setMrpError("MRP is required"); else setMrpError('');
-            if (!isRackId) setRackIdError("Rack ID is required"); else setRackIdError('');
-            if (!isCurrentStock) setCurrentStockError("Current Stock is required"); else setCurrentStockError('');
-            if (!isMinStock) setMinStockError("Minimum Stock is required"); else setMinStockError('');
-            if (!isMaxStock) setMaxStockError("Maximum Stock is required"); else setMaxStockError('');
+            if (!isPrice) setIsPrice("");
+            if (!isMRP) setIsMRP("");
+            if (!isRackId) setIsRackId("");
+            if (!isCurrentStock) setIsCurrentStock("");
+            if (!isMinStock) setIsMinStock("");
+            if (!isMaxStock) setIsMaxStock("");
+            // if (!isPart) setPartError("Part is required");
+            // else setPartError("");
+            // if (!isPrice) setPriceError("Price is required");
+            // else setPriceError("");
+            // if (!isMRP) setMrpError("MRP is required");
+            // else setMrpError("");
+            // if (!isRackId) setRackIdError("Rack ID is required");
+            // else setRackIdError("");
+            // if (!isCurrentStock)
+            //     setCurrentStockError("Current Stock is required");
+            // else setCurrentStockError("");
+            // if (!isMinStock) setMinStockError("Minimum Stock is required");
+            // else setMinStockError("");
+            // if (!isMaxStock) setMaxStockError("Maximum Stock is required");
+            // else setMaxStockError("");
             // if (!isVendor || isVendor === 0) setVendorError('Brand is required'); else setVendorError('');
-            if (!isGarage || isGarage == 0) setGarageError("Customer Belongs to Garage Field is required"); else setGarageError('');
+            if (!isGarage || isGarage == 0)
+                setGarageError("Customer Belongs to Garage Field is required");
+            else setGarageError("");
             return;
         }
 
         const data = {
-            'parts_id': isPart,
-            'garage_id': isGarage,
+            parts_id: isPart,
+            garage_id: isGarage,
             // 'vendor_id': isVendor,
-            'purchase_price': isPrice?.trim(),
-            'mrp': isMRP?.trim(),
-            'rack_id': isRackId?.trim(),
-            'current_stock': isCurrentStock?.trim(),
-            'min_stock': isMinStock?.trim(),
-            'max_stock': isMaxStock?.trim(),
-            'comment': isComment?.trim(),
-        }
+            purchase_price: isPrice?.trim(),
+            mrp: isMRP?.trim(),
+            rack_id: isRackId?.trim(),
+            current_stock: isCurrentStock?.trim(),
+            min_stock: isMinStock?.trim(),
+            max_stock: isMaxStock?.trim(),
+            comment: isComment?.trim(),
+        };
 
-        addStock(data); 
-    }
+        addStock(data);
+    };
 
     const addStock = async (data) => {
         try {
             const res = await fetch(`${API_URL}add_inventory`, {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + userToken
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(data),
             });
             const json = await res.json();
             if (json !== undefined) {
                 console.log(json);
-                navigation.navigate('Parts');
+                navigation.navigate("Parts");
             }
         } catch (e) {
             console.log(e);
         }
-    }
+    };
 
     return (
         <View style={{ flex: 1 }}>
             <View style={{ marginBottom: 35 }}>
-                { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
+                {selectedGarageId == 0 ? (
+                    <Text style={styles.garageNameTitle}>
+                        All Garages - {user.name}
+                    </Text>
+                ) : (
+                    <Text style={styles.garageNameTitle}>
+                        {selectedGarage?.garage_name} - {user.name}
+                    </Text>
+                )}
             </View>
             <View style={styles.pageContainer}>
-                {isLoading == true ? <ActivityIndicator></ActivityIndicator> :
+                {isLoading == true ? (
+                    <ActivityIndicator></ActivityIndicator>
+                ) : (
                     <InputScrollView
                         ref={scroll1Ref}
-                        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
-                        keyboardShouldPersistTaps={'handled'}
+                        contentContainerStyle={{
+                            flexGrow: 1,
+                            justifyContent: "center",
+                        }}
+                        keyboardOffset={200}
+                        behavior={Platform.OS === "ios" ? "padding" : "height"}
+                        keyboardShouldPersistTaps={"always"}
                         showsVerticalScrollIndicator={false}
-                        scrollEventThrottle={8}
-                        behavior="padding"
                     >
                         <View style={{ flex: 1 }}>
-                            <Text style={[styles.headingStyle, { marginTop: 20 }]}>Stock Details:</Text>
+                            <Text
+                                style={[styles.headingStyle, { marginTop: 20 }]}
+                            >
+                                Stock Details:
+                            </Text>
 
-                            {(userRole == "Super Admin" || garageId?.length > 1) &&
+                            {(userRole == "Super Admin" ||
+                                garageId?.length > 1) && (
                                 <View>
                                     <TextInput
                                         mode="outlined"
-                                        label='Garage'
-                                        style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                        label="Garage"
+                                        style={{
+                                            marginTop: 10,
+                                            backgroundColor: "#f1f1f1",
+                                            width: "100%",
+                                        }}
                                         placeholder="Select Garage"
                                         value={isGarageName}
-                                        right={<TextInput.Icon name="menu-down" />}
+                                        right={
+                                            <TextInput.Icon name="menu-down" />
+                                        }
                                         disabled={true}
                                     />
-                                    {garageError?.length > 0 &&
-                                        <Text style={styles.errorTextStyle}>{garageError}</Text>
-                                    }
+                                    {garageError?.length > 0 && (
+                                        <Text style={styles.errorTextStyle}>
+                                            {garageError}
+                                        </Text>
+                                    )}
                                 </View>
-                            }
-                            
+                            )}
+
                             <TextInput
                                 mode="outlined"
-                                label='Part'
-                                style={{marginTop: 10, backgroundColor: '#f1f1f1', width:'100%' }}
+                                label="Part"
+                                style={{
+                                    marginTop: 10,
+                                    backgroundColor: "#f1f1f1",
+                                    width: "100%",
+                                }}
                                 placeholder="Select Part"
                                 value={isPartName}
                                 right={<TextInput.Icon name="menu-down" />}
@@ -159,85 +240,97 @@ const EditStock = ({ navigation, userRole, userId, userToken, route, garageId, s
 
                             <TextInput
                                 mode="outlined"
-                                label='Purchase Price (Without GST)'
+                                label="Purchase Price (Without GST)"
                                 style={styles.input}
                                 placeholder="Purchase Price (Without GST)"
                                 value={isPrice}
                                 onChangeText={(text) => setIsPrice(text)}
                                 keyboardType={"phone-pad"}
                             />
-                            {priceError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{priceError}</Text>
-                            }
+                            {isPrice?.trim()?.length === 0 ? (
+                                <Text style={styles.errorTextStyle}>
+                                    Purchase Price is required.
+                                </Text>
+                            ) : null}
 
                             <TextInput
                                 mode="outlined"
-                                label='MRP'
+                                label="MRP"
                                 style={styles.input}
                                 placeholder="MRP"
                                 value={isMRP}
                                 onChangeText={(text) => setIsMRP(text)}
                                 keyboardType={"phone-pad"}
                             />
-                            {mrpError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{mrpError}</Text>
-                            }
+                            {isMRP?.trim()?.length === 0 ? (
+                                <Text style={styles.errorTextStyle}>
+                                    MRP is required.
+                                </Text>
+                            ) : null}
 
                             <TextInput
                                 mode="outlined"
-                                label='Rack ID'
+                                label="Rack ID"
                                 style={styles.input}
                                 placeholder="Rack ID"
                                 value={isRackId}
                                 onChangeText={(text) => setIsRackId(text)}
                                 keyboardType={"phone-pad"}
                             />
-                            {rackIdError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{rackIdError}</Text>
-                            }
+                            {isRackId?.trim()?.length === 0 ? (
+                                <Text style={styles.errorTextStyle}>
+                                    Rack ID is required.
+                                </Text>
+                            ) : null}
 
                             <TextInput
                                 mode="outlined"
-                                label='Current Stock'
+                                label="Current Stock"
                                 style={styles.input}
                                 placeholder="Current Stock"
                                 value={isCurrentStock}
                                 onChangeText={(text) => setIsCurrentStock(text)}
                                 keyboardType={"phone-pad"}
                             />
-                            {currentStockError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{currentStockError}</Text>
-                            }
+                            {isCurrentStock?.trim()?.length === 0 ? (
+                                <Text style={styles.errorTextStyle}>
+                                    Current Stock is required.
+                                </Text>
+                            ) : null}
 
                             <TextInput
                                 mode="outlined"
-                                label='Minimum Stock'
+                                label="Minimum Stock"
                                 style={styles.input}
                                 placeholder="Minimum Stock"
                                 value={isMinStock}
                                 onChangeText={(text) => setIsMinStock(text)}
                                 keyboardType={"phone-pad"}
                             />
-                            {minStockError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{minStockError}</Text>
-                            }
+                            {isMinStock?.trim()?.length === 0 ? (
+                                <Text style={styles.errorTextStyle}>
+                                    Minimum Stock is required.
+                                </Text>
+                            ) : null}
 
                             <TextInput
                                 mode="outlined"
-                                label='Maximum Stock'
+                                label="Maximum Stock"
                                 style={styles.input}
                                 placeholder="Maximum Stock"
                                 value={isMaxStock}
                                 onChangeText={(text) => setIsMaxStock(text)}
                                 keyboardType={"phone-pad"}
                             />
-                            {maxStockError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{maxStockError}</Text>
-                            }
+                            {isMaxStock?.trim()?.length === 0 ? (
+                                <Text style={styles.errorTextStyle}>
+                                    Maximum Stock is required.
+                                </Text>
+                            ) : null}
 
                             <TextInput
                                 mode="outlined"
-                                label='Comment'
+                                label="Comment"
                                 style={styles.input}
                                 placeholder="Comment"
                                 value={isComment}
@@ -245,62 +338,59 @@ const EditStock = ({ navigation, userRole, userId, userToken, route, garageId, s
                                 numberOfLines={3}
                                 multiline={true}
                             />
-                            {commentError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{commentError}</Text>
-                            }
+                            {commentError?.length > 0 && (
+                                <Text style={styles.errorTextStyle}>
+                                    {commentError}
+                                </Text>
+                            )}
 
-                        
-                
                             <Button
                                 style={{ marginTop: 15 }}
-                                mode={'contained'}
+                                mode={"contained"}
                                 onPress={submit}
                             >
                                 Update
                             </Button>
-                        
                         </View>
                     </InputScrollView>
-                }
+                )}
             </View>
         </View>
-    )
-}
-
-
+    );
+};
 
 const styles = StyleSheet.create({
     garageNameTitle: {
-        textAlign: 'center', 
-        fontSize: 17, 
-        fontWeight: '500', 
-        color: colors.white, 
-        paddingVertical: 7, 
+        textAlign: "center",
+        fontSize: 17,
+        fontWeight: "500",
+        color: colors.white,
+        paddingVertical: 7,
         backgroundColor: colors.secondary,
-        position: 'absolute',
+        position: "absolute",
         top: 0,
         zIndex: 5,
-        width: '100%',
+        width: "100%",
         flex: 1,
-        left: 0, 
-        right: 0
+        left: 0,
+        right: 0,
     },
     garageDropDownField: {
         fontSize: 16,
         color: colors.black,
-        position: 'absolute',
+        position: "absolute",
         marginTop: 15,
         left: 0,
         top: 0,
-        width: '100%',
-        height: '80%',
+        width: "100%",
+        height: "80%",
         zIndex: 2,
     },
     pageContainer: {
         padding: 20,
         flex: 1,
         backgroundColor: colors.white,
-        justifyContent: 'center',
+        justifyContent: "center",
     },
     input: {
         marginTop: 20,
@@ -309,7 +399,7 @@ const styles = StyleSheet.create({
     headingStyle: {
         fontSize: 20,
         color: colors.black,
-        fontWeight: '500',
+        fontWeight: "500",
     },
     dropDownContainer: {
         borderWidth: 1,
@@ -332,13 +422,13 @@ const styles = StyleSheet.create({
         backgroundColor: "#2196F3",
     },
     modalContainerStyle: {
-        backgroundColor: 'white',
+        backgroundColor: "white",
         padding: 20,
-        marginHorizontal: 30
+        marginHorizontal: 30,
     },
-})
+});
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     userToken: state.user.userToken,
     userRole: state.role.user_role,
     userId: state.user?.user?.id,
@@ -346,6 +436,6 @@ const mapStateToProps = state => ({
     user: state.user.user,
     selectedGarageId: state.garage.selected_garage_id,
     selectedGarage: state.garage.selected_garage,
-})
+});
 
 export default connect(mapStateToProps)(EditStock);

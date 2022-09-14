@@ -1,26 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
-import { Modal, Portal, Button, TextInput } from 'react-native-paper';
-import { connect } from 'react-redux';
-import { colors } from '../constants';
-import { API_URL } from '../constants/config';
+import React, { useState, useEffect } from "react";
+import {
+    View,
+    Text,
+    StyleSheet,
+    ActivityIndicator,
+    TouchableOpacity,
+} from "react-native";
+import { Modal, Portal, Button, TextInput } from "react-native-paper";
+import { connect } from "react-redux";
+import { colors } from "../constants";
+import { API_URL } from "../constants/config";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import InputScrollView from 'react-native-input-scroll-view';
-import { Picker } from '@react-native-picker/picker';
-import moment from 'moment';
+import InputScrollView from "react-native-input-scroll-view";
+import { Picker } from "@react-native-picker/picker";
+import moment from "moment";
 
 // Step - 2 for Repair Order
-const CounterSaleStep2 = ({ route, userToken, selectedGarageId, selectedGarage, user }) => {
-
+const CounterSaleStep2 = ({
+    route,
+    userToken,
+    selectedGarageId,
+    selectedGarage,
+    user,
+}) => {
     // User / Customer Fields
     const [isUserId, setIsUserId] = useState(route?.params?.data?.user_id);
     const [isName, setIsName] = useState(route?.params?.data?.name);
     const [isEmail, setIsEmail] = useState(route?.params?.data?.email);
-    const [isPhoneNumber, setIsPhoneNumber] = useState(route?.params?.data?.phone_number);
+    const [isPhoneNumber, setIsPhoneNumber] = useState(
+        route?.params?.data?.phone_number
+    );
 
     // Vehicle Fields
-    const [isPart, setIsPart] = useState('');
-    const [isService, setIsService] = useState('');
+    const [isPart, setIsPart] = useState("");
+    const [isService, setIsService] = useState("");
 
     const [isLoading, setIsLoading] = useState(false);
     const [isLoading2, setIsLoading2] = useState(true);
@@ -43,26 +56,51 @@ const CounterSaleStep2 = ({ route, userToken, selectedGarageId, selectedGarage, 
     const [isTotalServiceDiscount, setIsTotalServiceDiscount] = useState(0);
     const [isTotalPartDiscount, setIsTotalPartDiscount] = useState(0);
 
-    const [fields, setFields] = useState([{ serviceName: null, rate: null, quantity: 0, discount: 0, applicableDiscountForItem: 0, totalForThisService: 0 }]);
-    const [fieldsParts, setFieldsParts] = useState([{ serviceName: null, rate: null, quantity: 0, discount: 0, applicableDiscountForItem: 0, totalForThisService: 0 }]);
+    const [fields, setFields] = useState([
+        {
+            serviceName: null,
+            rate: null,
+            quantity: 0,
+            discount: 0,
+            applicableDiscountForItem: 0,
+            totalForThisService: 0,
+        },
+    ]);
+    const [fieldsParts, setFieldsParts] = useState([
+        {
+            serviceName: null,
+            rate: null,
+            quantity: 0,
+            discount: 0,
+            applicableDiscountForItem: 0,
+            totalForThisService: 0,
+        },
+    ]);
 
     function handleServiceChange(i, value) {
         const values = [...fields];
         values[i][value.name] = value.value;
-        values[i]['totalForThisService'] = (values[i]['rate'] * values[i]['quantity']) - ((values[i]['rate'] * values[i]['quantity']) * (values[i]['discount'] / 100))
+        values[i]["totalForThisService"] =
+            values[i]["rate"] * values[i]["quantity"] -
+            values[i]["rate"] *
+                values[i]["quantity"] *
+                (values[i]["discount"] / 100);
         setFields(values);
-        serviceTotals[i] = values[i]['totalForThisService'];
+        serviceTotals[i] = values[i]["totalForThisService"];
 
         let total = 0;
-        values.forEach(item => {
+        values.forEach((item) => {
             total += item.totalForThisService;
         });
         setServicesTotal(total);
         setIsTotal(total + partsTotal);
 
-        values[i]['applicableDiscountForItem'] = (values[i]['rate'] * values[i]['quantity']) * (values[i]['discount'] / 100);
+        values[i]["applicableDiscountForItem"] =
+            values[i]["rate"] *
+            values[i]["quantity"] *
+            (values[i]["discount"] / 100);
         let discountTotal = 0;
-        values.forEach(item => {
+        values.forEach((item) => {
             discountTotal += item.applicableDiscountForItem;
         });
         setIsTotalServiceDiscount(discountTotal);
@@ -71,7 +109,14 @@ const CounterSaleStep2 = ({ route, userToken, selectedGarageId, selectedGarage, 
 
     function handleServiceAdd() {
         const values = [...fields];
-        values.push({ serviceName: null, rate: null, quantity: 0, discount: 0, applicableDiscountForItem: 0, totalForThisService: 0 });
+        values.push({
+            serviceName: null,
+            rate: null,
+            quantity: 0,
+            discount: 0,
+            applicableDiscountForItem: 0,
+            totalForThisService: 0,
+        });
         setFields(values);
     }
 
@@ -87,22 +132,29 @@ const CounterSaleStep2 = ({ route, userToken, selectedGarageId, selectedGarage, 
 
         // Calculation of Specific Part's total
         partValues[i][value.name] = value.value;
-        partValues[i]['totalForThisService'] = (partValues[i]['rate'] * partValues[i]['quantity']) - ((partValues[i]['rate'] * partValues[i]['quantity']) * (partValues[i]['discount'] / 100))
+        partValues[i]["totalForThisService"] =
+            partValues[i]["rate"] * partValues[i]["quantity"] -
+            partValues[i]["rate"] *
+                partValues[i]["quantity"] *
+                (partValues[i]["discount"] / 100);
         setFieldsParts(partValues);
-        partTotals[i] = partValues[i]['totalForThisService'];
+        partTotals[i] = partValues[i]["totalForThisService"];
 
         // Calculation of Total of all Parts
         let total = 0;
-        partValues.forEach(item => {
+        partValues.forEach((item) => {
             total += item.totalForThisService;
         });
         setPartsTotal(total);
 
         // Calculate Total of Order
         setIsTotal(total + servicesTotal);
-        partValues[i]['applicableDiscountForItem'] = (partValues[i]['rate'] * partValues[i]['quantity']) * (partValues[i]['discount'] / 100);
+        partValues[i]["applicableDiscountForItem"] =
+            partValues[i]["rate"] *
+            partValues[i]["quantity"] *
+            (partValues[i]["discount"] / 100);
         let discountTotal = 0;
-        partValues.forEach(item => {
+        partValues.forEach((item) => {
             discountTotal += item.applicableDiscountForItem;
         });
 
@@ -113,7 +165,14 @@ const CounterSaleStep2 = ({ route, userToken, selectedGarageId, selectedGarage, 
 
     function handlePartAdd() {
         const partValues = [...fieldsParts];
-        partValues.push({ serviceName: null, rate: null, quantity: null, discount: 0, applicableDiscount: 0, totalForThisService: null });
+        partValues.push({
+            serviceName: null,
+            rate: null,
+            quantity: null,
+            discount: 0,
+            applicableDiscount: 0,
+            totalForThisService: null,
+        });
         setFieldsParts(partValues);
     }
 
@@ -126,7 +185,9 @@ const CounterSaleStep2 = ({ route, userToken, selectedGarageId, selectedGarage, 
     const changeEstimateDeliverySelectedDate = (event, selectedDate) => {
         if (selectedDate != null) {
             let currentDate = selectedDate;
-            let formattedDate = moment(currentDate, 'YYYY MMMM D', true).format('DD-MM-YYYY');
+            let formattedDate = moment(currentDate, "YYYY MMMM D", true).format(
+                "DD-MM-YYYY"
+            );
             setDisplayDeliveryDateCalender(false);
             let formattedDate2 = new Date(currentDate);
             setIsDeliveryDate(formattedDate2);
@@ -138,10 +199,13 @@ const CounterSaleStep2 = ({ route, userToken, selectedGarageId, selectedGarage, 
     const changeSelectedTime = (event, selectedTime) => {
         if (selectedTime != null) {
             let currentTime = selectedTime;
-            let convertToTime = moment(currentTime, 'YYYY-MM-DD"T"hh:mm ZZ').format('hh:mm A');
-            var formattedDate = isDeliveryDate1 + ' ' + convertToTime;
+            let convertToTime = moment(
+                currentTime,
+                'YYYY-MM-DD"T"hh:mm ZZ'
+            ).format("hh:mm A");
+            var formattedDate = isDeliveryDate1 + " " + convertToTime;
             setDisplayDeliveryTimeClock(false);
-            setEstimateDeliveryDateTime(formattedDate);            
+            setEstimateDeliveryDateTime(formattedDate);
             setIsDeliveryTime(new Date(currentTime));
         }
     };
@@ -150,11 +214,11 @@ const CounterSaleStep2 = ({ route, userToken, selectedGarageId, selectedGarage, 
     const getPartList = async () => {
         try {
             const res = await fetch(`${API_URL}fetch_parts`, {
-                method: 'GET',
+                method: "GET",
                 headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + userToken
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + userToken,
                 },
             });
             const json = await res.json();
@@ -176,108 +240,242 @@ const CounterSaleStep2 = ({ route, userToken, selectedGarageId, selectedGarage, 
     return (
         <View style={{ flex: 1 }}>
             <View style={{ marginBottom: 35 }}>
-            { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
+                {selectedGarageId == 0 ? (
+                    <Text style={styles.garageNameTitle}>
+                        All Garages - {user.name}
+                    </Text>
+                ) : (
+                    <Text style={styles.garageNameTitle}>
+                        {selectedGarage?.garage_name} - {user.name}
+                    </Text>
+                )}
             </View>
             <View style={styles.pageContainer}>
-                {(isLoading == true) ? <ActivityIndicator></ActivityIndicator> :
+                {isLoading == true ? (
+                    <ActivityIndicator></ActivityIndicator>
+                ) : (
                     <InputScrollView
-                        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
-                        keyboardShouldPersistTaps={'handled'}
+                        contentContainerStyle={{
+                            flexGrow: 1,
+                            justifyContent: "center",
+                        }}
+                        keyboardOffset={200}
+                        behavior={Platform.OS === "ios" ? "padding" : "height"}
+                        keyboardShouldPersistTaps={"always"}
                         showsVerticalScrollIndicator={false}
-                        scrollEventThrottle={8}
-                        behavior="padding"
                     >
                         <View style={{ flex: 1 }}>
-                            <Text style={[styles.headingStyle, { marginTop: 20 }]}>Order Details: </Text>
+                            <Text
+                                style={[styles.headingStyle, { marginTop: 20 }]}
+                            >
+                                Order Details:{" "}
+                            </Text>
                             <View style={styles.cardContainer}>
-                                <View style={[styles.cardRightContent, { flex: 1 }]}>
-                                    <Text style={styles.cardTitle}>Name: {isName}</Text>
-                                    <Text style={styles.cardTitle}>Email: {isEmail}</Text>
-                                    <Text style={styles.cardTitle}>Phone Number: {isPhoneNumber}</Text>
+                                <View
+                                    style={[
+                                        styles.cardRightContent,
+                                        { flex: 1 },
+                                    ]}
+                                >
+                                    <Text style={styles.cardTitle}>
+                                        Name: {isName}
+                                    </Text>
+                                    <Text style={styles.cardTitle}>
+                                        Email: {isEmail}
+                                    </Text>
+                                    <Text style={styles.cardTitle}>
+                                        Phone Number: {isPhoneNumber}
+                                    </Text>
                                 </View>
                             </View>
 
-                            <Text style={[styles.headingStyle, { marginTop: 20 }]}>Service:</Text>
+                            <Text
+                                style={[styles.headingStyle, { marginTop: 20 }]}
+                            >
+                                Service:
+                            </Text>
 
                             {fields.map((field, idx) => {
                                 return (
                                     <>
-                                        {(idx != 0) &&
-                                            <View style={styles.addFieldContainerGroup} key={'fields'+idx}>
-
-                                                <TouchableOpacity style={styles.removeEntryIconContainer} onPress={() => handleServiceRemove(idx)}>
-                                                    <Icon style={styles.removeEntryIcon} name="close" size={30} color="#000" />
+                                        {idx != 0 && (
+                                            <View
+                                                style={
+                                                    styles.addFieldContainerGroup
+                                                }
+                                                key={"fields" + idx}
+                                            >
+                                                <TouchableOpacity
+                                                    style={
+                                                        styles.removeEntryIconContainer
+                                                    }
+                                                    onPress={() =>
+                                                        handleServiceRemove(idx)
+                                                    }
+                                                >
+                                                    <Icon
+                                                        style={
+                                                            styles.removeEntryIcon
+                                                        }
+                                                        name="close"
+                                                        size={30}
+                                                        color="#000"
+                                                    />
                                                 </TouchableOpacity>
-                                                
-                                                <View style={[styles.cardRightContent, { flex: 1, flexDirection: 'row', marginTop: 10, marginBottom: 0 }]}>
-                                                    <Text style={[styles.partNameContent, {fontWeight: '600'}]}>Service Name: </Text>
-                                                    <Text style={styles.serviceNameContent}>Oil Change</Text>
+
+                                                <View
+                                                    style={[
+                                                        styles.cardRightContent,
+                                                        {
+                                                            flex: 1,
+                                                            flexDirection:
+                                                                "row",
+                                                            marginTop: 10,
+                                                            marginBottom: 0,
+                                                        },
+                                                    ]}
+                                                >
+                                                    <Text
+                                                        style={[
+                                                            styles.partNameContent,
+                                                            {
+                                                                fontWeight:
+                                                                    "600",
+                                                            },
+                                                        ]}
+                                                    >
+                                                        Service Name:{" "}
+                                                    </Text>
+                                                    <Text
+                                                        style={
+                                                            styles.serviceNameContent
+                                                        }
+                                                    >
+                                                        Oil Change
+                                                    </Text>
                                                 </View>
 
-                                                <View style={[styles.cardRightContent, { flex: 1 }]}>
-                                                    <View style={styles.addFieldContainer} key={`service-${field}-${idx}`}>
+                                                <View
+                                                    style={[
+                                                        styles.cardRightContent,
+                                                        { flex: 1 },
+                                                    ]}
+                                                >
+                                                    <View
+                                                        style={
+                                                            styles.addFieldContainer
+                                                        }
+                                                        key={`service-${field}-${idx}`}
+                                                    >
                                                         <TextInput
                                                             mode="outlined"
-                                                            label='Rate'
-                                                            style={styles.textEntryInput}
+                                                            label="Rate"
+                                                            style={
+                                                                styles.textEntryInput
+                                                            }
                                                             placeholder="Rate"
-                                                            onChangeText={
-                                                                e => {
-                                                                    let parameter = {
-                                                                        name: 'rate',
+                                                            onChangeText={(
+                                                                e
+                                                            ) => {
+                                                                let parameter =
+                                                                    {
+                                                                        name: "rate",
                                                                         value: e,
                                                                     };
-                                                                    handleServiceChange(idx, parameter);
-                                                                }
-                                                            }
+                                                                handleServiceChange(
+                                                                    idx,
+                                                                    parameter
+                                                                );
+                                                            }}
                                                         />
                                                         <TextInput
                                                             mode="outlined"
-                                                            label='Quantity'
-                                                            style={styles.textEntryInput}
+                                                            label="Quantity"
+                                                            style={
+                                                                styles.textEntryInput
+                                                            }
                                                             placeholder="Quantity"
-                                                            onChangeText={
-                                                                e => {
-                                                                    let parameter = {
-                                                                        name: 'quantity',
+                                                            onChangeText={(
+                                                                e
+                                                            ) => {
+                                                                let parameter =
+                                                                    {
+                                                                        name: "quantity",
                                                                         value: e,
                                                                     };
-                                                                    handleServiceChange(idx, parameter);
-                                                                }
-                                                            }
+                                                                handleServiceChange(
+                                                                    idx,
+                                                                    parameter
+                                                                );
+                                                            }}
                                                         />
                                                         <TextInput
                                                             mode="outlined"
-                                                            label='Discount'
-                                                            style={styles.textEntryInput}
+                                                            label="Discount"
+                                                            style={
+                                                                styles.textEntryInput
+                                                            }
                                                             placeholder="Discount"
-                                                            onChangeText=
-                                                            {
-                                                                e => {
-                                                                    let parameter = {
-                                                                        name: 'discount',
+                                                            onChangeText={(
+                                                                e
+                                                            ) => {
+                                                                let parameter =
+                                                                    {
+                                                                        name: "discount",
                                                                         value: e,
                                                                     };
-                                                                    handleServiceChange(idx, parameter);
-                                                                }
-                                                            }
+                                                                handleServiceChange(
+                                                                    idx,
+                                                                    parameter
+                                                                );
+                                                            }}
                                                         />
                                                     </View>
 
-                                                    <View style={{flexDirection: 'row'}}>
-                                                        <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 0, fontWeight: '600'}}>Total for this Service: </Text>
-                                                        <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 5 }}>{(fields[idx]) ? fields[idx]['totalForThisService'] : 0}</Text>
+                                                    <View
+                                                        style={{
+                                                            flexDirection:
+                                                                "row",
+                                                        }}
+                                                    >
+                                                        <Text
+                                                            style={{
+                                                                fontSize: 20,
+                                                                color: colors.black,
+                                                                marginTop: 15,
+                                                                marginBottom: 0,
+                                                                fontWeight:
+                                                                    "600",
+                                                            }}
+                                                        >
+                                                            Total for this
+                                                            Service:{" "}
+                                                        </Text>
+                                                        <Text
+                                                            style={{
+                                                                fontSize: 20,
+                                                                color: colors.black,
+                                                                marginTop: 15,
+                                                                marginBottom: 5,
+                                                            }}
+                                                        >
+                                                            {fields[idx]
+                                                                ? fields[idx][
+                                                                      "totalForThisService"
+                                                                  ]
+                                                                : 0}
+                                                        </Text>
                                                     </View>
                                                 </View>
                                             </View>
-                                        }
+                                        )}
                                     </>
                                 );
                             })}
                             <View style={styles.addFieldBtnContainer}>
                                 <Button
                                     style={{ marginTop: 15, flex: 0.3 }}
-                                    mode={'contained'}
+                                    mode={"contained"}
                                     icon="plus"
                                     onPress={() => {
                                         setAddServiceModal(true);
@@ -288,87 +486,193 @@ const CounterSaleStep2 = ({ route, userToken, selectedGarageId, selectedGarage, 
                                 <View style={{ flex: 0.5 }}></View>
                             </View>
 
-
-                            <Text style={[styles.headingStyle, { marginTop: 20 }]}>Parts:</Text>
+                            <Text
+                                style={[styles.headingStyle, { marginTop: 20 }]}
+                            >
+                                Parts:
+                            </Text>
                             {fieldsParts.map((field, idx) => {
                                 return (
                                     <>
-                                        {(idx != 0) &&
-                                            <View style={styles.addFieldContainerGroup} key={'fieldsParts'+idx}>
-                                        
-                                                <TouchableOpacity style={styles.removeEntryIconContainer} onPress={() => handlePartRemove(idx)}>
-                                                    <Icon style={styles.removeEntryIcon} name="close" size={30} color="#000" />
+                                        {idx != 0 && (
+                                            <View
+                                                style={
+                                                    styles.addFieldContainerGroup
+                                                }
+                                                key={"fieldsParts" + idx}
+                                            >
+                                                <TouchableOpacity
+                                                    style={
+                                                        styles.removeEntryIconContainer
+                                                    }
+                                                    onPress={() =>
+                                                        handlePartRemove(idx)
+                                                    }
+                                                >
+                                                    <Icon
+                                                        style={
+                                                            styles.removeEntryIcon
+                                                        }
+                                                        name="close"
+                                                        size={30}
+                                                        color="#000"
+                                                    />
                                                 </TouchableOpacity>
-                                            
-                                                <View style={[styles.cardRightContent, { flex: 1, flexDirection: 'row', marginTop: 10, marginBottom: 0 }]}>
-                                                    <Text style={[styles.partNameContent, {fontWeight: '600'}]}>Part Name: </Text>
-                                                    <Text style={styles.partNameContent}>Oil Change</Text>
+
+                                                <View
+                                                    style={[
+                                                        styles.cardRightContent,
+                                                        {
+                                                            flex: 1,
+                                                            flexDirection:
+                                                                "row",
+                                                            marginTop: 10,
+                                                            marginBottom: 0,
+                                                        },
+                                                    ]}
+                                                >
+                                                    <Text
+                                                        style={[
+                                                            styles.partNameContent,
+                                                            {
+                                                                fontWeight:
+                                                                    "600",
+                                                            },
+                                                        ]}
+                                                    >
+                                                        Part Name:{" "}
+                                                    </Text>
+                                                    <Text
+                                                        style={
+                                                            styles.partNameContent
+                                                        }
+                                                    >
+                                                        Oil Change
+                                                    </Text>
                                                 </View>
 
-                                                <View style={[styles.cardRightContent, { flex: 1 }]}>
-                                                    <View style={styles.addFieldContainer} key={`parts-${field}-${idx}`}>
+                                                <View
+                                                    style={[
+                                                        styles.cardRightContent,
+                                                        { flex: 1 },
+                                                    ]}
+                                                >
+                                                    <View
+                                                        style={
+                                                            styles.addFieldContainer
+                                                        }
+                                                        key={`parts-${field}-${idx}`}
+                                                    >
                                                         <TextInput
                                                             mode="outlined"
-                                                            label='Rate'
-                                                            style={[styles.textEntryInput]}
+                                                            label="Rate"
+                                                            style={[
+                                                                styles.textEntryInput,
+                                                            ]}
                                                             placeholder="Rate"
-                                                            onChangeText={
-                                                                e => {
-                                                                    let parameter = {
-                                                                        name: 'rate',
+                                                            onChangeText={(
+                                                                e
+                                                            ) => {
+                                                                let parameter =
+                                                                    {
+                                                                        name: "rate",
                                                                         value: e,
                                                                     };
-                                                                    handlePartChange(idx, parameter);
-                                                                }
-                                                            }
+                                                                handlePartChange(
+                                                                    idx,
+                                                                    parameter
+                                                                );
+                                                            }}
                                                         />
                                                         <TextInput
                                                             mode="outlined"
-                                                            label='Quantity'
-                                                            style={styles.textEntryInput}
+                                                            label="Quantity"
+                                                            style={
+                                                                styles.textEntryInput
+                                                            }
                                                             placeholder="Quantity"
-                                                            onChangeText={
-                                                                e => {
-                                                                    let parameter = {
-                                                                        name: 'quantity',
+                                                            onChangeText={(
+                                                                e
+                                                            ) => {
+                                                                let parameter =
+                                                                    {
+                                                                        name: "quantity",
                                                                         value: e,
                                                                     };
-                                                                    handlePartChange(idx, parameter);
-                                                                }
-                                                            }
+                                                                handlePartChange(
+                                                                    idx,
+                                                                    parameter
+                                                                );
+                                                            }}
                                                         />
                                                         <TextInput
                                                             mode="outlined"
-                                                            label='Discount'
-                                                            style={styles.textEntryInput}
+                                                            label="Discount"
+                                                            style={
+                                                                styles.textEntryInput
+                                                            }
                                                             placeholder="Discount"
-                                                            onChangeText=
-                                                            {
-                                                                e => {
-                                                                    let parameter = {
-                                                                        name: 'discount',
+                                                            onChangeText={(
+                                                                e
+                                                            ) => {
+                                                                let parameter =
+                                                                    {
+                                                                        name: "discount",
                                                                         value: e,
                                                                     };
-                                                                    handlePartChange(idx, parameter);
-                                                                }
-                                                            }
+                                                                handlePartChange(
+                                                                    idx,
+                                                                    parameter
+                                                                );
+                                                            }}
                                                         />
                                                     </View>
 
-                                                    <View style={{flexDirection: 'row'}}>
-                                                        <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 0, fontWeight: '600'}}>Total for the Part: </Text>
-                                                        <Text style={{fontSize: 20, color: colors.black, marginTop: 15, marginBottom: 5 }}>{(fieldsParts[idx]) ? fieldsParts[idx]['totalForThisService'] : 0}</Text>
+                                                    <View
+                                                        style={{
+                                                            flexDirection:
+                                                                "row",
+                                                        }}
+                                                    >
+                                                        <Text
+                                                            style={{
+                                                                fontSize: 20,
+                                                                color: colors.black,
+                                                                marginTop: 15,
+                                                                marginBottom: 0,
+                                                                fontWeight:
+                                                                    "600",
+                                                            }}
+                                                        >
+                                                            Total for the Part:{" "}
+                                                        </Text>
+                                                        <Text
+                                                            style={{
+                                                                fontSize: 20,
+                                                                color: colors.black,
+                                                                marginTop: 15,
+                                                                marginBottom: 5,
+                                                            }}
+                                                        >
+                                                            {fieldsParts[idx]
+                                                                ? fieldsParts[
+                                                                      idx
+                                                                  ][
+                                                                      "totalForThisService"
+                                                                  ]
+                                                                : 0}
+                                                        </Text>
                                                     </View>
                                                 </View>
                                             </View>
-                                        } 
+                                        )}
                                     </>
                                 );
                             })}
                             <View style={styles.addFieldBtnContainer}>
                                 <Button
                                     style={{ marginTop: 15, flex: 0.3 }}
-                                    mode={'contained'}
+                                    mode={"contained"}
                                     icon="plus"
                                     onPress={() => {
                                         setAddPartModal(true);
@@ -376,54 +680,165 @@ const CounterSaleStep2 = ({ route, userToken, selectedGarageId, selectedGarage, 
                                 >
                                     Add Part
                                 </Button>
-                                <View style={{ flex: 0.5 }}>
-                                </View>
+                                <View style={{ flex: 0.5 }}></View>
                             </View>
 
                             {/* Fieldset - Totals */}
-                            <Text style={[styles.headingStyle, { marginTop: 20 }]}>Totals:</Text>
+                            <Text
+                                style={[styles.headingStyle, { marginTop: 20 }]}
+                            >
+                                Totals:
+                            </Text>
                             <View style={styles.totalFieldContainerGroup}>
                                 <View style={styles.totalFieldsGroup}>
-                                    <View style={[styles.totalFieldsLeftContent, { flex: 0.8 }]}>
-                                        <Text style={styles.partNameContent}>Services Total</Text>
+                                    <View
+                                        style={[
+                                            styles.totalFieldsLeftContent,
+                                            { flex: 0.8 },
+                                        ]}
+                                    >
+                                        <Text style={styles.partNameContent}>
+                                            Services Total
+                                        </Text>
                                     </View>
-                                    <View style={[styles.totalFieldsRightContent, { flex: 1 }]}>
-                                        <Text style={styles.totalFieldTextContainer}>INR </Text>
-                                        <View style={styles.totalFieldContainer}>
-                                            <Text style={{fontSize: 18, color: colors.black}}>{servicesTotal}</Text>
+                                    <View
+                                        style={[
+                                            styles.totalFieldsRightContent,
+                                            { flex: 1 },
+                                        ]}
+                                    >
+                                        <Text
+                                            style={
+                                                styles.totalFieldTextContainer
+                                            }
+                                        >
+                                            INR{" "}
+                                        </Text>
+                                        <View
+                                            style={styles.totalFieldContainer}
+                                        >
+                                            <Text
+                                                style={{
+                                                    fontSize: 18,
+                                                    color: colors.black,
+                                                }}
+                                            >
+                                                {servicesTotal}
+                                            </Text>
                                         </View>
                                     </View>
                                 </View>
                                 <View style={styles.totalFieldsGroup}>
-                                    <View style={[styles.totalFieldsLeftContent, { flex: 0.8 }]}>
-                                        <Text style={styles.partNameContent}>Parts Total</Text>
+                                    <View
+                                        style={[
+                                            styles.totalFieldsLeftContent,
+                                            { flex: 0.8 },
+                                        ]}
+                                    >
+                                        <Text style={styles.partNameContent}>
+                                            Parts Total
+                                        </Text>
                                     </View>
-                                    <View style={[styles.totalFieldsRightContent, { flex: 1 }]}>
-                                        <Text style={styles.totalFieldTextContainer}>INR </Text>
-                                        <View style={styles.totalFieldContainer}>
-                                            <Text style={{fontSize: 18, color: colors.black}}>{partsTotal}</Text>
+                                    <View
+                                        style={[
+                                            styles.totalFieldsRightContent,
+                                            { flex: 1 },
+                                        ]}
+                                    >
+                                        <Text
+                                            style={
+                                                styles.totalFieldTextContainer
+                                            }
+                                        >
+                                            INR{" "}
+                                        </Text>
+                                        <View
+                                            style={styles.totalFieldContainer}
+                                        >
+                                            <Text
+                                                style={{
+                                                    fontSize: 18,
+                                                    color: colors.black,
+                                                }}
+                                            >
+                                                {partsTotal}
+                                            </Text>
                                         </View>
                                     </View>
                                 </View>
                                 <View style={styles.totalFieldsGroup}>
-                                    <View style={[styles.totalFieldsLeftContent, { flex: 0.8 }]}>
-                                        <Text style={styles.partNameContent}>Applicable Discount</Text>
+                                    <View
+                                        style={[
+                                            styles.totalFieldsLeftContent,
+                                            { flex: 0.8 },
+                                        ]}
+                                    >
+                                        <Text style={styles.partNameContent}>
+                                            Applicable Discount
+                                        </Text>
                                     </View>
-                                    <View style={[styles.totalFieldsRightContent, { flex: 1 }]}>
-                                        <Text style={styles.totalFieldTextContainer}>INR </Text>
-                                        <View style={styles.totalFieldContainer}>
-                                            <Text style={{fontSize: 18, color: colors.black}}>{isApplicableDiscount}</Text>
+                                    <View
+                                        style={[
+                                            styles.totalFieldsRightContent,
+                                            { flex: 1 },
+                                        ]}
+                                    >
+                                        <Text
+                                            style={
+                                                styles.totalFieldTextContainer
+                                            }
+                                        >
+                                            INR{" "}
+                                        </Text>
+                                        <View
+                                            style={styles.totalFieldContainer}
+                                        >
+                                            <Text
+                                                style={{
+                                                    fontSize: 18,
+                                                    color: colors.black,
+                                                }}
+                                            >
+                                                {isApplicableDiscount}
+                                            </Text>
                                         </View>
                                     </View>
                                 </View>
                                 <View style={styles.totalFieldsGroup}>
-                                    <View style={[styles.totalFieldsLeftContent, { flex: 0.9 }]}>
-                                        <Text style={styles.partNameContent}>Total {'\n'} (Inclusive of Taxes)</Text>
+                                    <View
+                                        style={[
+                                            styles.totalFieldsLeftContent,
+                                            { flex: 0.9 },
+                                        ]}
+                                    >
+                                        <Text style={styles.partNameContent}>
+                                            Total {"\n"} (Inclusive of Taxes)
+                                        </Text>
                                     </View>
-                                    <View style={[styles.totalFieldsRightContent, { flex: 1 }]}>
-                                        <Text style={styles.totalFieldTextContainer}>INR </Text>
-                                        <View style={styles.totalFieldContainer}>
-                                            <Text style={{fontSize: 18, color: colors.black}}>{isTotal}</Text>
+                                    <View
+                                        style={[
+                                            styles.totalFieldsRightContent,
+                                            { flex: 1 },
+                                        ]}
+                                    >
+                                        <Text
+                                            style={
+                                                styles.totalFieldTextContainer
+                                            }
+                                        >
+                                            INR{" "}
+                                        </Text>
+                                        <View
+                                            style={styles.totalFieldContainer}
+                                        >
+                                            <Text
+                                                style={{
+                                                    fontSize: 18,
+                                                    color: colors.black,
+                                                }}
+                                            >
+                                                {isTotal}
+                                            </Text>
                                         </View>
                                     </View>
                                 </View>
@@ -431,32 +846,52 @@ const CounterSaleStep2 = ({ route, userToken, selectedGarageId, selectedGarage, 
 
                             <Button
                                 style={{ marginTop: 15 }}
-                                mode={'contained'}
+                                mode={"contained"}
                             >
                                 Prepare Invoice
                             </Button>
                         </View>
                     </InputScrollView>
-                }
+                )}
 
                 <Portal>
-                    <Modal visible={addServiceModal} onDismiss={() => { setAddServiceModal(false); setIsService(0); }} contentContainerStyle={styles.modalContainerStyle}>
-                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Service</Text>
-                        {(isLoading2 == true) ? <ActivityIndicator></ActivityIndicator>
-                            :
+                    <Modal
+                        visible={addServiceModal}
+                        onDismiss={() => {
+                            setAddServiceModal(false);
+                            setIsService(0);
+                        }}
+                        contentContainerStyle={styles.modalContainerStyle}
+                    >
+                        <Text
+                            style={[
+                                styles.headingStyle,
+                                { marginTop: 0, alignSelf: "center" },
+                            ]}
+                        >
+                            Add New Service
+                        </Text>
+                        {isLoading2 == true ? (
+                            <ActivityIndicator></ActivityIndicator>
+                        ) : (
                             <>
                                 <View style={styles.dropDownContainer}>
                                     <Picker
                                         selectedValue={isService}
-                                        onValueChange={(option) => { setIsService(option); }}
+                                        onValueChange={(option) => {
+                                            setIsService(option);
+                                        }}
                                         style={styles.dropDownField}
                                         itemStyle={{ padding: 0 }}
                                     >
-                                        <Picker.Item label="Select Service" value="0" />
+                                        <Picker.Item
+                                            label="Select Service"
+                                            value="0"
+                                        />
                                         {serviceList?.map((serviceList, i) => {
                                             return (
                                                 <Picker.Item
-                                                    key={'part'+i}
+                                                    key={"part" + i}
                                                     label={serviceList?.name}
                                                     value={serviceList?.id}
                                                 />
@@ -464,45 +899,73 @@ const CounterSaleStep2 = ({ route, userToken, selectedGarageId, selectedGarage, 
                                         })}
                                     </Picker>
                                 </View>
-                                {serviceError?.length > 0 &&
-                                    <Text style={styles.errorTextStyle}>{serviceError}</Text>
-                                }
-                                <View style={{ flexDirection: "row", }}>
+                                {serviceError?.length > 0 && (
+                                    <Text style={styles.errorTextStyle}>
+                                        {serviceError}
+                                    </Text>
+                                )}
+                                <View style={{ flexDirection: "row" }}>
                                     <Button
-                                        style={{ marginTop: 15, flex: 1, marginRight: 10 }}
-                                        mode={'contained'}
+                                        style={{
+                                            marginTop: 15,
+                                            flex: 1,
+                                            marginRight: 10,
+                                        }}
+                                        mode={"contained"}
                                         onPress={() => handleServiceAdd()}
                                     >
                                         Add
                                     </Button>
                                     <Button
                                         style={{ marginTop: 15, flex: 1 }}
-                                        mode={'contained'}
-                                        onPress={() => setAddServiceModal(false)}
+                                        mode={"contained"}
+                                        onPress={() =>
+                                            setAddServiceModal(false)
+                                        }
                                     >
                                         Close
                                     </Button>
                                 </View>
                             </>
-                        }
+                        )}
                     </Modal>
-                    <Modal visible={addPartModal} onDismiss={() => { setAddPartModal(false); setIsPart(0); }} contentContainerStyle={styles.modalContainerStyle}>
-                        <Text style={[styles.headingStyle, { marginTop: 0, alignSelf: "center", }]}>Add New Part</Text>
-                        {(isLoading2 == true) ? <ActivityIndicator></ActivityIndicator>
-                            :
+                    <Modal
+                        visible={addPartModal}
+                        onDismiss={() => {
+                            setAddPartModal(false);
+                            setIsPart(0);
+                        }}
+                        contentContainerStyle={styles.modalContainerStyle}
+                    >
+                        <Text
+                            style={[
+                                styles.headingStyle,
+                                { marginTop: 0, alignSelf: "center" },
+                            ]}
+                        >
+                            Add New Part
+                        </Text>
+                        {isLoading2 == true ? (
+                            <ActivityIndicator></ActivityIndicator>
+                        ) : (
                             <>
                                 <View style={styles.dropDownContainer}>
                                     <Picker
                                         selectedValue={isPart}
-                                        onValueChange={(option) => { setIsPart(option); }}
+                                        onValueChange={(option) => {
+                                            setIsPart(option);
+                                        }}
                                         style={styles.dropDownField}
                                         itemStyle={{ padding: 0 }}
                                     >
-                                        <Picker.Item label="Select Part" value="0" />
+                                        <Picker.Item
+                                            label="Select Part"
+                                            value="0"
+                                        />
                                         {partList?.map((partList, i) => {
                                             return (
                                                 <Picker.Item
-                                                    key={'part'+i}
+                                                    key={"part" + i}
                                                     label={partList?.name}
                                                     value={partList?.id}
                                                 />
@@ -510,99 +973,102 @@ const CounterSaleStep2 = ({ route, userToken, selectedGarageId, selectedGarage, 
                                         })}
                                     </Picker>
                                 </View>
-                                {partError?.length > 0 &&
-                                    <Text style={styles.errorTextStyle}>{partError}</Text>
-                                }
-                                <View style={{ flexDirection: "row", }}>
+                                {partError?.length > 0 && (
+                                    <Text style={styles.errorTextStyle}>
+                                        {partError}
+                                    </Text>
+                                )}
+                                <View style={{ flexDirection: "row" }}>
                                     <Button
-                                        style={{ marginTop: 15, flex: 1, marginRight: 10 }}
-                                        mode={'contained'}
+                                        style={{
+                                            marginTop: 15,
+                                            flex: 1,
+                                            marginRight: 10,
+                                        }}
+                                        mode={"contained"}
                                         onPress={() => handlePartAdd()}
                                     >
                                         Add
                                     </Button>
                                     <Button
                                         style={{ marginTop: 15, flex: 1 }}
-                                        mode={'contained'}
+                                        mode={"contained"}
                                         onPress={() => setAddPartModal(false)}
                                     >
                                         Close
                                     </Button>
                                 </View>
                             </>
-                        }
+                        )}
                     </Modal>
                 </Portal>
             </View>
         </View>
-    )
-}
-
-
+    );
+};
 
 const styles = StyleSheet.create({
     garageNameTitle: {
-        textAlign: 'center', 
-        fontSize: 17, 
-        fontWeight: '500', 
-        color: colors.white, 
-        paddingVertical: 7, 
+        textAlign: "center",
+        fontSize: 17,
+        fontWeight: "500",
+        color: colors.white,
+        paddingVertical: 7,
         backgroundColor: colors.secondary,
-        position: 'absolute',
+        position: "absolute",
         top: 0,
         zIndex: 5,
-        width: '100%',
+        width: "100%",
         flex: 1,
-        left: 0, 
-        right: 0
+        left: 0,
+        right: 0,
     },
     totalFieldsGroup: {
-        flexDirection: 'row',
+        flexDirection: "row",
         marginBottom: 10,
     },
     serviceNameContent: {
         fontSize: 17,
-        color: colors.black
+        color: colors.black,
     },
     partNameContent: {
         fontSize: 18,
-        color: colors.black
+        color: colors.black,
     },
     totalFieldTextContainer: {
         flex: 0.23,
         fontSize: 18,
         color: colors.black,
-        marginLeft: 10
+        marginLeft: 10,
     },
     totalFieldContainer: {
-
         flex: 0.77,
     },
     totalFieldsRightContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
     },
     totalFieldsLeftContent: {
-        justifyContent: 'center',
+        justifyContent: "center",
         paddingLeft: 10,
     },
     totalFieldContainerGroup: {
         marginTop: 10,
         flex: 1,
-        flexDirection: 'column',
+        flexDirection: "column",
         backgroundColor: "#ecf5f9",
         padding: 10,
     },
     addFieldContainerGroup: {
         marginTop: 10,
         flex: 1,
-        flexDirection: 'column',
+        flexDirection: "column",
         backgroundColor: "#ecf5f9",
         padding: 10,
     },
     addFieldContainer: {
-        flexDirection: 'row',
-        display: 'flex',
+        flexDirection: "row",
+        display: "flex",
         flex: 1,
         marginTop: 15,
     },
@@ -612,14 +1078,14 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     removeEntryIconContainer: {
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: "center",
+        alignItems: "center",
         zIndex: 2,
         borderColor: colors.light_gray,
         borderWidth: 1,
         borderRadius: 5,
         backgroundColor: colors.gray,
-        position: 'absolute',
+        position: "absolute",
         top: 10,
         right: 10,
     },
@@ -627,13 +1093,13 @@ const styles = StyleSheet.create({
         color: colors.white,
     },
     addFieldBtnContainer: {
-        flexDirection: 'row',
+        flexDirection: "row",
     },
     pageContainer: {
         padding: 20,
         flex: 1,
         backgroundColor: colors.white,
-        justifyContent: 'center',
+        justifyContent: "center",
     },
     input: {
         marginTop: 20,
@@ -642,7 +1108,7 @@ const styles = StyleSheet.create({
     headingStyle: {
         fontSize: 20,
         color: colors.black,
-        fontWeight: '500',
+        fontWeight: "500",
     },
     uploadButtonStyle: {
         backgroundColor: "#F3F6F8",
@@ -650,16 +1116,16 @@ const styles = StyleSheet.create({
         borderStyle: "dashed",
         borderWidth: 1,
         height: 100,
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: "center",
+        alignItems: "center",
         marginTop: 15,
     },
     datePickerContainer: {
         flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        position: 'relative',
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        position: "relative",
         marginTop: 20,
     },
     datePickerField: {
@@ -669,7 +1135,7 @@ const styles = StyleSheet.create({
     },
     datePickerIcon: {
         padding: 10,
-        position: 'absolute',
+        position: "absolute",
         right: 7,
         top: 12,
         zIndex: 2,
@@ -695,9 +1161,9 @@ const styles = StyleSheet.create({
         backgroundColor: "#2196F3",
     },
     modalContainerStyle: {
-        backgroundColor: 'white',
+        backgroundColor: "white",
         padding: 20,
-        marginHorizontal: 30
+        marginHorizontal: 30,
     },
     odometerContainer: {
         textAlign: "center",
@@ -708,7 +1174,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         elevation: 1,
         flex: 1,
-        flexDirection: 'row',
+        flexDirection: "row",
         borderColor: colors.black,
         backgroundColor: "#ecf5f9",
         padding: 10,
@@ -716,19 +1182,19 @@ const styles = StyleSheet.create({
     cardMainTitle: {
         color: "#000",
         fontSize: 17,
-        fontWeight: '600'
+        fontWeight: "600",
     },
     cardTitle: {
         color: "#000",
         fontSize: 16,
     },
-})
+});
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     userToken: state.user.userToken,
     user: state.user.user,
     selectedGarageId: state.garage.selected_garage_id,
     selectedGarage: state.garage.selected_garage,
-})
+});
 
 export default connect(mapStateToProps)(CounterSaleStep2);
