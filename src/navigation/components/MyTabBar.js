@@ -129,3 +129,149 @@
 // }
 
 // export default MyTabBar;
+
+import React, { useState, useEffect } from 'react';
+import { View, Image, Text, TouchableOpacity, StyleSheet, Platform, Keyboard } from 'react-native';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import Icon from "react-native-vector-icons/FontAwesome5";
+
+function MyTabBar({ state, descriptors, navigation }) {
+
+    const [visible, setVisible] = useState(false);
+
+    useEffect(() => {
+        let keyboardEventListeners;
+        if (Platform.OS === 'android') {
+            keyboardEventListeners = [
+                Keyboard.addListener('keyboardDidShow', () => setVisible(true)),
+                Keyboard.addListener('keyboardDidHide', () => setVisible(false)),
+            ];
+        }
+        return () => {
+            if (Platform.OS === 'android') {
+                keyboardEventListeners &&
+                    keyboardEventListeners.forEach(eventListener => eventListener.remove());
+            }
+        };
+    }, []);
+
+    if (visible) return null;
+
+    return (
+        <View style={{
+            flexDirection: 'row',
+            backgroundColor: '#00000',
+            alignItems: 'center',
+            justifyContent: 'center',
+            // shadowColor: "#000",
+            shadowOffset: {
+                width: 0,
+
+            },
+            shadowOpacity: 0.10,
+            shadowRadius: 16.00,
+            borderTopColor: '#eee',
+            borderTopWidth: 1
+        }}>
+            {state.routes.map((route, index) => {
+                const { options } = descriptors[route.key];
+                const label =
+                    options.tabBarLabel !== undefined
+                        ? options.tabBarLabel
+                        : options.title !== undefined
+                            ? options.title
+                            : route.name;
+
+                const icon = options.icon;
+
+                const isFocused = state.index === index;
+
+                const onPress = async () => {
+                    const event = navigation.emit({
+                        type: 'tabPress',
+                        target: route.key,
+                        canPreventDefault: true,
+                    });
+                    if (isFocused && !route.params) return;
+                    if ((!isFocused && !event.defaultPrevented)) {
+                        navigation.reset({
+                            index: 0,
+                            routes: [{ name: route.name }],
+                        });
+                    }
+                };
+
+                const onLongPress = () => {
+                    navigation.emit({
+                        type: 'tabLongPress',
+                        target: route.key,
+                    });
+                };
+
+                const styles = StyleSheet.create({
+                    tabBox: {
+                        flex: 1,
+                        paddingHorizontal: 10,
+                        paddingVertical: 10,
+                        backgroundColor: 'white'
+                    },
+                    box: {
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }
+                })
+                const routeName = getFocusedRouteNameFromRoute(route) ?? "";
+                let IconImage;
+                let color
+                switch (icon) {
+                    case 'Service':
+                        IconImage = "tools"
+                        color = isFocused ?'#E31E24':'grey'
+                        break;
+                    case 'Parts':
+                        IconImage = "wrench"
+                        color = isFocused ? '#E31E24' : 'grey'
+                        break;
+                    case 'More':
+                        IconImage = "bars"
+                        color = isFocused ? '#E31E24' : 'grey'
+                        break;
+                    case 'Orders':
+                        IconImage = "box"
+                        color = isFocused ? '#E31E24' : 'grey'
+                        break;
+                    case 'MyVehicles':
+                        IconImage = "car"
+                        color = isFocused ? '#E31E24' : 'grey'
+                        break;
+                    case 'My Profile':
+                        IconImage = "user"
+                        color = isFocused ? '#E31E24' : 'grey'
+                        break;
+                    
+                }
+
+                return (
+                    <TouchableOpacity
+                        key={index}
+                        accessibilityRole="button"
+                        accessibilityState={isFocused ? { selected: true } : {}}
+                        accessibilityLabel={options.tabBarAccessibilityLabel}
+                        testID={options.tabBarTestID}
+                        onPress={onPress}
+                        onLongPress={onLongPress}
+                        style={styles.tabBox}
+                    >
+                        <View style={styles.box}>
+                            <Icon name={IconImage} size={22}
+                                color={color} />
+                            <Text style={{ fontSize: 13, color: isFocused ? '#E31E24' : 'grey', }}> {label} </Text>
+                        </View>
+                    </TouchableOpacity>
+                );
+            })}
+        </View>
+    );
+}
+
+export default MyTabBar;

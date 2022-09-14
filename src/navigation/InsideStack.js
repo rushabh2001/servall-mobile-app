@@ -10,6 +10,7 @@ import { createMaterialTopTabNavigator } from "@react-navigation/material-top-ta
 import { colors } from "../constants";
 import { connect, useSelector, useDispatch } from "react-redux";
 import { signOut as signOutAction } from "../actions/login";
+import MyTabBar from './components/MyTabBar';
 import {
     EditStock,
     AddStock,
@@ -81,9 +82,8 @@ const ServicesStack = ({ navigation }) => {
                             garageId?.length > 1 ? (
                                 <Button
                                     onPress={() =>
-                                        navigation.navigate("ServicesStack", {
-                                            screen: "ChooseGarage",
-                                        })
+                                        navigation.navigate( "ChooseGarage",
+                                        )
                                     }
                                     style={[
                                         styles.buttonStyle,
@@ -124,9 +124,7 @@ const ServicesStack = ({ navigation }) => {
                             {userRole == "Super Admin" && (
                                 <Button
                                     onPress={() =>
-                                        navigation.navigate("ServicesStack", {
-                                            screen: "AddGarage",
-                                        })
+                              navigation.navigate("AddGarage")
                                     }
                                     style={styles.buttonStyle}
                                     color={colors.secondary}
@@ -566,7 +564,7 @@ const OrderStack = ({ navigation }) => {
                 name={"Orders"}
                 component={Orders}
                 options={{
-                    headerShown: false,
+                    headerShown: true,
                 }}
             />
         </Stack.Navigator>
@@ -745,7 +743,7 @@ const UserVehicleStack = ({ navigation }) => {
                 name={"VehicleList"}
                 component={VehicleList}
                 options={{
-                    headerShown: false,
+                    headerShown: true,
                 }}
             />
         </Stack.Navigator>
@@ -1046,108 +1044,189 @@ const InsideCustomerStack = () => {
     const userId = useSelector((state) => state.user.user.id);
 
     return (
-        <Tab.Navigator
-            initialRouteName="PartsStack"
-            screenOptions={{
-                tabBarActiveTintColor: colors.default_theme.primary,
-                tabBarStyle: { height: 60, marginTop: 0 },
-                tabBarItemStyle: { paddingVertical: 7 },
-                tabBarLabelStyle: { fontSize: 14 },
-            }}
-        >
-            <Tab.Screen
-                name="PartsStack"
-                component={OrderStack}
-                options={{
-                    title: "My Orders",
-                    tabBarLabel: "Orders",
-                    tabBarIcon: ({ color }) => (
-                        <Icon name={"box"} size={20} color={color} />
-                    ),
-                    // headerShown: false,
-                }}
-            />
-            <Tab.Screen
-                name="MyVehicles"
-                component={UserVehicleStack}
-                options={{
-                    title: "My Vehicles",
-                    tabBarLabel: "Vehicles",
-                    tabBarIcon: ({ color }) => (
-                        <Icon name={"car"} size={20} color={color} />
-                    ),
-                    // headerShown: false,
-                }}
-                initialParams={{ userId: userId }}
-            />
+        // <Tab.Navigator
+        //     initialRouteName="PartsStack"
+        //     screenOptions={{
+        //         tabBarActiveTintColor: colors.default_theme.primary,
+        //         tabBarStyle: { height: 60, marginTop: 0 },
+        //         tabBarItemStyle: { paddingVertical: 7 },
+        //         tabBarLabelStyle: { fontSize: 14 },
+        //     }}
+        // >
+        //     <Tab.Screen
+        //         name="PartsStack"
+        //         component={OrderStack}
+        //         options={{
+        //             title: "My Orders",
+        //             tabBarLabel: "Orders",
+        //             tabBarIcon: ({ color }) => (
+        //                 <Icon name={"box"} size={20} color={color} />
+        //             ),
+        //             // headerShown: false,
+        //         }}
+        //     />
+        //     <Tab.Screen
+        //         name="MyVehicles"
+        //         component={UserVehicleStack}
+        //         options={{
+        //             title: "My Vehicles",
+        //             tabBarLabel: "Vehicles",
+        //             tabBarIcon: ({ color }) => (
+        //                 <Icon name={"car"} size={20} color={color} />
+        //             ),
+        //             // headerShown: false,
+        //         }}
+        //         initialParams={{ userId: userId }}
+        //     />
 
-            <Tab.Screen
-                name="AllCustomerStack"
-                component={AllCustomerStack}
-                options={{
-                    tabBarLabel: "My Profile",
-                    tabBarIcon: ({ color }) => (
-                        <Icon name={"user"} size={20} color={color} solid />
-                    ),
-                    headerShown: false,
-                }}
-            />
-        </Tab.Navigator>
+        //     <Tab.Screen
+        //         name="AllCustomerStack"
+        //         component={AllCustomerStack}
+        //         options={{
+        //             tabBarLabel: "My Profile",
+        //             tabBarIcon: ({ color }) => (
+        //                 <Icon name={"user"} size={20} color={color} solid />
+        //             ),
+        //             headerShown: false,
+        //         }}
+        //     />
+        // </Tab.Navigator>
+      <Tab.Navigator
+        backBehavior={'initialRoute'}
+        screenOptions={{
+          headerShown: false
+        }}
+        tabBarOptions={{
+          keyboardHidesTabBar: true
+        }}
+        tabBar={props => <MyTabBar {...props} />}>
+        <Tab.Screen
+          name="Orders"
+          component={OrderStack}
+          options={({ route }) => {
+            return ({
+              title: 'Orders',
+              icon: 'Orders'
+            })
+          }}
+        />
+        <Tab.Screen
+          name="MyVehicles"
+          component={UserVehicleStack}
+          options={({ route }) => {
+            return ({
+              title: 'Vehicles',
+              icon: 'MyVehicles'
+            })
+          }}
+        />
+        <Tab.Screen
+          name="My Profile"
+          component={AllCustomerStack}
+          options={({ route }) => {
+            return ({
+              title: 'My Profile',
+              icon: 'My Profile'
+            })
+          }}
+        />
+      </Tab.Navigator>
     );
 };
 
 const InsideStack = ({ navigation }) => {
     return (
-        <Tab.Navigator
-            initialRouteName="ServicesStack"
-            screenOptions={{
-                tabBarActiveTintColor: colors.default_theme.primary,
-                tabBarStyle: { height: 60, marginTop: 0 },
-                tabBarItemStyle: { paddingVertical: 7 },
-                tabBarLabelStyle: { fontSize: 14 },
-                keyboardHidesTabBar: true,
-            }}
-        >
-            <Tab.Screen
-                name="ServicesStack"
-                component={ServicesStack}
-                options={{
-                    tabBarLabel: "Service",
-                    tabBarIcon: ({ color }) => (
-                        <Icon name={"tools"} size={20} color={color} />
-                    ),
-                    headerShown: false,
-                }}
-            />
-            <Tab.Screen
-                name="PartsStack"
-                component={PartsStack}
-                options={{
-                    tabBarLabel: "Parts",
-                    tabBarIcon: ({ color }) => (
-                        <Icon name={"wrench"} size={20} color={color} />
-                    ),
-                    headerShown: false,
-                }}
-            />
-            <Tab.Screen
-                name="AllStack"
-                component={AllStack}
-                options={{
-                    tabBarLabel: "More",
-                    tabBarIcon: ({ color }) => (
-                        <Icon name={"bars"} size={20} color={color} />
-                    ),
-                    headerShown: false,
-                }}
-                listeners={({ navigation }) => ({
-                    tabPress: (event) => {
-                        event.preventDefault();
-                        navigation.navigate("AllStack", { screen: "More" });
-                    },
-                })}
-            />
-        </Tab.Navigator>
+        // <Tab.Navigator
+        //     initialRouteName="ServicesStack"
+        //     screenOptions={{
+        //         tabBarActiveTintColor: colors.default_theme.primary,
+        //         tabBarStyle: { height: 60, marginTop: 0 },
+        //         tabBarItemStyle: { paddingVertical: 7 },
+        //         tabBarLabelStyle: { fontSize: 14 },
+        //         keyboardHidesTabBar: true,
+        //     }}
+        // >
+        //     <Tab.Screen
+        //         name="ServicesStack"
+        //         component={ServicesStack}
+        //         options={{
+        //             tabBarLabel: "Service",
+        //             tabBarIcon: ({ color }) => (
+        //                 <Icon name={"tools"} size={20} color={color} />
+        //             ),
+        //             headerShown: false,
+        //         }}
+        //     />
+        //     <Tab.Screen
+        //         name="PartsStack"
+        //         component={PartsStack}
+        //         options={{
+        //             tabBarLabel: "Parts",
+        //             tabBarIcon: ({ color }) => (
+        //                 <Icon name={"wrench"} size={20} color={color} />
+        //             ),
+        //             headerShown: false,
+        //         }}
+        //     />
+        //     <Tab.Screen
+        //         name="AllStack"
+        //         component={AllStack}
+        //         options={{
+        //             tabBarLabel: "More",
+        //             tabBarIcon: ({ color }) => (
+        //                 <Icon name={"bars"} size={20} color={color} />
+        //             ),
+        //             headerShown: false,
+        //         }}
+        //         listeners={({ navigation }) => ({
+        //             tabPress: (event) => {
+        //                 event.preventDefault();
+        //                 navigation.navigate("AllStack", { screen: "More" });
+        //             },
+        //         })}
+        //     />
+        // </Tab.Navigator>
+      <Tab.Navigator
+        backBehavior={'initialRoute'}
+        screenOptions={{
+          headerShown: false
+        }}
+        tabBarOptions={{
+          keyboardHidesTabBar: true
+        }}
+        tabBar={props => <MyTabBar {...props} />}>
+        <Tab.Screen
+              name="Service"
+               component={ServicesStack}
+          options={({ route }) => {
+            return ({
+              title: 'Service',
+              icon: 'Service'
+            })
+          }}
+        />
+        <Tab.Screen
+          name="Parts"
+          component={PartsStack}
+          options={({ route }) => {
+            return ({
+              title: 'Parts',
+              icon: 'Parts'
+            })
+          }}
+        />
+        <Tab.Screen
+          name="More"
+            component={AllStack}
+          options={({ route }) => {
+            return ({
+              title: 'More',
+              icon: 'More'
+            })
+          }}
+        />
+      </Tab.Navigator>
+    
     );
 };
 

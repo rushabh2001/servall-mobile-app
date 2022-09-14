@@ -78,7 +78,7 @@ const Services = ({ navigation, selectedGarageId, userToken, selectedGarage, use
 
             {/* Create Repair Order Card */}
             <View style={styles.mainCards}>
-              <TouchableOpacity style={[styles.cardContainer, {  marginTop:0, elevation: 3, flex:1 }]} onPress={() => navigation.navigate("ServicesStack" , {screen:"AddRepairOrder"}) }>
+            <TouchableOpacity style={[styles.cardContainer, { marginTop: 0, elevation: 3, flex: 1 }]} onPress={() => navigation.navigate("AddRepairOrder") }>
                 <View style={{flex:1, alignItems: 'center'}}>
                   <Image resizeMode={'cover'} style={styles.cardImage} source={require('../assets/images/icons/addorder.png')} />
                 </View>
