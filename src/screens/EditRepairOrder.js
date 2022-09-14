@@ -1765,6 +1765,7 @@ const EditRepairOrder = ({
                                 </View>
                                 {filteredPartData?.length > 0 ? (
                                     <FlatList
+                                            showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />
@@ -2020,6 +2021,7 @@ const EditRepairOrder = ({
                                 </View>
                                 {filteredServiceData?.length > 0 ? (
                                     <FlatList
+                                            showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />

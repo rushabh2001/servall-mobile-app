@@ -856,6 +856,7 @@ const AddStock = ({
                                 </View>
                                 {filteredPartData?.length > 0 ? (
                                     <FlatList
+                                            showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />
@@ -1184,6 +1185,7 @@ const AddStock = ({
                                 </View>
                                 {filteredGarageData?.length > 0 ? (
                                     <FlatList
+                                            showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />

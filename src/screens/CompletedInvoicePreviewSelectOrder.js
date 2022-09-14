@@ -271,6 +271,7 @@ const InvoicePreviewSelectOrder = ({
                     ) : filteredData.length != 0 ? (
                         <View>
                             <FlatList
+                                    showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent={() => <Divider />}
                                 data={filteredData}
                                 onEndReached={
@@ -558,7 +559,7 @@ const InvoicePreviewSelectOrder = ({
                                             <ActivityIndicator></ActivityIndicator>
                                         </View>
                                     ) : (
-                                        <ScrollView>
+                                                <ScrollView showsVerticalScrollIndicator={false}>
                                             <Text
                                                 style={
                                                     styles.cardDetailsHeading

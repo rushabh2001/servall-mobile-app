@@ -76,6 +76,7 @@ const PurchaseOrderSelectOrder = ({navigation, userToken, selectedGarageId, navi
                     (filteredData.length != 0 ?             
                         <View>
                             <FlatList
+                                showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent= {() => (<Divider />)}
                                 data={filteredData}
                                 // onEndReachedThreshold={1}
@@ -151,7 +152,7 @@ const PurchaseOrderSelectOrder = ({navigation, userToken, selectedGarageId, navi
                                             ? 
                                                 <ActivityIndicator style={{marginVertical: 30}}></ActivityIndicator> 
                                             : */}
-                                                <ScrollView>
+                                                <ScrollView showsVerticalScrollIndicator={false}>
                                                 <Text style={styles.cardDetailsHeading}>Order ID:</Text>
                                                 <Text style={styles.cardDetailsData}>{item.id}</Text>
                                                 <Divider />

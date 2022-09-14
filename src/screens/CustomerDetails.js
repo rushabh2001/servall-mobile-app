@@ -121,7 +121,7 @@ const CustomerDetails = ({ navigation, route, userToken, userRole, selectedGarag
 
     const CustomerOrders = () => {
         return(   
-            <ScrollView style={styles.innerTabContainer}>
+            <ScrollView style={styles.innerTabContainer} showsVerticalScrollIndicator={false}>
                 {isLoading ?  <ActivityIndicator style={{marginVertical: 50}}></ActivityIndicator> :
                     ((isCustomerData.order.length != 0 || isCustomerData.order == undefined) ?
                         <>
@@ -163,7 +163,7 @@ const CustomerDetails = ({ navigation, route, userToken, userRole, selectedGarag
 
     const CustomerNotifications = () => {
         return(
-            <ScrollView style={styles.innerTabContainer}>
+            <ScrollView style={styles.innerTabContainer} showsVerticalScrollIndicator={false}>
                 {isLoading ?  <ActivityIndicator style={{marginVertical: 50}}></ActivityIndicator> :
                     ((isCustomerData.order.length != 0 || isCustomerData.order == undefined) ?
                         <>

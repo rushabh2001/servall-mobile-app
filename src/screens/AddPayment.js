@@ -150,7 +150,7 @@ const AddPayment = ({
                 )}
             </View>
             <View style={styles.surfaceContainer}>
-                <ScrollView>
+                <ScrollView showsVerticalScrollIndicator={false}>
                     <View style={styles.cardContainer}>
                         <View
                             style={{

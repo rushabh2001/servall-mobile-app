@@ -36,7 +36,7 @@ const PartPurchase = ({ navigation }) => {
             </View>
     
             <View style={{flex:1}}>
-              <ScrollView>
+          <ScrollView showsVerticalScrollIndicator={false}>
                 <DataTable style={{padding:0,margin:0}}>
                   <DataTable.Header background="#000" style={{padding:0,margin:0}}>
                     <DataTable.Title  background="#000" style={[styles.tableHeader, {flex:1}]}><Text style={styles.tableHeaderText}>(P No.) Name</Text></DataTable.Title>
@@ -119,7 +119,7 @@ const Income = ({ navigation }) => {
             </View>
     
             <View style={{flex:1}}>
-              <ScrollView>
+          <ScrollView showsVerticalScrollIndicator={false}>
                 <DataTable style={{padding:0,margin:0}}>
                   <DataTable.Header background="#000" style={{padding:0,margin:0}}>
                     <DataTable.Title  background="#000" style={[styles.tableHeader, {flex:1}]}><Text style={styles.tableHeaderText}>(P No.) Name</Text></DataTable.Title>
@@ -203,7 +203,7 @@ const Expense = ({ navigation }) => {
             </View>
     
             <View style={{flex:1}}>
-              <ScrollView>
+          <ScrollView showsVerticalScrollIndicator={false}>
                 <DataTable style={{padding:0,margin:0}}>
                   <DataTable.Header background="#000" style={{padding:0,margin:0}}>
                     <DataTable.Title  background="#000" style={[styles.tableHeader, {flex:1}]}><Text style={styles.tableHeaderText}>(P No.) Name</Text></DataTable.Title>

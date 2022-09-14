@@ -1086,47 +1086,46 @@ const InsideCustomerStack = () => {
         //         }}
         //     />
         // </Tab.Navigator>
-        <Tab.Navigator
-            backBehavior={"initialRoute"}
-            screenOptions={{
-                headerShown: false,
-            }}
-            tabBarOptions={{
-                keyboardHidesTabBar: true,
-            }}
-            tabBar={(props) => <MyTabBar {...props} />}
-        >
-            <Tab.Screen
-                name="Orders"
-                component={OrderStack}
-                options={({ route }) => {
-                    return {
-                        title: "Orders",
-                        icon: "Orders",
-                    };
-                }}
-            />
-            <Tab.Screen
-                name="MyVehicles"
-                component={UserVehicleStack}
-                options={({ route }) => {
-                    return {
-                        title: "Vehicles",
-                        icon: "MyVehicles",
-                    };
-                }}
-            />
-            <Tab.Screen
-                name="My Profile"
-                component={AllCustomerStack}
-                options={({ route }) => {
-                    return {
-                        title: "My Profile",
-                        icon: "My Profile",
-                    };
-                }}
-            />
-        </Tab.Navigator>
+      <Tab.Navigator
+        backBehavior={'initialRoute'}
+        screenOptions={{
+          headerShown: false
+        }}
+        // tabBarOptions={{
+        //   keyboardHidesTabBar: true
+        // }}
+        tabBar={props => <MyTabBar {...props} />}>
+        <Tab.Screen
+          name="Orders"
+          component={OrderStack}
+          options={({ route }) => {
+            return ({
+              title: 'Orders',
+              icon: 'Orders'
+            })
+          }}
+        />
+        <Tab.Screen
+          name="MyVehicles"
+          component={UserVehicleStack}
+          options={({ route }) => {
+            return ({
+              title: 'Vehicles',
+              icon: 'MyVehicles'
+            })
+          }}
+        />
+        <Tab.Screen
+          name="My Profile"
+          component={AllCustomerStack}
+          options={({ route }) => {
+            return ({
+              title: 'My Profile',
+              icon: 'My Profile'
+            })
+          }}
+        />
+      </Tab.Navigator>
     );
 };
 
@@ -1182,47 +1181,44 @@ const InsideStack = ({ navigation }) => {
         //         })}
         //     />
         // </Tab.Navigator>
-        <Tab.Navigator
-            backBehavior={"initialRoute"}
-            screenOptions={{
-                headerShown: false,
-            }}
-            tabBarOptions={{
-                keyboardHidesTabBar: true,
-            }}
-            tabBar={(props) => <MyTabBar {...props} />}
-        >
-            <Tab.Screen
-                name="Service"
-                component={ServicesStack}
-                options={({ route }) => {
-                    return {
-                        title: "Service",
-                        icon: "Service",
-                    };
-                }}
-            />
-            <Tab.Screen
-                name="Parts"
-                component={PartsStack}
-                options={({ route }) => {
-                    return {
-                        title: "Parts",
-                        icon: "Parts",
-                    };
-                }}
-            />
-            <Tab.Screen
-                name="More"
-                component={AllStack}
-                options={({ route }) => {
-                    return {
-                        title: "More",
-                        icon: "More",
-                    };
-                }}
-            />
-        </Tab.Navigator>
+      <Tab.Navigator
+        backBehavior={'initialRoute'}
+        screenOptions={{
+          headerShown: false
+        }}
+        tabBar={props => <MyTabBar {...props} />}>
+        <Tab.Screen
+              name="Service"
+               component={ServicesStack}
+          options={({ route }) => {
+            return ({
+              title: 'Service',
+              icon: 'Service'
+            })
+          }}
+        />
+        <Tab.Screen
+          name="Parts"
+          component={PartsStack}
+          options={({ route }) => {
+            return ({
+              title: 'Parts',
+              icon: 'Parts'
+            })
+          }}
+        />
+        <Tab.Screen
+          name="More"
+            component={AllStack}
+          options={({ route }) => {
+            return ({
+              title: 'More',
+              icon: 'More'
+            })
+          }}
+        />
+      </Tab.Navigator>
+    
     );
 };
 

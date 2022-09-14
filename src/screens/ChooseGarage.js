@@ -211,6 +211,7 @@ const ChooseGarage = ({
                             />
                         )}
                         <FlatList
+                                showsVerticalScrollIndicator={false}
                             ItemSeparatorComponent={() => (
                                 <>
                                     <Divider />

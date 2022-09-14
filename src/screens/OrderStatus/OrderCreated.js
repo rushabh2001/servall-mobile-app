@@ -143,7 +143,7 @@ const OrderCreated = ({ navigation, userRole, route, userToken, selectedGarageId
             { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
             </View>
             <View style={styles.surfaceContainer}>
-                <ScrollView>
+                <ScrollView showsVerticalScrollIndicator={false}>
                     <View style={styles.upperContainer}>
                         <View style={styles.stepLables}>
                             <View style={{justifyContent: 'flex-start'}}>
@@ -219,6 +219,7 @@ const OrderCreated = ({ navigation, userRole, route, userToken, selectedGarageId
                                                 </View>
                                                 :
                                                     <FlatList
+                                                        showsVerticalScrollIndicator={false}
                                                         ItemSeparatorComponent= {() => (<Divider />)}
                                                         data={serviceData}
                                                         // onEndReachedThreshold={1}
@@ -262,6 +263,7 @@ const OrderCreated = ({ navigation, userRole, route, userToken, selectedGarageId
                                                     </View>
                                                 :
                                                     <FlatList
+                                                        showsVerticalScrollIndicator={false}
                                                         ItemSeparatorComponent= {() => (<Divider />)}
                                                         data={partData}
                                                         // onEndReachedThreshold={1}

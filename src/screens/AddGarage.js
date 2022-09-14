@@ -926,6 +926,7 @@ const AddGarage = ({
                             </View>
                             {filteredUserData?.length > 0 ? (
                                 <FlatList
+                                        showsVerticalScrollIndicator={false}
                                     ItemSeparatorComponent={() => (
                                         <>
                                             <Divider />
@@ -1077,6 +1078,7 @@ const AddGarage = ({
                             />
                             {filteredStateData?.length > 0 ? (
                                 <FlatList
+                                        showsVerticalScrollIndicator={false}
                                     ItemSeparatorComponent={() => (
                                         <>
                                             <Divider />
@@ -1205,6 +1207,7 @@ const AddGarage = ({
                             />
                             {filteredCityData?.length > 0 ? (
                                 <FlatList
+                                        showsVerticalScrollIndicator={false}
                                     ItemSeparatorComponent={() => (
                                         <>
                                             <Divider />

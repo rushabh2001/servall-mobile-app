@@ -1331,6 +1331,7 @@ const AddVehicle = ({
                                 />
                                 {filteredInsuranceProviderData?.length > 0 ? (
                                     <FlatList
+                                            showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />
@@ -1667,6 +1668,7 @@ const AddVehicle = ({
                                 </View>
                                 {filteredBrandData?.length > 0 ? (
                                     <FlatList
+                                            showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />
@@ -1910,6 +1912,7 @@ const AddVehicle = ({
                                 </View>
                                 {filteredModelData?.length > 0 ? (
                                     <FlatList
+                                            showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />

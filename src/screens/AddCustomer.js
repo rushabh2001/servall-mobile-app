@@ -1842,6 +1842,7 @@ const AddCustomer = ({
                                             borderWidth: 1,
                                             flex: 1,
                                         }}
+                                            showsVerticalScrollIndicator={false}
                                         keyExtractor={(item) => item.id}
                                         renderItem={({ item }) => (
                                             <List.Item
@@ -2159,6 +2160,7 @@ const AddCustomer = ({
                                 </View>
                                 {filteredGarageData?.length > 0 ? (
                                     <FlatList
+                                            showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />
@@ -2371,6 +2373,7 @@ const AddCustomer = ({
                                 </View>
                                 {filteredBrandData?.length > 0 ? (
                                     <FlatList
+                                            showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />
@@ -2614,6 +2617,7 @@ const AddCustomer = ({
                                 </View>
                                 {filteredModelData?.length > 0 ? (
                                     <FlatList
+                                            showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />
@@ -2801,6 +2805,7 @@ const AddCustomer = ({
                                 />
                                 {filteredStateData?.length > 0 ? (
                                     <FlatList
+                                            showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />
@@ -2935,6 +2940,7 @@ const AddCustomer = ({
                                 />
                                 {filteredCityData?.length > 0 ? (
                                     <FlatList
+                                            showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />

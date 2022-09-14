@@ -1688,6 +1688,7 @@ const AddRepairOrderStep3 = ({
                                 </View>
                                 {filteredPartData?.length > 0 ? (
                                     <FlatList
+                                            showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />
@@ -1946,6 +1947,7 @@ const AddRepairOrderStep3 = ({
                                 </View>
                                 {filteredServiceData?.length > 0 ? (
                                     <FlatList
+                                            showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />

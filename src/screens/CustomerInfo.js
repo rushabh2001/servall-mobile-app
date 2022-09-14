@@ -521,6 +521,7 @@ const CustomerInfo = ({
                             />
                             {filteredStateData?.length > 0 ? (
                                 <FlatList
+                                        showsVerticalScrollIndicator={false}
                                     ItemSeparatorComponent={() => (
                                         <>
                                             <Divider />
@@ -649,6 +650,7 @@ const CustomerInfo = ({
                             />
                             {filteredCityData?.length > 0 ? (
                                 <FlatList
+                                        showsVerticalScrollIndicator={false}
                                     ItemSeparatorComponent={() => (
                                         <>
                                             <Divider />

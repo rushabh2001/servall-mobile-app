@@ -269,7 +269,7 @@ const Parts = ({
                             <ActivityIndicator></ActivityIndicator>
                         </View>
                     ) : (
-                        <ScrollView>
+                            <ScrollView showsVerticalScrollIndicator={false}>
                             <View style={styles.container}>
                                 <Table>
                                     <Row
@@ -280,6 +280,7 @@ const Parts = ({
                                     />
                                     {filteredPartData?.length > 0 ? (
                                         <FlatList
+                                                showsVerticalScrollIndicator={false}
                                             ItemSeparatorComponent={() => (
                                                 <>
                                                     <Divider />

@@ -87,6 +87,7 @@ const CounterSale = ({navigation, userToken, selectedGarageId, selectedGarage, u
                         (filteredData.length != 0 ? 
                             <View>
                                 <FlatList
+                                    showsVerticalScrollIndicator={false}
                                     ItemSeparatorComponent= {() => (<Divider />)}
                                     data={filteredData}
                                     keyExtractor={item => item.id}

@@ -1963,6 +1963,7 @@ const EditVehicle = ({
                                         {filteredInsuranceProviderData?.length >
                                         0 ? (
                                             <FlatList
+                                                showsVerticalScrollIndicator={false}
                                                 ItemSeparatorComponent={() => (
                                                     <>
                                                         <Divider />
@@ -2334,6 +2335,7 @@ const EditVehicle = ({
                                         </View>
                                         {filteredBrandData?.length > 0 ? (
                                             <FlatList
+                                                showsVerticalScrollIndicator={false}
                                                 ItemSeparatorComponent={() => (
                                                     <>
                                                         <Divider />
@@ -2608,6 +2610,7 @@ const EditVehicle = ({
                                         </View>
                                         {filteredModelData?.length > 0 ? (
                                             <FlatList
+                                                showsVerticalScrollIndicator={false}
                                                 ItemSeparatorComponent={() => (
                                                     <>
                                                         <Divider />

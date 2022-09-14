@@ -22,7 +22,7 @@ const More = ({ navigation, signOut, selectedGarageId, selectedGarage, user}) =>
       </View>
       <View style= {styles.customSurface}>
         <View style={{flex:1}}>
-          <ScrollView>
+          <ScrollView showsVerticalScrollIndicator={false}>
             <List.Item
               title="My Customers"
               style={{paddingVertical:15}}

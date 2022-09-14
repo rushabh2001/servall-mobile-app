@@ -271,6 +271,7 @@ const AddPaymentSelectOrder = ({
                     ) : filteredData.length != 0 ? (
                         <View>
                             <FlatList
+                                    showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent={() => <Divider />}
                                 data={filteredData}
                                 onEndReached={
@@ -561,7 +562,7 @@ const AddPaymentSelectOrder = ({
                                             ></ActivityIndicator>
                                         </View>
                                     ) : (
-                                        <ScrollView>
+                                                <ScrollView showsVerticalScrollIndicator={false}>
                                             <Text
                                                 style={
                                                     styles.cardDetailsHeading

@@ -261,6 +261,7 @@ const VehicleSearch = ({
                     ) : filteredData.length != 0 ? (
                         <View>
                             <FlatList
+                                    showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent={() => <Divider />}
                                 data={filteredData}
                                 onEndReached={
@@ -391,7 +392,7 @@ const VehicleSearch = ({
                                             style={{ marginVertical: 30 }}
                                         ></ActivityIndicator>
                                     ) : (
-                                        <ScrollView>
+                                                <ScrollView showsVerticalScrollIndicator={false}>
                                             <Text
                                                 style={
                                                     styles.cardDetailsHeading

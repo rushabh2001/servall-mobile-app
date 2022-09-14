@@ -237,6 +237,7 @@ const OrderCompletedList = ({
                     ) : filteredData.length != 0 ? (
                         <View>
                             <FlatList
+                                    showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent={() => <Divider />}
                                 data={filteredData}
                                 onEndReached={

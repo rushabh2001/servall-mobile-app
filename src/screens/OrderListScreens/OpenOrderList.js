@@ -237,6 +237,7 @@ const OpenOrderList = ({
                     ) : filteredData.length != 0 ? (
                         <View>
                             <FlatList
+                                    showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent={() => <Divider />}
                                 // initialNumToRender={2}
                                 data={filteredData}
