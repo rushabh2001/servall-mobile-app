@@ -28,6 +28,10 @@ import { Picker } from "@react-native-picker/picker";
 import moment from "moment";
 import DocumentPicker from "react-native-document-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import Spinner from "react-native-loading-spinner-overlay";
+
+const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+const phoneReg = /^[0-9]{10}$/;
 
 const AddCustomer = ({
     navigation,
@@ -40,9 +44,9 @@ const AddCustomer = ({
     user,
 }) => {
     // Customer Fields
-    const [isName, setIsName] = useState("");
-    const [isEmail, setIsEmail] = useState("");
-    const [isPhoneNumber, setIsPhoneNumber] = useState("");
+    const [isName, setIsName] = useState();
+    const [isEmail, setIsEmail] = useState();
+    const [isPhoneNumber, setIsPhoneNumber] = useState();
     // const [isCity, setIsCity] = useState();
     // const [isState, setIsState] = useState();
     const [isAddress, setIsAddress] = useState("");
@@ -59,7 +63,7 @@ const AddCustomer = ({
 
     // Vehicle Fields
     const [isVehicleRegistrationNumber, setIsVehicleRegistrationNumber] =
-        useState("");
+        useState();
     const [isPurchaseDate, setIsPurchaseDate] = useState(new Date());
     const [isManufacturingDate, setIsManufacturingDate] = useState(new Date());
     const [isEngineNumber, setIsEngineNumber] = useState("");
@@ -206,8 +210,10 @@ const AddCustomer = ({
                 body: JSON.stringify(data),
             });
             const json = await res.json();
+            console.log(json);
             if (json !== undefined) {
                 await getBrandList();
+                console.log("ok go now");
             }
         } catch (e) {
             console.log(e);
@@ -360,18 +366,23 @@ const AddCustomer = ({
         Keyboard.dismiss();
 
         if (!validate()) {
-            if (!isName) setNameError("Customer Name is required");
-            else setNameError("");
-            if (!isPhoneNumber) setPhoneNumberError("Phone Number is required");
-            else setPhoneNumberError("");
-            if (!isEmail) setEmailError("Email is required");
-            else if (isEmail.length < 6)
-                setEmailError("Email should be minimum 6 characters");
-            else if (isEmail?.indexOf(" ") >= 0)
-                setEmailError("Email cannot contain spaces");
-            else if (isEmail?.indexOf("@") < 0)
-                setEmailError("Invalid Email Format");
-            else setEmailError("");
+            if (!isName) setIsName("");
+            if (!isEmail) setIsEmail("");
+            if (!isPhoneNumber) setIsPhoneNumber("");
+            if (!isVehicleRegistrationNumber)
+                setIsVehicleRegistrationNumber("");
+            // if (!isName) setNameError("Customer Name is required");
+            // else setNameError("");
+            // if (!isPhoneNumber) setPhoneNumberError("Phone Number is required");
+            // else setPhoneNumberError("");
+            // if (!isEmail) setEmailError("Email is required");
+            // else if (isEmail.length < 6)
+            //     setEmailError("Email should be minimum 6 characters");
+            // else if (isEmail?.indexOf(" ") >= 0)
+            //     setEmailError("Email cannot contain spaces");
+            // else if (isEmail?.indexOf("@") < 0)
+            //     setEmailError("Invalid Email Format");
+            // else setEmailError("");
             if (!isBrand || isBrand === 0) setBrandError("Brand is required");
             else setBrandError("");
             if (!isModel || isModel === 0) setModelError("Model is required");
@@ -385,14 +396,14 @@ const AddCustomer = ({
                     "Customer Belongs to Garage Field is required"
                 );
             else setGarageIdError("");
-            if (
-                !isVehicleRegistrationNumber ||
-                isVehicleRegistrationNumber?.trim().length === 0
-            )
-                setVehicleRegistrationNumberError(
-                    "Vehicle Registration Number is required"
-                );
-            else setVehicleRegistrationNumberError("");
+            // if (
+            //     !isVehicleRegistrationNumber ||
+            //     isVehicleRegistrationNumber?.trim().length === 0
+            // )
+            //     setVehicleRegistrationNumberError(
+            //         "Vehicle Registration Number is required"
+            //     );
+            // else setVehicleRegistrationNumberError("");
             return;
         }
 
@@ -627,6 +638,7 @@ const AddCustomer = ({
         {
             brandPage != 1 && setIsBrandScrollLoading(true);
         }
+        console.log("brand");
         try {
             const res = await fetch(`${API_URL}fetch_brand?page=${brandPage}`, {
                 method: "POST",
@@ -1108,11 +1120,11 @@ const AddCustomer = ({
                                 value={isName}
                                 onChangeText={(text) => setIsName(text)}
                             />
-                            {nameError?.length > 0 && (
+                            {isName?.trim()?.length === 0 ? (
                                 <Text style={styles.errorTextStyle}>
-                                    {nameError}
+                                    Customer Name is required
                                 </Text>
-                            )}
+                            ) : null}
 
                             <TextInput
                                 mode="outlined"
@@ -1122,26 +1134,40 @@ const AddCustomer = ({
                                 value={isEmail}
                                 onChangeText={(text) => setIsEmail(text)}
                             />
-                            {emailError?.length > 0 && (
+                            {isEmail?.trim()?.length === 0 ? (
                                 <Text style={styles.errorTextStyle}>
-                                    {emailError}
+                                    Email is required.
                                 </Text>
-                            )}
+                            ) : isEmail && !reg.test(isEmail?.trim()) ? (
+                                <Text style={styles.errorTextStyle}>
+                                    Invalid Email.
+                                </Text>
+                            ) : isEmail?.length > 200 ? (
+                                <Text style={styles.errorTextStyle}>
+                                    Email must be a maximum 200 characters.
+                                </Text>
+                            ) : null}
 
                             <TextInput
                                 mode="outlined"
                                 label="Phone Number"
                                 style={styles.input}
                                 placeholder="Phone Number"
+                                maxLength={10}
                                 value={isPhoneNumber}
                                 onChangeText={(text) => setIsPhoneNumber(text)}
                                 keyboardType={"phone-pad"}
                             />
-                            {phoneNumberError?.length > 0 && (
+                            {isPhoneNumber?.trim()?.length === 0 ? (
                                 <Text style={styles.errorTextStyle}>
-                                    {phoneNumberError}
+                                    Phone Number is required.
                                 </Text>
-                            )}
+                            ) : isPhoneNumber &&
+                              !phoneReg.test(isPhoneNumber?.trim()) ? (
+                                <Text style={styles.errorTextStyle}>
+                                    Phone Number must be 10 digits.
+                                </Text>
+                            ) : null}
 
                             <View>
                                 <TouchableOpacity
@@ -1343,11 +1369,12 @@ const AddCustomer = ({
                                     setIsVehicleRegistrationNumber(text)
                                 }
                             />
-                            {vehicleRegistrationNumberError?.length > 0 && (
+                            {isVehicleRegistrationNumber?.trim()?.length ===
+                            0 ? (
                                 <Text style={styles.errorTextStyle}>
-                                    {vehicleRegistrationNumberError}
+                                    Vehicle Registration Number is required.
                                 </Text>
-                            )}
+                            ) : null}
 
                             <TouchableOpacity
                                 style={{ flex: 1 }}
@@ -1842,7 +1869,7 @@ const AddCustomer = ({
                                             borderWidth: 1,
                                             flex: 1,
                                         }}
-                                            showsVerticalScrollIndicator={false}
+                                        showsVerticalScrollIndicator={false}
                                         keyExtractor={(item) => item.id}
                                         renderItem={({ item }) => (
                                             <List.Item
@@ -2160,7 +2187,7 @@ const AddCustomer = ({
                                 </View>
                                 {filteredGarageData?.length > 0 ? (
                                     <FlatList
-                                            showsVerticalScrollIndicator={false}
+                                        showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />
@@ -2217,6 +2244,7 @@ const AddCustomer = ({
                                                     );
                                                     setIsGarageId(item.id);
                                                     setGarageError("");
+                                                    setGarageIdError("");
                                                     setGarageListModal(false);
                                                 }}
                                             />
@@ -2373,7 +2401,7 @@ const AddCustomer = ({
                                 </View>
                                 {filteredBrandData?.length > 0 ? (
                                     <FlatList
-                                            showsVerticalScrollIndicator={false}
+                                        showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />
@@ -2617,7 +2645,7 @@ const AddCustomer = ({
                                 </View>
                                 {filteredModelData?.length > 0 ? (
                                     <FlatList
-                                            showsVerticalScrollIndicator={false}
+                                        showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />
@@ -2805,7 +2833,7 @@ const AddCustomer = ({
                                 />
                                 {filteredStateData?.length > 0 ? (
                                     <FlatList
-                                            showsVerticalScrollIndicator={false}
+                                        showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />
@@ -2940,7 +2968,7 @@ const AddCustomer = ({
                                 />
                                 {filteredCityData?.length > 0 ? (
                                     <FlatList
-                                            showsVerticalScrollIndicator={false}
+                                        showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />

@@ -84,7 +84,7 @@ const AddRepairOrderStep3 = ({
 
     const [isVehicleImg, setIsVehicleImg] = useState();
 
-    const [isComment, setIsComment] = useState();
+    const [isComment, setIsComment] = useState("");
 
     const [isPart, setIsPart] = useState("");
     const [isPartName, setIsPartName] = useState("");
@@ -200,7 +200,11 @@ const AddRepairOrderStep3 = ({
         data.append("discount", isApplicableDiscount);
         if (isVehicleImg != null) data.append("orderimage", isVehicleImg);
         data.append("total", isTotal);
-        data.append("comment", isComment?.trim());
+        //data.append("comment", isComment?.trim());
+        data.append(
+            "comment",
+            isComment?.trim()?.length === 0 ? "" : isComment
+        );
 
         addOrder(data);
         console.log("data", data);
@@ -1688,7 +1692,7 @@ const AddRepairOrderStep3 = ({
                                 </View>
                                 {filteredPartData?.length > 0 ? (
                                     <FlatList
-                                            showsVerticalScrollIndicator={false}
+                                        showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />
@@ -1947,7 +1951,7 @@ const AddRepairOrderStep3 = ({
                                 </View>
                                 {filteredServiceData?.length > 0 ? (
                                     <FlatList
-                                            showsVerticalScrollIndicator={false}
+                                        showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />

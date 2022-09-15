@@ -254,7 +254,7 @@ const MyCustomer = ({
                     ) : filteredData?.length > 0 ? (
                         <>
                             <FlatList
-                                 showsVerticalScrollIndicator={false}
+                                showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent={() => <Divider />}
                                 data={filteredData}
                                 onEndReached={
