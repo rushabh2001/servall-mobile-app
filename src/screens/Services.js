@@ -80,8 +80,8 @@ const Services = ({
     useEffect(() => {
         // setIsGarageId(selectedGarageId);
         getDashboardData();
-        console.log("user", user);
-        console.log("user name", user.name);
+        // console.log("user", user);
+        // console.log("user name", user.name);
         // console.log('selectedGarage', selectedGarageId);
     }, [isFocused]);
 

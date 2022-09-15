@@ -477,9 +477,7 @@ const AddRepairOrderStep3 = ({
             console.log(e);
         } finally {
             // setIsLoadingPartList(false)
-            {
-                partPage == 1 && setIsLoadingPartList(false);
-            }
+            setIsLoadingPartList(false);
             {
                 partPage != 1 && setIsPartScrollLoading(false);
             }
@@ -538,6 +536,7 @@ const AddRepairOrderStep3 = ({
             console.error(error);
         } finally {
             setPartRefreshing(false);
+            setIsLoadingPartList(false);
         }
     };
 
@@ -593,9 +592,7 @@ const AddRepairOrderStep3 = ({
         } catch (e) {
             console.log(e);
         } finally {
-            {
-                servicePage == 1 && setIsLoadingServiceList(false);
-            }
+            setIsLoadingServiceList(false);
             {
                 servicePage != 1 && setIsServiceScrollLoading(false);
             }
@@ -654,6 +651,7 @@ const AddRepairOrderStep3 = ({
             console.error(error);
         } finally {
             setServiceRefreshing(false);
+            setIsLoadingServiceList(false);
         }
     };
 
@@ -689,6 +687,7 @@ const AddRepairOrderStep3 = ({
             });
             const json = await res.json();
             if (json !== undefined) {
+                setIsLoadingServiceList(true);
                 pullServiceRefresh();
                 setIsService(parseInt(json.data.id));
                 setIsServiceName(json.data.name);
@@ -718,6 +717,7 @@ const AddRepairOrderStep3 = ({
             });
             const json = await res.json();
             if (json !== undefined) {
+                setIsLoadingPartList(true);
                 pullPartRefresh();
                 setIsPart(parseInt(json.data.id));
                 setIsPartName(json.data.name);
@@ -731,7 +731,7 @@ const AddRepairOrderStep3 = ({
         } catch (e) {
             console.log(e);
         }
-    };
+    };  
 
     useEffect(() => {
         getServiceList();

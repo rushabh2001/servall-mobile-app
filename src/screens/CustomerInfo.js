@@ -147,10 +147,7 @@ const CustomerInfo = ({
                         return;
                     } else if (res.statusCode == 201) {
                         console.log("Customer Updated SuccessFully");
-                        navigation.navigate("AllStack", {
-                            screen: "CustomerDetails",
-                            params: { userId: route?.params?.userId },
-                        });
+                        navigation.navigate("CustomerDetails",{ userId: route?.params?.userId });
                     }
                 });
         } catch (e) {

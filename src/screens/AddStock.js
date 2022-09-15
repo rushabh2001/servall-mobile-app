@@ -186,6 +186,7 @@ const AddStock = ({
                 body: JSON.stringify(data),
             });
             const json = await res.json();
+            console.log('add_inventory', json);
             if (json !== undefined) {
                 navigation.navigate("Parts");
             }
@@ -208,7 +209,8 @@ const AddStock = ({
             });
             const json = await res.json();
             if (json !== undefined) {
-                getPartList();
+                setIsLoadingPartList(true);
+                pullPartRefresh();
                 setIsPart(parseInt(json.data.id));
                 setIsPartName(json.data.name);
             }
@@ -271,9 +273,7 @@ const AddStock = ({
         } catch (e) {
             console.log(e);
         } finally {
-            {
-                partPage == 1 && setIsLoadingPartList(false);
-            }
+            setIsLoadingPartList(false);
             {
                 partPage != 1 && setIsPartScrollLoading(false);
             }
@@ -305,6 +305,7 @@ const AddStock = ({
             console.error(error);
         } finally {
             setPartRefreshing(false);
+            setIsLoadingPartList(false);
         }
     };
 

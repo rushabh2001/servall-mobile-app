@@ -690,7 +690,7 @@ const AccountsStack = ({ navigation }) => {
                                 <Button
                                     // onPress={() => navigation.navigate('ChooseGarage')}
                                     onPress={() =>
-                                        navigation.navigate("ServicesStack", {
+                                        navigation.navigate("Service", {
                                             screen: "ChooseGarage",
                                         })
                                     }

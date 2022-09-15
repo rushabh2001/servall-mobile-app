@@ -138,6 +138,7 @@ const OrderCompletedList = ({
             console.error(error);
         } finally {
             setRefreshing(false);
+            setIsLoading(false);
         }
     };
 
@@ -159,7 +160,7 @@ const OrderCompletedList = ({
     };
 
     useEffect(() => {
-        getOrderList();
+        pullRefresh();
     }, [isFocused]);
 
     return (

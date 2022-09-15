@@ -138,6 +138,7 @@ const WIPOrderList = ({
             console.error(error);
         } finally {
             setRefreshing(false);
+            setIsLoading(false);
         }
     };
 
@@ -159,7 +160,7 @@ const WIPOrderList = ({
     };
 
     useEffect(() => {
-        getOrderList();
+        pullRefresh();
     }, [isFocused]);
 
     return (

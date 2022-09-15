@@ -122,10 +122,15 @@ const CustomerDetails = ({ navigation, route, userToken, userRole, selectedGarag
     const CustomerOrders = () => {
         return(   
             <ScrollView style={styles.innerTabContainer} showsVerticalScrollIndicator={false}>
-                {isLoading ?  <ActivityIndicator style={{marginVertical: 50}}></ActivityIndicator> :
-                    ((isCustomerData.order.length != 0 || isCustomerData.order == undefined) ?
+                {isLoading ? <ActivityIndicator style={{marginVertical: 50}}></ActivityIndicator> :
+                    ((isCustomerData?.order?.length == 0 || isCustomerData.order == undefined || isCustomerData.order == []) 
+                    ?
+                        <View style={[styles.cards, {alignItems: 'center', flex: 1, justifyContent: 'center', backgroundColor: "transparent", marginVertical: 50 }]}>
+                            <Text>No Order Found for this user!</Text>
+                        </View>
+                    :
                         <>
-                            {isCustomerData.order.map((order, i) => {
+                            {isCustomerData?.order.map((order, i) => {
                                 return (
                                     <View style={styles.cards}>
                                         {/* <View style={styles.cardTags} >
@@ -151,10 +156,6 @@ const CustomerDetails = ({ navigation, route, userToken, userRole, selectedGarag
                                 );
                             })}
                         </>
-                    :
-                        <View style={[styles.cards, {alignItems: 'center', flex: 1, justifyContent: 'center', backgroundColor: "transparent", marginVertical: 50 }]}>
-                            <Text>No Order Found for this user!</Text>
-                        </View>
                     )
                 }
             </ScrollView>
@@ -164,10 +165,14 @@ const CustomerDetails = ({ navigation, route, userToken, userRole, selectedGarag
     const CustomerNotifications = () => {
         return(
             <ScrollView style={styles.innerTabContainer} showsVerticalScrollIndicator={false}>
-                {isLoading ?  <ActivityIndicator style={{marginVertical: 50}}></ActivityIndicator> :
-                    ((isCustomerData.order.length != 0 || isCustomerData.order == undefined) ?
-                        <>
-                            {isCustomerData.order.map((order, i) => {
+                {isLoading ? <ActivityIndicator style={{marginVertical: 50}}></ActivityIndicator> :
+                    ((isCustomerData?.order?.length == 0 || isCustomerData.order == undefined || isCustomerData.order == []) ?
+                        <View style={[styles.cards, { marginVertical: 50, alignItems: 'center', flex: 1, justifyContent: 'center', backgroundColor: "transparent" }]}>
+                            <Text>No Order Found for this user!</Text>
+                        </View>
+                    :
+                    <>
+                            {isCustomerData?.order.map((order, i) => {
                                 return (
                                     <View style={styles.cards}>
                                         {/* <View style={styles.cardTags} >
@@ -193,10 +198,6 @@ const CustomerDetails = ({ navigation, route, userToken, userRole, selectedGarag
                                 );
                             })}
                         </>
-                    :
-                        <View style={[styles.cards, { marginVertical: 50, alignItems: 'center', flex: 1, justifyContent: 'center', backgroundColor: "transparent" }]}>
-                            <Text>No Order Found for this user!</Text>
-                        </View>
                     )
                 }
             </ScrollView>
@@ -211,6 +212,8 @@ const CustomerDetails = ({ navigation, route, userToken, userRole, selectedGarag
 
     useEffect(() => {
         getCustomerDetails();
+        console.log('isCustomerData?.order?.length', isCustomerData?.order?.length);
+        console.log('isCustomerData?.order', isCustomerData?.order);
     }, [isFocused]);
     
     return (

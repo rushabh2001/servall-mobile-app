@@ -69,7 +69,7 @@ const AddGarage = ({
 
     // States for Dropdown
     // const [isUser, setIsUser] = useState('');
-    const [isUserName, setIsUserName] = useState("");
+    // const [isName, setIsName] = useState("");
     // const [userList, setAdminList] = useState([]);
     const [userListModal, setUserListModal] = useState(false);
     const [isLoadingUserList, setIsLoadingUserList] = useState(false);
@@ -216,9 +216,7 @@ const AddGarage = ({
                         }
                         return;
                     } else if (res.statusCode == 201) {
-                        navigation.navigate("AllStack", {
-                            screen: "ChooseGarage",
-                        });
+                        navigation.navigate("ChooseGarage");
                     }
                 });
         } catch (e) {
@@ -672,7 +670,7 @@ const AddGarage = ({
                                                     width: "100%",
                                                 }}
                                                 placeholder="Select User"
-                                                value={isUserName}
+                                                value={isName}
                                                 right={
                                                     <TextInput.Icon name="menu-down" />
                                                 }
@@ -815,7 +813,7 @@ const AddGarage = ({
                     onDismiss={() => {
                         setUserListModal(false);
                         setOwnerId(0);
-                        setIsUserName("");
+                        setIsName("");
                         setUserError("");
                         setSearchQueryForUsers("");
                         searchFilterForUsers();
@@ -846,7 +844,7 @@ const AddGarage = ({
                         onPress={() => {
                             setUserListModal(false);
                             setOwnerId(0);
-                            setIsUserName("");
+                            setIsName("");
                             setUserError("");
                             setSearchQueryForUsers("");
                             searchFilterForUsers();
@@ -981,7 +979,7 @@ const AddGarage = ({
                                                     // </TouchableOpacity>
                                                 }
                                                 onPress={() => {
-                                                    setIsUserName(item.name);
+                                                    setIsName(item.name);
                                                     setOwnerId(item.id);
                                                     setUserError("");
                                                     setUserListModal(false);

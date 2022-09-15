@@ -94,6 +94,7 @@ const OrderList = ({navigation, userToken, navigator, selectedGarageId, selected
                 // console.log('2', response.status);
                 setRefreshing(false);
             }
+            setIsLoading(false);
         } catch (error) {
             // if (error?.message == 'Unauthenticated.') signOut();
             console.error(error);
@@ -244,7 +245,7 @@ const OrderList = ({navigation, userToken, navigator, selectedGarageId, selected
                                                     <List.Item
                                                         title="Change Order Status"
                                                         style={{paddingVertical:15}}
-                                                        onPress={() =>  { navigation.navigate("ServicesStack", {screen: 'OrderCreated'});  this[RBSheet + index].close(); }}
+                                                        onPress={() =>  { navigation.navigate("Service", {screen: 'OrderCreated'});  this[RBSheet + index].close(); }}
                                                         left={() => (<Icon type={"MaterialCommunityIcons"} name="clipboard-list-outline" style={{marginHorizontal:10, alignSelf:"center"}} color={colors.black} size={26} />)}
                                                     />
                                                     <Divider />

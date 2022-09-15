@@ -55,7 +55,7 @@ const AddRepairOrderStep2 = ({
     const [isUser, setIsUser] = useState();
     const [userList, setUserList] = useState([]);
     const [userError, setUserError] = useState("");
-    const [isUserName, setIsUserName] = useState("");
+    // const [isName, setIsName] = useState("");
     const [userListModal, setUserListModal] = useState(false);
     const [isLoadingUserList, setIsLoadingUserList] = useState(false);
     const [filteredUserData, setFilteredUserData] = useState([]);
@@ -225,7 +225,7 @@ const AddRepairOrderStep2 = ({
             });
             const json = await res.json();
             if (json !== undefined) {
-                await getBrandList();
+                pullBrandRefresh();
             }
         } catch (e) {
             console.log(e);
@@ -250,7 +250,7 @@ const AddRepairOrderStep2 = ({
             });
             const json = await res.json();
             if (json !== undefined) {
-                await getModelList();
+                pullModelRefresh();
             }
         } catch (e) {
             console.log(e);
@@ -1234,7 +1234,7 @@ const AddRepairOrderStep2 = ({
                 ]);
                 // setUserList(json.user_list);
                 // setFilteredUserData(json.user_list);
-                // setIsUserName("");
+                // setIsName("");
                 // setIsUser(0);
             }
         } catch (e) {
@@ -1451,7 +1451,7 @@ const AddRepairOrderStep2 = ({
                                                 width: "100%",
                                             }}
                                             placeholder="Select User"
-                                            value={isUserName}
+                                            value={isName}
                                             right={
                                                 <TextInput.Icon name="menu-down" />
                                             }
@@ -2461,7 +2461,7 @@ const AddRepairOrderStep2 = ({
                         onDismiss={() => {
                             setUserListModal(false);
                             // setIsUser();
-                            // setIsUserName("");
+                            // setIsName("");
                             // setUserError("");
                             onUserRefresh();
                             setSearchQueryForUsers("");
@@ -2493,7 +2493,7 @@ const AddRepairOrderStep2 = ({
                             onPress={() => {
                                 setUserListModal(false);
                                 // setIsUser();
-                                // setIsUserName("");
+                                // setIsName("");
                                 // setUserError("");
                                 onUserRefresh();
                                 setSearchQueryForUsers("");
@@ -2635,7 +2635,7 @@ const AddRepairOrderStep2 = ({
                                                     </View>
                                                 }
                                                 onPress={() => {
-                                                    setIsUserName(item.name);
+                                                    setIsName(item.name);
                                                     setIsUser(item.id);
                                                     setUserError("");
                                                     setUserListModal(false);

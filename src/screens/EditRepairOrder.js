@@ -493,9 +493,7 @@ const EditRepairOrder = ({
             console.log(e);
         } finally {
             // setIsLoadingPartList(false)
-            {
-                partPage == 1 && setIsLoadingPartList(false);
-            }
+            setIsLoadingPartList(false);
             {
                 partPage != 1 && setIsPartScrollLoading(false);
             }
@@ -554,6 +552,7 @@ const EditRepairOrder = ({
             console.error(error);
         } finally {
             setPartRefreshing(false);
+            setIsLoadingPartList(false);
         }
     };
 
@@ -609,9 +608,7 @@ const EditRepairOrder = ({
         } catch (e) {
             console.log(e);
         } finally {
-            {
-                servicePage == 1 && setIsLoadingServiceList(false);
-            }
+            setIsLoadingServiceList(false);
             {
                 servicePage != 1 && setIsServiceScrollLoading(false);
             }
@@ -670,6 +667,7 @@ const EditRepairOrder = ({
             console.error(error);
         } finally {
             setServiceRefreshing(false);
+            setIsLoadingServiceList(false);
         }
     };
 
@@ -739,6 +737,7 @@ const EditRepairOrder = ({
             });
             const json = await res.json();
             if (json !== undefined) {
+                setIsLoadingPartList(true);
                 pullPartRefresh();
                 setIsPart(parseInt(json.data.id));
                 setIsPartName(json.data.name);

@@ -139,6 +139,7 @@ const VehicleReadyOrderList = ({
             console.error(error);
         } finally {
             setRefreshing(false);
+            setIsLoading(false);
         }
     };
 
@@ -160,7 +161,7 @@ const VehicleReadyOrderList = ({
     };
 
     useEffect(() => {
-        getOrderList();
+        pullRefresh();
     }, [isFocused]);
 
     return (

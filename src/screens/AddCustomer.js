@@ -212,8 +212,7 @@ const AddCustomer = ({
             const json = await res.json();
             console.log(json);
             if (json !== undefined) {
-                await getBrandList();
-                console.log("ok go now");
+                pullBrandRefresh();
             }
         } catch (e) {
             console.log(e);
@@ -238,7 +237,7 @@ const AddCustomer = ({
             });
             const json = await res.json();
             if (json !== undefined) {
-                await getModelList();
+                pullModelRefresh();
             }
         } catch (e) {
             console.log(e);
@@ -652,6 +651,7 @@ const AddCustomer = ({
                 }),
             });
             const json = await res.json();
+            console.log('Fetch Brand List');
             if (json !== undefined) {
                 setBrandList([...brandList, ...json.brand_list.data]);
                 setFilteredBrandData([

@@ -231,7 +231,7 @@ const AddVehicle = ({
             });
             const json = await res.json();
             if (json !== undefined) {
-                await getBrandList();
+                pullBrandRefresh();
             }
         } catch (e) {
             console.log(e);
@@ -256,7 +256,7 @@ const AddVehicle = ({
             });
             const json = await res.json();
             if (json !== undefined) {
-                await getModelList();
+                pullModelRefresh();
             }
         } catch (e) {
             console.log(e);

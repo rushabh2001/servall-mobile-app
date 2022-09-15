@@ -132,6 +132,7 @@ const OrderSearch = ({
             }
         } finally {
             setRefreshing(false);
+            setIsLoading(false);
         }
     };
 
@@ -231,7 +232,7 @@ const OrderSearch = ({
                     ) : filteredData.length != 0 ? (
                         <View>
                             <FlatList
-                                    showsVerticalScrollIndicator={false}
+                                showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent={() => <Divider />}
                                 data={filteredData}
                                 onEndReached={
@@ -596,42 +597,22 @@ const OrderSearch = ({
                                                             item?.status ==
                                                             "Vehicle Received"
                                                         ) {
-                                                            navigation.navigate(
-                                                                "OrderCreated",
-                                                                {
-                                                                    data: arrData,
-                                                                }
-                                                            );
+                                                            navigation.navigate("Service", {screen: "OrderCreated", params: {data: arrData}});
                                                         } else if (
                                                             item?.status ==
                                                             "Work in Progress Order"
                                                         ) {
-                                                            navigation.navigate(
-                                                                "OrderWorkInProgress",
-                                                                {
-                                                                    data: arrData,
-                                                                }
-                                                            );
+                                                             navigation.navigate("Service", {screen: "OrderWorkInProgress", params: {data: arrData}});
                                                         } else if (
                                                             item?.status ==
                                                             "Vehicle Ready"
                                                         ) {
-                                                            navigation.navigate(
-                                                                "OrderVehicleReady",
-                                                                {
-                                                                    data: arrData,
-                                                                }
-                                                            );
+                                                            navigation.navigate("Service", {screen: "OrderVehicleReady", params: {data: arrData}});
                                                         } else if (
                                                             item?.status ==
                                                             "Completed Order"
                                                         ) {
-                                                            navigation.navigate(
-                                                                "OrderCompleted",
-                                                                {
-                                                                    data: arrData,
-                                                                }
-                                                            );
+                                                            navigation.navigate("Service", {screen: "OrderCompleted", params: {data: arrData}});
                                                         }
                                                         // navigation.navigate('OrderCreated', {'data': arrData});
                                                         this[
@@ -718,10 +699,11 @@ const OrderSearch = ({
                                                             "data:",
                                                             arrData
                                                         );
-                                                        navigation.navigate(
-                                                            "EditRepairOrder",
-                                                            { data: arrData }
-                                                        );
+                                                        navigation.navigate("Service", {screen: "EditRepairOrder", params: {data: arrData}});
+                                                        // navigation.navigate(
+                                                        //     "EditRepairOrder",
+                                                        //     { data: arrData }
+                                                        // );
                                                         this[
                                                             RBSheet + index
                                                         ].close();

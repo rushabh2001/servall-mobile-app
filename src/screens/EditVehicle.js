@@ -226,7 +226,7 @@ const EditVehicle = ({
             });
             const json = await res.json();
             if (json !== undefined) {
-                await getBrandList();
+                pullBrandRefresh();
             }
         } catch (e) {
             console.log(e);
@@ -251,7 +251,7 @@ const EditVehicle = ({
             });
             const json = await res.json();
             if (json !== undefined) {
-                await getModelList();
+                pullModelRefresh();
             }
         } catch (e) {
             console.log(e);
@@ -564,10 +564,7 @@ const EditVehicle = ({
                     } else if (res.statusCode == 200) {
                         console.log(res);
                         console.log("Vehicle Updated SuccessFully");
-                        navigation.navigate("AllStack", {
-                            screen: "CustomerDetails",
-                            params: { userId: route?.params?.userId },
-                        });
+                        navigation.navigate("CustomerDetails", {userId: route?.params?.userId});
                     }
                 });
         } catch (e) {

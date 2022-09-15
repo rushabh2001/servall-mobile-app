@@ -166,6 +166,7 @@ const AddRepairOrder = ({
             console.error(error);
         } finally {
             setRefreshing(false);
+            setIsLoading(false);
         }
     };
 

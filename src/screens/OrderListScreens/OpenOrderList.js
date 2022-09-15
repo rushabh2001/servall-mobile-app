@@ -111,7 +111,7 @@ const OpenOrderList = ({
     };
 
     useEffect(() => {
-        getOrderList();
+        pullRefresh();
     }, [isFocused]);
 
     const onRefresh = () => {
@@ -147,6 +147,7 @@ const OpenOrderList = ({
             console.error(error);
         } finally {
             setRefreshing(false);
+            setIsLoading(false);
         }
     };
 

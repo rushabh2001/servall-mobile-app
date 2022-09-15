@@ -149,6 +149,7 @@ const Orders = ({
             console.error(error);
         } finally {
             setRefreshing(false);
+            setIsLoading(false);
         }
     };
 
@@ -191,7 +192,7 @@ const Orders = ({
     };
 
     useEffect(() => {
-        getOrderList();
+        pullRefresh();
     }, [isFocused]);
 
     return (

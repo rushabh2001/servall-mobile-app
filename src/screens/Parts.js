@@ -155,11 +155,13 @@ const Parts = ({
                 setPartList(json.data.data);
                 setFilteredPartData(json.data.data);
                 setPage(2);
+                console.log('setPartList', json.data.data);
             }
         } catch (error) {
             console.error(error);
         } finally {
             setRefreshing(false);
+            setIsLoading(false);
         }
     };
 
@@ -181,7 +183,7 @@ const Parts = ({
     };
 
     useEffect(() => {
-        getPartList();
+        pullRefresh();
     }, [isFocused]);
 
     const element = (data, index) => (

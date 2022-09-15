@@ -163,6 +163,7 @@ const VehicleList = ({
             console.error(error);
         } finally {
             setRefreshing(false);
+            setIsLoading(false);
         }
     };
 

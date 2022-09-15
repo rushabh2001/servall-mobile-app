@@ -172,6 +172,7 @@ const AddPaymentSelectOrder = ({
             console.error(error);
         } finally {
             setRefreshing(false);
+            setIsLoading(false);
         }
     };
 

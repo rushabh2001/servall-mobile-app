@@ -67,17 +67,16 @@ const MyCustomer = ({
                 setFilteredData([...filteredData, ...json.user_list.data]);
                 // setData(json.user_list);
                 // setFilteredData(json.user_list);
+                setIsLoading(false);
+                {
+                    page != 1 && setIsScrollLoading(false);
+                }
+                {json.user_list.data != [] && setPage(page + 1)};
             }
         } catch (e) {
             console.log(e);
         } finally {
-            {
-                page == 1 && setIsLoading(false);
-            }
-            {
-                page != 1 && setIsScrollLoading(false);
-            }
-            setPage(page + 1);
+       
         }
     };
 
@@ -141,6 +140,7 @@ const MyCustomer = ({
             console.error(error);
         } finally {
             setRefreshing(false);
+            setIsLoading(false);
         }
     };
 
@@ -161,13 +161,14 @@ const MyCustomer = ({
         pullRefresh();
     };
 
-    useEffect(() => {
-        getCustomerList();
-    }, []);
+    // useEffect(() => {
+    //     getCustomerList();
+    // }, []);
 
     useEffect(() => {
+        setPage(1);
         setIsLoading(true);
-        getCustomerList();
+        pullRefresh();
     }, [isFocused]);
 
     return (
