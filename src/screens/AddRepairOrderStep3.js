@@ -288,17 +288,24 @@ const AddRepairOrderStep3 = ({
 
     function handleServiceAdd(data) {
         const values = [...fieldsServices];
-        values.push({
-            service_id: data.service_id,
-            serviceName: data.serviceName,
-            rate: 0,
-            qty: 0,
-            discount: 0,
-            applicableDiscountForItem: 0,
-            amount: 0,
-        });
-        setFieldsServices(values);
-        setServiceListModal(false);
+        var keyword = data.service_id;
+        const isObjectPresent = values.find((o) => o.service_id === keyword);
+        if (!isObjectPresent) {
+            values.push({
+                service_id: data.service_id,
+                serviceName: data.serviceName,
+                rate: 0,
+                qty: 0,
+                discount: 0,
+                applicableDiscountForItem: 0,
+                amount: 0,
+            });
+            setFieldsServices(values);
+            setServiceListModal(false);
+        } else {
+            setServiceListModal(false);
+            alert("Already added service.");
+        }
     }
 
     function handleServiceRemove(i) {
@@ -361,17 +368,24 @@ const AddRepairOrderStep3 = ({
 
     function handlePartAdd(data) {
         const partValues = [...fieldsParts];
-        partValues.push({
-            parts_id: data.parts_id,
-            partName: data.partName,
-            rate: 0,
-            qty: 0,
-            discount: 0,
-            applicableDiscount: 0,
-            amount: 0,
-        });
-        setFieldsParts(partValues);
-        setPartListModal(false);
+        var keyword = data.parts_id;
+        const isObjectPresent = partValues.find((o) => o.parts_id === keyword);
+        if (!isObjectPresent) {
+            partValues.push({
+                parts_id: data.parts_id,
+                partName: data.partName,
+                rate: 0,
+                qty: 0,
+                discount: 0,
+                applicableDiscount: 0,
+                amount: 0,
+            });
+            setFieldsParts(partValues);
+            setPartListModal(false);
+        } else {
+            setPartListModal(false);
+            alert("Already added parts.");
+        }
     }
 
     function handlePartRemove(i) {
@@ -731,7 +745,7 @@ const AddRepairOrderStep3 = ({
         } catch (e) {
             console.log(e);
         }
-    };  
+    };
 
     useEffect(() => {
         getServiceList();

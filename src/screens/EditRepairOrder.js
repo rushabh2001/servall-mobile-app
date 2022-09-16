@@ -206,17 +206,27 @@ const EditRepairOrder = ({
 
     function handleServiceAdd(data) {
         const values = [...fieldsServices];
-        values.push({
-            service_id: data.service_id,
-            serviceName: data.serviceName,
-            rate: 0,
-            qty: 0,
-            discount: 0,
-            applicableDiscountForItem: 0,
-            amount: 0,
-        });
-        setFieldsServices(values);
-        setServiceListModal(false);
+        console.log("check", values);
+        console.log("data", data.service_id);
+        var keyword = data.service_id;
+        const isObjectPresent = values.find((o) => o.service_id === keyword);
+        console.log("isObjectPresent", isObjectPresent);
+        if (!isObjectPresent) {
+            values.push({
+                service_id: data.service_id,
+                serviceName: data.serviceName,
+                rate: 0,
+                qty: 0,
+                discount: 0,
+                applicableDiscountForItem: 0,
+                amount: 0,
+            });
+            setFieldsServices(values);
+            setServiceListModal(false);
+        } else {
+            setServiceListModal(false);
+            alert("Already added service.");
+        }
     }
 
     function handleServiceRemove(i) {
@@ -283,17 +293,27 @@ const EditRepairOrder = ({
 
     function handlePartAdd(data) {
         const partValues = [...fieldsParts];
-        partValues.push({
-            parts_id: data.parts_id,
-            partName: data.partName,
-            rate: 0,
-            qty: 0,
-            discount: 0,
-            applicableDiscount: 0,
-            amount: 0,
-        });
-        setFieldsParts(partValues);
-        setPartListModal(false);
+        console.log("check", partValues);
+        console.log("data", data);
+        var keyword = data.parts_id;
+        const isObjectPresent = partValues.find((o) => o.parts_id === keyword);
+        console.log("isObjectPresent", isObjectPresent);
+        if (!isObjectPresent) {
+            partValues.push({
+                parts_id: data.parts_id,
+                partName: data.partName,
+                rate: 0,
+                qty: 0,
+                discount: 0,
+                applicableDiscount: 0,
+                amount: 0,
+            });
+            setFieldsParts(partValues);
+            setPartListModal(false);
+        } else {
+            setPartListModal(false);
+            alert("Already added parts.");
+        }
     }
 
     function handlePartRemove(i) {
@@ -1764,7 +1784,7 @@ const EditRepairOrder = ({
                                 </View>
                                 {filteredPartData?.length > 0 ? (
                                     <FlatList
-                                            showsVerticalScrollIndicator={false}
+                                        showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />
@@ -2020,7 +2040,7 @@ const EditRepairOrder = ({
                                 </View>
                                 {filteredServiceData?.length > 0 ? (
                                     <FlatList
-                                            showsVerticalScrollIndicator={false}
+                                        showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />
