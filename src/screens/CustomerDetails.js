@@ -212,8 +212,6 @@ const CustomerDetails = ({ navigation, route, userToken, userRole, selectedGarag
 
     useEffect(() => {
         getCustomerDetails();
-        console.log('isCustomerData?.order?.length', isCustomerData?.order?.length);
-        console.log('isCustomerData?.order', isCustomerData?.order);
     }, [isFocused]);
     
     return (

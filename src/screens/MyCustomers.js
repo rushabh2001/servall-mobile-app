@@ -36,6 +36,7 @@ const MyCustomer = ({
     const [page, setPage] = useState(1);
     const [isScrollLoading, setIsScrollLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    const [loadMoreCustomers, setLoadMoreCustomers] = useState(true);
 
     const getCustomerList = async () => {
         {
@@ -65,13 +66,13 @@ const MyCustomer = ({
                 console.log("json", json);
                 setData([...data, ...json.user_list.data]);
                 setFilteredData([...filteredData, ...json.user_list.data]);
-                // setData(json.user_list);
-                // setFilteredData(json.user_list);
                 setIsLoading(false);
                 {
                     page != 1 && setIsScrollLoading(false);
                 }
-                {json.user_list.data != [] && setPage(page + 1)};
+                {json.user_list.current_page != json.user_list.last_page ? setLoadMoreCustomers(true) : setLoadMoreCustomers(false)}
+                {json.user_list.current_page != json.user_list.last_page ? setPage(page + 1) : null}
+                // {json.user_list.data != [] && setPage(page + 1)};
             }
         } catch (e) {
             console.log(e);
@@ -101,7 +102,8 @@ const MyCustomer = ({
             if (response.status == "200") {
                 setData(json.user_list.data);
                 setFilteredData(json.user_list.data);
-                setPage(2);
+                {json.user_list.current_page != json.user_list.last_page ? setLoadMoreCustomers(true) : setLoadMoreCustomers(false)}
+                {json.user_list.current_page != json.user_list.last_page ? setPage(2) : null}
                 setRefreshing(false);
             } else {
                 setRefreshing(false);
@@ -134,7 +136,8 @@ const MyCustomer = ({
             if (response.status == "200") {
                 setData(json.user_list.data);
                 setFilteredData(json.user_list.data);
-                setPage(2);
+                {json.user_list.current_page != json.user_list.last_page ? setLoadMoreCustomers(true) : setLoadMoreCustomers(false)}
+                {json.user_list.current_page != json.user_list.last_page ? setPage(2) : null}
             }
         } catch (error) {
             console.error(error);
@@ -258,9 +261,7 @@ const MyCustomer = ({
                                 showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent={() => <Divider />}
                                 data={filteredData}
-                                onEndReached={
-                                    filteredData?.length > 9 && getCustomerList
-                                }
+                                onEndReached={loadMoreCustomers ? getCustomerList : null}
                                 onEndReachedThreshold={0.5}
                                 refreshControl={
                                     <RefreshControl
@@ -269,9 +270,7 @@ const MyCustomer = ({
                                         colors={["green"]}
                                     />
                                 }
-                                ListFooterComponent={
-                                    filteredData?.length > 9 && renderFooter
-                                }
+                                ListFooterComponent={loadMoreCustomers ? renderFooter : null}
                                 keyExtractor={(item) => item.id}
                                 renderItem={({ item, index }) => (
                                     <>

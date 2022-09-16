@@ -75,7 +75,7 @@ const AddGarage = ({
     const [isLoadingUserList, setIsLoadingUserList] = useState(false);
     const [filteredUserData, setFilteredUserData] = useState([]);
     const [searchQueryForUsers, setSearchQueryForUsers] = useState();
-    const [userError, setUserError] = useState();
+    const [userError, setUserError] = useState("");
 
     const [userPage, setUserPage] = useState(1);
     const [isUserScrollLoading, setIsUserScrollLoading] = useState(false);
@@ -117,16 +117,17 @@ const AddGarage = ({
         if (isGarageContactNumber.length == 0) {
             setGarageContactNumberError("Garage Contact Number is required");
         }
+        if (isCity == 0 || isCity == undefined) {
+            setCityError("City is required");
+        }
+        if (isState == 0 || isState == undefined) {
+            setStateError("State is required");
+        }
+        if (isLocation.length == 0) {
+            setLocationError("Location is required");
+        }
         if (ownerOption == "new_user") {
-            if (isCity == 0) {
-                setCityError("City is required");
-            }
-            if (isState == 0) {
-                setStateError("State is required");
-            }
-            if (isLocation.length == 0) {
-                setLocationError("Location is required");
-            }
+           
             if (isName.length == 0) {
                 setNameError("Owner Name is required");
             }
@@ -137,7 +138,6 @@ const AddGarage = ({
                     "Phone Number should be minimum 10 characters"
                 );
             }
-
             if (isEmail.length == 0) {
                 setEmailError("Email is required");
             } else if (isEmail.length < 6) {
@@ -152,9 +152,9 @@ const AddGarage = ({
             }
         } else if (ownerOption == "existing_user") {
             if (ownerId == 0) {
-                userError("User is required");
+                setUserError("User is required");
             } else {
-                userError("");
+                setUserError("");
             }
         }
 
@@ -203,15 +203,22 @@ const AddGarage = ({
                     });
                 })
                 .then((res) => {
-                    if (res.statusCode == 400) {
+                    console.log('res', res.data.message.garage_name);
+                    if (res.statusCode == 400 || res.statusCode == 401) {
                         {
-                            res.data.message.email &&
+                            res?.data?.message?.email &&
                                 setEmailError(res.data.message.email);
                         }
                         {
-                            res.data.message.phone_number &&
+                            res?.data?.message?.phone_number &&
                                 setPhoneNumberError(
                                     res.data.message.phone_number
+                                );
+                        }
+                        {
+                            res?.data?.message?.garage_name &&
+                                setGarageNameError(
+                                    res.data.message.garage_name
                                 );
                         }
                         return;
@@ -455,7 +462,11 @@ const AddGarage = ({
     };
 
     useEffect(() => {
-        if (isState != undefined) getCityList();
+        if (isState != undefined) {
+            getCityList();
+            setIsCity();
+            setIsCityName("");
+        }
     }, [isState]);
 
     useEffect(() => {
@@ -556,7 +567,7 @@ const AddGarage = ({
                                     />
                                 </View>
                                 {stateError?.length > 0 && (
-                                    <Text style={styles.errorTextStyle}>
+                                    <Text style={{ color: colors.danger }}>
                                         {stateError}
                                     </Text>
                                 )}
@@ -597,7 +608,7 @@ const AddGarage = ({
                                     />
                                 </View>
                                 {cityError?.length > 0 && (
-                                    <Text style={styles.errorTextStyle}>
+                                    <Text style={{ color: colors.danger }}>
                                         {cityError}
                                     </Text>
                                 )}
@@ -677,7 +688,7 @@ const AddGarage = ({
                                             />
                                         </View>
                                         {userError?.length > 0 && (
-                                            <Text style={styles.errorTextStyle}>
+                                            <Text style={{ color: colors.danger }}>
                                                 {userError}
                                             </Text>
                                         )}
@@ -932,10 +943,7 @@ const AddGarage = ({
                                         </>
                                     )}
                                     data={filteredUserData}
-                                    onEndReached={
-                                        filteredUserData?.length > 9 &&
-                                        getAdminList
-                                    }
+                                    onEndReached={getAdminList}
                                     onEndReachedThreshold={0.5}
                                     refreshControl={
                                         <RefreshControl
@@ -944,10 +952,7 @@ const AddGarage = ({
                                             colors={["green"]}
                                         />
                                     }
-                                    ListFooterComponent={
-                                        filteredUserData?.length > 9 &&
-                                        renderUserFooter
-                                    }
+                                    ListFooterComponent={renderUserFooter}
                                     style={{
                                         borderColor: "#0000000a",
                                         borderWidth: 1,
@@ -1016,12 +1021,8 @@ const AddGarage = ({
                     visible={stateListModal}
                     onDismiss={() => {
                         setStateListModal(false);
-                        setIsState(0);
-                        setIsStateName("");
-                        setStateError("");
                         setSearchQueryForStates("");
                         searchFilterForStates();
-                        setCityFieldToggle(false);
                     }}
                     contentContainerStyle={[
                         styles.modalContainerStyle,
@@ -1048,12 +1049,8 @@ const AddGarage = ({
                         }}
                         onPress={() => {
                             setStateListModal(false);
-                            setIsState(0);
-                            setIsStateName("");
-                            setStateError("");
                             setSearchQueryForStates("");
                             searchFilterForStates();
-                            setCityFieldToggle(false);
                         }}
                     />
                     {isLoadingStateList == true ? (
@@ -1148,9 +1145,6 @@ const AddGarage = ({
                     visible={cityListModal}
                     onDismiss={() => {
                         setCityListModal(false);
-                        setIsCity(0);
-                        setIsCityName("");
-                        setCityError("");
                         setSearchQueryForCity("");
                         searchFilterForCity();
                     }}
@@ -1179,9 +1173,6 @@ const AddGarage = ({
                         }}
                         onPress={() => {
                             setCityListModal(false);
-                            setIsCity(0);
-                            setIsCityName("");
-                            setCityError("");
                             setSearchQueryForCity("");
                             searchFilterForCity();
                         }}

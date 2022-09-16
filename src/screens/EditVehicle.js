@@ -492,9 +492,9 @@ const EditVehicle = ({
         }
 
         const data = {
-            brand_id: isBrand,
-            model_id: isModel,
-            vehicle_registration_number: isVehicleRegistrationNumber,
+            brand_id: JSON.stringify(isBrand),
+            model_id: JSON.stringify(isModel),
+            vehicle_registration_number: isVehicleRegistrationNumber.toUpperCase()?.trim(),
             purchase_date: moment(
                 isPurchaseDate,
                 'YYYY-MM-DD"T"hh:mm ZZ'
@@ -2340,10 +2340,7 @@ const EditVehicle = ({
                                                     </>
                                                 )}
                                                 data={filteredBrandData}
-                                                onEndReached={
-                                                    filteredBrandData?.length >
-                                                        9 && getBrandList
-                                                }
+                                                onEndReached={getBrandList}
                                                 onEndReachedThreshold={0.5}
                                                 refreshControl={
                                                     <RefreshControl
@@ -2356,10 +2353,7 @@ const EditVehicle = ({
                                                         colors={["green"]}
                                                     />
                                                 }
-                                                ListFooterComponent={
-                                                    filteredBrandData?.length >
-                                                        9 && renderBrandFooter
-                                                }
+                                                ListFooterComponent={renderBrandFooter}
                                                 style={{
                                                     borderColor: "#0000000a",
                                                     borderWidth: 1,
@@ -2615,10 +2609,7 @@ const EditVehicle = ({
                                                     </>
                                                 )}
                                                 data={filteredModelData}
-                                                onEndReached={
-                                                    filteredModelData?.length >
-                                                        9 && getModelList
-                                                }
+                                                onEndReached={getModelList}
                                                 onEndReachedThreshold={0.5}
                                                 refreshControl={
                                                     <RefreshControl
@@ -2631,10 +2622,7 @@ const EditVehicle = ({
                                                         colors={["green"]}
                                                     />
                                                 }
-                                                ListFooterComponent={
-                                                    filteredModelData?.length >
-                                                        9 && renderModelFooter
-                                                }
+                                                ListFooterComponent={renderModelFooter}
                                                 style={{
                                                     borderColor: "#0000000a",
                                                     borderWidth: 1,

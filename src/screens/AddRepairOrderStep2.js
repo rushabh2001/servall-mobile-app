@@ -456,7 +456,7 @@ const AddRepairOrderStep2 = ({
         data.append("model_id", JSON.stringify(isModel));
         data.append(
             "vehicle_registration_number",
-            isVehicleRegistrationNumber?.trim()
+            isVehicleRegistrationNumber.toUpperCase()?.trim()
         );
         if (isPurchaseDate)
             data.append(
@@ -1339,7 +1339,11 @@ const AddRepairOrderStep2 = ({
     }, []);
 
     useEffect(() => {
-        if (isState != undefined) getCityList();
+        if (isState != undefined) {
+            getCityList();
+            setIsCity();
+            setIsCityName("");
+        }
     }, [isState]);
 
     useEffect(() => {
@@ -1354,7 +1358,11 @@ const AddRepairOrderStep2 = ({
     }, [isBrand]);
 
     useEffect(() => {
-        if (isGarageId != undefined) getUserList();
+        if (isGarageId != undefined) {
+            getUserList();
+            setIsUser();
+            setIsName("");
+        }
     }, [isGarageId]);
 
     // useEffect(() => {
@@ -2800,10 +2808,7 @@ const AddRepairOrderStep2 = ({
                                             </>
                                         )}
                                         data={filteredGarageData}
-                                        onEndReached={
-                                            filteredGarageData?.length > 9 &&
-                                            getGarageList
-                                        }
+                                        onEndReached={getGarageList}
                                         showsVerticalScrollIndicator={false}
                                         onEndReachedThreshold={0.5}
                                         refreshControl={
@@ -2813,10 +2818,7 @@ const AddRepairOrderStep2 = ({
                                                 colors={["green"]}
                                             />
                                         }
-                                        ListFooterComponent={
-                                            filteredGarageData?.length > 9 &&
-                                            renderGarageFooter
-                                        }
+                                        ListFooterComponent={renderGarageFooter}
                                         style={{
                                             borderColor: "#0000000a",
                                             borderWidth: 1,
@@ -3017,10 +3019,7 @@ const AddRepairOrderStep2 = ({
                                             </>
                                         )}
                                         data={filteredBrandData}
-                                        onEndReached={
-                                            filteredBrandData?.length > 9 &&
-                                            getBrandList
-                                        }
+                                        onEndReached={getBrandList}
                                         showsVerticalScrollIndicator={false}
                                         onEndReachedThreshold={0.5}
                                         refreshControl={
@@ -3030,10 +3029,7 @@ const AddRepairOrderStep2 = ({
                                                 colors={["green"]}
                                             />
                                         }
-                                        ListFooterComponent={
-                                            filteredBrandData?.length > 9 &&
-                                            renderBrandFooter
-                                        }
+                                        ListFooterComponent={renderBrandFooter}
                                         style={{
                                             borderColor: "#0000000a",
                                             borderWidth: 1,
@@ -3264,10 +3260,7 @@ const AddRepairOrderStep2 = ({
                                             </>
                                         )}
                                         data={filteredModelData}
-                                        onEndReached={
-                                            filteredModelData?.length > 9 &&
-                                            getModelList
-                                        }
+                                        onEndReached={getModelList}
                                         showsVerticalScrollIndicator={false}
                                         onEndReachedThreshold={0.5}
                                         refreshControl={
@@ -3277,10 +3270,7 @@ const AddRepairOrderStep2 = ({
                                                 colors={["green"]}
                                             />
                                         }
-                                        ListFooterComponent={
-                                            filteredModelData?.length > 9 &&
-                                            renderModelFooter
-                                        }
+                                        ListFooterComponent={renderModelFooter}
                                         style={{
                                             borderColor: "#0000000a",
                                             borderWidth: 1,

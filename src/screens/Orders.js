@@ -273,9 +273,7 @@ const Orders = ({
                                     showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent={() => <Divider />}
                                 data={filteredData}
-                                onEndReached={
-                                    filteredData?.length > 9 && getOrderList
-                                }
+                                onEndReached={getOrderList}
                                 onEndReachedThreshold={0.5}
                                 refreshControl={
                                     <RefreshControl
@@ -284,9 +282,7 @@ const Orders = ({
                                         colors={["green"]}
                                     />
                                 }
-                                ListFooterComponent={
-                                    filteredData?.length > 9 && renderFooter
-                                }
+                                ListFooterComponent={renderFooter}
                                 keyExtractor={(item) => item.id}
                                 renderItem={({ item, index }) => (
                                     <>

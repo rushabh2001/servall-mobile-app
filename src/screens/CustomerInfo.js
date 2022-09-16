@@ -288,7 +288,11 @@ const CustomerInfo = ({
     }, [stateList]);
 
     useEffect(() => {
-        getCityList();
+        if (isState != undefined) {
+            getCityList();
+            setIsCity(0);
+            setIsCityName("");
+        }
     }, [isState]);
 
     return (

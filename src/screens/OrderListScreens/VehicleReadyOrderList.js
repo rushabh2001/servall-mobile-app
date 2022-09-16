@@ -35,6 +35,7 @@ const VehicleReadyOrderList = ({
     const [page, setPage] = useState(1);
     const [isScrollLoading, setIsScrollLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    const [loadMoreOrders, setLoadMoreOrders] = useState(true);
 
     const getOrderList = async () => {
         {
@@ -64,17 +65,17 @@ const VehicleReadyOrderList = ({
             if (json !== undefined) {
                 setData([...data, ...json.data.data]);
                 setFilteredData([...filteredData, ...json.data.data]);
+                {
+                    page == 1 && setIsLoading(false);
+                }
+                {
+                    page != 1 && setIsScrollLoading(false);
+                }
+                {json.data.current_page != json.data.last_page ? setLoadMoreOrders(true) : setLoadMoreOrders(false)}
+                {json.data.current_page != json.data.last_page ? setPage(page + 1) : null}
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            {
-                page == 1 && setIsLoading(false);
-            }
-            {
-                page != 1 && setIsScrollLoading(false);
-            }
-            setPage(page + 1);
         }
     };
 
@@ -100,7 +101,8 @@ const VehicleReadyOrderList = ({
             if (response.status == "200") {
                 setData(json.data.data);
                 setFilteredData(json.data.data);
-                setPage(2);
+                {json.data.current_page != json.data.last_page ? setLoadMoreOrders(true) : setLoadMoreOrders(false)}
+                {json.data.current_page != json.data.last_page ? setPage(2) : null}
                 setRefreshing(false);
             } else {
                 setRefreshing(false);
@@ -133,7 +135,8 @@ const VehicleReadyOrderList = ({
             if (response.status == "200") {
                 setData(json.data.data);
                 setFilteredData(json.data.data);
-                setPage(2);
+                {json.data.current_page != json.data.last_page ? setLoadMoreOrders(true) : setLoadMoreOrders(false)}
+                {json.data.current_page != json.data.last_page ? setPage(2) : null}
             }
         } catch (error) {
             console.error(error);
@@ -239,12 +242,10 @@ const VehicleReadyOrderList = ({
                     ) : filteredData.length != 0 ? (
                         <View>
                             <FlatList
-                                    showsVerticalScrollIndicator={false}
+                                showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent={() => <Divider />}
                                 data={filteredData}
-                                onEndReached={
-                                    filteredData?.length > 9 && getOrderList
-                                }
+                                onEndReached={loadMoreOrders ? getOrderList : null}
                                 onEndReachedThreshold={0.5}
                                 refreshControl={
                                     <RefreshControl
@@ -253,9 +254,7 @@ const VehicleReadyOrderList = ({
                                         colors={["green"]}
                                     />
                                 }
-                                ListFooterComponent={
-                                    filteredData?.length > 9 && renderFooter
-                                }
+                                ListFooterComponent={loadMoreOrders ? renderFooter : null}
                                 keyExtractor={(item) => item.id}
                                 renderItem={({ item, index }) => (
                                     <>
@@ -551,8 +550,8 @@ const VehicleReadyOrderList = ({
                                             height={
                                                 item?.payment_status ==
                                                 "Pending"
-                                                    ? 190
-                                                    : 128
+                                                    ? 128
+                                                    : 64
                                             }
                                             openDuration={250}
                                         >
@@ -639,98 +638,6 @@ const VehicleReadyOrderList = ({
                                                                 "MaterialCommunityIcons"
                                                             }
                                                             name="clipboard-list-outline"
-                                                            style={{
-                                                                marginHorizontal: 10,
-                                                                alignSelf:
-                                                                    "center",
-                                                            }}
-                                                            color={colors.black}
-                                                            size={26}
-                                                        />
-                                                    )}
-                                                />
-                                                <Divider />
-                                                <List.Item
-                                                    title="Edit Order"
-                                                    style={{
-                                                        paddingVertical: 15,
-                                                    }}
-                                                    onPress={() => {
-                                                        let arrData = {
-                                                            order_id: item.id,
-                                                            user_id:
-                                                                item.user_id,
-                                                            garage_id:
-                                                                item.garage_id,
-                                                            vehicle_id:
-                                                                item.vehicle_id,
-                                                            name: item.user
-                                                                .name,
-                                                            email: item.user
-                                                                .email,
-                                                            phone_number:
-                                                                item.user
-                                                                    .phone_number,
-                                                            brand_id:
-                                                                item.vehicle
-                                                                    .brand_id,
-                                                            brand_name:
-                                                                item?.vehicle
-                                                                    ?.brand
-                                                                    ?.name,
-                                                            model_id:
-                                                                item?.vehicle
-                                                                    ?.model_id,
-                                                            model_name:
-                                                                item?.vehicle
-                                                                    ?.vehicle_model
-                                                                    ?.model_name,
-                                                            vehicle_registration_number:
-                                                                item?.vehicle
-                                                                    ?.vehicle_registration_number,
-                                                            odometer:
-                                                                item?.odometer,
-                                                            fuel_level:
-                                                                item?.fuel_level,
-                                                            comment:
-                                                                item?.comment,
-                                                            estimated_delivery_time:
-                                                                item?.estimated_delivery_time,
-                                                            labor_total:
-                                                                item?.labor_total,
-                                                            parts_total:
-                                                                item?.parts_total,
-                                                            services_list:
-                                                                item?.orderservice,
-                                                            parts_list:
-                                                                item?.orderparts,
-                                                            created_at:
-                                                                item?.created_at,
-                                                            payment_status:
-                                                                item?.payment_status,
-                                                            total: item?.total,
-                                                            status: item?.status,
-                                                            applicable_discount:
-                                                                item?.discount,
-                                                        };
-                                                        console.log(
-                                                            "data:",
-                                                            arrData
-                                                        );
-                                                        navigation.navigate(
-                                                            "EditRepairOrder",
-                                                            { data: arrData }
-                                                        );
-                                                        this[
-                                                            RBSheet + index
-                                                        ].close();
-                                                    }}
-                                                    left={() => (
-                                                        <Icon
-                                                            type={
-                                                                "MaterialCommunityIcons"
-                                                            }
-                                                            name="clipboard-edit-outline"
                                                             style={{
                                                                 marginHorizontal: 10,
                                                                 alignSelf:

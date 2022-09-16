@@ -35,6 +35,7 @@ const OpenOrderList = ({
     const [page, setPage] = useState(1);
     const [isScrollLoading, setIsScrollLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    const [loadMoreOrders, setLoadMoreOrders] = useState(true);
 
     const getOrderList = async () => {
         {
@@ -63,17 +64,17 @@ const OpenOrderList = ({
             if (json !== undefined) {
                 setData([...data, ...json.data.data]);
                 setFilteredData([...filteredData, ...json.data.data]);
+                {
+                    page == 1 && setIsLoading(false);
+                }
+                {
+                    page != 1 && setIsScrollLoading(false);
+                }
+                {json.data.current_page != json.data.last_page ? setLoadMoreOrders(true) : setLoadMoreOrders(false)}
+                {json.data.current_page != json.data.last_page ? setPage(page + 1) : null}
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            {
-                page == 1 && setIsLoading(false);
-            }
-            {
-                page != 1 && setIsScrollLoading(false);
-            }
-            setPage(page + 1);
         }
     };
 
@@ -99,7 +100,8 @@ const OpenOrderList = ({
             if (response.status == "200") {
                 setData(json.data.data);
                 setFilteredData(json.data.data);
-                setPage(2);
+                {json.data.current_page != json.data.last_page ? setLoadMoreOrders(true) : setLoadMoreOrders(false)}
+                {json.data.current_page != json.data.last_page ? setPage(2) : null}
                 setRefreshing(false);
             } else {
                 setRefreshing(false);
@@ -141,7 +143,8 @@ const OpenOrderList = ({
             if (response.status == "200") {
                 setData(json.data.data);
                 setFilteredData(json.data.data);
-                setPage(2);
+                {json.data.current_page != json.data.last_page ? setLoadMoreOrders(true) : setLoadMoreOrders(false)}
+                {json.data.current_page != json.data.last_page ? setPage(2) : null}
             }
         } catch (error) {
             console.error(error);
@@ -238,13 +241,11 @@ const OpenOrderList = ({
                     ) : filteredData.length != 0 ? (
                         <View>
                             <FlatList
-                                    showsVerticalScrollIndicator={false}
+                                showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent={() => <Divider />}
                                 // initialNumToRender={2}
                                 data={filteredData}
-                                onEndReached={
-                                    filteredData?.length > 9 && getOrderList
-                                }
+                                onEndReached={loadMoreOrders ? getOrderList : null}
                                 onEndReachedThreshold={0.5}
                                 refreshControl={
                                     <RefreshControl
@@ -253,9 +254,7 @@ const OpenOrderList = ({
                                         colors={["green"]}
                                     />
                                 }
-                                ListFooterComponent={
-                                    filteredData?.length > 9 && renderFooter
-                                }
+                                ListFooterComponent={loadMoreOrders ? renderFooter : null}
                                 keyExtractor={(item) => item.id}
                                 renderItem={({ item, index }) => (
                                     <>

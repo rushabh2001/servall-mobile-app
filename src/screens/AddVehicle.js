@@ -170,7 +170,7 @@ const AddVehicle = ({
         data.append("model_id", JSON.stringify(isModel));
         data.append(
             "vehicle_registration_number",
-            isVehicleRegistrationNumber?.trim()
+            isVehicleRegistrationNumber.toUpperCase()?.trim()
         );
         if (isPurchaseDate)
             data.append(
@@ -1676,10 +1676,7 @@ const AddVehicle = ({
                                             </>
                                         )}
                                         data={filteredBrandData}
-                                        onEndReached={
-                                            filteredBrandData?.length > 9 &&
-                                            getBrandList
-                                        }
+                                        onEndReached={getBrandList}
                                         onEndReachedThreshold={0.5}
                                         refreshControl={
                                             <RefreshControl
@@ -1688,10 +1685,7 @@ const AddVehicle = ({
                                                 colors={["green"]}
                                             />
                                         }
-                                        ListFooterComponent={
-                                            filteredBrandData?.length > 9 &&
-                                            renderBrandFooter
-                                        }
+                                        ListFooterComponent={renderBrandFooter}
                                         style={{
                                             borderColor: "#0000000a",
                                             borderWidth: 1,
@@ -1920,10 +1914,7 @@ const AddVehicle = ({
                                             </>
                                         )}
                                         data={filteredModelData}
-                                        onEndReached={
-                                            filteredModelData?.length > 9 &&
-                                            getModelList
-                                        }
+                                        onEndReached={getModelList}
                                         onEndReachedThreshold={0.5}
                                         refreshControl={
                                             <RefreshControl
@@ -1932,10 +1923,7 @@ const AddVehicle = ({
                                                 colors={["green"]}
                                             />
                                         }
-                                        ListFooterComponent={
-                                            filteredModelData?.length > 9 &&
-                                            renderModelFooter
-                                        }
+                                        ListFooterComponent={renderModelFooter}
                                         style={{
                                             borderColor: "#0000000a",
                                             borderWidth: 1,

@@ -266,9 +266,7 @@ const VehicleList = ({
                                     showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent={() => <Divider />}
                                 data={filteredData}
-                                onEndReached={
-                                    filteredData?.length > 9 && getVehicleList
-                                }
+                                onEndReached={getVehicleList}
                                 onEndReachedThreshold={0.5}
                                 refreshControl={
                                     <RefreshControl
@@ -277,9 +275,7 @@ const VehicleList = ({
                                         colors={["green"]}
                                     />
                                 }
-                                ListFooterComponent={
-                                    filteredData?.length > 9 && renderFooter
-                                }
+                                ListFooterComponent={renderFooter}
                                 keyExtractor={(item) => item.id}
                                 renderItem={({ item }) => (
                                     <View style={styles.cards}>

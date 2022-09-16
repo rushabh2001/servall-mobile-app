@@ -146,10 +146,12 @@ const AddRepairOrderStep3 = ({
     const [partPage, setPartPage] = useState(1);
     const [isPartScrollLoading, setIsPartScrollLoading] = useState(false);
     const [partRefreshing, setPartRefreshing] = useState(false);
+    const [loadMoreParts, setLoadMoreParts] = useState(true);
 
     const [servicePage, setServicePage] = useState(1);
     const [isServiceScrollLoading, setIsServiceScrollLoading] = useState(false);
     const [serviceRefreshing, setServiceRefreshing] = useState(false);
+    const [loadMoreServices, setLoadMoreServices] = useState(true);
 
     const validate = () => {
         return !(
@@ -486,16 +488,15 @@ const AddRepairOrderStep3 = ({
                 // setFilteredPartData(json.data);
                 setPartList([...partList, ...json.data.data]);
                 setFilteredPartData([...filteredPartData, ...json.data.data]);
+                setIsLoadingPartList(false);
+                {
+                    partPage != 1 && setIsPartScrollLoading(false);
+                }
+                {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
+                {json.data.current_page != json.data.last_page ? setPartPage(partPage + 1) : null}
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            // setIsLoadingPartList(false)
-            setIsLoadingPartList(false);
-            {
-                partPage != 1 && setIsPartScrollLoading(false);
-            }
-            setPartPage(partPage + 1);
         }
     };
 
@@ -516,7 +517,8 @@ const AddRepairOrderStep3 = ({
             if (response.status == "200") {
                 setPartList(json.data.data);
                 setFilteredPartData(json.data.data);
-                setPartPage(2);
+                {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
+                {json.data.current_page != json.data.last_page ? setPartPage(2) : null}
                 setPartRefreshing(false);
             } else {
                 setPartRefreshing(false);
@@ -544,7 +546,8 @@ const AddRepairOrderStep3 = ({
             if (response.status == "200") {
                 setPartList(json.data.data);
                 setFilteredPartData(json.data.data);
-                setPartPage(2);
+                {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
+                {json.data.current_page != json.data.last_page ? setPartPage(2) : null}
             }
         } catch (error) {
             console.error(error);
@@ -600,17 +603,15 @@ const AddRepairOrderStep3 = ({
                     ...filteredServiceData,
                     ...json.data.data,
                 ]);
-                // setServiceList(json.data);
-                // setFilteredServiceData(json.data);
+                setIsLoadingServiceList(false);
+                {
+                    servicePage != 1 && setIsServiceScrollLoading(false);
+                }
+                {json.data.current_page != json.data.last_page ? setLoadMoreServices(true) : setLoadMoreServices(false)}
+                {json.data.current_page != json.data.last_page ? setServicePage(servicePage + 1) : null}
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            setIsLoadingServiceList(false);
-            {
-                servicePage != 1 && setIsServiceScrollLoading(false);
-            }
-            setServicePage(servicePage + 1);
         }
     };
 
@@ -631,7 +632,8 @@ const AddRepairOrderStep3 = ({
             if (response.status == "200") {
                 setServiceList(json.data.data);
                 setFilteredServiceData(json.data.data);
-                setServicePage(2);
+                {json.data.current_page != json.data.last_page ? setLoadMoreServices(true) : setLoadMoreServices(false)}
+                {json.data.current_page != json.data.last_page ? setServicePage(servicePage + 1) : null}
                 setServiceRefreshing(false);
             } else {
                 setServiceRefreshing(false);
@@ -659,7 +661,8 @@ const AddRepairOrderStep3 = ({
             if (response.status == "200") {
                 setServiceList(json.data.data);
                 setFilteredServiceData(json.data.data);
-                setServicePage(2);
+                {json.data.current_page != json.data.last_page ? setLoadMoreServices(true) : setLoadMoreServices(false)}
+                {json.data.current_page != json.data.last_page ? setServicePage(servicePage + 1) : null}
             }
         } catch (error) {
             console.error(error);
@@ -1719,10 +1722,7 @@ const AddRepairOrderStep3 = ({
                                             borderWidth: 1,
                                             flex: 1,
                                         }}
-                                        onEndReached={
-                                            filteredPartData?.length > 9 &&
-                                            getPartList
-                                        }
+                                        onEndReached={loadMoreParts ? getPartList : null}
                                         onEndReachedThreshold={0.5}
                                         refreshControl={
                                             <RefreshControl
@@ -1731,10 +1731,7 @@ const AddRepairOrderStep3 = ({
                                                 colors={["green"]}
                                             />
                                         }
-                                        ListFooterComponent={
-                                            filteredPartData?.length > 9 &&
-                                            renderPartFooter
-                                        }
+                                        ListFooterComponent={loadMoreParts ? renderPartFooter : null}
                                         keyExtractor={(item) => item.id}
                                         renderItem={({ item }) => (
                                             <>
@@ -1886,10 +1883,7 @@ const AddRepairOrderStep3 = ({
                             }}
                         />
                         {isLoadingServiceList == true ? (
-                            <View style={{ flex: 1, justifyContent: "center" }}>
-                                {" "}
-                                ? <ActivityIndicator></ActivityIndicator>
-                            </View>
+                            <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator></ActivityIndicator></View>
                         ) : (
                             <View style={{ marginTop: 20, flex: 1 }}>
                                 {/* Search Bar */}
@@ -1978,10 +1972,7 @@ const AddRepairOrderStep3 = ({
                                             borderWidth: 1,
                                             flex: 1,
                                         }}
-                                        onEndReached={
-                                            filteredServiceData?.length > 9 &&
-                                            getServiceList
-                                        }
+                                        onEndReached={loadMoreServices ? getServiceList : null}
                                         onEndReachedThreshold={0.5}
                                         refreshControl={
                                             <RefreshControl
@@ -1990,10 +1981,7 @@ const AddRepairOrderStep3 = ({
                                                 colors={["green"]}
                                             />
                                         }
-                                        ListFooterComponent={
-                                            filteredServiceData?.length > 9 &&
-                                            renderServiceFooter
-                                        }
+                                        ListFooterComponent={loadMoreServices ? renderServiceFooter : null}
                                         keyExtractor={(item) => item.id}
                                         renderItem={({ item }) => (
                                             <>

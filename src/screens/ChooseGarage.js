@@ -32,6 +32,7 @@ const ChooseGarage = ({
     const [page, setPage] = useState(1);
     const [isScrollLoading, setIsScrollLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    const [loadMoreGarages, setLoadMoreGarages] = useState(true);
 
     const getGarageList = async () => {
         {
@@ -61,18 +62,17 @@ const ChooseGarage = ({
             console.log("fetch_owner_garages", json);
             if (json !== undefined) {
                 setData([...data, ...json.garage_list.data]);
-                // setData(json.garage_list);
+                {
+                    page == 1 ? setIsLoading(false) : null
+                }
+                {
+                    page != 1 ? setIsScrollLoading(false) : null
+                }
+                {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
+                {json.garage_list.current_page != json.garage_list.last_page ? setPage(page + 1) : null}
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            {
-                page == 1 && setIsLoading(false);
-            }
-            {
-                page != 1 && setIsScrollLoading(false);
-            }
-            setPage(page + 1);
         }
     };
 
@@ -95,7 +95,8 @@ const ChooseGarage = ({
             console.log("1", json);
             if (response.status == "200") {
                 setData(json.garage_list.data);
-                setPage(2);
+                {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
+                {json.garage_list.current_page != json.garage_list.last_page ? setPage(2) : null}
                 setRefreshing(false);
             } else {
                 // console.log('2', response.status);
@@ -219,7 +220,7 @@ const ChooseGarage = ({
                                 </>
                             )}
                             data={data}
-                            onEndReached={getGarageList}
+                            onEndReached={loadMoreGarages ? getGarageList : null}
                             onEndReachedThreshold={0.5}
                             refreshControl={
                                 <RefreshControl
@@ -228,7 +229,7 @@ const ChooseGarage = ({
                                     colors={["green"]}
                                 />
                             }
-                            ListFooterComponent={renderFooter}
+                            ListFooterComponent={loadMoreGarages ? renderFooter : null}
                             ListEmptyComponent={() => (
                                 <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                                     <Text

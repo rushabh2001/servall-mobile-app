@@ -6,17 +6,14 @@ import { API_URL } from '../constants/config';
 import { Button } from 'react-native-paper';
 import Toast from 'react-native-toast-message';
 import Spinner from 'react-native-loading-spinner-overlay';
-// import { IconX, ICON_TYPE } from '../icons';
-// import InputScrollView from 'react-native-input-scroll-view';
+
 import { loginRequest, resetLogin } from '../actions/login';
-// import { getValue } from '../../lib/storage';
 const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-const Login = ({ navigation, loginRequest, loginError, error, authenticating, resetLogin, }) => {
+const Login = ({ loginRequest, loginError, error }) => {
 
     const [otpField, setField] = useState(false);
     const [email, setEmail] = useState(null);
     const [otp, setOtp] = useState("");
-    const [emailError, setEmailError] = useState();
     const [OtpError, setOtpError] = useState();
     const [isLoading, setIsLoading] = useState(false);
 
@@ -157,7 +154,6 @@ const Login = ({ navigation, loginRequest, loginError, error, authenticating, re
                             <TextInput
                                 label='Email'
                                 style={styles.input}
-                                // innerRef={emailRef}
                                 placeholder="Email Address"
                                 value={email}
                                 onChangeText={(text) => setEmail(text)}
@@ -183,7 +179,6 @@ const Login = ({ navigation, loginRequest, loginError, error, authenticating, re
                                 label='OTP'
                                 placeholder="Your OTP"
                                 style={styles.input}
-                                // innerRef={otpRef}
                                 keyboardType="numeric"
                                 textContentType="oneTimeCode"
                                 maxLength={4}
@@ -204,7 +199,6 @@ const Login = ({ navigation, loginRequest, loginError, error, authenticating, re
                                 Verify OTP
                             </Button>
                             <Text
-                                // mode={'text'}
                                 style={styles.smallBtn}
                                 onPress={() => {
                                     submit();
@@ -214,11 +208,9 @@ const Login = ({ navigation, loginRequest, loginError, error, authenticating, re
                                 Resend OTP
                             </Text>
                             <Text
-                                // mode={'text'}
                                 style={styles.smallBtn}
                                 onPress={() => {
                                     setField(false);
-                                    setEmailError("");
                                 }}
                             >
                                 Change Email
@@ -229,7 +221,6 @@ const Login = ({ navigation, loginRequest, loginError, error, authenticating, re
             </View>
             <Toast />
             {isLoading &&
-
                 <Spinner
                     visible={isLoading}
                     color="#377520"
@@ -251,7 +242,6 @@ const styles = StyleSheet.create({
         fontSize: 22,
         color: colors.black,
         fontWeight: "300",
-        // alignItems: 'center',
         marginTop: 10,
         marginBottom: 2,
     },

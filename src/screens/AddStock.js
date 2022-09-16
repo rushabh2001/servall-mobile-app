@@ -870,10 +870,7 @@ const AddStock = ({
                                             borderWidth: 1,
                                             flex: 1,
                                         }}
-                                        onEndReached={
-                                            filteredPartData?.length > 9 &&
-                                            getPartList
-                                        }
+                                        onEndReached={getPartList}
                                         onEndReachedThreshold={0.5}
                                         refreshControl={
                                             <RefreshControl
@@ -882,10 +879,7 @@ const AddStock = ({
                                                 colors={["green"]}
                                             />
                                         }
-                                        ListFooterComponent={
-                                            filteredPartData?.length > 9 &&
-                                            renderPartFooter
-                                        }
+                                        ListFooterComponent={renderPartFooter}
                                         keyExtractor={(item) => item.id}
                                         renderItem={({ item }) => (
                                             <>
@@ -1199,10 +1193,7 @@ const AddStock = ({
                                             borderWidth: 1,
                                             flex: 1,
                                         }}
-                                        onEndReached={
-                                            filteredGarageData?.length > 9 &&
-                                            getGarageList
-                                        }
+                                        onEndReached={getGarageList}
                                         onEndReachedThreshold={0.5}
                                         refreshControl={
                                             <RefreshControl
@@ -1211,10 +1202,7 @@ const AddStock = ({
                                                 colors={["green"]}
                                             />
                                         }
-                                        ListFooterComponent={
-                                            filteredGarageData?.length > 9 &&
-                                            renderGarageFooter
-                                        }
+                                        ListFooterComponent={renderGarageFooter}
                                         keyExtractor={(item) => item.id}
                                         renderItem={({ item }) => (
                                             <>
