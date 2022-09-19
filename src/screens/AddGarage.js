@@ -76,6 +76,7 @@ const AddGarage = ({
     const [filteredUserData, setFilteredUserData] = useState([]);
     const [searchQueryForUsers, setSearchQueryForUsers] = useState();
     const [userError, setUserError] = useState("");
+    const [loadMoreUsers, setLoadMoreUsers] = useState(true);
 
     const [userPage, setUserPage] = useState(1);
     const [isUserScrollLoading, setIsUserScrollLoading] = useState(false);
@@ -354,19 +355,15 @@ const AddGarage = ({
                     ...filteredUserData,
                     ...json.admin_user_list.data,
                 ]);
-                // setAdminList(json.admin_user_list);
-                // setFilteredUserData(json.admin_user_list);
+                setIsLoadingUserList(false);
+                {
+                    userPage != 1 && setIsUserScrollLoading(false);
+                }
+                {json.admin_user_list.current_page != json.admin_user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
+                {json.admin_user_list.current_page != json.admin_user_list.last_page ? setUserPage(userPage + 1) : null}
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            {
-                userPage == 1 && setIsLoadingUserList(false);
-            }
-            {
-                userPage != 1 && setIsUserScrollLoading(false);
-            }
-            setUserPage(userPage + 1);
         }
     };
 
@@ -387,7 +384,8 @@ const AddGarage = ({
             if (response.status == "200") {
                 setAdminList(json.admin_user_list.data);
                 setFilteredUserData(json.admin_user_list.data);
-                setUserPage(2);
+                {json.admin_user_list.current_page != json.admin_user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
+                {json.admin_user_list.current_page != json.admin_user_list.last_page ? setUserPage(2) : null}
                 setUserRefreshing(false);
             } else {
                 setUserRefreshing(false);
@@ -415,9 +413,12 @@ const AddGarage = ({
                 setSearchQueryForUsers("");
                 setAdminList(json.admin_user_list.data);
                 setFilteredUserData(json.admin_user_list.data);
-                setUserPage(2);
+                {json.admin_user_list.current_page != json.admin_user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
+                {json.admin_user_list.current_page != json.admin_user_list.last_page ? setUserPage(2) : null}
+                setIsLoadingUserList(false);
                 setUserRefreshing(false);
             } else {
+                setIsLoadingUserList(false);
                 setUserRefreshing(false);
             }
         } catch (error) {
@@ -935,7 +936,7 @@ const AddGarage = ({
                             </View>
                             {filteredUserData?.length > 0 ? (
                                 <FlatList
-                                        showsVerticalScrollIndicator={false}
+                                    showsVerticalScrollIndicator={false}
                                     ItemSeparatorComponent={() => (
                                         <>
                                             <Divider />
@@ -943,7 +944,7 @@ const AddGarage = ({
                                         </>
                                     )}
                                     data={filteredUserData}
-                                    onEndReached={getAdminList}
+                                    onEndReached={loadMoreUsers ? getAdminList : null}
                                     onEndReachedThreshold={0.5}
                                     refreshControl={
                                         <RefreshControl
@@ -952,7 +953,7 @@ const AddGarage = ({
                                             colors={["green"]}
                                         />
                                     }
-                                    ListFooterComponent={renderUserFooter}
+                                    ListFooterComponent={loadMoreUsers ? renderUserFooter : null}
                                     style={{
                                         borderColor: "#0000000a",
                                         borderWidth: 1,

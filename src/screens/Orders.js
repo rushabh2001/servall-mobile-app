@@ -46,6 +46,7 @@ const Orders = ({
     const [page, setPage] = useState(1);
     const [isScrollLoading, setIsScrollLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    const [loadMoreOrders, setLoadMoreOrders] = useState(true);
 
     const getOrderList = async () => {
         {
@@ -75,17 +76,15 @@ const Orders = ({
             if (json !== undefined) {
                 setData([...data, ...json.data.data]);
                 setFilteredData([...filteredData, ...json.data.data]);
+                setIsLoading(false);
+                {
+                    page != 1 && setIsScrollLoading(false);
+                }
+                {json.data.current_page != json.data.last_page ? setLoadMoreOrders(true) : setLoadMoreOrders(false)}
+                {json.data.current_page != json.data.last_page ? setPage(page + 1) : null}
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            {
-                page == 1 && setIsLoading(false);
-            }
-            {
-                page != 1 && setIsScrollLoading(false);
-            }
-            setPage(page + 1);
         }
     };
 
@@ -110,7 +109,8 @@ const Orders = ({
             if (response.status == "200") {
                 setData(json.data.data);
                 setFilteredData(json.data.data);
-                setPage(2);
+                {json.data.current_page != json.data.last_page ? setLoadMoreOrders(true) : setLoadMoreOrders(false)}
+                {json.data.current_page != json.data.last_page ? setPage(2) : null}
                 setRefreshing(false);
                 setIsLoading(false);
             } else {
@@ -143,7 +143,8 @@ const Orders = ({
             if (response.status == "200") {
                 setData(json.data.data);
                 setFilteredData(json.data.data);
-                setPage(2);
+                {json.data.current_page != json.data.last_page ? setLoadMoreOrders(true) : setLoadMoreOrders(false)}
+                {json.data.current_page != json.data.last_page ? setPage(2) : null}
             }
         } catch (error) {
             console.error(error);
@@ -273,7 +274,7 @@ const Orders = ({
                                     showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent={() => <Divider />}
                                 data={filteredData}
-                                onEndReached={getOrderList}
+                                onEndReached={loadMoreOrders ? getOrderList : null}
                                 onEndReachedThreshold={0.5}
                                 refreshControl={
                                     <RefreshControl
@@ -282,7 +283,7 @@ const Orders = ({
                                         colors={["green"]}
                                     />
                                 }
-                                ListFooterComponent={renderFooter}
+                                ListFooterComponent={loadMoreOrders ? renderFooter : null}
                                 keyExtractor={(item) => item.id}
                                 renderItem={({ item, index }) => (
                                     <>

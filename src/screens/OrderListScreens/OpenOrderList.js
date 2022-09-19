@@ -64,9 +64,7 @@ const OpenOrderList = ({
             if (json !== undefined) {
                 setData([...data, ...json.data.data]);
                 setFilteredData([...filteredData, ...json.data.data]);
-                {
-                    page == 1 && setIsLoading(false);
-                }
+                setIsLoading(false);
                 {
                     page != 1 && setIsScrollLoading(false);
                 }

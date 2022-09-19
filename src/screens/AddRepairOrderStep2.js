@@ -60,6 +60,7 @@ const AddRepairOrderStep2 = ({
     const [isLoadingUserList, setIsLoadingUserList] = useState(false);
     const [filteredUserData, setFilteredUserData] = useState([]);
     const [searchQueryForUsers, setSearchQueryForUsers] = useState();
+    const [loadMoreUsers, setLoadMoreUsers] = useState(true);
 
     const [userPage, setUserPage] = useState(1);
     const [isUserScrollLoading, setIsUserScrollLoading] = useState(false);
@@ -107,6 +108,7 @@ const AddRepairOrderStep2 = ({
     const [searchQueryForGarages, setSearchQueryForGarages] = useState();
     const [garageError, setGarageError] = useState(""); // Error State
     const [garageIdError, setGarageIdError] = useState();
+    const [loadMoreGarages, setLoadMoreGarages] = useState(true);
 
     const [garagePage, setGaragePage] = useState(1);
     const [isGarageScrollLoading, setIsGarageScrollLoading] = useState(false);
@@ -143,6 +145,7 @@ const AddRepairOrderStep2 = ({
     const [filteredBrandData, setFilteredBrandData] = useState([]);
     const [searchQueryForBrands, setSearchQueryForBrands] = useState();
     const [brandError, setBrandError] = useState(""); // Error State
+    const [loadMoreBrands, setLoadMoreBrands] = useState(true);
 
     const [brandPage, setBrandPage] = useState(1);
     const [isBrandScrollLoading, setIsBrandScrollLoading] = useState(false);
@@ -157,6 +160,7 @@ const AddRepairOrderStep2 = ({
     const [filteredModelData, setFilteredModelData] = useState([]);
     const [searchQueryForModels, setSearchQueryForModels] = useState();
     const [modelError, setModelError] = useState(""); // Error State
+    const [loadMoreModels, setLoadMoreModels] = useState(true);
 
     const [modelPage, setModelPage] = useState(1);
     const [isModelScrollLoading, setIsModelScrollLoading] = useState(false);
@@ -435,7 +439,7 @@ const AddRepairOrderStep2 = ({
             //         "Vehicle Registration Number is required"
             //     );
             // else setVehicleRegistrationNumberError("");
-            return;
+            // return;
         }
 
         const data = new FormData();
@@ -766,17 +770,15 @@ const AddRepairOrderStep2 = ({
                     ...filteredBrandData,
                     ...json.brand_list.data,
                 ]);
+                setIsLoadingBrandList(false);
+                {
+                    brandPage != 1 && setIsBrandScrollLoading(false);
+                }
+                {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
+                {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(brandPage + 1) : null}
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            {
-                brandPage == 1 && setIsLoadingBrandList(false);
-            }
-            {
-                brandPage != 1 && setIsBrandScrollLoading(false);
-            }
-            setBrandPage(brandPage + 1);
         }
     };
 
@@ -797,7 +799,8 @@ const AddRepairOrderStep2 = ({
             if (response.status == "200") {
                 setBrandList(json.brand_list.data);
                 setFilteredBrandData(json.brand_list.data);
-                setBrandPage(2);
+                {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
+                {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(2) : null}
                 setBrandRefreshing(false);
             } else {
                 setBrandRefreshing(false);
@@ -825,12 +828,14 @@ const AddRepairOrderStep2 = ({
             if (response.status == "200") {
                 setBrandList(json.brand_list.data);
                 setFilteredBrandData(json.brand_list.data);
-                setBrandPage(2);
+                {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
+                {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(2) : null}
             }
         } catch (error) {
             console.error(error);
         } finally {
             setBrandRefreshing(false);
+            setIsLoadingBrandList(false);
         }
     };
 
@@ -882,18 +887,17 @@ const AddRepairOrderStep2 = ({
                     ...filteredModelData,
                     ...json.vehicle_model_list.data,
                 ]);
+                setIsLoadingModelList(false);
+                {
+                    modelPage != 1 && setIsModelScrollLoading(false);
+                }
+                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
+                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(modelPage + 1) : null}
+                // setModelPage(modelPage + 1);
                 // setModelList(json.vehicle_model_list);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            {
-                modelPage == 1 && setIsLoadingModelList(false);
-            }
-            {
-                modelPage != 1 && setIsModelScrollLoading(false);
-            }
-            setModelPage(modelPage + 1);
         }
     };
 
@@ -915,7 +919,8 @@ const AddRepairOrderStep2 = ({
             if (response.status == "200") {
                 setModelList(json.vehicle_model_list.data);
                 setFilteredModelData(json.vehicle_model_list.data);
-                setModelPage(2);
+                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
+                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(2) : null}
                 setModelRefreshing(false);
             } else {
                 setModelRefreshing(false);
@@ -944,7 +949,8 @@ const AddRepairOrderStep2 = ({
             if (response.status == "200") {
                 setModelList(json.vehicle_model_list.data);
                 setFilteredModelData(json.vehicle_model_list.data);
-                setModelPage(2);
+                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
+                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(2) : null}
             }
         } catch (error) {
             console.error(error);
@@ -1111,18 +1117,16 @@ const AddRepairOrderStep2 = ({
                     ...filteredGarageData,
                     ...json.garage_list.data,
                 ]);
+                setIsLoadingGarageList(false);
+                {
+                    garagePage != 1 && setIsGarageScrollLoading(false);
+                }
+                {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
+                {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(garagePage + 1) : null}
                 // setGarageList(json.garage_list);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            {
-                garagePage == 1 && setIsLoadingGarageList(false);
-            }
-            {
-                garagePage != 1 && setIsGarageScrollLoading(false);
-            }
-            setGaragePage(garagePage + 1);
         }
     };
 
@@ -1145,7 +1149,8 @@ const AddRepairOrderStep2 = ({
             if (response.status == "200") {
                 setGarageList(json.garage_list.data);
                 setFilteredGarageData(json.garage_list.data);
-                setGaragePage(2);
+                {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
+                {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(2) : null}
                 setGarageRefreshing(false);
             } else {
                 setGarageRefreshing(false);
@@ -1175,7 +1180,8 @@ const AddRepairOrderStep2 = ({
             if (response.status == "200") {
                 setGarageList(json.garage_list.data);
                 setFilteredGarageData(json.garage_list.data);
-                setGaragePage(2);
+                {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
+                {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(2) : null}
             }
         } catch (error) {
             console.error(error);
@@ -1232,22 +1238,15 @@ const AddRepairOrderStep2 = ({
                     ...filteredUserData,
                     ...json.user_list.data,
                 ]);
-                // setUserList(json.user_list);
-                // setFilteredUserData(json.user_list);
-                // setIsName("");
-                // setIsUser(0);
+                setIsLoadingUserList(false);
+                {
+                    userPage != 1 && setIsUserScrollLoading(false);
+                }
+                {json.user_list.current_page != json.user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
+                {json.user_list.current_page != json.user_list.last_page ? setUserPage(userPage + 1) : null}
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            {
-                userPage == 1 && setIsLoadingUserList(false);
-            }
-            {
-                userPage != 1 && setIsUserScrollLoading(false);
-            }
-            setUserPage(userPage + 1);
-            // setIsLoadingUserList(false)
         }
     };
 
@@ -1272,7 +1271,8 @@ const AddRepairOrderStep2 = ({
             if (response.status == "200") {
                 setUserList(json.user_list.data);
                 setFilteredUserData(json.user_list.data);
-                setUserPage(2);
+                {json.user_list.current_page != json.user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
+                {json.user_list.current_page != json.user_list.last_page ? setUserPage(2) : null}
                 setUserRefreshing(false);
             } else {
                 setUserRefreshing(false);
@@ -1304,12 +1304,14 @@ const AddRepairOrderStep2 = ({
             if (response.status == "200") {
                 setUserList(json.user_list.data);
                 setFilteredUserData(json.user_list.data);
-                setUserPage(2);
+                {json.user_list.current_page != json.user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
+                {json.user_list.current_page != json.user_list.last_page ? setUserPage(2) : null}
             }
         } catch (error) {
             console.error(error);
         } finally {
             setUserRefreshing(false);
+            setIsLoadingUserList(false);
         }
     };
 
@@ -1669,6 +1671,32 @@ const AddRepairOrderStep2 = ({
                                 Vehicle Details:
                             </Text>
 
+                            {/* <TouchableOpacity
+                                onPress={() => {
+                                    setBrandListModal(true);
+                                }}
+                            >
+                                <TextInput
+                                    mode="outlined"
+                                    label="Brand"
+                                    editable={false}
+                                    style={{
+                                        marginTop: 10,
+                                        backgroundColor: "#f1f1f1",
+                                        width: "100%",
+                                    }}
+                                    placeholder="Select Brand"
+                                    value={isBrandName}
+                                    right={
+                                        <TextInput.Icon name="menu-down" />
+                                    }
+                                />
+                            </TouchableOpacity>
+                            {brandError?.length > 0 && (
+                                <Text style={styles.errorTextStyle}>
+                                    {brandError}
+                                </Text>
+                            )} */}
                             <>
                                 <View>
                                     <TouchableOpacity
@@ -1696,7 +1724,7 @@ const AddRepairOrderStep2 = ({
                                     <Text style={styles.errorTextStyle}>
                                         {brandError}
                                     </Text>
-                                )}
+                                )} 
                             </>
 
                             <>
@@ -1746,6 +1774,33 @@ const AddRepairOrderStep2 = ({
                                     </Text>
                                 )}
                             </>
+                            
+                            {/* <TouchableOpacity
+                                onPress={() => {
+                                    setModelListModal(true);
+                                }}
+                            >
+                                <TextInput
+                                    mode="outlined"
+                                    label="Vehicle Model"
+                                    editable={false}
+                                    style={{
+                                        marginTop: 10,
+                                        backgroundColor: "#f1f1f1",
+                                        width: "100%",
+                                    }}
+                                    placeholder="Select Vehicle Model"
+                                    value={isModelName}
+                                    right={
+                                        <TextInput.Icon name="menu-down" />
+                                    }
+                                />
+                            </TouchableOpacity>
+                            {modelError?.length > 0 && (
+                                <Text style={styles.errorTextStyle}>
+                                    {modelError}
+                                </Text>
+                            )} */}
 
                             <TextInput
                                 mode="outlined"
@@ -2603,7 +2658,7 @@ const AddRepairOrderStep2 = ({
                                             </>
                                         )}
                                         data={filteredUserData}
-                                        onEndReached={getUserList}
+                                        onEndReached={loadMoreUsers ? getUserList : null}
                                         onEndReachedThreshold={0.5}
                                         showsVerticalScrollIndicator={false}
                                         refreshControl={
@@ -2613,7 +2668,7 @@ const AddRepairOrderStep2 = ({
                                                 colors={["green"]}
                                             />
                                         }
-                                        ListFooterComponent={renderUserFooter}
+                                        ListFooterComponent={loadMoreUsers ? renderUserFooter : null}
                                         style={{
                                             borderColor: "#0000000a",
                                             borderWidth: 1,
@@ -2808,7 +2863,7 @@ const AddRepairOrderStep2 = ({
                                             </>
                                         )}
                                         data={filteredGarageData}
-                                        onEndReached={getGarageList}
+                                        onEndReached={loadMoreGarages ? getGarageList : null}
                                         showsVerticalScrollIndicator={false}
                                         onEndReachedThreshold={0.5}
                                         refreshControl={
@@ -2818,7 +2873,7 @@ const AddRepairOrderStep2 = ({
                                                 colors={["green"]}
                                             />
                                         }
-                                        ListFooterComponent={renderGarageFooter}
+                                        ListFooterComponent={loadMoreGarages ? renderGarageFooter : null}
                                         style={{
                                             borderColor: "#0000000a",
                                             borderWidth: 1,
@@ -3019,7 +3074,7 @@ const AddRepairOrderStep2 = ({
                                             </>
                                         )}
                                         data={filteredBrandData}
-                                        onEndReached={getBrandList}
+                                        onEndReached={loadMoreBrands ? getBrandList : null}
                                         showsVerticalScrollIndicator={false}
                                         onEndReachedThreshold={0.5}
                                         refreshControl={
@@ -3029,7 +3084,7 @@ const AddRepairOrderStep2 = ({
                                                 colors={["green"]}
                                             />
                                         }
-                                        ListFooterComponent={renderBrandFooter}
+                                        ListFooterComponent={loadMoreBrands ? renderBrandFooter : null}
                                         style={{
                                             borderColor: "#0000000a",
                                             borderWidth: 1,
@@ -3260,7 +3315,7 @@ const AddRepairOrderStep2 = ({
                                             </>
                                         )}
                                         data={filteredModelData}
-                                        onEndReached={getModelList}
+                                        onEndReached={loadMoreModels ? getModelList : null}
                                         showsVerticalScrollIndicator={false}
                                         onEndReachedThreshold={0.5}
                                         refreshControl={
@@ -3270,7 +3325,7 @@ const AddRepairOrderStep2 = ({
                                                 colors={["green"]}
                                             />
                                         }
-                                        ListFooterComponent={renderModelFooter}
+                                        ListFooterComponent={loadMoreModels ? renderModelFooter : null}
                                         style={{
                                             borderColor: "#0000000a",
                                             borderWidth: 1,

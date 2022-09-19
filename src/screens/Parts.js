@@ -40,7 +40,7 @@ const Parts = ({
     const [searchQueryForParts, setSearchQueryForParts] = useState();
 
     const [isGarageId, setIsGarageId] = useState(selectedGarageId);
-    const [isGarageName, setIsGarageName] = useState(!selectedGarage ? "" : selectedGarage.garage_name);
+    const [isGarageName, setIsGarageName] = useState(!selectedGarage ? "All Garages" : selectedGarage.garage_name);
     const [garageList, setGarageList] = useState([]);
     const [garageListModal, setGarageListModal] = useState(false);
     const [isLoadingGarageList, setIsLoadingGarageList] = useState(true);
@@ -108,9 +108,7 @@ const Parts = ({
                     ...filteredGarageData,
                     ...json.garage_list.data,
                 ]);
-                {
-                    garagePage == 1 && setIsLoadingGarageList(false);
-                }
+                setIsLoadingGarageList(false);
                 {
                     garagePage != 1 && setIsGarageScrollLoading(false);
                 }
@@ -331,8 +329,8 @@ const Parts = ({
     };
 
     useEffect(() => {
-        getGarageList();
         pullGarageRefresh();
+        pullRefresh();
     }, [isFocused]);
 
     useEffect(() => {

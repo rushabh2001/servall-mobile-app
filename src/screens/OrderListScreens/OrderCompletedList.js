@@ -35,6 +35,7 @@ const OrderCompletedList = ({
     const [page, setPage] = useState(1);
     const [isScrollLoading, setIsScrollLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    const [loadMoreOrders, setLoadMoreOrders] = useState(true);
 
     const getOrderList = async () => {
         {

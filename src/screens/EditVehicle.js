@@ -118,6 +118,7 @@ const EditVehicle = ({
     const [filteredBrandData, setFilteredBrandData] = useState([]);
     const [searchQueryForBrands, setSearchQueryForBrands] = useState();
     const [brandError, setBrandError] = useState(""); // Error State
+    const [loadMoreBrands, setLoadMoreBrands] = useState(true);
 
     const [brandPage, setBrandPage] = useState(1);
     const [isBrandScrollLoading, setIsBrandScrollLoading] = useState(false);
@@ -132,6 +133,7 @@ const EditVehicle = ({
     const [filteredModelData, setFilteredModelData] = useState([]);
     const [searchQueryForModels, setSearchQueryForModels] = useState();
     const [modelError, setModelError] = useState(""); // Error State
+    const [loadMoreModels, setLoadMoreModels] = useState(true);
 
     const [modelPage, setModelPage] = useState(1);
     const [isModelScrollLoading, setIsModelScrollLoading] = useState(false);
@@ -625,19 +627,15 @@ const EditVehicle = ({
                     ...filteredBrandData,
                     ...json.brand_list.data,
                 ]);
-
-                // setBrandList(json.brand_list);
+                setIsLoadingBrandList(false);
+                {
+                    brandPage != 1 && setIsBrandScrollLoading(false);
+                }
+                {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
+                {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(brandPage + 1) : null}
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            {
-                brandPage == 1 && setIsLoadingBrandList(false);
-            }
-            {
-                brandPage != 1 && setIsBrandScrollLoading(false);
-            }
-            setBrandPage(brandPage + 1);
         }
     };
 
@@ -658,7 +656,8 @@ const EditVehicle = ({
             if (response.status == "200") {
                 setBrandList(json.brand_list.data);
                 setFilteredBrandData(json.brand_list.data);
-                setBrandPage(2);
+                {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
+                {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(2) : null}
                 setBrandRefreshing(false);
             } else {
                 setBrandRefreshing(false);
@@ -686,7 +685,8 @@ const EditVehicle = ({
             if (response.status == "200") {
                 setBrandList(json.brand_list.data);
                 setFilteredBrandData(json.brand_list.data);
-                setBrandPage(2);
+                {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
+                {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(2) : null}
             }
         } catch (error) {
             console.error(error);
@@ -743,18 +743,15 @@ const EditVehicle = ({
                     ...filteredModelData,
                     ...json.vehicle_model_list.data,
                 ]);
-                // setModelList(json.vehicle_model_list);
+                setIsLoadingModelList(false);
+                {
+                    modelPage != 1 && setIsModelScrollLoading(false);
+                }
+                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
+                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(modelPage + 1) : null}
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            {
-                modelPage == 1 && setIsLoadingModelList(false);
-            }
-            {
-                modelPage != 1 && setIsModelScrollLoading(false);
-            }
-            setModelPage(modelPage + 1);
         }
     };
 
@@ -776,7 +773,8 @@ const EditVehicle = ({
             if (response.status == "200") {
                 setModelList(json.vehicle_model_list.data);
                 setFilteredModelData(json.vehicle_model_list.data);
-                setModelPage(2);
+                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
+                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(2) : null}
                 setModelRefreshing(false);
             } else {
                 setModelRefreshing(false);
@@ -805,7 +803,8 @@ const EditVehicle = ({
             if (response.status == "200") {
                 setModelList(json.vehicle_model_list.data);
                 setFilteredModelData(json.vehicle_model_list.data);
-                setModelPage(2);
+                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
+                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(2) : null}
             }
         } catch (error) {
             console.error(error);
@@ -2340,7 +2339,7 @@ const EditVehicle = ({
                                                     </>
                                                 )}
                                                 data={filteredBrandData}
-                                                onEndReached={getBrandList}
+                                                onEndReached={loadMoreBrands ? getBrandList : null}
                                                 onEndReachedThreshold={0.5}
                                                 refreshControl={
                                                     <RefreshControl
@@ -2353,7 +2352,7 @@ const EditVehicle = ({
                                                         colors={["green"]}
                                                     />
                                                 }
-                                                ListFooterComponent={renderBrandFooter}
+                                                ListFooterComponent={loadMoreBrands ? renderBrandFooter : null}
                                                 style={{
                                                     borderColor: "#0000000a",
                                                     borderWidth: 1,
@@ -2609,7 +2608,7 @@ const EditVehicle = ({
                                                     </>
                                                 )}
                                                 data={filteredModelData}
-                                                onEndReached={getModelList}
+                                                onEndReached={loadMoreModels ? getModelList : null}
                                                 onEndReachedThreshold={0.5}
                                                 refreshControl={
                                                     <RefreshControl
@@ -2622,7 +2621,7 @@ const EditVehicle = ({
                                                         colors={["green"]}
                                                     />
                                                 }
-                                                ListFooterComponent={renderModelFooter}
+                                                ListFooterComponent={loadMoreModels ? renderModelFooter : null}
                                                 style={{
                                                     borderColor: "#0000000a",
                                                     borderWidth: 1,

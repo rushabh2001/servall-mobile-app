@@ -72,13 +72,10 @@ const MyCustomer = ({
                 }
                 {json.user_list.current_page != json.user_list.last_page ? setLoadMoreCustomers(true) : setLoadMoreCustomers(false)}
                 {json.user_list.current_page != json.user_list.last_page ? setPage(page + 1) : null}
-                // {json.user_list.data != [] && setPage(page + 1)};
             }
         } catch (e) {
             console.log(e);
-        } finally {
-       
-        }
+        } 
     };
 
     const searchFilter = async () => {

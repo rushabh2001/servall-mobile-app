@@ -30,6 +30,7 @@ const AddRepairOrder = ({
     const [data, setData] = useState([]);
     const [isScrollLoading, setIsScrollLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    const [loadMoreVehicles, setLoadMoreVehicles] = useState(true);
 
     const getVehicleList = async () => {
         {
@@ -57,17 +58,15 @@ const AddRepairOrder = ({
             if (json !== undefined) {
                 setData([...data, ...json.vehicle_list.data]);
                 setFilteredData([...filteredData, ...json.vehicle_list.data]);
+                setIsLoading(false);
+                {
+                    page != 1 && setIsScrollLoading(false);
+                }
+                {json.vehicle_list.current_page != json.vehicle_list.last_page ? setLoadMoreVehicles(true) : setLoadMoreVehicles(false)}
+                {json.vehicle_list.current_page != json.vehicle_list.last_page ? setPage(page + 1) : null}
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            {
-                page == 1 && setIsLoading(false);
-            }
-            {
-                page != 1 && setIsScrollLoading(false);
-            }
-            setPage(page + 1);
         }
     };
 
@@ -92,7 +91,8 @@ const AddRepairOrder = ({
             if (response.status == "200") {
                 setData(json.vehicle_list.data);
                 setFilteredData(json.vehicle_list.data);
-                setPage(2);
+                {json.vehicle_list.current_page != json.vehicle_list.last_page ? setLoadMoreVehicles(true) : setLoadMoreVehicles(false)}
+                {json.vehicle_list.current_page != json.vehicle_list.last_page ? setPage(2) : null}
                 setRefreshing(false);
             } else {
                 setRefreshing(false);
@@ -160,7 +160,8 @@ const AddRepairOrder = ({
             if (response.status == "200") {
                 setData(json.vehicle_list.data);
                 setFilteredData(json.vehicle_list.data);
-                setPage(2);
+                {json.vehicle_list.current_page != json.vehicle_list.last_page ? setLoadMoreVehicles(true) : setLoadMoreVehicles(false)}
+                {json.vehicle_list.current_page != json.vehicle_list.last_page ? setPage(2) : null}
             }
         } catch (error) {
             console.error(error);
@@ -269,7 +270,7 @@ const AddRepairOrder = ({
                                 showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent={() => <Divider />}
                                 data={filteredData}
-                                onEndReached={getVehicleList}
+                                onEndReached={loadMoreVehicles ? getVehicleList : null}
                                 onEndReachedThreshold={0.5}
                                 refreshControl={
                                     <RefreshControl
@@ -278,7 +279,7 @@ const AddRepairOrder = ({
                                         colors={["green"]}
                                     />
                                 }
-                                ListFooterComponent={renderFooter}
+                                ListFooterComponent={loadMoreVehicles ? renderFooter : null}
                                 keyExtractor={(item) => item.id}
                                 renderItem={({ item, index }) => (
                                     <View style={styles.cards}>

@@ -62,6 +62,7 @@ const AddStock = ({
     const [filteredPartData, setFilteredPartData] = useState([]);
     const [searchQueryForParts, setSearchQueryForParts] = useState();
     const [partError, setPartError] = useState("");
+    const [loadMoreParts, setLoadMoreParts] = useState(true);
 
     const [isNewPart, setIsNewPart] = useState("");
     const [newPartError, setNewPartError] = useState();
@@ -97,6 +98,7 @@ const AddStock = ({
     const [searchQueryForGarages, setSearchQueryForGarages] = useState();
     const [garageError, setGarageError] = useState(""); // Error State
     const [garageIdError, setGarageIdError] = useState();
+    const [loadMoreGarages, setLoadMoreGarages] = useState(true);
 
     const [isLoading, setIsLoading] = useState(false);
     const scroll1Ref = useRef();
@@ -236,7 +238,8 @@ const AddStock = ({
             if (response.status == "200") {
                 setPartList(json.data.data);
                 setFilteredPartData(json.data.data);
-                setPartPage(2);
+                {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
+                {json.data.current_page != json.data.last_page ? setPartPage(2) : null}
                 setPartRefreshing(false);
             } else {
                 setPartRefreshing(false);
@@ -269,15 +272,15 @@ const AddStock = ({
             if (json !== undefined) {
                 setPartList([...partList, ...json.data.data]);
                 setFilteredPartData([...filteredPartData, ...json.data.data]);
+                setIsLoadingPartList(false);
+                {
+                    partPage != 1 && setIsPartScrollLoading(false);
+                }
+                {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
+                {json.data.current_page != json.data.last_page ? setPartPage(partPage + 1) : null}
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            setIsLoadingPartList(false);
-            {
-                partPage != 1 && setIsPartScrollLoading(false);
-            }
-            setPartPage(partPage + 1);
         }
     };
 
@@ -299,7 +302,8 @@ const AddStock = ({
             if (response.status == "200") {
                 setPartList(json.data.data);
                 setFilteredPartData(json.data.data);
-                setPartPage(2);
+                {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
+                {json.data.current_page != json.data.last_page ? setPartPage(2) : null}
             }
         } catch (error) {
             console.error(error);
@@ -358,17 +362,15 @@ const AddStock = ({
                     ...filteredGarageData,
                     ...json.garage_list.data,
                 ]);
+                setIsLoadingGarageList(false);
+                {
+                    garagePage != 1 && setIsGarageScrollLoading(false);
+                }
+                {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
+                {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(garagePage + 1) : null}
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            {
-                garagePage == 1 && setIsLoadingGarageList(false);
-            }
-            {
-                garagePage != 1 && setIsGarageScrollLoading(false);
-            }
-            setGaragePage(garagePage + 1);
         }
     };
 
@@ -391,7 +393,8 @@ const AddStock = ({
             if (response.status == "200") {
                 setGarageList(json.garage_list.data);
                 setFilteredGarageData(json.garage_list.data);
-                setGaragePage(2);
+                {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
+                {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(2) : null}
                 setGarageRefreshing(false);
             } else {
                 setGarageRefreshing(false);
@@ -421,7 +424,8 @@ const AddStock = ({
             if (response.status == "200") {
                 setGarageList(json.garage_list.data);
                 setFilteredGarageData(json.garage_list.data);
-                setGaragePage(2);
+                {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
+                {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(2) : null}
             }
         } catch (error) {
             console.error(error);
@@ -857,7 +861,7 @@ const AddStock = ({
                                 </View>
                                 {filteredPartData?.length > 0 ? (
                                     <FlatList
-                                            showsVerticalScrollIndicator={false}
+                                        showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />
@@ -870,7 +874,7 @@ const AddStock = ({
                                             borderWidth: 1,
                                             flex: 1,
                                         }}
-                                        onEndReached={getPartList}
+                                        onEndReached={loadMoreParts ? getPartList : null}
                                         onEndReachedThreshold={0.5}
                                         refreshControl={
                                             <RefreshControl
@@ -879,7 +883,7 @@ const AddStock = ({
                                                 colors={["green"]}
                                             />
                                         }
-                                        ListFooterComponent={renderPartFooter}
+                                        ListFooterComponent={loadMoreParts ? renderPartFooter : null}
                                         keyExtractor={(item) => item.id}
                                         renderItem={({ item }) => (
                                             <>
@@ -1180,7 +1184,7 @@ const AddStock = ({
                                 </View>
                                 {filteredGarageData?.length > 0 ? (
                                     <FlatList
-                                            showsVerticalScrollIndicator={false}
+                                        showsVerticalScrollIndicator={false}
                                         ItemSeparatorComponent={() => (
                                             <>
                                                 <Divider />
@@ -1193,7 +1197,7 @@ const AddStock = ({
                                             borderWidth: 1,
                                             flex: 1,
                                         }}
-                                        onEndReached={getGarageList}
+                                        onEndReached={loadMoreGarages ? getGarageList : null}
                                         onEndReachedThreshold={0.5}
                                         refreshControl={
                                             <RefreshControl
@@ -1202,7 +1206,7 @@ const AddStock = ({
                                                 colors={["green"]}
                                             />
                                         }
-                                        ListFooterComponent={renderGarageFooter}
+                                        ListFooterComponent={loadMoreGarages ? renderGarageFooter : null}
                                         keyExtractor={(item) => item.id}
                                         renderItem={({ item }) => (
                                             <>
