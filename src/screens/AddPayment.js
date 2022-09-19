@@ -31,8 +31,7 @@ const AddPayment = ({
 
     const [orderId, setOrderId] = useState(route?.params?.data.order_id);
     const [isAmount, setIsAmount] = useState(route?.params?.data.total);
-    const [isPaymentReferenceNumber, setIsPaymentReferenceNumber] =
-        useState("");
+    const [isPaymentReferenceNumber, setIsPaymentReferenceNumber] = useState();
     const [isPaymentMethod, setIsPaymentMethod] = useState();
 
     // Error States
@@ -88,11 +87,14 @@ const AddPayment = ({
             else setPaymentMethodError("");
             if (!isAmount) setAmountError("Amount is required");
             else setAmountError("");
-            if (!isPaymentReferenceNumber)
-                setPaymentReferenceNumberError(
-                    "Payment Reference Number is required"
-                );
-            else setPaymentReferenceNumberError("");
+
+            if (!isPaymentReferenceNumber) setIsPaymentReferenceNumber("");
+
+            // if (!isPaymentReferenceNumber)
+            //     setPaymentReferenceNumberError(
+            //         "Payment Reference Number is required"
+            //     );
+            // else setPaymentReferenceNumberError("");
             if (!isPaymentDate) setPaymentDateError("Payment Date is required");
             else setPaymentDateError("");
             return;
@@ -241,6 +243,11 @@ const AddPayment = ({
                                     selectedValue={isPaymentMethod}
                                     onValueChange={(v) => {
                                         setIsPaymentMethod(v);
+                                        v == 0
+                                            ? setPaymentMethodError(
+                                                  "Payment Method is required"
+                                              )
+                                            : setPaymentMethodError("");
                                     }}
                                     style={{ padding: 0 }}
                                     itemStyle={{ padding: 0 }}
@@ -306,6 +313,7 @@ const AddPayment = ({
                                     />
                                 </Picker>
                             </View>
+
                             {paymentMethodError?.length > 0 && (
                                 <Text style={{ color: colors.danger }}>
                                     {paymentMethodError}
@@ -355,11 +363,16 @@ const AddPayment = ({
                                     setIsPaymentReferenceNumber(text)
                                 }
                             />
-                            {paymentReferenceNumberError?.length > 0 && (
+                            {isPaymentReferenceNumber?.trim()?.length === 0 ? (
+                                <Text style={{ color: colors.danger }}>
+                                    Payment Reference Number is required
+                                </Text>
+                            ) : null}
+                            {/* {paymentReferenceNumberError?.length > 0 && (
                                 <Text style={{ color: colors.danger }}>
                                     {paymentReferenceNumberError}
                                 </Text>
-                            )}
+                            )} */}
 
                             <TouchableOpacity
                                 style={{ flex: 1 }}

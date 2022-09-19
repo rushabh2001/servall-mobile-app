@@ -49,7 +49,7 @@ const AddRepairOrderStep2 = ({
     const [isName, setIsName] = useState();
     const [isEmail, setIsEmail] = useState();
     const [isPhoneNumber, setIsPhoneNumber] = useState();
-    const [isAddress, setIsAddress] = useState("");
+    const [isAddress, setIsAddress] = useState();
     const [userOption, setUserOption] = useState("new_user");
 
     const [isUser, setIsUser] = useState();
@@ -1361,7 +1361,7 @@ const AddRepairOrderStep2 = ({
         if (isGarageId != undefined) {
             getUserList();
             setIsUser();
-            setIsName("");
+            setIsName();
         }
     }, [isGarageId]);
 
