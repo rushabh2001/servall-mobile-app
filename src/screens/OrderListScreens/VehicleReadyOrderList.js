@@ -551,7 +551,7 @@ const VehicleReadyOrderList = ({
                                                 item?.payment_status ==
                                                 "Pending"
                                                     ? 128
-                                                    : 64
+                                                    : 63
                                             }
                                             openDuration={250}
                                         >

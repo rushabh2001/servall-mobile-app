@@ -633,7 +633,7 @@ const OrderSearch = ({
                                                     )}
                                                 />
                                                 <Divider />
-                                                {(item?.status != "Vehicle Ready" || item?.status != "Completed Order") ? 
+                                                {(item?.status != "Vehicle Ready" || item?.status != "Completed Order" || item?.payment_status !="Completed") ? 
                                                     <>
                                                         <List.Item
                                                             title="Edit Order"
@@ -731,6 +731,7 @@ const OrderSearch = ({
                                 justifyContent: "center",
                                 paddingVertical: 50,
                                 backgroundColor: colors.white,
+                                flex: 1
                             }}
                         >
                             <Text

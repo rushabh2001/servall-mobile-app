@@ -25,6 +25,7 @@ const Parts = ({
     userRole,
     user,
     selectedGarage,
+    garageId,
 }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [partList, setPartList] = useState([]);
@@ -40,7 +41,7 @@ const Parts = ({
     const [searchQueryForParts, setSearchQueryForParts] = useState();
 
     const [isGarageId, setIsGarageId] = useState(selectedGarageId);
-    const [isGarageName, setIsGarageName] = useState(!selectedGarage ? "All Garages" : selectedGarage.garage_name);
+    const [isGarageName, setIsGarageName] = useState(!selectedGarage ? "" : selectedGarage.garage_name);
     const [garageList, setGarageList] = useState([]);
     const [garageListModal, setGarageListModal] = useState(false);
     const [isLoadingGarageList, setIsLoadingGarageList] = useState(true);
@@ -334,8 +335,17 @@ const Parts = ({
     }, [isFocused]);
 
     useEffect(() => {
-        setIsLoading(true);
-        pullRefresh();
+        if(selectedGarageId == 0 && garageList) {
+            setIsGarageId(garageList[0]?.id); 
+            setIsGarageName(garageList[0]?.garage_name);
+        } 
+    }, [garageList]);
+
+    useEffect(() => {
+        if(isGarageId != 0 && selectedGarageId != isGarageId) {
+            setIsLoading(true);
+            pullRefresh();
+        }
     }, [isGarageId]);
 
     const element = (data, index) => (
@@ -360,28 +370,31 @@ const Parts = ({
                 )}
             </View>
             <View style={styles.customSurface}>
-                <>
-                    <View>
-                        <TouchableOpacity 
-                            style={styles.garageDropDownField} 
-                            onPress={() => {
-                                setGarageListModal(true);
-                            }}
-                        >
-                        </TouchableOpacity>
-                        <TextInput
-                            mode="outlined"
-                            label='Garage'
-                            style={{marginTop: 10, marginBottom: 20,  backgroundColor: colors.white, width:'100%' }}
-                            placeholder="Select Garage"
-                            value={isGarageName}
-                            right={<TextInput.Icon name="menu-down" />}
-                        />
-                    </View>
-                    {garageError?.length > 0 &&
-                        <Text style={styles.errorTextStyle}>{garageError}</Text>
-                    }
-                </>
+                {(userRole == "Super Admin" ||
+                    garageId?.length > 1) && (
+                        <>
+                            <View>
+                                <TouchableOpacity 
+                                    style={styles.garageDropDownField} 
+                                    onPress={() => {
+                                        setGarageListModal(true);
+                                    }}
+                                >
+                                </TouchableOpacity>
+                                <TextInput
+                                    mode="outlined"
+                                    label='Garage'
+                                    style={{marginTop: 10, marginBottom: 20,  backgroundColor: colors.white, width:'100%' }}
+                                    placeholder="Select Garage"
+                                    value={isGarageName}
+                                    right={<TextInput.Icon name="menu-down" />}
+                                />
+                            </View>
+                            {garageError?.length > 0 &&
+                                <Text style={styles.errorTextStyle}>{garageError}</Text>
+                            }
+                        </>
+                    )}
 
                 {/* Search Bar */}
                 <View>

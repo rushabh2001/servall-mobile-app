@@ -79,6 +79,7 @@ const MyCustomer = ({
     };
 
     const searchFilter = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(
                 `${API_URL}fetch_my_garage_customers`,
@@ -102,9 +103,8 @@ const MyCustomer = ({
                 {json.user_list.current_page != json.user_list.last_page ? setLoadMoreCustomers(true) : setLoadMoreCustomers(false)}
                 {json.user_list.current_page != json.user_list.last_page ? setPage(2) : null}
                 setRefreshing(false);
-            } else {
-                setRefreshing(false);
-            }
+                setIsLoading(false);
+            } 
         } catch (error) {
             console.error(error);
         }

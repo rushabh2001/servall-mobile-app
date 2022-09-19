@@ -489,6 +489,7 @@ const Orders = ({
                                 justifyContent: "center",
                                 paddingVertical: 50,
                                 backgroundColor: colors.white,
+                                flex: 1,
                             }}
                         >
                             <Text
@@ -497,7 +498,7 @@ const Orders = ({
                                     textAlign: "center",
                                 }}
                             >
-                                No data found.
+                                No orders found.
                             </Text>
                         </View>
                     )}

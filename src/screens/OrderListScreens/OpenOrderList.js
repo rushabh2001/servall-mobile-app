@@ -549,7 +549,7 @@ const OpenOrderList = ({
                                                 item?.payment_status ==
                                                 "Pending"
                                                     ? 190
-                                                    : 128
+                                                    : 63
                                             }
                                             openDuration={250}
                                         >
@@ -646,94 +646,100 @@ const OpenOrderList = ({
                                                         />
                                                     )}
                                                 />
-                                                <Divider />
-                                                <List.Item
-                                                    title="Edit Order"
-                                                    style={{
-                                                        paddingVertical: 15,
-                                                    }}
-                                                    onPress={() => {
-                                                        let arrData = {
-                                                            order_id: item.id,
-                                                            user_id:
-                                                                item.user_id,
-                                                            garage_id:
-                                                                item.garage_id,
-                                                            vehicle_id:
-                                                                item.vehicle_id,
-                                                            name: item.user
-                                                                .name,
-                                                            email: item.user
-                                                                .email,
-                                                            phone_number:
-                                                                item.user
-                                                                    .phone_number,
-                                                            brand_id:
-                                                                item.vehicle
-                                                                    .brand_id,
-                                                            brand_name:
-                                                                item?.vehicle
-                                                                    ?.brand
-                                                                    ?.name,
-                                                            model_id:
-                                                                item?.vehicle
-                                                                    ?.model_id,
-                                                            model_name:
-                                                                item?.vehicle
-                                                                    ?.vehicle_model
-                                                                    ?.model_name,
-                                                            vehicle_registration_number:
-                                                                item?.vehicle
-                                                                    ?.vehicle_registration_number,
-                                                            odometer:
-                                                                item?.odometer,
-                                                            fuel_level:
-                                                                item?.fuel_level,
-                                                            comment:
-                                                                item?.comment,
-                                                            estimated_delivery_time:
-                                                                item?.estimated_delivery_time,
-                                                            labor_total:
-                                                                item?.labor_total,
-                                                            parts_total:
-                                                                item?.parts_total,
-                                                            services_list:
-                                                                item?.orderservice,
-                                                            parts_list:
-                                                                item?.orderparts,
-                                                            created_at:
-                                                                item?.created_at,
-                                                            payment_status:
-                                                                item?.payment_status,
-                                                            total: item?.total,
-                                                            status: item?.status,
-                                                            applicable_discount:
-                                                                item?.discount,
-                                                        };
-                                                        navigation.navigate(
-                                                            "EditRepairOrder",
-                                                            { data: arrData }
-                                                        );
-                                                        this[
-                                                            RBSheet + index
-                                                        ].close();
-                                                    }}
-                                                    left={() => (
-                                                        <Icon
-                                                            type={
-                                                                "MaterialCommunityIcons"
-                                                            }
-                                                            name="clipboard-edit-outline"
-                                                            style={{
-                                                                marginHorizontal: 10,
-                                                                alignSelf:
-                                                                    "center",
-                                                            }}
-                                                            color={colors.black}
-                                                            size={26}
-                                                        />
+                                             
+                                                {item?.payment_status ==
+                                                    "Pending" && (
+                                                        <>
+                                                            <Divider />
+                                                            <List.Item
+                                                                title="Edit Order"
+                                                                style={{
+                                                                    paddingVertical: 15,
+                                                                }}
+                                                                onPress={() => {
+                                                                    let arrData = {
+                                                                        order_id: item.id,
+                                                                        user_id:
+                                                                            item.user_id,
+                                                                        garage_id:
+                                                                            item.garage_id,
+                                                                        vehicle_id:
+                                                                            item.vehicle_id,
+                                                                        name: item.user
+                                                                            .name,
+                                                                        email: item.user
+                                                                            .email,
+                                                                        phone_number:
+                                                                            item.user
+                                                                                .phone_number,
+                                                                        brand_id:
+                                                                            item.vehicle
+                                                                                .brand_id,
+                                                                        brand_name:
+                                                                            item?.vehicle
+                                                                                ?.brand
+                                                                                ?.name,
+                                                                        model_id:
+                                                                            item?.vehicle
+                                                                                ?.model_id,
+                                                                        model_name:
+                                                                            item?.vehicle
+                                                                                ?.vehicle_model
+                                                                                ?.model_name,
+                                                                        vehicle_registration_number:
+                                                                            item?.vehicle
+                                                                                ?.vehicle_registration_number,
+                                                                        odometer:
+                                                                            item?.odometer,
+                                                                        fuel_level:
+                                                                            item?.fuel_level,
+                                                                        comment:
+                                                                            item?.comment,
+                                                                        estimated_delivery_time:
+                                                                            item?.estimated_delivery_time,
+                                                                        labor_total:
+                                                                            item?.labor_total,
+                                                                        parts_total:
+                                                                            item?.parts_total,
+                                                                        services_list:
+                                                                            item?.orderservice,
+                                                                        parts_list:
+                                                                            item?.orderparts,
+                                                                        created_at:
+                                                                            item?.created_at,
+                                                                        payment_status:
+                                                                            item?.payment_status,
+                                                                        total: item?.total,
+                                                                        status: item?.status,
+                                                                        applicable_discount:
+                                                                            item?.discount,
+                                                                    };
+                                                                    navigation.navigate(
+                                                                        "EditRepairOrder",
+                                                                        { data: arrData }
+                                                                    );
+                                                                    this[
+                                                                        RBSheet + index
+                                                                    ].close();
+                                                                }}
+                                                                left={() => (
+                                                                    <Icon
+                                                                        type={
+                                                                            "MaterialCommunityIcons"
+                                                                        }
+                                                                        name="clipboard-edit-outline"
+                                                                        style={{
+                                                                            marginHorizontal: 10,
+                                                                            alignSelf:
+                                                                                "center",
+                                                                        }}
+                                                                        color={colors.black}
+                                                                        size={26}
+                                                                    />
+                                                                )}
+                                                            />
+                                                        </>
                                                     )}
-                                                />
 
                                                 {item?.payment_status ==
                                                     "Pending" && (

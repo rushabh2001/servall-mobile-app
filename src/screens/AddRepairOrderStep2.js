@@ -3433,7 +3433,9 @@ const AddRepairOrderStep2 = ({
                             // setStateError("");
                             setSearchQueryForStates("");
                             searchFilterForStates();
-                            // setCityFieldToggle(false);
+                            setIsCity();
+                            setIsCityName("");
+                            setCityFieldToggle(false);
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -3465,7 +3467,9 @@ const AddRepairOrderStep2 = ({
                                 // setStateError("");
                                 setSearchQueryForStates("");
                                 searchFilterForStates();
-                                //  setCityFieldToggle(false);
+                                setIsCity();
+                                setIsCityName("");
+                                setCityFieldToggle(false);
                             }}
                         />
                         {isLoadingStateList == true ? (

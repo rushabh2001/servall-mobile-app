@@ -78,12 +78,9 @@ const Services = ({
     };
 
     useEffect(() => {
-        // setIsGarageId(selectedGarageId);
-        getDashboardData();
-        // console.log("user", user);
-        // console.log("user name", user.name);
-        // console.log('selectedGarage', selectedGarageId);
-    }, [isFocused]);
+        if(selectedGarageId) getDashboardData()
+        // console.log('selectedGarageId', selectedGarageId);
+    }, [selectedGarageId, isFocused]);
 
     return (
         <View style={{ flex: 1 }}>

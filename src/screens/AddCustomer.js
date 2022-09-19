@@ -2198,7 +2198,7 @@ const AddCustomer = ({
                                             </>
                                         )}
                                         data={filteredGarageData}
-                                        onEndReached={getGarageList}
+                                        onEndReached={loadMoreGarages ? getGarageList : null}
                                         onEndReachedThreshold={0.5}
                                         refreshControl={
                                             <RefreshControl
@@ -2207,7 +2207,7 @@ const AddCustomer = ({
                                                 colors={["green"]}
                                             />
                                         }
-                                        ListFooterComponent={renderGarageFooter}
+                                        ListFooterComponent={loadMoreGarages ? renderGarageFooter : null}
                                         style={{
                                             borderColor: "#0000000a",
                                             borderWidth: 1,
@@ -2760,6 +2760,8 @@ const AddCustomer = ({
                             setSearchQueryForStates("");
                             searchFilterForStates();
                             setCityFieldToggle(false);
+                            setIsCity();
+                            setIsCityName("");
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -2792,6 +2794,8 @@ const AddCustomer = ({
                                 setSearchQueryForStates("");
                                 searchFilterForStates();
                                 setCityFieldToggle(false);
+                                setIsCity();
+                                setIsCityName("");
                             }}
                         />
                         {isLoadingStateList == true ? (

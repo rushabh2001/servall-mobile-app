@@ -288,7 +288,7 @@ const CustomerInfo = ({
     }, [stateList]);
 
     useEffect(() => {
-        if (isState != undefined) {
+        if (isState != undefined || isState != "") {
             getCityList();
             setIsCity(0);
             setIsCityName("");
@@ -468,6 +468,8 @@ const CustomerInfo = ({
                         setSearchQueryForStates("");
                         searchFilterForStates();
                         setCityFieldToggle(false);
+                        setIsCity();
+                        setIsCityName("");
                     }}
                     contentContainerStyle={[
                         styles.modalContainerStyle,
@@ -492,6 +494,8 @@ const CustomerInfo = ({
                             setSearchQueryForStates("");
                             searchFilterForStates();
                             setCityFieldToggle(false);
+                            setIsCity();
+                            setIsCityName("");
                         }}
                     />
                     <Text

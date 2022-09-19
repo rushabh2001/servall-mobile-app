@@ -198,7 +198,7 @@ const VehicleList = ({
                     </Text>
                 ) : (
                     <Text style={styles.garageNameTitle}>
-                        Hello {user.name}
+                        Hello {user.name}!
                     </Text>
                 )}
             </View>
@@ -729,6 +729,7 @@ const VehicleList = ({
                                 justifyContent: "center",
                                 paddingVertical: 50,
                                 backgroundColor: colors.white,
+                                flex: 1
                             }}
                         >
                             <Text

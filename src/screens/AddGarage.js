@@ -1024,6 +1024,9 @@ const AddGarage = ({
                         setStateListModal(false);
                         setSearchQueryForStates("");
                         searchFilterForStates();
+                        setIsCity();
+                        setIsCityName("");
+                        setCityFieldToggle(false);
                     }}
                     contentContainerStyle={[
                         styles.modalContainerStyle,
@@ -1052,6 +1055,9 @@ const AddGarage = ({
                             setStateListModal(false);
                             setSearchQueryForStates("");
                             searchFilterForStates();
+                            setIsCity();
+                            setIsCityName("");
+                            setCityFieldToggle(false);
                         }}
                     />
                     {isLoadingStateList == true ? (

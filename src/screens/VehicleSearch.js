@@ -355,9 +355,10 @@ const VehicleSearch = ({
                                         setVehicleDataLoading(true);
                                         setViewVehicleDetailsModal(false);
                                     }}
-                                    contentContainerStyle={
-                                        styles.modalContainerStyle
-                                    }
+                                    contentContainerStyle={[
+                                        styles.modalContainerStyle, 
+                                        {flex: 0.8}
+                                    ]}
                                 >
                                     <IconX
                                         name="times"
@@ -386,11 +387,14 @@ const VehicleSearch = ({
                                         Vehicle Details
                                     </Text>
                                     {vehicleDataLoading ? (
-                                        <ActivityIndicator
-                                            style={{ marginVertical: 30 }}
-                                        ></ActivityIndicator>
+                                        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                                            <ActivityIndicator></ActivityIndicator>    
+                                        </View>
                                     ) : (
-                                                <ScrollView showsVerticalScrollIndicator={false}>
+                                        <ScrollView 
+                                            showsVerticalScrollIndicator={false} 
+                                            style={{flex: 1}}
+                                        >
                                             <Text
                                                 style={
                                                     styles.cardDetailsHeading
@@ -744,6 +748,7 @@ const VehicleSearch = ({
                                 justifyContent: "center",
                                 paddingVertical: 50,
                                 backgroundColor: colors.white,
+                                flex: 1
                             }}
                         >
                             <Text

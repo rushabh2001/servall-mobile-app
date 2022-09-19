@@ -546,7 +546,7 @@ const OrderCompletedList = ({
                                             ref={(ref) => {
                                                 this[RBSheet + index] = ref;
                                             }}
-                                            height={64}
+                                            height={63}
                                             openDuration={250}
                                         >
                                             <View
