@@ -10,9 +10,9 @@ import { connect } from "react-redux";
 import { useIsFocused } from "@react-navigation/native";
 import DocumentPicker from 'react-native-document-picker';
 import Lightbox from 'react-native-lightbox-v2';
-import RBSheet from "react-native-raw-bottom-sheet";
 import moment from "moment";
 import ServAllLogo from '../assets/images/placeholder_servall.jpg';
+import Spinner from "react-native-loading-spinner-overlay";
 
 const customerTopTabs = createMaterialTopTabNavigator();
 
@@ -58,6 +58,7 @@ const CustomerDetails = ({ navigation, route, userToken, userRole, selectedGarag
     };
 
     const getOrderDetails = async (orderId) => {
+        setOrderDataLoading(true);
         try {
             const res = await fetch(`${API_URL}order/${orderId}`, {
                 method: 'GET',
@@ -97,6 +98,7 @@ const CustomerDetails = ({ navigation, route, userToken, userRole, selectedGarag
     };
 
     const uploadImage = async () => {
+        setIsLoading(true);
         if (singleFile != null) {
             const fileToUpload = singleFile;
             const data = new FormData();
@@ -117,46 +119,45 @@ const CustomerDetails = ({ navigation, route, userToken, userRole, selectedGarag
         } else {
             console.log('Please Select File first');
         }
+        setIsLoading(false);
     };
 
     const CustomerOrders = () => {
         return(   
             <ScrollView style={styles.innerTabContainer} showsVerticalScrollIndicator={false}>
-                {isLoading ? <ActivityIndicator style={{marginVertical: 50}}></ActivityIndicator> :
-                    ((isCustomerData?.order?.length == 0 || isCustomerData.order == undefined || isCustomerData.order == []) 
-                    ?
-                        <View style={[styles.cards, {alignItems: 'center', flex: 1, justifyContent: 'center', backgroundColor: "transparent", marginVertical: 50 }]}>
-                            <Text>No Order Found for this user!</Text>
-                        </View>
-                    :
-                        <>
-                            {isCustomerData?.order.map((order, i) => {
-                                return (
-                                    <View style={styles.cards}>
-                                        {/* <View style={styles.cardTags} >
-                                            <Text style={styles.tags}>Running Repair</Text>
-                                            <Text style={styles.tags}>Running Repair</Text>
-                                            <Text style={styles.tags}>Running Repair</Text>
-                                        </View> */}
-                                        <View style={styles.cardOrderDetails}>
-                                            <Text style={styles.orderID}>Order ID: {order.id}</Text>
-                                            <Text style={styles.orderStatus}>{order.status}</Text>
-                                        </View>
-                                        <View>
-                                            <Text style={styles.orderAmount}>Order Amount: ₹ {order.total}</Text>
-                                            <Divider />
-                                            <Text style={styles.orderDate}>Order Date: {moment(order.created_at, 'YYYY-MM-DD HH:mm:ss').format('DD-MM-YYYY')}</Text>
-                                            <Divider />
-                                            <Text style={styles.kmNoted}>KM: {order.odometer}</Text>
-                                        </View>
-                                        <View style={styles.cardActions}>
-                                            <TouchableOpacity onPress={()=>{setOrderDataModal(true); getOrderDetails(order.id); }} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>View Details</Text></TouchableOpacity>
-                                        </View>
+                {(isCustomerData?.order?.length == 0 || isCustomerData.order == undefined || isCustomerData.order == []) ?
+                    <View style={[styles.cards, {alignItems: 'center', flex: 1, justifyContent: 'center', backgroundColor: "transparent", marginVertical: 50 }]}>
+                        <Text>No Order Found for this user!</Text>
+                    </View>
+                :
+                    <>
+                        {isCustomerData?.order.map((order, i) => {
+                            return (
+                                <View style={styles.cards}>
+                                    {/* <View style={styles.cardTags} >
+                                        <Text style={styles.tags}>Running Repair</Text>
+                                        <Text style={styles.tags}>Running Repair</Text>
+                                        <Text style={styles.tags}>Running Repair</Text>
+                                    </View> */}
+                                    <View style={styles.cardOrderDetails}>
+                                        <Text style={styles.orderID}>Order ID: {order.id}</Text>
+                                        <Text style={styles.orderStatus}>{order.status}</Text>
                                     </View>
-                                );
-                            })}
-                        </>
-                    )
+                                    <View>
+                                        <Text style={styles.orderAmount}>Order Amount: ₹ {order.total}</Text>
+                                        <Divider />
+                                        <Text style={styles.orderDate}>Order Date: {moment(order.created_at, 'YYYY-MM-DD HH:mm:ss').format('DD-MM-YYYY')}</Text>
+                                        <Divider />
+                                        <Text style={styles.kmNoted}>KM: {order.odometer}</Text>
+                                    </View>
+                                    <View style={styles.cardActions}>
+                                        <TouchableOpacity onPress={()=>{setOrderDataModal(true); getOrderDetails(order.id); }} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>View Details</Text></TouchableOpacity>
+                                    </View>
+                                </View>
+                            );
+                        })}
+                    </>
+                    
                 }
             </ScrollView>
         )
@@ -165,40 +166,38 @@ const CustomerDetails = ({ navigation, route, userToken, userRole, selectedGarag
     const CustomerNotifications = () => {
         return(
             <ScrollView style={styles.innerTabContainer} showsVerticalScrollIndicator={false}>
-                {isLoading ? <ActivityIndicator style={{marginVertical: 50}}></ActivityIndicator> :
-                    ((isCustomerData?.order?.length == 0 || isCustomerData.order == undefined || isCustomerData.order == []) ?
-                        <View style={[styles.cards, { marginVertical: 50, alignItems: 'center', flex: 1, justifyContent: 'center', backgroundColor: "transparent" }]}>
-                            <Text>No Order Found for this user!</Text>
-                        </View>
-                    :
-                    <>
-                            {isCustomerData?.order.map((order, i) => {
-                                return (
-                                    <View style={styles.cards}>
-                                        {/* <View style={styles.cardTags} >
-                                            <Text style={styles.tags}>Running Repair</Text>
-                                            <Text style={styles.tags}>Running Repair</Text>
-                                            <Text style={styles.tags}>Running Repair</Text>
-                                        </View> */}
-                                        <View style={styles.cardOrderDetails}>
-                                            <Text style={styles.orderID}>Order ID: {order.id}</Text>
-                                            <Text style={styles.orderStatus}>{order.status}</Text>
-                                        </View>
-                                        <View>
-                                            <Text style={styles.orderAmount}>Order Amount: ₹ {order.total}</Text>
-                                            <Divider />
-                                            <Text style={styles.orderDate}>Order Date: {moment(order.created_at, 'YYYY-MM-DD HH:mm:ss').format('DD-MM-YYYY')}</Text>
-                                            <Divider />
-                                            <Text style={styles.kmNoted}>KM: {order.odometer}</Text>
-                                        </View>
-                                        <View style={styles.cardActions}>
-                                            <TouchableOpacity onPress={()=>{setOrderDataModal(true); getOrderDetails(order.id); }} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>View Details</Text></TouchableOpacity>
-                                        </View>
+                {(isCustomerData?.order?.length == 0 || isCustomerData.order == undefined || isCustomerData.order == []) ?
+                    <View style={[styles.cards, { marginVertical: 50, alignItems: 'center', flex: 1, justifyContent: 'center', backgroundColor: "transparent" }]}>
+                        <Text>No Order Found for this user!</Text>
+                    </View>
+                :
+                <>
+                        {isCustomerData?.order.map((order, i) => {
+                            return (
+                                <View style={styles.cards}>
+                                    {/* <View style={styles.cardTags} >
+                                        <Text style={styles.tags}>Running Repair</Text>
+                                        <Text style={styles.tags}>Running Repair</Text>
+                                        <Text style={styles.tags}>Running Repair</Text>
+                                    </View> */}
+                                    <View style={styles.cardOrderDetails}>
+                                        <Text style={styles.orderID}>Order ID: {order.id}</Text>
+                                        <Text style={styles.orderStatus}>{order.status}</Text>
                                     </View>
-                                );
-                            })}
-                        </>
-                    )
+                                    <View>
+                                        <Text style={styles.orderAmount}>Order Amount: ₹ {order.total}</Text>
+                                        <Divider />
+                                        <Text style={styles.orderDate}>Order Date: {moment(order.created_at, 'YYYY-MM-DD HH:mm:ss').format('DD-MM-YYYY')}</Text>
+                                        <Divider />
+                                        <Text style={styles.kmNoted}>KM: {order.odometer}</Text>
+                                    </View>
+                                    <View style={styles.cardActions}>
+                                        <TouchableOpacity onPress={()=>{setOrderDataModal(true); getOrderDetails(order.id); }} style={[styles.smallButton, {width: 150, marginTop:8}]}><Text style={{color:colors.primary}}>View Details</Text></TouchableOpacity>
+                                    </View>
+                                </View>
+                            );
+                        })}
+                    </>
                 }
             </ScrollView>
         )
@@ -429,6 +428,13 @@ const CustomerDetails = ({ navigation, route, userToken, userRole, selectedGarag
                         </View>
                     </Modal>
                 </Portal>
+                {isLoading &&
+                    <Spinner
+                        visible={isLoading}
+                        color="#377520"
+                        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
+                    />
+                }
             </View>
         </View>
     )

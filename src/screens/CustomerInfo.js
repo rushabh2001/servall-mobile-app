@@ -21,8 +21,8 @@ import {
     Searchbar,
 } from "react-native-paper";
 import InputScrollView from "react-native-input-scroll-view";
-import { Picker } from "@react-native-picker/picker";
 import IconX from "react-native-vector-icons/FontAwesome5";
+import Spinner from "react-native-loading-spinner-overlay";
 
 const CustomerInfo = ({
     navigation,
@@ -113,6 +113,7 @@ const CustomerInfo = ({
     };
 
     const updateUser = async (data) => {
+        setIsLoading(true);
         try {
             await fetch(`${API_URL}update_customer/${route?.params?.userId}`, {
                 method: "PUT",
@@ -132,7 +133,8 @@ const CustomerInfo = ({
                     });
                 })
                 .then((res) => {
-                    console.log(res);
+                    // console.log(res);
+                    setIsLoading(false);
                     if (res.statusCode == 400) {
                         {
                             res.data.message.email &&
@@ -146,14 +148,12 @@ const CustomerInfo = ({
                         }
                         return;
                     } else if (res.statusCode == 201) {
-                        console.log("Customer Updated SuccessFully");
+                        // console.log("Customer Updated SuccessFully");
                         navigation.navigate("CustomerDetails",{ userId: route?.params?.userId });
                     }
                 });
         } catch (e) {
             console.log(e);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -247,6 +247,7 @@ const CustomerInfo = ({
     };
 
     const getUserDetails = async () => {
+        setIsLoading(true);
         try {
             const res = await fetch(
                 `${API_URL}fetch_customer_details?id=${route?.params?.userId}`,
@@ -309,152 +310,138 @@ const CustomerInfo = ({
                 )}
             </View>
             <View style={styles.pageContainer}>
-                {isLoading == true ? (
-                    <ActivityIndicator></ActivityIndicator>
-                ) : (
-                    <InputScrollView
-                        ref={scroll1Ref}
-                        contentContainerStyle={{
-                            flexGrow: 1,
-                            justifyContent: "center",
-                        }}
-                        keyboardOffset={200}
-                        behavior={Platform.OS === "ios" ? "padding" : "height"}
-                        keyboardShouldPersistTaps={"always"}
-                        showsVerticalScrollIndicator={false}
-                    >
-                        <View style={{ flex: 1 }}>
-                            <Text
-                                style={[styles.headingStyle, { marginTop: 20 }]}
-                            >
-                                Customer Details:
+                <InputScrollView
+                    ref={scroll1Ref}
+                    contentContainerStyle={{
+                        flexGrow: 1,
+                        justifyContent: "center",
+                    }}
+                    keyboardOffset={200}
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    keyboardShouldPersistTaps={"always"}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <View style={{ flex: 1 }}>
+                        <Text
+                            style={[styles.headingStyle, { marginTop: 20 }]}
+                        >
+                            Customer Details:
+                        </Text>
+                        <TextInput
+                            mode="outlined"
+                            label="Customer Name"
+                            style={styles.input}
+                            placeholder="Customer Name"
+                            value={isName}
+                            onChangeText={(text) => setIsName(text)}
+                        />
+                        {nameError?.length > 0 && (
+                            <Text style={{ color: colors.danger }}>
+                                {nameError}
                             </Text>
-                            <TextInput
-                                mode="outlined"
-                                label="Customer Name"
-                                style={styles.input}
-                                placeholder="Customer Name"
-                                value={isName}
-                                onChangeText={(text) => setIsName(text)}
-                            />
-                            {nameError?.length > 0 && (
-                                <Text style={{ color: colors.danger }}>
-                                    {nameError}
-                                </Text>
-                            )}
+                        )}
 
-                            <TextInput
-                                mode="outlined"
-                                label="Email Address"
-                                style={styles.input}
-                                placeholder="Email Address"
-                                value={isEmail}
-                                onChangeText={(text) => setIsEmail(text)}
-                            />
-                            {emailError?.length > 0 && (
-                                <Text style={{ color: colors.danger }}>
-                                    {emailError}
-                                </Text>
-                            )}
+                        <TextInput
+                            mode="outlined"
+                            label="Email Address"
+                            style={styles.input}
+                            placeholder="Email Address"
+                            value={isEmail}
+                            onChangeText={(text) => setIsEmail(text)}
+                        />
+                        {emailError?.length > 0 && (
+                            <Text style={{ color: colors.danger }}>
+                                {emailError}
+                            </Text>
+                        )}
 
-                            <TextInput
-                                mode="outlined"
-                                label="Phone Number"
-                                style={styles.input}
-                                placeholder="Phone Number"
-                                value={isPhoneNumber}
-                                onChangeText={(text) => setIsPhoneNumber(text)}
-                                keyboardType={"phone-pad"}
-                            />
-                            {phoneNumberError?.length > 0 && (
-                                <Text style={{ color: colors.danger }}>
-                                    {phoneNumberError}
-                                </Text>
-                            )}
+                        <TextInput
+                            mode="outlined"
+                            label="Phone Number"
+                            style={styles.input}
+                            placeholder="Phone Number"
+                            value={isPhoneNumber}
+                            onChangeText={(text) => setIsPhoneNumber(text)}
+                            keyboardType={"phone-pad"}
+                        />
+                        {phoneNumberError?.length > 0 && (
+                            <Text style={{ color: colors.danger }}>
+                                {phoneNumberError}
+                            </Text>
+                        )}
 
-                            <View>
-                                <TouchableOpacity
-                                    style={styles.stateDropDownField}
-                                    onPress={() => {
-                                        setStateListModal(true);
-                                    }}
-                                ></TouchableOpacity>
+                        <View style={{marginTop: 20}}>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setStateListModal(true);
+                                }}
+                            >
                                 <TextInput
                                     mode="outlined"
                                     label="State"
                                     style={{
-                                        marginTop: 10,
                                         backgroundColor: "#f1f1f1",
                                         width: "100%",
                                     }}
                                     placeholder="Select State"
+                                    editable={false}
                                     value={isStateName}
                                     right={<TextInput.Icon name="menu-down" />}
                                 />
-                            </View>
+                            </TouchableOpacity>
                             {stateError?.length > 0 && (
                                 <Text style={styles.errorTextStyle}>
                                     {stateError}
                                 </Text>
                             )}
-
-                            <View>
-                                {cityFieldToggle == false && (
-                                    <View
-                                        style={[
-                                            styles.cityDropDownField,
-                                            {
-                                                zIndex: 10,
-                                                opacity: 0.6,
-                                                backgroundColor: colors.white,
-                                            },
-                                        ]}
-                                    ></View>
-                                )}
+                        </View>
+                    
+                        {cityFieldToggle == true && (
+                            <View style={{marginTop: 20}}>                         
                                 <TouchableOpacity
-                                    style={styles.cityDropDownField}
                                     onPress={() => {
                                         setCityListModal(true);
                                     }}
-                                ></TouchableOpacity>
-                                <TextInput
-                                    mode="outlined"
-                                    label="City"
-                                    style={{
-                                        marginTop: 10,
-                                        backgroundColor: "#f1f1f1",
-                                        width: "100%",
-                                    }}
-                                    placeholder="Select City"
-                                    value={isCityName}
-                                    right={<TextInput.Icon name="menu-down" />}
-                                />
+                                >
+                                    <TextInput
+                                        mode="outlined"
+                                        label="City"
+                                        style={{
+                                            backgroundColor: "#f1f1f1",
+                                            width: "100%",
+                                        }}
+                                        placeholder="Select City"
+                                        editable={false}
+                                        value={isCityName}
+                                        right={<TextInput.Icon name="menu-down" />}
+                                    />
+                                </TouchableOpacity>
+                                {cityError?.length > 0 && (
+                                    <Text style={styles.errorTextStyle}>
+                                        {cityError}
+                                    </Text>
+                                )}
                             </View>
-                            {cityError?.length > 0 && (
-                                <Text style={styles.errorTextStyle}>
-                                    {cityError}
-                                </Text>
-                            )}
+                        )}
 
-                            <TextInput
-                                mode="outlined"
-                                label="Address"
-                                style={styles.input}
-                                placeholder="Address"
-                                value={isAddress}
-                                onChangeText={(text) => setIsAddress(text)}
-                            />
+                        <TextInput
+                            mode="outlined"
+                            label="Address"
+                            style={styles.input}
+                            placeholder="Address"
+                            value={isAddress}
+                            onChangeText={(text) => setIsAddress(text)}
+                        />
 
-                            <Button
-                                style={{ marginTop: 15 }}
-                                mode={"contained"}
-                                onPress={submit}
-                            >
-                                Submit
-                            </Button>
-                        </View>
-                    </InputScrollView>
-                )}
+                        <Button
+                            style={{ marginTop: 15 }}
+                            mode={"contained"}
+                            onPress={submit}
+                        >
+                            Submit
+                        </Button>
+                    </View>
+                </InputScrollView>
             </View>
             <Portal>
                 {/* States List Modal */}
@@ -725,6 +712,13 @@ const CustomerInfo = ({
                     )}
                 </Modal>
             </Portal>
+            {isLoading &&
+                <Spinner
+                    visible={isLoading}
+                    color="#377520"
+                    style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
+                />
+            }
         </View>
     );
 };

@@ -11,6 +11,7 @@ import { connect } from "react-redux";
 import { colors } from "../constants";
 import { API_URL } from "../constants/config";
 import InputScrollView from "react-native-input-scroll-view";
+import Spinner from "react-native-loading-spinner-overlay";
 
 const EditStock = ({
     navigation,
@@ -143,6 +144,7 @@ const EditStock = ({
     };
 
     const addStock = async (data) => {
+        setIsLoading(true);
         try {
             const res = await fetch(`${API_URL}add_inventory`, {
                 method: "POST",
@@ -155,7 +157,8 @@ const EditStock = ({
             });
             const json = await res.json();
             if (json !== undefined) {
-                console.log(json);
+                // console.log(json);
+                setIsLoading(false);
                 navigation.navigate("Parts");
             }
         } catch (e) {
@@ -177,183 +180,185 @@ const EditStock = ({
                 )}
             </View>
             <View style={styles.pageContainer}>
-                {isLoading == true ? (
-                    <ActivityIndicator></ActivityIndicator>
-                ) : (
-                    <InputScrollView
-                        ref={scroll1Ref}
-                        contentContainerStyle={{
-                            flexGrow: 1,
-                            justifyContent: "center",
-                        }}
-                        keyboardOffset={200}
-                        behavior={Platform.OS === "ios" ? "padding" : "height"}
-                        keyboardShouldPersistTaps={"always"}
-                        showsVerticalScrollIndicator={false}
-                    >
-                        <View style={{ flex: 1 }}>
-                            <Text
-                                style={[styles.headingStyle, { marginTop: 20 }]}
-                            >
-                                Stock Details:
+                <InputScrollView
+                    ref={scroll1Ref}
+                    contentContainerStyle={{
+                        flexGrow: 1,
+                        justifyContent: "center",
+                    }}
+                    keyboardOffset={200}
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    keyboardShouldPersistTaps={"always"}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <View style={{ flex: 1 }}>
+                        <Text
+                            style={[styles.headingStyle, { marginTop: 20 }]}
+                        >
+                            Stock Details:
+                        </Text>
+
+                        {(userRole == "Super Admin" ||
+                            garageId?.length > 1) && (
+                            <View style={{marginTop: 20}}>
+                                <TextInput
+                                    mode="outlined"
+                                    label="Garage"
+                                    style={{
+                                        backgroundColor: "#f1f1f1",
+                                        width: "100%",
+                                    }}
+                                    placeholder="Select Garage"
+                                    value={isGarageName}
+                                    right={
+                                        <TextInput.Icon name="menu-down" />
+                                    }
+                                    disabled={true}
+                                />
+                                {garageError?.length > 0 && (
+                                    <Text style={styles.errorTextStyle}>
+                                        {garageError}
+                                    </Text>
+                                )}
+                            </View>
+                        )}
+
+                        <TextInput
+                            mode="outlined"
+                            label="Part"
+                            style={{
+                                marginTop: 20,
+                                backgroundColor: "#f1f1f1",
+                                width: "100%",
+                            }}
+                            placeholder="Select Part"
+                            value={isPartName}
+                            right={<TextInput.Icon name="menu-down" />}
+                            disabled={true}
+                        />
+
+                        <TextInput
+                            mode="outlined"
+                            label="Purchase Price (Without GST)"
+                            style={styles.input}
+                            placeholder="Purchase Price (Without GST)"
+                            value={isPrice}
+                            onChangeText={(text) => setIsPrice(text)}
+                            keyboardType={"phone-pad"}
+                        />
+                        {isPrice?.trim()?.length === 0 ? (
+                            <Text style={styles.errorTextStyle}>
+                                Purchase Price is required.
                             </Text>
+                        ) : null}
 
-                            {(userRole == "Super Admin" ||
-                                garageId?.length > 1) && (
-                                <View>
-                                    <TextInput
-                                        mode="outlined"
-                                        label="Garage"
-                                        style={{
-                                            marginTop: 10,
-                                            backgroundColor: "#f1f1f1",
-                                            width: "100%",
-                                        }}
-                                        placeholder="Select Garage"
-                                        value={isGarageName}
-                                        right={
-                                            <TextInput.Icon name="menu-down" />
-                                        }
-                                        disabled={true}
-                                    />
-                                    {garageError?.length > 0 && (
-                                        <Text style={styles.errorTextStyle}>
-                                            {garageError}
-                                        </Text>
-                                    )}
-                                </View>
-                            )}
+                        <TextInput
+                            mode="outlined"
+                            label="MRP"
+                            style={styles.input}
+                            placeholder="MRP"
+                            value={isMRP}
+                            onChangeText={(text) => setIsMRP(text)}
+                            keyboardType={"phone-pad"}
+                        />
+                        {isMRP?.trim()?.length === 0 ? (
+                            <Text style={styles.errorTextStyle}>
+                                MRP is required.
+                            </Text>
+                        ) : null}
 
-                            <TextInput
-                                mode="outlined"
-                                label="Part"
-                                style={{
-                                    marginTop: 10,
-                                    backgroundColor: "#f1f1f1",
-                                    width: "100%",
-                                }}
-                                placeholder="Select Part"
-                                value={isPartName}
-                                right={<TextInput.Icon name="menu-down" />}
-                                disabled={true}
-                            />
+                        <TextInput
+                            mode="outlined"
+                            label="Rack ID"
+                            style={styles.input}
+                            placeholder="Rack ID"
+                            value={isRackId}
+                            onChangeText={(text) => setIsRackId(text)}
+                            keyboardType={"phone-pad"}
+                        />
+                        {isRackId?.trim()?.length === 0 ? (
+                            <Text style={styles.errorTextStyle}>
+                                Rack ID is required.
+                            </Text>
+                        ) : null}
 
-                            <TextInput
-                                mode="outlined"
-                                label="Purchase Price (Without GST)"
-                                style={styles.input}
-                                placeholder="Purchase Price (Without GST)"
-                                value={isPrice}
-                                onChangeText={(text) => setIsPrice(text)}
-                                keyboardType={"phone-pad"}
-                            />
-                            {isPrice?.trim()?.length === 0 ? (
-                                <Text style={styles.errorTextStyle}>
-                                    Purchase Price is required.
-                                </Text>
-                            ) : null}
+                        <TextInput
+                            mode="outlined"
+                            label="Current Stock"
+                            style={styles.input}
+                            placeholder="Current Stock"
+                            value={isCurrentStock}
+                            onChangeText={(text) => setIsCurrentStock(text)}
+                            keyboardType={"phone-pad"}
+                        />
+                        {isCurrentStock?.trim()?.length === 0 ? (
+                            <Text style={styles.errorTextStyle}>
+                                Current Stock is required.
+                            </Text>
+                        ) : null}
 
-                            <TextInput
-                                mode="outlined"
-                                label="MRP"
-                                style={styles.input}
-                                placeholder="MRP"
-                                value={isMRP}
-                                onChangeText={(text) => setIsMRP(text)}
-                                keyboardType={"phone-pad"}
-                            />
-                            {isMRP?.trim()?.length === 0 ? (
-                                <Text style={styles.errorTextStyle}>
-                                    MRP is required.
-                                </Text>
-                            ) : null}
+                        <TextInput
+                            mode="outlined"
+                            label="Minimum Stock"
+                            style={styles.input}
+                            placeholder="Minimum Stock"
+                            value={isMinStock}
+                            onChangeText={(text) => setIsMinStock(text)}
+                            keyboardType={"phone-pad"}
+                        />
+                        {isMinStock?.trim()?.length === 0 ? (
+                            <Text style={styles.errorTextStyle}>
+                                Minimum Stock is required.
+                            </Text>
+                        ) : null}
 
-                            <TextInput
-                                mode="outlined"
-                                label="Rack ID"
-                                style={styles.input}
-                                placeholder="Rack ID"
-                                value={isRackId}
-                                onChangeText={(text) => setIsRackId(text)}
-                                keyboardType={"phone-pad"}
-                            />
-                            {isRackId?.trim()?.length === 0 ? (
-                                <Text style={styles.errorTextStyle}>
-                                    Rack ID is required.
-                                </Text>
-                            ) : null}
+                        <TextInput
+                            mode="outlined"
+                            label="Maximum Stock"
+                            style={styles.input}
+                            placeholder="Maximum Stock"
+                            value={isMaxStock}
+                            onChangeText={(text) => setIsMaxStock(text)}
+                            keyboardType={"phone-pad"}
+                        />
+                        {isMaxStock?.trim()?.length === 0 ? (
+                            <Text style={styles.errorTextStyle}>
+                                Maximum Stock is required.
+                            </Text>
+                        ) : null}
 
-                            <TextInput
-                                mode="outlined"
-                                label="Current Stock"
-                                style={styles.input}
-                                placeholder="Current Stock"
-                                value={isCurrentStock}
-                                onChangeText={(text) => setIsCurrentStock(text)}
-                                keyboardType={"phone-pad"}
-                            />
-                            {isCurrentStock?.trim()?.length === 0 ? (
-                                <Text style={styles.errorTextStyle}>
-                                    Current Stock is required.
-                                </Text>
-                            ) : null}
+                        <TextInput
+                            mode="outlined"
+                            label="Comment"
+                            style={styles.input}
+                            placeholder="Comment"
+                            value={isComment}
+                            onChangeText={(text) => setIsComment(text)}
+                            numberOfLines={3}
+                            multiline={true}
+                        />
+                        {commentError?.length > 0 && (
+                            <Text style={styles.errorTextStyle}>
+                                {commentError}
+                            </Text>
+                        )}
 
-                            <TextInput
-                                mode="outlined"
-                                label="Minimum Stock"
-                                style={styles.input}
-                                placeholder="Minimum Stock"
-                                value={isMinStock}
-                                onChangeText={(text) => setIsMinStock(text)}
-                                keyboardType={"phone-pad"}
-                            />
-                            {isMinStock?.trim()?.length === 0 ? (
-                                <Text style={styles.errorTextStyle}>
-                                    Minimum Stock is required.
-                                </Text>
-                            ) : null}
-
-                            <TextInput
-                                mode="outlined"
-                                label="Maximum Stock"
-                                style={styles.input}
-                                placeholder="Maximum Stock"
-                                value={isMaxStock}
-                                onChangeText={(text) => setIsMaxStock(text)}
-                                keyboardType={"phone-pad"}
-                            />
-                            {isMaxStock?.trim()?.length === 0 ? (
-                                <Text style={styles.errorTextStyle}>
-                                    Maximum Stock is required.
-                                </Text>
-                            ) : null}
-
-                            <TextInput
-                                mode="outlined"
-                                label="Comment"
-                                style={styles.input}
-                                placeholder="Comment"
-                                value={isComment}
-                                onChangeText={(text) => setIsComment(text)}
-                                numberOfLines={3}
-                                multiline={true}
-                            />
-                            {commentError?.length > 0 && (
-                                <Text style={styles.errorTextStyle}>
-                                    {commentError}
-                                </Text>
-                            )}
-
-                            <Button
-                                style={{ marginTop: 15 }}
-                                mode={"contained"}
-                                onPress={submit}
-                            >
-                                Update
-                            </Button>
-                        </View>
-                    </InputScrollView>
-                )}
+                        <Button
+                            style={{ marginTop: 15 }}
+                            mode={"contained"}
+                            onPress={submit}
+                        >
+                            Update
+                        </Button>
+                    </View>
+                </InputScrollView>
+                {isLoading &&
+                    <Spinner
+                        visible={isLoading}
+                        color="#377520"
+                        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
+                    />
+                }
             </View>
         </View>
     );

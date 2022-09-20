@@ -28,6 +28,7 @@ import DocumentPicker from "react-native-document-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { SliderPicker } from "react-native-slider-picker";
 import { Picker } from "@react-native-picker/picker";
+import Spinner from "react-native-loading-spinner-overlay";
 
 // Edit Repair Order
 const EditRepairOrder = ({
@@ -208,11 +209,11 @@ const EditRepairOrder = ({
 
     function handleServiceAdd(data) {
         const values = [...fieldsServices];
-        console.log("check", values);
-        console.log("data", data.service_id);
+        // console.log("check", values);
+        // console.log("data", data.service_id);
         var keyword = data.service_id;
         const isObjectPresent = values.find((o) => o.service_id === keyword);
-        console.log("isObjectPresent", isObjectPresent);
+        // console.log("isObjectPresent", isObjectPresent);
         if (!isObjectPresent) {
             values.push({
                 service_id: data.service_id,
@@ -295,11 +296,11 @@ const EditRepairOrder = ({
 
     function handlePartAdd(data) {
         const partValues = [...fieldsParts];
-        console.log("check", partValues);
-        console.log("data", data);
+        // console.log("check", partValues);
+        // console.log("data", data);
         var keyword = data.parts_id;
         const isObjectPresent = partValues.find((o) => o.parts_id === keyword);
-        console.log("isObjectPresent", isObjectPresent);
+        // console.log("isObjectPresent", isObjectPresent);
         if (!isObjectPresent) {
             partValues.push({
                 parts_id: data.parts_id,
@@ -394,6 +395,8 @@ const EditRepairOrder = ({
         return !(
             !isOrderStatus ||
             isOrderStatus === 0 ||
+            (!fieldsServices && !fieldsParts) ||
+            (fieldsServices.length === 0 && fieldsParts.length === 0) ||
             !estimatedDeliveryDateTime ||
             estimatedDeliveryDateTime?.trim().length === 0
         );
@@ -413,7 +416,11 @@ const EditRepairOrder = ({
             if (!isOrderStatus || isOrderStatus?.trim().length === 0)
                 setOrderStatusError("Order Status is required");
             else setOrderStatusError("");
-
+            if (
+                (!fieldsParts &&
+                !fieldsServices) || (fieldsServices.length === 0 && fieldsParts.length === 0)
+            )
+            alert("Minimum 1 service or part should be added in order!");
             return;
         }
 
@@ -440,10 +447,11 @@ const EditRepairOrder = ({
         data.append("comment", isComment?.trim());
 
         editOrder(data);
-        console.log(JSON.stringify(data));
+        // console.log(JSON.stringify(data));
     };
 
     const editOrder = async (data) => {
+        setIsLoading(true);
         try {
             await fetch(`${API_URL}update_order/${isOrderId}`, {
                 method: "POST",
@@ -463,7 +471,8 @@ const EditRepairOrder = ({
                     });
                 })
                 .then((res) => {
-                    console.log("res", JSON.stringify(res));
+                    setIsLoading(false);
+                    // console.log("res", JSON.stringify(res));
                     if (res.statusCode == 400) {
                         {
                             res.data.message.estimated_delivery_time &&
@@ -473,16 +482,13 @@ const EditRepairOrder = ({
                         }
                         return;
                     } else if (res.statusCode == 201 || res.statusCode == 200) {
+                        navigation.popToTop();
                         navigation.navigate("OpenOrderList");
-                    } else {
-                        navigation.navigate("OpenOrderList");
-                    }
+                    } 
                 });
         } catch (e) {
             console.log(e);
-        } finally {
-            navigation.navigate("OpenOrderList");
-        }
+        } 
     };
 
     const getPartList = async () => {
@@ -832,839 +838,835 @@ const EditRepairOrder = ({
                 )}
             </View>
             <View style={styles.pageContainer}>
-                {isLoading == true ? (
-                    <ActivityIndicator></ActivityIndicator>
-                ) : (
-                    <InputScrollView
-                        contentContainerStyle={{
-                            flexGrow: 1,
-                            justifyContent: "center",
-                        }}
-                        keyboardOffset={200}
-                        behavior={Platform.OS === "ios" ? "padding" : "height"}
-                        keyboardShouldPersistTaps={"always"}
-                        showsVerticalScrollIndicator={false}
-                    >
-                        <View style={{ flex: 1 }}>
-                            <Text
-                                style={[styles.headingStyle, { marginTop: 20 }]}
-                            >
-                                Order Details:{" "}
-                            </Text>
-                            <View style={styles.cardContainer}>
-                                <View
-                                    style={[
-                                        styles.cardRightContent,
-                                        { flex: 0.5 },
-                                    ]}
-                                >
-                                    <Text style={styles.cardMainTitle}>
-                                        Customer Details:
-                                    </Text>
-                                    <Text style={styles.cardTitle}>
-                                        {isName}
-                                    </Text>
-                                    <Text style={styles.cardTitle}>
-                                        {isEmail}
-                                    </Text>
-                                    <Text style={styles.cardTitle}>
-                                        {isPhoneNumber}
-                                    </Text>
-                                </View>
-                                <View
-                                    style={[
-                                        styles.cardRightContent,
-                                        { flex: 0.5 },
-                                    ]}
-                                >
-                                    <Text style={styles.cardMainTitle}>
-                                        Vehicle Details:
-                                    </Text>
-                                    <Text style={styles.cardTitle}>
-                                        {isBrandName}
-                                    </Text>
-                                    <Text style={styles.cardTitle}>
-                                        {isModelName}
-                                    </Text>
-                                    <Text style={styles.cardTitle}>
-                                        {isVehicleRegistrationNumber}
-                                    </Text>
-                                </View>
-                            </View>
-
-                            <Text
-                                style={[styles.headingStyle, { marginTop: 20 }]}
-                            >
-                                Service:
-                            </Text>
-
-                            {fieldsServices.map((field, idx) => {
-                                return (
-                                    <>
-                                        <View
-                                            style={
-                                                styles.addFieldContainerGroup
-                                            }
-                                            key={`service-${field}-${idx}`}
-                                        >
-                                            <TouchableOpacity
-                                                style={
-                                                    styles.removeEntryIconContainer
-                                                }
-                                                onPress={() =>
-                                                    handleServiceRemove(idx)
-                                                }
-                                            >
-                                                <Icon
-                                                    style={
-                                                        styles.removeEntryIcon
-                                                    }
-                                                    name="close"
-                                                    size={30}
-                                                    color="#000"
-                                                />
-                                            </TouchableOpacity>
-
-                                            <View
-                                                style={[
-                                                    styles.cardRightContent,
-                                                    {
-                                                        flex: 1,
-                                                        flexDirection: "row",
-                                                        marginTop: 10,
-                                                        marginBottom: 0,
-                                                    },
-                                                ]}
-                                            >
-                                                <Text
-                                                    style={[
-                                                        styles.partNameContent,
-                                                        { fontWeight: "600" },
-                                                    ]}
-                                                >
-                                                    Service Name:{" "}
-                                                </Text>
-                                                <Text
-                                                    style={
-                                                        styles.serviceNameContent
-                                                    }
-                                                >
-                                                    {
-                                                        fieldsServices[idx]
-                                                            .serviceName
-                                                    }
-                                                </Text>
-                                            </View>
-
-                                            <View
-                                                style={[
-                                                    styles.cardRightContent,
-                                                    { flex: 1 },
-                                                ]}
-                                            >
-                                                <View
-                                                    style={
-                                                        styles.addFieldContainer
-                                                    }
-                                                >
-                                                    <TextInput
-                                                        mode="outlined"
-                                                        label="Rate"
-                                                        style={
-                                                            styles.textEntryInput
-                                                        }
-                                                        placeholder="Rate"
-                                                        keyboardType="numeric"
-                                                        value={
-                                                            fieldsServices[idx][
-                                                                "rate"
-                                                            ]
-                                                        }
-                                                        onChangeText={(e) => {
-                                                            let parameter = {
-                                                                name: "rate",
-                                                                value: e,
-                                                            };
-                                                            handleServiceChange(
-                                                                idx,
-                                                                parameter
-                                                            );
-                                                        }}
-                                                    />
-                                                    <TextInput
-                                                        mode="outlined"
-                                                        label="Quantity"
-                                                        style={
-                                                            styles.textEntryInput
-                                                        }
-                                                        placeholder="Quantity"
-                                                        keyboardType="numeric"
-                                                        value={
-                                                            fieldsServices[idx]
-                                                                .qty
-                                                        }
-                                                        onChangeText={(e) => {
-                                                            let parameter = {
-                                                                name: "qty",
-                                                                value: e,
-                                                            };
-                                                            handleServiceChange(
-                                                                idx,
-                                                                parameter
-                                                            );
-                                                        }}
-                                                    />
-                                                    <TextInput
-                                                        mode="outlined"
-                                                        label="Discount"
-                                                        style={
-                                                            styles.textEntryInput
-                                                        }
-                                                        placeholder="Discount"
-                                                        keyboardType="numeric"
-                                                        value={
-                                                            fieldsServices[idx]
-                                                                .discount
-                                                        }
-                                                        onChangeText={(e) => {
-                                                            let parameter = {
-                                                                name: "discount",
-                                                                value: e,
-                                                            };
-                                                            handleServiceChange(
-                                                                idx,
-                                                                parameter
-                                                            );
-                                                        }}
-                                                    />
-                                                </View>
-
-                                                <View
-                                                    style={{
-                                                        flexDirection: "row",
-                                                    }}
-                                                >
-                                                    <Text
-                                                        style={{
-                                                            fontSize: 20,
-                                                            color: colors.black,
-                                                            marginTop: 15,
-                                                            marginBottom: 0,
-                                                            fontWeight: "600",
-                                                        }}
-                                                    >
-                                                        Total for this Service:{" "}
-                                                    </Text>
-                                                    <Text
-                                                        style={{
-                                                            fontSize: 20,
-                                                            color: colors.black,
-                                                            marginTop: 15,
-                                                            marginBottom: 5,
-                                                        }}
-                                                    >
-                                                        {fieldsServices[idx]
-                                                            ? fieldsServices[
-                                                                  idx
-                                                              ].amount
-                                                            : 0}
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    </>
-                                );
-                            })}
-                            <View style={styles.addFieldBtnContainer}>
-                                <Button
-                                    style={{ marginTop: 15, flex: 0.3 }}
-                                    mode={"contained"}
-                                    icon="plus"
-                                    onPress={() => setServiceListModal(true)}
-                                >
-                                    Add Service
-                                </Button>
-                                <View style={{ flex: 0.5 }}></View>
-                            </View>
-
-                            <Text
-                                style={[styles.headingStyle, { marginTop: 20 }]}
-                            >
-                                Parts:
-                            </Text>
-                            {fieldsParts.map((field, idx) => {
-                                return (
-                                    <>
-                                        <View
-                                            style={
-                                                styles.addFieldContainerGroup
-                                            }
-                                            key={`fieldsParts-${field}-${idx}`}
-                                        >
-                                            <TouchableOpacity
-                                                style={
-                                                    styles.removeEntryIconContainer
-                                                }
-                                                onPress={() =>
-                                                    handlePartRemove(idx)
-                                                }
-                                            >
-                                                <Icon
-                                                    style={
-                                                        styles.removeEntryIcon
-                                                    }
-                                                    name="close"
-                                                    size={30}
-                                                    color="#000"
-                                                />
-                                            </TouchableOpacity>
-
-                                            <View
-                                                style={[
-                                                    styles.cardRightContent,
-                                                    {
-                                                        flex: 1,
-                                                        flexDirection: "row",
-                                                        marginTop: 10,
-                                                        marginBottom: 0,
-                                                    },
-                                                ]}
-                                            >
-                                                <Text
-                                                    style={[
-                                                        styles.partNameContent,
-                                                        { fontWeight: "600" },
-                                                    ]}
-                                                >
-                                                    Part Name:{" "}
-                                                </Text>
-                                                <Text
-                                                    style={
-                                                        styles.partNameContent
-                                                    }
-                                                >
-                                                    {fieldsParts[idx].partName}
-                                                </Text>
-                                            </View>
-                                            <View
-                                                style={[
-                                                    styles.cardRightContent,
-                                                    { flex: 1 },
-                                                ]}
-                                            >
-                                                <View
-                                                    style={
-                                                        styles.addFieldContainer
-                                                    }
-                                                >
-                                                    <TextInput
-                                                        mode="outlined"
-                                                        label="Rate"
-                                                        style={[
-                                                            styles.textEntryInput,
-                                                        ]}
-                                                        placeholder="Rate"
-                                                        keyboardType="numeric"
-                                                        value={
-                                                            fieldsParts[idx]
-                                                                .rate
-                                                        }
-                                                        onChangeText={(e) => {
-                                                            let parameter = {
-                                                                name: "rate",
-                                                                value: e,
-                                                            };
-                                                            handlePartChange(
-                                                                idx,
-                                                                parameter
-                                                            );
-                                                        }}
-                                                    />
-                                                    <TextInput
-                                                        mode="outlined"
-                                                        label="Quantity"
-                                                        style={
-                                                            styles.textEntryInput
-                                                        }
-                                                        placeholder="Quantity"
-                                                        keyboardType="numeric"
-                                                        value={
-                                                            fieldsParts[idx].qty
-                                                        }
-                                                        onChangeText={(e) => {
-                                                            let parameter = {
-                                                                name: "qty",
-                                                                value: e,
-                                                            };
-                                                            handlePartChange(
-                                                                idx,
-                                                                parameter
-                                                            );
-                                                        }}
-                                                    />
-                                                    <TextInput
-                                                        mode="outlined"
-                                                        label="Discount"
-                                                        style={
-                                                            styles.textEntryInput
-                                                        }
-                                                        placeholder="Discount"
-                                                        keyboardType="numeric"
-                                                        value={
-                                                            fieldsParts[idx]
-                                                                .discount
-                                                        }
-                                                        onChangeText={(e) => {
-                                                            let parameter = {
-                                                                name: "discount",
-                                                                value: e,
-                                                            };
-                                                            handlePartChange(
-                                                                idx,
-                                                                parameter
-                                                            );
-                                                        }}
-                                                    />
-                                                </View>
-
-                                                <View
-                                                    style={{
-                                                        flexDirection: "row",
-                                                    }}
-                                                >
-                                                    <Text
-                                                        style={{
-                                                            fontSize: 20,
-                                                            color: colors.black,
-                                                            marginTop: 15,
-                                                            marginBottom: 0,
-                                                            fontWeight: "600",
-                                                        }}
-                                                    >
-                                                        Total for this Part:{" "}
-                                                    </Text>
-                                                    <Text
-                                                        style={{
-                                                            fontSize: 20,
-                                                            color: colors.black,
-                                                            marginTop: 15,
-                                                            marginBottom: 5,
-                                                        }}
-                                                    >
-                                                        {fieldsParts[idx]
-                                                            ? fieldsParts[idx]
-                                                                  .amount
-                                                            : 0}
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    </>
-                                );
-                            })}
-                            <View style={styles.addFieldBtnContainer}>
-                                <Button
-                                    style={{ marginTop: 15, flex: 0.3 }}
-                                    mode={"contained"}
-                                    icon="plus"
-                                    onPress={() => setPartListModal(true)}
-                                >
-                                    Add Part
-                                </Button>
-                                <View style={{ flex: 0.5 }}></View>
-                            </View>
-
-                            <Text
-                                style={[styles.headingStyle, { marginTop: 20 }]}
-                            >
-                                Totals:
-                            </Text>
-                            <View style={styles.totalFieldContainerGroup}>
-                                <View style={styles.totalFieldsGroup}>
-                                    <View
-                                        style={[
-                                            styles.totalFieldsLeftContent,
-                                            { flex: 0.8 },
-                                        ]}
-                                    >
-                                        <Text style={styles.partNameContent}>
-                                            Services Total
-                                        </Text>
-                                    </View>
-                                    <View
-                                        style={[
-                                            styles.totalFieldsRightContent,
-                                            { flex: 1 },
-                                        ]}
-                                    >
-                                        <Text
-                                            style={
-                                                styles.totalFieldTextContainer
-                                            }
-                                        >
-                                            INR{" "}
-                                        </Text>
-                                        <View
-                                            style={styles.totalFieldContainer}
-                                        >
-                                            <Text
-                                                style={{
-                                                    fontSize: 18,
-                                                    color: colors.black,
-                                                }}
-                                            >
-                                                {servicesTotal}
-                                            </Text>
-                                        </View>
-                                    </View>
-                                </View>
-                                <View style={styles.totalFieldsGroup}>
-                                    <View
-                                        style={[
-                                            styles.totalFieldsLeftContent,
-                                            { flex: 0.8 },
-                                        ]}
-                                    >
-                                        <Text style={styles.partNameContent}>
-                                            Parts Total
-                                        </Text>
-                                    </View>
-                                    <View
-                                        style={[
-                                            styles.totalFieldsRightContent,
-                                            { flex: 1 },
-                                        ]}
-                                    >
-                                        <Text
-                                            style={
-                                                styles.totalFieldTextContainer
-                                            }
-                                        >
-                                            INR{" "}
-                                        </Text>
-                                        <View
-                                            style={styles.totalFieldContainer}
-                                        >
-                                            <Text
-                                                style={{
-                                                    fontSize: 18,
-                                                    color: colors.black,
-                                                }}
-                                            >
-                                                {partsTotal}
-                                            </Text>
-                                        </View>
-                                    </View>
-                                </View>
-                                <View style={styles.totalFieldsGroup}>
-                                    <View
-                                        style={[
-                                            styles.totalFieldsLeftContent,
-                                            { flex: 0.8 },
-                                        ]}
-                                    >
-                                        <Text style={styles.partNameContent}>
-                                            Applicable Discount
-                                        </Text>
-                                    </View>
-                                    <View
-                                        style={[
-                                            styles.totalFieldsRightContent,
-                                            { flex: 1 },
-                                        ]}
-                                    >
-                                        <Text
-                                            style={
-                                                styles.totalFieldTextContainer
-                                            }
-                                        >
-                                            INR{" "}
-                                        </Text>
-                                        <View
-                                            style={styles.totalFieldContainer}
-                                        >
-                                            <Text
-                                                style={{
-                                                    fontSize: 18,
-                                                    color: colors.black,
-                                                }}
-                                            >
-                                                {isApplicableDiscount}
-                                            </Text>
-                                        </View>
-                                    </View>
-                                </View>
-                                <View style={styles.totalFieldsGroup}>
-                                    <View
-                                        style={[
-                                            styles.totalFieldsLeftContent,
-                                            { flex: 0.9 },
-                                        ]}
-                                    >
-                                        <Text style={styles.partNameContent}>
-                                            Total {"\n"} (Inclusive of Taxes)
-                                        </Text>
-                                    </View>
-                                    <View
-                                        style={[
-                                            styles.totalFieldsRightContent,
-                                            { flex: 1 },
-                                        ]}
-                                    >
-                                        <Text
-                                            style={
-                                                styles.totalFieldTextContainer
-                                            }
-                                        >
-                                            INR{" "}
-                                        </Text>
-                                        <View
-                                            style={styles.totalFieldContainer}
-                                        >
-                                            <Text
-                                                style={{
-                                                    fontSize: 18,
-                                                    color: colors.black,
-                                                }}
-                                            >
-                                                {isTotal}
-                                            </Text>
-                                        </View>
-                                    </View>
-                                </View>
-                            </View>
-
-                            <Text
-                                style={[styles.headingStyle, { marginTop: 20 }]}
-                            >
-                                Vehicle Images:
-                            </Text>
-
-                            <View>
-                                <TouchableOpacity
-                                    activeOpacity={0.5}
-                                    style={styles.uploadButtonStyle}
-                                    onPress={selectVehicleImg}
-                                >
-                                    <Icon
-                                        name="upload"
-                                        size={18}
-                                        color={colors.primary}
-                                        style={styles.downloadIcon}
-                                    />
-                                    <Text
-                                        style={{
-                                            marginRight: 10,
-                                            fontSize: 18,
-                                            color: "#000",
-                                        }}
-                                    >
-                                        Upload Vehicle Image
-                                    </Text>
-                                    {isVehicleImg != null ? (
-                                        <Text style={styles.textStyle}>
-                                            File Name:
-                                            {isVehicleImg?.map(
-                                                (isVehicleImg) => {
-                                                    return (
-                                                        isVehicleImg.name + ", "
-                                                    );
-                                                }
-                                            )}
-                                        </Text>
-                                    ) : null}
-                                </TouchableOpacity>
-                            </View>
-
-                            <Text
-                                style={[styles.headingStyle, { marginTop: 20 }]}
-                            >
-                                Additional Information:
-                            </Text>
-
+                <InputScrollView
+                    contentContainerStyle={{
+                        flexGrow: 1,
+                        justifyContent: "center",
+                    }}
+                    keyboardOffset={200}
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    keyboardShouldPersistTaps={"always"}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <View style={{ flex: 1 }}>
+                        <Text
+                            style={[styles.headingStyle, { marginTop: 20 }]}
+                        >
+                            Order Details:{" "}
+                        </Text>
+                        <View style={styles.cardContainer}>
                             <View
-                                style={{
-                                    borderBottomWidth: 1,
-                                    borderColor: colors.light_gray,
-                                    borderRadius: 4,
-                                    marginTop: 20,
-                                    backgroundColor: "#F0F2F5",
-                                }}
+                                style={[
+                                    styles.cardRightContent,
+                                    { flex: 0.5 },
+                                ]}
                             >
-                                <Picker
-                                    selectedValue={isOrderStatus}
-                                    onValueChange={(v) => {
-                                        setIsOrderStatus(v);
-                                    }}
-                                    style={{ padding: 0 }}
-                                    itemStyle={{ padding: 0 }}
-                                >
-                                    <Picker.Item
-                                        key={1}
-                                        label="Select Order Status"
-                                        value="0"
-                                    />
-                                    <Picker.Item
-                                        key={2}
-                                        label="Vehicle Received"
-                                        value="Vehicle Received"
-                                    />
-                                    <Picker.Item
-                                        key={3}
-                                        label="Work in Progress Order"
-                                        value="Work in Progress Order"
-                                    />
-                                    <Picker.Item
-                                        key={4}
-                                        label="Vehicle Ready"
-                                        value="Vehicle Ready"
-                                    />
-                                    <Picker.Item
-                                        key={5}
-                                        label="Completed Order"
-                                        value="Completed Order"
-                                    />
-                                </Picker>
+                                <Text style={styles.cardMainTitle}>
+                                    Customer Details:
+                                </Text>
+                                <Text style={styles.cardTitle}>
+                                    {isName}
+                                </Text>
+                                <Text style={styles.cardTitle}>
+                                    {isEmail}
+                                </Text>
+                                <Text style={styles.cardTitle}>
+                                    {isPhoneNumber}
+                                </Text>
                             </View>
-                            {orderStatusError?.length > 0 && (
-                                <Text style={{ color: colors.danger }}>
-                                    {orderStatusError}
+                            <View
+                                style={[
+                                    styles.cardRightContent,
+                                    { flex: 0.5 },
+                                ]}
+                            >
+                                <Text style={styles.cardMainTitle}>
+                                    Vehicle Details:
                                 </Text>
-                            )}
-
-                            <TextInput
-                                mode="outlined"
-                                label="Odometer (in KMs)"
-                                style={styles.input}
-                                placeholder="Odometer (in KMs)"
-                                value={isOdometerKMs}
-                                onChangeText={(text) => setIsOdometerKMs(text)}
-                                keyboardType="numeric"
-                            />
-                            {odometerKMsError?.length > 0 && (
-                                <Text style={styles.errorTextStyle}>
-                                    {odometerKMsError}
+                                <Text style={styles.cardTitle}>
+                                    {isBrandName}
                                 </Text>
-                            )}
+                                <Text style={styles.cardTitle}>
+                                    {isModelName}
+                                </Text>
+                                <Text style={styles.cardTitle}>
+                                    {isVehicleRegistrationNumber}
+                                </Text>
+                            </View>
+                        </View>
 
-                            <View style={styles.odometerContainer}>
-                                <SliderPicker
-                                    minLabel={"Empty"}
-                                    maxLabel={"Full"}
-                                    minValue={0}
-                                    maxValue={10}
-                                    callback={(position) => {
-                                        setIsFuelLevel(position);
-                                    }}
-                                    defaultValue={parseInt(isFuelLevel)}
-                                    showFill={true}
-                                    fillColor={"green"}
-                                    labelFontWeight={"500"}
-                                    labelFontSize={14}
-                                    labelFontColor={colors.default_theme.black}
-                                    showNumberScale={false}
-                                    showSeparatorScale={true}
-                                    buttonBackgroundColor={"#fff"}
-                                    buttonBorderColor={"#6c7682"}
-                                    buttonBorderWidth={1}
-                                    scaleNumberFontWeight={"300"}
-                                    buttonDimensionsPercentage={6}
-                                    heightPercentage={1}
-                                    widthPercentage={80}
-                                    labelStylesOverride={{ marginTop: 25 }}
+                        <Text
+                            style={[styles.headingStyle, { marginTop: 20 }]}
+                        >
+                            Service:
+                        </Text>
+
+                        {fieldsServices.map((field, idx) => {
+                            return (
+                                <>
+                                    <View
+                                        style={
+                                            styles.addFieldContainerGroup
+                                        }
+                                        key={`service-${field}-${idx}`}
+                                    >
+                                        <TouchableOpacity
+                                            style={
+                                                styles.removeEntryIconContainer
+                                            }
+                                            onPress={() =>
+                                                handleServiceRemove(idx)
+                                            }
+                                        >
+                                            <Icon
+                                                style={
+                                                    styles.removeEntryIcon
+                                                }
+                                                name="close"
+                                                size={30}
+                                                color="#000"
+                                            />
+                                        </TouchableOpacity>
+
+                                        <View
+                                            style={[
+                                                styles.cardRightContent,
+                                                {
+                                                    flex: 1,
+                                                    flexDirection: "row",
+                                                    marginTop: 10,
+                                                    marginBottom: 0,
+                                                },
+                                            ]}
+                                        >
+                                            <Text
+                                                style={[
+                                                    styles.partNameContent,
+                                                    { fontWeight: "600" },
+                                                ]}
+                                            >
+                                                Service Name:{" "}
+                                            </Text>
+                                            <Text
+                                                style={
+                                                    styles.serviceNameContent
+                                                }
+                                            >
+                                                {
+                                                    fieldsServices[idx]
+                                                        .serviceName
+                                                }
+                                            </Text>
+                                        </View>
+
+                                        <View
+                                            style={[
+                                                styles.cardRightContent,
+                                                { flex: 1 },
+                                            ]}
+                                        >
+                                            <View
+                                                style={
+                                                    styles.addFieldContainer
+                                                }
+                                            >
+                                                <TextInput
+                                                    mode="outlined"
+                                                    label="Rate"
+                                                    style={
+                                                        styles.textEntryInput
+                                                    }
+                                                    placeholder="Rate"
+                                                    keyboardType="numeric"
+                                                    value={
+                                                        fieldsServices[idx][
+                                                            "rate"
+                                                        ]
+                                                    }
+                                                    onChangeText={(e) => {
+                                                        let parameter = {
+                                                            name: "rate",
+                                                            value: e,
+                                                        };
+                                                        handleServiceChange(
+                                                            idx,
+                                                            parameter
+                                                        );
+                                                    }}
+                                                />
+                                                <TextInput
+                                                    mode="outlined"
+                                                    label="Quantity"
+                                                    style={
+                                                        styles.textEntryInput
+                                                    }
+                                                    placeholder="Quantity"
+                                                    keyboardType="numeric"
+                                                    value={
+                                                        fieldsServices[idx]
+                                                            .qty
+                                                    }
+                                                    onChangeText={(e) => {
+                                                        let parameter = {
+                                                            name: "qty",
+                                                            value: e,
+                                                        };
+                                                        handleServiceChange(
+                                                            idx,
+                                                            parameter
+                                                        );
+                                                    }}
+                                                />
+                                                <TextInput
+                                                    mode="outlined"
+                                                    label="Discount"
+                                                    style={
+                                                        styles.textEntryInput
+                                                    }
+                                                    placeholder="Discount"
+                                                    keyboardType="numeric"
+                                                    value={
+                                                        fieldsServices[idx]
+                                                            .discount
+                                                    }
+                                                    onChangeText={(e) => {
+                                                        let parameter = {
+                                                            name: "discount",
+                                                            value: e,
+                                                        };
+                                                        handleServiceChange(
+                                                            idx,
+                                                            parameter
+                                                        );
+                                                    }}
+                                                />
+                                            </View>
+
+                                            <View
+                                                style={{
+                                                    flexDirection: "row",
+                                                }}
+                                            >
+                                                <Text
+                                                    style={{
+                                                        fontSize: 20,
+                                                        color: colors.black,
+                                                        marginTop: 15,
+                                                        marginBottom: 0,
+                                                        fontWeight: "600",
+                                                    }}
+                                                >
+                                                    Total for this Service:{" "}
+                                                </Text>
+                                                <Text
+                                                    style={{
+                                                        fontSize: 20,
+                                                        color: colors.black,
+                                                        marginTop: 15,
+                                                        marginBottom: 5,
+                                                    }}
+                                                >
+                                                    {fieldsServices[idx]
+                                                        ? fieldsServices[
+                                                                idx
+                                                            ].amount
+                                                        : 0}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    </View>
+                                </>
+                            );
+                        })}
+                        <View style={styles.addFieldBtnContainer}>
+                            <Button
+                                style={{ marginTop: 15, flex: 0.3 }}
+                                mode={"contained"}
+                                icon="plus"
+                                onPress={() => setServiceListModal(true)}
+                            >
+                                Add Service
+                            </Button>
+                            <View style={{ flex: 0.5 }}></View>
+                        </View>
+
+                        <Text
+                            style={[styles.headingStyle, { marginTop: 20 }]}
+                        >
+                            Parts:
+                        </Text>
+                        {fieldsParts.map((field, idx) => {
+                            return (
+                                <>
+                                    <View
+                                        style={
+                                            styles.addFieldContainerGroup
+                                        }
+                                        key={`fieldsParts-${field}-${idx}`}
+                                    >
+                                        <TouchableOpacity
+                                            style={
+                                                styles.removeEntryIconContainer
+                                            }
+                                            onPress={() =>
+                                                handlePartRemove(idx)
+                                            }
+                                        >
+                                            <Icon
+                                                style={
+                                                    styles.removeEntryIcon
+                                                }
+                                                name="close"
+                                                size={30}
+                                                color="#000"
+                                            />
+                                        </TouchableOpacity>
+
+                                        <View
+                                            style={[
+                                                styles.cardRightContent,
+                                                {
+                                                    flex: 1,
+                                                    flexDirection: "row",
+                                                    marginTop: 10,
+                                                    marginBottom: 0,
+                                                },
+                                            ]}
+                                        >
+                                            <Text
+                                                style={[
+                                                    styles.partNameContent,
+                                                    { fontWeight: "600" },
+                                                ]}
+                                            >
+                                                Part Name:{" "}
+                                            </Text>
+                                            <Text
+                                                style={
+                                                    styles.partNameContent
+                                                }
+                                            >
+                                                {fieldsParts[idx].partName}
+                                            </Text>
+                                        </View>
+                                        <View
+                                            style={[
+                                                styles.cardRightContent,
+                                                { flex: 1 },
+                                            ]}
+                                        >
+                                            <View
+                                                style={
+                                                    styles.addFieldContainer
+                                                }
+                                            >
+                                                <TextInput
+                                                    mode="outlined"
+                                                    label="Rate"
+                                                    style={[
+                                                        styles.textEntryInput,
+                                                    ]}
+                                                    placeholder="Rate"
+                                                    keyboardType="numeric"
+                                                    value={
+                                                        fieldsParts[idx]
+                                                            .rate
+                                                    }
+                                                    onChangeText={(e) => {
+                                                        let parameter = {
+                                                            name: "rate",
+                                                            value: e,
+                                                        };
+                                                        handlePartChange(
+                                                            idx,
+                                                            parameter
+                                                        );
+                                                    }}
+                                                />
+                                                <TextInput
+                                                    mode="outlined"
+                                                    label="Quantity"
+                                                    style={
+                                                        styles.textEntryInput
+                                                    }
+                                                    placeholder="Quantity"
+                                                    keyboardType="numeric"
+                                                    value={
+                                                        fieldsParts[idx].qty
+                                                    }
+                                                    onChangeText={(e) => {
+                                                        let parameter = {
+                                                            name: "qty",
+                                                            value: e,
+                                                        };
+                                                        handlePartChange(
+                                                            idx,
+                                                            parameter
+                                                        );
+                                                    }}
+                                                />
+                                                <TextInput
+                                                    mode="outlined"
+                                                    label="Discount"
+                                                    style={
+                                                        styles.textEntryInput
+                                                    }
+                                                    placeholder="Discount"
+                                                    keyboardType="numeric"
+                                                    value={
+                                                        fieldsParts[idx]
+                                                            .discount
+                                                    }
+                                                    onChangeText={(e) => {
+                                                        let parameter = {
+                                                            name: "discount",
+                                                            value: e,
+                                                        };
+                                                        handlePartChange(
+                                                            idx,
+                                                            parameter
+                                                        );
+                                                    }}
+                                                />
+                                            </View>
+
+                                            <View
+                                                style={{
+                                                    flexDirection: "row",
+                                                }}
+                                            >
+                                                <Text
+                                                    style={{
+                                                        fontSize: 20,
+                                                        color: colors.black,
+                                                        marginTop: 15,
+                                                        marginBottom: 0,
+                                                        fontWeight: "600",
+                                                    }}
+                                                >
+                                                    Total for this Part:{" "}
+                                                </Text>
+                                                <Text
+                                                    style={{
+                                                        fontSize: 20,
+                                                        color: colors.black,
+                                                        marginTop: 15,
+                                                        marginBottom: 5,
+                                                    }}
+                                                >
+                                                    {fieldsParts[idx]
+                                                        ? fieldsParts[idx]
+                                                                .amount
+                                                        : 0}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    </View>
+                                </>
+                            );
+                        })}
+                        <View style={styles.addFieldBtnContainer}>
+                            <Button
+                                style={{ marginTop: 15, flex: 0.3 }}
+                                mode={"contained"}
+                                icon="plus"
+                                onPress={() => setPartListModal(true)}
+                            >
+                                Add Part
+                            </Button>
+                            <View style={{ flex: 0.5 }}></View>
+                        </View>
+
+                        <Text
+                            style={[styles.headingStyle, { marginTop: 20 }]}
+                        >
+                            Totals:
+                        </Text>
+                        <View style={styles.totalFieldContainerGroup}>
+                            <View style={styles.totalFieldsGroup}>
+                                <View
+                                    style={[
+                                        styles.totalFieldsLeftContent,
+                                        { flex: 0.8 },
+                                    ]}
+                                >
+                                    <Text style={styles.partNameContent}>
+                                        Services Total
+                                    </Text>
+                                </View>
+                                <View
+                                    style={[
+                                        styles.totalFieldsRightContent,
+                                        { flex: 1 },
+                                    ]}
+                                >
+                                    <Text
+                                        style={
+                                            styles.totalFieldTextContainer
+                                        }
+                                    >
+                                        INR{" "}
+                                    </Text>
+                                    <View
+                                        style={styles.totalFieldContainer}
+                                    >
+                                        <Text
+                                            style={{
+                                                fontSize: 18,
+                                                color: colors.black,
+                                            }}
+                                        >
+                                            {servicesTotal}
+                                        </Text>
+                                    </View>
+                                </View>
+                            </View>
+                            <View style={styles.totalFieldsGroup}>
+                                <View
+                                    style={[
+                                        styles.totalFieldsLeftContent,
+                                        { flex: 0.8 },
+                                    ]}
+                                >
+                                    <Text style={styles.partNameContent}>
+                                        Parts Total
+                                    </Text>
+                                </View>
+                                <View
+                                    style={[
+                                        styles.totalFieldsRightContent,
+                                        { flex: 1 },
+                                    ]}
+                                >
+                                    <Text
+                                        style={
+                                            styles.totalFieldTextContainer
+                                        }
+                                    >
+                                        INR{" "}
+                                    </Text>
+                                    <View
+                                        style={styles.totalFieldContainer}
+                                    >
+                                        <Text
+                                            style={{
+                                                fontSize: 18,
+                                                color: colors.black,
+                                            }}
+                                        >
+                                            {partsTotal}
+                                        </Text>
+                                    </View>
+                                </View>
+                            </View>
+                            <View style={styles.totalFieldsGroup}>
+                                <View
+                                    style={[
+                                        styles.totalFieldsLeftContent,
+                                        { flex: 0.8 },
+                                    ]}
+                                >
+                                    <Text style={styles.partNameContent}>
+                                        Applicable Discount
+                                    </Text>
+                                </View>
+                                <View
+                                    style={[
+                                        styles.totalFieldsRightContent,
+                                        { flex: 1 },
+                                    ]}
+                                >
+                                    <Text
+                                        style={
+                                            styles.totalFieldTextContainer
+                                        }
+                                    >
+                                        INR{" "}
+                                    </Text>
+                                    <View
+                                        style={styles.totalFieldContainer}
+                                    >
+                                        <Text
+                                            style={{
+                                                fontSize: 18,
+                                                color: colors.black,
+                                            }}
+                                        >
+                                            {isApplicableDiscount}
+                                        </Text>
+                                    </View>
+                                </View>
+                            </View>
+                            <View style={styles.totalFieldsGroup}>
+                                <View
+                                    style={[
+                                        styles.totalFieldsLeftContent,
+                                        { flex: 0.9 },
+                                    ]}
+                                >
+                                    <Text style={styles.partNameContent}>
+                                        Total {"\n"} (Inclusive of Taxes)
+                                    </Text>
+                                </View>
+                                <View
+                                    style={[
+                                        styles.totalFieldsRightContent,
+                                        { flex: 1 },
+                                    ]}
+                                >
+                                    <Text
+                                        style={
+                                            styles.totalFieldTextContainer
+                                        }
+                                    >
+                                        INR{" "}
+                                    </Text>
+                                    <View
+                                        style={styles.totalFieldContainer}
+                                    >
+                                        <Text
+                                            style={{
+                                                fontSize: 18,
+                                                color: colors.black,
+                                            }}
+                                        >
+                                            {isTotal}
+                                        </Text>
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
+
+                        <Text
+                            style={[styles.headingStyle, { marginTop: 20 }]}
+                        >
+                            Vehicle Images:
+                        </Text>
+
+                        <View>
+                            <TouchableOpacity
+                                activeOpacity={0.5}
+                                style={styles.uploadButtonStyle}
+                                onPress={selectVehicleImg}
+                            >
+                                <Icon
+                                    name="upload"
+                                    size={18}
+                                    color={colors.primary}
+                                    style={styles.downloadIcon}
                                 />
                                 <Text
                                     style={{
-                                        fontWeight: "600",
+                                        marginRight: 10,
                                         fontSize: 18,
-                                        color: colors.black,
+                                        color: "#000",
                                     }}
                                 >
-                                    Fuel Level: {isFuelLevel}
+                                    Upload Vehicle Image
                                 </Text>
-                            </View>
-
-                            <TextInput
-                                mode="outlined"
-                                label="Comment"
-                                style={styles.input}
-                                placeholder="Comment"
-                                value={isComment}
-                                onChangeText={(text) => setIsComment(text)}
-                                numberOfLines={3}
-                                multiline={true}
-                            />
-
-                            <TouchableOpacity
-                                style={{ flex: 1 }}
-                                onPress={() =>
-                                    setDisplayDeliveryDateCalender(true)
-                                }
-                                activeOpacity={1}
-                            >
-                                <View
-                                    style={styles.datePickerContainer}
-                                    pointerEvents="none"
-                                >
-                                    <Icon
-                                        style={styles.datePickerIcon}
-                                        name="calendar-month"
-                                        size={24}
-                                        color="#000"
-                                    />
-                                    <TextInput
-                                        mode="outlined"
-                                        label="Estimate Delivery Time"
-                                        style={styles.datePickerField}
-                                        placeholder="Estimate Delivery Time"
-                                        value={estimatedDeliveryDateTime}
-                                    />
-                                    {displayDeliveryDateCalender == true && (
-                                        <DateTimePicker
-                                            value={
-                                                isDeliveryDate
-                                                    ? isDeliveryDate
-                                                    : null
+                                {isVehicleImg != null ? (
+                                    <Text style={styles.textStyle}>
+                                        File Name:
+                                        {isVehicleImg?.map(
+                                            (isVehicleImg) => {
+                                                return (
+                                                    isVehicleImg.name + ", "
+                                                );
                                             }
-                                            mode={"date"}
-                                            is24Hour={true}
-                                            display="spinner"
-                                            onChange={
-                                                changeEstimateDeliverySelectedDate
-                                            }
-                                        />
-                                    )}
-                                    {displayDeliveryTimeClock && (
-                                        <DateTimePicker
-                                            value={
-                                                isDeliveryTime
-                                                    ? isDeliveryTime
-                                                    : null
-                                            }
-                                            mode={"time"}
-                                            is24Hour={false}
-                                            display="spinner"
-                                            onChange={changeSelectedTime}
-                                        />
-                                    )}
-                                </View>
+                                        )}
+                                    </Text>
+                                ) : null}
                             </TouchableOpacity>
-                            {estimateDeliveryDateError?.length > 0 && (
-                                <Text style={styles.errorTextStyle}>
-                                    {estimateDeliveryDateError}
-                                </Text>
-                            )}
-
-                            <Button
-                                style={{ marginTop: 15 }}
-                                mode={"contained"}
-                                onPress={submit}
-                            >
-                                Edit Repair Order
-                            </Button>
                         </View>
-                    </InputScrollView>
-                )}
+
+                        <Text
+                            style={[styles.headingStyle, { marginTop: 20 }]}
+                        >
+                            Additional Information:
+                        </Text>
+
+                        <View
+                            style={{
+                                borderBottomWidth: 1,
+                                borderColor: colors.light_gray,
+                                borderRadius: 4,
+                                marginTop: 20,
+                                backgroundColor: "#F0F2F5",
+                            }}
+                        >
+                            <Picker
+                                selectedValue={isOrderStatus}
+                                onValueChange={(v) => {
+                                    setIsOrderStatus(v);
+                                }}
+                                style={{ padding: 0 }}
+                                itemStyle={{ padding: 0 }}
+                            >
+                                <Picker.Item
+                                    key={1}
+                                    label="Select Order Status"
+                                    value="0"
+                                />
+                                <Picker.Item
+                                    key={2}
+                                    label="Vehicle Received"
+                                    value="Vehicle Received"
+                                />
+                                <Picker.Item
+                                    key={3}
+                                    label="Work in Progress Order"
+                                    value="Work in Progress Order"
+                                />
+                                <Picker.Item
+                                    key={4}
+                                    label="Vehicle Ready"
+                                    value="Vehicle Ready"
+                                />
+                                <Picker.Item
+                                    key={5}
+                                    label="Completed Order"
+                                    value="Completed Order"
+                                />
+                            </Picker>
+                        </View>
+                        {orderStatusError?.length > 0 && (
+                            <Text style={{ color: colors.danger }}>
+                                {orderStatusError}
+                            </Text>
+                        )}
+
+                        <TextInput
+                            mode="outlined"
+                            label="Odometer (in KMs)"
+                            style={styles.input}
+                            placeholder="Odometer (in KMs)"
+                            value={isOdometerKMs}
+                            onChangeText={(text) => setIsOdometerKMs(text)}
+                            keyboardType="numeric"
+                        />
+                        {odometerKMsError?.length > 0 && (
+                            <Text style={styles.errorTextStyle}>
+                                {odometerKMsError}
+                            </Text>
+                        )}
+
+                        <View style={styles.odometerContainer}>
+                            <SliderPicker
+                                minLabel={"Empty"}
+                                maxLabel={"Full"}
+                                minValue={0}
+                                maxValue={10}
+                                callback={(position) => {
+                                    setIsFuelLevel(position);
+                                }}
+                                defaultValue={parseInt(isFuelLevel)}
+                                showFill={true}
+                                fillColor={"green"}
+                                labelFontWeight={"500"}
+                                labelFontSize={14}
+                                labelFontColor={colors.default_theme.black}
+                                showNumberScale={false}
+                                showSeparatorScale={true}
+                                buttonBackgroundColor={"#fff"}
+                                buttonBorderColor={"#6c7682"}
+                                buttonBorderWidth={1}
+                                scaleNumberFontWeight={"300"}
+                                buttonDimensionsPercentage={6}
+                                heightPercentage={1}
+                                widthPercentage={80}
+                                labelStylesOverride={{ marginTop: 25 }}
+                            />
+                            <Text
+                                style={{
+                                    fontWeight: "600",
+                                    fontSize: 18,
+                                    color: colors.black,
+                                }}
+                            >
+                                Fuel Level: {isFuelLevel}
+                            </Text>
+                        </View>
+
+                        <TextInput
+                            mode="outlined"
+                            label="Comment"
+                            style={styles.input}
+                            placeholder="Comment"
+                            value={isComment}
+                            onChangeText={(text) => setIsComment(text)}
+                            numberOfLines={3}
+                            multiline={true}
+                        />
+
+                        <TouchableOpacity
+                            style={{ flex: 1 }}
+                            onPress={() =>
+                                setDisplayDeliveryDateCalender(true)
+                            }
+                            activeOpacity={1}
+                        >
+                            <View
+                                style={styles.datePickerContainer}
+                                pointerEvents="none"
+                            >
+                                <Icon
+                                    style={styles.datePickerIcon}
+                                    name="calendar-month"
+                                    size={24}
+                                    color="#000"
+                                />
+                                <TextInput
+                                    mode="outlined"
+                                    label="Estimate Delivery Time"
+                                    style={styles.datePickerField}
+                                    placeholder="Estimate Delivery Time"
+                                    value={estimatedDeliveryDateTime}
+                                />
+                                {displayDeliveryDateCalender == true && (
+                                    <DateTimePicker
+                                        value={
+                                            isDeliveryDate
+                                                ? isDeliveryDate
+                                                : null
+                                        }
+                                        mode={"date"}
+                                        is24Hour={true}
+                                        display="spinner"
+                                        onChange={
+                                            changeEstimateDeliverySelectedDate
+                                        }
+                                    />
+                                )}
+                                {displayDeliveryTimeClock && (
+                                    <DateTimePicker
+                                        value={
+                                            isDeliveryTime
+                                                ? isDeliveryTime
+                                                : null
+                                        }
+                                        mode={"time"}
+                                        is24Hour={false}
+                                        display="spinner"
+                                        onChange={changeSelectedTime}
+                                    />
+                                )}
+                            </View>
+                        </TouchableOpacity>
+                        {estimateDeliveryDateError?.length > 0 && (
+                            <Text style={styles.errorTextStyle}>
+                                {estimateDeliveryDateError}
+                            </Text>
+                        )}
+
+                        <Button
+                            style={{ marginTop: 15 }}
+                            mode={"contained"}
+                            onPress={submit}
+                        >
+                            Edit Repair Order
+                        </Button>
+                    </View>
+                </InputScrollView>
 
                 <Portal>
                     {/* Parts List Modal */}
@@ -2344,6 +2346,13 @@ const EditRepairOrder = ({
                         </View>
                     </Modal>
                 </Portal>
+                {isLoading &&
+                    <Spinner
+                        visible={isLoading}
+                        color="#377520"
+                        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
+                    />
+                }
             </View>
         </View>
     );

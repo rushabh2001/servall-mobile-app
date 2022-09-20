@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
 import moment from "moment";
 import { API_URL } from "../../constants/config";
+import Spinner from "react-native-loading-spinner-overlay";
 
 const OrderCompleted = ({ navigation, userRole, route, userToken, selectedGarageId, selectedGarage, user }) => {
 
@@ -26,7 +27,10 @@ const OrderCompleted = ({ navigation, userRole, route, userToken, selectedGarage
     const [createdAt, setCreatedAt] = useState(moment(route?.params?.data?.created_at, 'YYYY-MM-DD hh:mm:ss').fromNow());
     const [estimatedDeliveryDateTime, setEstimatedDeliveryDateTime] = useState(moment(route?.params?.data?.estimated_delivery_time, 'YYYY-MM-DD hh:mm:ss').format('DD-MM-YYYY hh:mm A'));
 
+    const [isLoading, setIsLoading] = useState(false);
+
     const changeOrderStatus = async () => {
+        setIsLoading(true);
 
         // Data to call API 
         let orderServicesArray = [];
@@ -58,7 +62,8 @@ const OrderCompleted = ({ navigation, userRole, route, userToken, selectedGarage
             });
             const json = await res.json();
             if (json !== undefined) {
-                console.log(json);
+                setIsLoading(false);
+                // console.log(json);
                 if (json.order_status == "Vehicle Received") {
                     navigation.navigate('OrderCreated', {'data': isOrderData});
                 } else if(json.order_status == "Work in Progress Order") {

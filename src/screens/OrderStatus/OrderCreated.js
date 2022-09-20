@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
 import moment from "moment";
 import { API_URL } from "../../constants/config";
+import Spinner from "react-native-loading-spinner-overlay";
 
 const OrderCreated = ({ navigation, userRole, route, userToken, selectedGarageId, selectedGarage, user }) => {
 
@@ -16,43 +17,17 @@ const OrderCreated = ({ navigation, userRole, route, userToken, selectedGarageId
     const [isOrderData, setIsOrderData] = useState(route?.params?.data);
 
     const [isOrderId, setIsOrderId] = useState(route?.params?.data?.order_id);
-    // const [isGarageId, setIsGarageId] = useState(route?.params?.data?.garage_id);
-    // const [isUserId, setIsUserId] = useState(route?.params?.data?.user_id);
-    // const [isVehicleId, setIsVehicleId] = useState(route?.params?.data?.vehicle_id);
     const [isName, setIsName] = useState(route?.params?.data?.name);
-    // const [isEmail, setIsEmail] = useState(route?.params?.data?.email);
     const [isPhoneNumber, setIsPhoneNumber] = useState(route?.params?.data?.phone_number);
 
     // Vehicle Fields
-    // const [isBrand, setIsBrand] = useState(route?.params?.data?.brand_id);
     const [isBrandName, setIsBrandName] = useState(route?.params?.data?.brand_name);
-    // const [isModel, setIsModel] = useState(route?.params?.data?.model_id);
-    // const [isModelName, setIsModelName] = useState(route?.params?.data?.model_name);
     const [isVehicleRegistrationNumber, setIsVehicleRegistrationNumber] = useState(route?.params?.data?.vehicle_registration_number);
-
-    // const [isOdometerKMs, setIsOdometerKMs] = useState(route?.params?.data?.odometer);
-    // const [isFuelLevel, setIsFuelLevel] = useState(route?.params?.data?.fuel_level);
-    // const [isComment, setIsComment] = useState(route?.params?.data?.comment);
     const [isTotal, setIsTotal] = useState(route?.params?.data?.total);
-    // const [isApplicableDiscount, setIsApplicableDiscount] = useState(route?.params?.data?.applicable_discount);
-
-    // const [isCreatedAt, setIsCreatedAt] = useState(route?.params?.data?.created_at);
     const [createdAt, setCreatedAt] = useState(moment(route?.params?.data?.created_at, 'YYYY-MM-DD hh:mm:ss').fromNow());
-
-    // const [isEstimatedDeliveryDateTime, setIsEstimatedDeliveryDateTime] = useState(route?.params?.data?.estimated_delivery_time);
     const [estimatedDeliveryDateTime, setEstimatedDeliveryDateTime] = useState(moment(route?.params?.data?.estimated_delivery_time, 'YYYY-MM-DD hh:mm:ss').format('DD-MM-YYYY hh:mm A'));
 
-    // const [partTotals, setPartTotals] = useState([]);
-    // const [serviceTotals, setSeviceTotals] = useState([]);
-
-    // const [servicesTotal, setServicesTotal] = useState(route?.params?.data?.labor_total);
-    // const [partsTotal, setPartsTotal] = useState(route?.params?.data?.parts_total);
-
-    // const [isTotalServiceDiscount, setIsTotalServiceDiscount] = useState(0);
-    // const [isTotalPartDiscount, setIsTotalPartDiscount] = useState(0);
-    
-    // const [fieldsServices, setFieldsServices] = useState([]);
-    // const [fieldsParts, setFieldsParts] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const changeOrderStatus = async () => {
         console.log('working');
@@ -66,7 +41,7 @@ const OrderCreated = ({ navigation, userRole, route, userToken, selectedGarageId
         partData.forEach(item => {
             orderPartsArray.push({ order_part_id: item.id, is_done: item.is_done });
         });
-        console.log('orderStatusArray', isOrderData);
+        // console.log('orderStatusArray', isOrderData);
 
         // Data to send for next screen 
         isOrderData['parts_list'] = partData;
@@ -88,7 +63,8 @@ const OrderCreated = ({ navigation, userRole, route, userToken, selectedGarageId
             });
             const json = await res.json();
             if (json !== undefined) {
-                console.log(json);
+                setIsLoading(false);
+                // console.log(json);
                 if (json.order_status == "Vehicle Received") {
                     // navigation.navigate('OrderCreated', {'data': isOrderData});
                 } else if(json.order_status == "Work in Progress Order") {
@@ -293,20 +269,6 @@ const OrderCreated = ({ navigation, userRole, route, userToken, selectedGarageId
                                                     />
                                                 }
                                             </>
-                                            {/* // <TouchableOpacity  
-                                            //     onPress={() => {
-                                            //         setChecked(!checked);
-                                            //     }}
-                                            //     style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 7, paddingHorizontal: 10}}
-                                            //     activeOpacity={1}
-                                            // >
-                                            //     <Text style={{fontSize: 18, color: colors.black}}>- Air filter hose Cleaning</Text>
-                                            //     <Checkbox
-                                            //         status={checked ? 'checked' : 'unchecked'}
-
-                                            //     />
-                                            // </TouchableOpacity>
-                                            // <Checkbox.Item label="- Item" status="checked" /> */}
                                         </View>
                                     </View>
 
@@ -338,9 +300,14 @@ const OrderCreated = ({ navigation, userRole, route, userToken, selectedGarageId
                         </View>
                         
                     </View>
-                    {/* <View style={styles.lowerContainer}>
-                    </View> */}
                 </ScrollView>
+                {isLoading &&
+                    <Spinner
+                        visible={isLoading}
+                        color="#377520"
+                        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
+                    />
+                }
             </View>
         </View>
     )
@@ -365,17 +332,10 @@ const styles = StyleSheet.create({
     surfaceContainer: {
         flex:1,
         padding:15,
-        // marginBottom: 35
     },
     stepLables: {
-        // flexDirection: 'row',
-        // width: '100%',
-        // alignContent: 'space-between'
         flexDirection: "row", 
         alignItems:"center", 
-        // elevation: 3, 
-        // backgroundColor: colors.white,
-        // padding: 8,
         marginBottom: -15,
         justifyContent:"space-between",
         width: "100%",

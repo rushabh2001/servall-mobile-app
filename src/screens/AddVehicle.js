@@ -24,10 +24,10 @@ import { API_URL } from "../constants/config";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import IconX from "react-native-vector-icons/FontAwesome5";
 import InputScrollView from "react-native-input-scroll-view";
-import { Picker } from "@react-native-picker/picker";
 import moment from "moment";
 import DocumentPicker from "react-native-document-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import Spinner from "react-native-loading-spinner-overlay";
 
 const AddVehicle = ({
     navigation,
@@ -232,15 +232,16 @@ const AddVehicle = ({
                 body: JSON.stringify(data),
             });
             const json = await res.json();
-            if (json !== undefined) {
+            if (res.status == 200 || res.status == 201){
                 pullBrandRefresh();
+                setAddBrandModal(false);
+                setNewBrandName("");
+                setIsBrand(0);
+            } else if(res.status == 400) {
+                setNewBrandNameError(json.message.name);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            setAddBrandModal(false);
-            setNewBrandName("");
-            setIsBrand(0);
         }
     };
 
@@ -257,15 +258,16 @@ const AddVehicle = ({
                 body: JSON.stringify(data),
             });
             const json = await res.json();
-            if (json !== undefined) {
+            if (res.status == 200 || res.status == 201){
                 pullModelRefresh();
+                setAddModelModal(false);
+                setNewModelName("");
+                setIsModel(0);
+            } else if(res.status == 400) {
+                setNewModelNameError(json.message.model_name);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            setAddModelModal(false);
-            setNewModelName("");
-            setIsModel(0);
         }
     };
 
@@ -359,6 +361,7 @@ const AddVehicle = ({
     };
 
     const addVehicle = async (data) => {
+        setIsLoading(true);
         try {
             await fetch(`${API_URL}add_new_vehicle`, {
                 method: "POST",
@@ -377,6 +380,7 @@ const AddVehicle = ({
                     });
                 })
                 .then((res) => {
+                    setIsLoading(false);
                     if (
                         res.statusCode == 201 ||
                         res.statusCode == 200 ||
@@ -646,12 +650,16 @@ const AddVehicle = ({
                 body: JSON.stringify(data),
             });
             const json = await res.json();
-
-            if (json !== undefined) {
-                // console.log('setInsuranceProviderList', json.data);
+            if (res.status == 200 || res.status == 201){
+                // console.log("setInsuranceProviderList", json.data);
                 getInsuranceProviderList();
-                setIsInsuranceProvider(parseInt(json.data.id));
-                setIsInsuranceProviderName(json.data.name);
+                setIsInsuranceProvider(
+                    parseInt(json.insurance_provider_list.id)
+                );
+                setIsInsuranceProviderName(json.insurance_provider_list.name);
+                setAddNewInsuranceProviderModal(false);
+            } else if(res.status == 400) {
+                setNewInsuranceProviderError(json.message.name);
             }
         } catch (e) {
             console.log(e);
@@ -728,401 +736,376 @@ const AddVehicle = ({
                 )}
             </View>
             <View style={styles.pageContainer}>
-                {isLoading == true ? (
-                    <ActivityIndicator></ActivityIndicator>
-                ) : (
-                    <InputScrollView
-                        ref={scroll1Ref}
-                        contentContainerStyle={{
-                            flexGrow: 1,
-                            justifyContent: "center",
-                        }}
-                        keyboardOffset={200}
-                        behavior={Platform.OS === "ios" ? "padding" : "height"}
-                        keyboardShouldPersistTaps={"always"}
-                        showsVerticalScrollIndicator={false}
-                    >
-                        <View style={{ flex: 1 }}>
-                            <Text style={[styles.headingStyle]}>
-                                Vehicle Details:
-                            </Text>
+                <InputScrollView
+                    ref={scroll1Ref}
+                    contentContainerStyle={{
+                        flexGrow: 1,
+                        justifyContent: "center",
+                    }}
+                    keyboardOffset={200}
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    keyboardShouldPersistTaps={"always"}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <View style={{ flex: 1 }}>
+                        <Text style={[styles.headingStyle]}>
+                            Vehicle Details:
+                        </Text>
 
-                            <>
-                                <View>
-                                    <TouchableOpacity
-                                        style={styles.brandDropDownField}
-                                        onPress={() => {
-                                            setBrandListModal(true);
-                                        }}
-                                    ></TouchableOpacity>
-                                    <TextInput
-                                        mode="outlined"
-                                        label="Brand"
-                                        style={{
-                                            marginTop: 10,
-                                            backgroundColor: "#f1f1f1",
-                                            width: "100%",
-                                        }}
-                                        placeholder="Select Brand"
-                                        value={isBrandName}
-                                        right={
-                                            <TextInput.Icon name="menu-down" />
-                                        }
-                                    />
-                                </View>
-                                {brandError?.length > 0 && (
-                                    <Text style={styles.errorTextStyle}>
-                                        {brandError}
-                                    </Text>
-                                )}
-                            </>
 
-                            <>
-                                <View>
-                                    {modelFieldToggle == false && (
-                                        <View
-                                            style={[
-                                                styles.modelDropDownField,
-                                                {
-                                                    zIndex: 10,
-                                                    opacity: 0.6,
-                                                    backgroundColor:
-                                                        colors.white,
-                                                },
-                                            ]}
-                                        ></View>
-                                    )}
-                                    <TouchableOpacity
-                                        style={[
-                                            styles.modelDropDownField,
-                                            modelFieldToggle == false && {
-                                                opacity: 0.5,
-                                            },
-                                        ]}
-                                        onPress={() => {
-                                            setModelListModal(true);
-                                        }}
-                                    ></TouchableOpacity>
+                        <View style={{marginTop: 20}}>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setBrandListModal(true);
+                                }}
+                            >
+                                <TextInput
+                                    mode="outlined"
+                                    label="Brand"
+                                    style={{
+                                        backgroundColor: "#f1f1f1",
+                                        width: "100%",
+                                    }}
+                                    placeholder="Select Brand"
+                                    value={isBrandName}
+                                    editable={false}
+                                    right={
+                                        <TextInput.Icon name="menu-down" />
+                                    }
+                                />
+                            </TouchableOpacity>
+                            {brandError?.length > 0 && (
+                                <Text style={styles.errorTextStyle}>
+                                    {brandError}
+                                </Text>
+                            )}
+                        </View>
+
+                        {modelFieldToggle == true && (
+                            <View style={{marginTop: 20}}>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        setModelListModal(true);
+                                    }}
+                                >
                                     <TextInput
                                         mode="outlined"
                                         label="Vehicle Model"
                                         style={{
-                                            marginTop: 10,
                                             backgroundColor: "#f1f1f1",
                                             width: "100%",
                                         }}
                                         placeholder="Select Vehicle Model"
+                                        editable={false}
                                         value={isModelName}
                                         right={
                                             <TextInput.Icon name="menu-down" />
                                         }
                                     />
-                                </View>
+                                </TouchableOpacity>
                                 {modelError?.length > 0 && (
                                     <Text style={styles.errorTextStyle}>
                                         {modelError}
                                     </Text>
                                 )}
-                            </>
+                            </View>
+                        )}
 
-                            <TextInput
-                                mode="outlined"
-                                label="Vehicle Registration Number"
-                                style={styles.input}
-                                placeholder="Vehicle Registration Number"
-                                value={isVehicleRegistrationNumber}
-                                onChangeText={(text) =>
-                                    setIsVehicleRegistrationNumber(text)
-                                }
-                            />
-                            {vehicleRegistrationNumberError?.length > 0 && (
-                                <Text style={styles.errorTextStyle}>
-                                    {vehicleRegistrationNumberError}
-                                </Text>
-                            )}
+                        <TextInput
+                            mode="outlined"
+                            label="Vehicle Registration Number"
+                            style={styles.input}
+                            placeholder="Vehicle Registration Number"
+                            value={isVehicleRegistrationNumber}
+                            onChangeText={(text) =>
+                                setIsVehicleRegistrationNumber(text)
+                            }
+                        />
+                        {vehicleRegistrationNumberError?.length > 0 && (
+                            <Text style={styles.errorTextStyle}>
+                                {vehicleRegistrationNumberError}
+                            </Text>
+                        )}
 
-                            <TouchableOpacity
-                                style={{ flex: 1 }}
-                                onPress={() => setDisplayPurchaseCalender(true)}
-                                activeOpacity={1}
+                        <TouchableOpacity
+                            style={{ flex: 1 }}
+                            onPress={() => setDisplayPurchaseCalender(true)}
+                            activeOpacity={1}
+                        >
+                            <View
+                                style={styles.datePickerContainer}
+                                pointerEvents="none"
                             >
-                                <View
-                                    style={styles.datePickerContainer}
-                                    pointerEvents="none"
-                                >
-                                    <Icon
-                                        style={styles.datePickerIcon}
-                                        name="calendar-month"
-                                        size={24}
-                                        color="#000"
+                                <Icon
+                                    style={styles.datePickerIcon}
+                                    name="calendar-month"
+                                    size={24}
+                                    color="#000"
+                                />
+                                <TextInput
+                                    mode="outlined"
+                                    label="Purchase Date"
+                                    style={styles.datePickerField}
+                                    placeholder="Purchase Date"
+                                    value={datePurchase}
+                                />
+                                {displayPurchaseCalender == true && (
+                                    <DateTimePicker
+                                        value={
+                                            isPurchaseDate
+                                                ? isPurchaseDate
+                                                : null
+                                        }
+                                        mode="date"
+                                        onChange={
+                                            changePurchaseSelectedDate
+                                        }
+                                        display="spinner"
                                     />
-                                    <TextInput
-                                        mode="outlined"
-                                        label="Purchase Date"
-                                        style={styles.datePickerField}
-                                        placeholder="Purchase Date"
-                                        value={datePurchase}
-                                    />
-                                    {displayPurchaseCalender == true && (
-                                        <DateTimePicker
-                                            value={
-                                                isPurchaseDate
-                                                    ? isPurchaseDate
-                                                    : null
-                                            }
-                                            mode="date"
-                                            onChange={
-                                                changePurchaseSelectedDate
-                                            }
-                                            display="spinner"
-                                        />
-                                    )}
-                                </View>
-                            </TouchableOpacity>
+                                )}
+                            </View>
+                        </TouchableOpacity>
 
-                            <TouchableOpacity
-                                style={{ flex: 1 }}
-                                onPress={() =>
-                                    setDisplayManufacturingCalender(true)
-                                }
-                                activeOpacity={1}
+                        <TouchableOpacity
+                            style={{ flex: 1 }}
+                            onPress={() =>
+                                setDisplayManufacturingCalender(true)
+                            }
+                            activeOpacity={1}
+                        >
+                            <View
+                                style={styles.datePickerContainer}
+                                pointerEvents="none"
                             >
-                                <View
-                                    style={styles.datePickerContainer}
-                                    pointerEvents="none"
-                                >
-                                    <Icon
-                                        style={styles.datePickerIcon}
-                                        name="calendar-month"
-                                        size={24}
-                                        color="#000"
+                                <Icon
+                                    style={styles.datePickerIcon}
+                                    name="calendar-month"
+                                    size={24}
+                                    color="#000"
+                                />
+                                <TextInput
+                                    mode="outlined"
+                                    label="Manufacturing Date"
+                                    style={styles.datePickerField}
+                                    placeholder="Manufacturing Date"
+                                    value={dateManufacturing}
+                                />
+                                {displayManufacturingCalender == true && (
+                                    <DateTimePicker
+                                        value={
+                                            isManufacturingDate
+                                                ? isManufacturingDate
+                                                : null
+                                        }
+                                        mode="date"
+                                        onChange={
+                                            changeManufacturingSelectedDate
+                                        }
+                                        display="spinner"
                                     />
-                                    <TextInput
-                                        mode="outlined"
-                                        label="Manufacturing Date"
-                                        style={styles.datePickerField}
-                                        placeholder="Manufacturing Date"
-                                        value={dateManufacturing}
-                                    />
-                                    {displayManufacturingCalender == true && (
-                                        <DateTimePicker
-                                            value={
-                                                isManufacturingDate
-                                                    ? isManufacturingDate
-                                                    : null
-                                            }
-                                            mode="date"
-                                            onChange={
-                                                changeManufacturingSelectedDate
-                                            }
-                                            display="spinner"
-                                        />
-                                    )}
-                                </View>
-                            </TouchableOpacity>
+                                )}
+                            </View>
+                        </TouchableOpacity>
 
-                            <TextInput
-                                mode="outlined"
-                                label="Engine Number"
-                                style={styles.input}
-                                placeholder="Engine Number"
-                                value={isEngineNumber}
-                                onChangeText={(text) => setIsEngineNumber(text)}
-                            />
+                        <TextInput
+                            mode="outlined"
+                            label="Engine Number"
+                            style={styles.input}
+                            placeholder="Engine Number"
+                            value={isEngineNumber}
+                            onChangeText={(text) => setIsEngineNumber(text)}
+                        />
 
-                            <TextInput
-                                mode="outlined"
-                                label="Chasis Number"
-                                style={styles.input}
-                                placeholder="Chasis Number"
-                                value={isChasisNumber}
-                                onChangeText={(text) => setIsChasisNumber(text)}
-                            />
+                        <TextInput
+                            mode="outlined"
+                            label="Chasis Number"
+                            style={styles.input}
+                            placeholder="Chasis Number"
+                            value={isChasisNumber}
+                            onChangeText={(text) => setIsChasisNumber(text)}
+                        />
 
-                            <View>
-                                <TouchableOpacity
-                                    style={
-                                        styles.insuranceProviderDropDownField
-                                    }
-                                    onPress={() => {
-                                        setInsuranceProviderListModal(true);
-                                        setIsNewInsuranceProvider("");
-                                        setNewInsuranceProviderError("");
-                                    }}
-                                ></TouchableOpacity>
+                        <View style={{marginTop: 20}}>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setInsuranceProviderListModal(true);
+                                    setIsNewInsuranceProvider("");
+                                    setNewInsuranceProviderError("");
+                                }}
+                            >
                                 <TextInput
                                     mode="outlined"
                                     label="Insurance Provider"
                                     style={{
-                                        marginTop: 10,
                                         backgroundColor: "#f1f1f1",
                                         width: "100%",
                                     }}
                                     placeholder="Select Insurance Provider"
+                                    editable={false}
                                     value={isInsuranceProviderName}
                                     right={<TextInput.Icon name="menu-down" />}
                                 />
-                            </View>
+                            </TouchableOpacity>
                             {insuranceProviderError?.length > 0 && (
                                 <Text style={styles.errorTextStyle}>
                                     {insuranceProviderError}
                                 </Text>
                             )}
-
-                            <TextInput
-                                mode="outlined"
-                                label="Insurer GSTIN"
-                                style={styles.input}
-                                placeholder="Insurer GSTIN"
-                                value={isInsurerGstin}
-                                onChangeText={(text) => setIsInsurerGstin(text)}
-                            />
-
-                            <TextInput
-                                mode="outlined"
-                                label="Insurer Address"
-                                style={styles.input}
-                                placeholder="Insurer Address"
-                                value={isInsurerAddress}
-                                onChangeText={(text) =>
-                                    setIsInsurerAddress(text)
-                                }
-                            />
-
-                            <TextInput
-                                mode="outlined"
-                                label="Policy Number"
-                                style={styles.input}
-                                placeholder="Policy Number"
-                                value={isPolicyNumber}
-                                onChangeText={(text) => setIsPolicyNumber(text)}
-                            />
-
-                            <TouchableOpacity
-                                style={{ flex: 1 }}
-                                onPress={() =>
-                                    setDisplayInsuranceExpiryCalender(true)
-                                }
-                                activeOpacity={1}
-                            >
-                                <View
-                                    style={styles.datePickerContainer}
-                                    pointerEvents="none"
-                                >
-                                    <Icon
-                                        style={styles.datePickerIcon}
-                                        name="calendar-month"
-                                        size={24}
-                                        color="#000"
-                                    />
-                                    <TextInput
-                                        mode="outlined"
-                                        label="Insurance Expiry Date"
-                                        style={styles.datePickerField}
-                                        placeholder="Insurance Expiry Date"
-                                        value={dateInsuranceExpiry}
-                                    />
-                                    {displayInsuranceExpiryCalender == true && (
-                                        <DateTimePicker
-                                            value={
-                                                isInsuranceExpiryDate
-                                                    ? isInsuranceExpiryDate
-                                                    : null
-                                            }
-                                            mode="date"
-                                            onChange={
-                                                changeInsuranceExpirySelectedDate
-                                            }
-                                            display="spinner"
-                                        />
-                                    )}
-                                </View>
-                            </TouchableOpacity>
-
-                            <View>
-                                <TouchableOpacity
-                                    activeOpacity={0.5}
-                                    style={styles.uploadButtonStyle}
-                                    onPress={selectRegistrationCrtImg}
-                                >
-                                    <Icon
-                                        name="upload"
-                                        size={18}
-                                        color={colors.primary}
-                                        style={styles.downloadIcon}
-                                    />
-                                    <Text
-                                        style={{
-                                            marginRight: 10,
-                                            fontSize: 18,
-                                            color: "#000",
-                                        }}
-                                    >
-                                        Upload Registration Certificate
-                                    </Text>
-                                    {isRegistrationCertificateImg != null ? (
-                                        <Text style={styles.textStyle}>
-                                            File Name:{" "}
-                                            {isRegistrationCertificateImg?.name
-                                                ? isRegistrationCertificateImg.name
-                                                : ""}
-                                        </Text>
-                                    ) : null}
-                                </TouchableOpacity>
-                            </View>
-                            {registrationCertificateImgError?.length > 0 && (
-                                <Text style={styles.errorTextStyle}>
-                                    {registrationCertificateImgError}
-                                </Text>
-                            )}
-
-                            <View>
-                                <TouchableOpacity
-                                    activeOpacity={0.5}
-                                    style={styles.uploadButtonStyle}
-                                    onPress={selectInsurancePolicyImg}
-                                >
-                                    <Icon
-                                        name="upload"
-                                        size={18}
-                                        color={colors.primary}
-                                        style={styles.downloadIcon}
-                                    />
-                                    <Text
-                                        style={{
-                                            marginRight: 10,
-                                            fontSize: 18,
-                                            color: "#000",
-                                        }}
-                                    >
-                                        Upload Insurance Policy
-                                    </Text>
-                                    {isInsuranceImg != null ? (
-                                        <Text style={styles.textStyle}>
-                                            File Name:{" "}
-                                            {isInsuranceImg.name
-                                                ? isInsuranceImg.name
-                                                : ""}
-                                        </Text>
-                                    ) : null}
-                                </TouchableOpacity>
-                            </View>
-                            {insuranceImgError?.length > 0 && (
-                                <Text style={styles.errorTextStyle}>
-                                    {insuranceImgError}
-                                </Text>
-                            )}
-
-                            <Button
-                                style={{ marginTop: 15 }}
-                                mode={"contained"}
-                                onPress={submit}
-                            >
-                                Add
-                            </Button>
                         </View>
-                    </InputScrollView>
-                )}
+                      
+                        <TextInput
+                            mode="outlined"
+                            label="Insurer GSTIN"
+                            style={styles.input}
+                            placeholder="Insurer GSTIN"
+                            value={isInsurerGstin}
+                            onChangeText={(text) => setIsInsurerGstin(text)}
+                        />
+
+                        <TextInput
+                            mode="outlined"
+                            label="Insurer Address"
+                            style={styles.input}
+                            placeholder="Insurer Address"
+                            value={isInsurerAddress}
+                            onChangeText={(text) =>
+                                setIsInsurerAddress(text)
+                            }
+                        />
+
+                        <TextInput
+                            mode="outlined"
+                            label="Policy Number"
+                            style={styles.input}
+                            placeholder="Policy Number"
+                            value={isPolicyNumber}
+                            onChangeText={(text) => setIsPolicyNumber(text)}
+                        />
+
+                        <TouchableOpacity
+                            style={{ flex: 1 }}
+                            onPress={() =>
+                                setDisplayInsuranceExpiryCalender(true)
+                            }
+                            activeOpacity={1}
+                        >
+                            <View
+                                style={styles.datePickerContainer}
+                                pointerEvents="none"
+                            >
+                                <Icon
+                                    style={styles.datePickerIcon}
+                                    name="calendar-month"
+                                    size={24}
+                                    color="#000"
+                                />
+                                <TextInput
+                                    mode="outlined"
+                                    label="Insurance Expiry Date"
+                                    style={styles.datePickerField}
+                                    placeholder="Insurance Expiry Date"
+                                    value={dateInsuranceExpiry}
+                                />
+                                {displayInsuranceExpiryCalender == true && (
+                                    <DateTimePicker
+                                        value={
+                                            isInsuranceExpiryDate
+                                                ? isInsuranceExpiryDate
+                                                : null
+                                        }
+                                        mode="date"
+                                        onChange={
+                                            changeInsuranceExpirySelectedDate
+                                        }
+                                        display="spinner"
+                                    />
+                                )}
+                            </View>
+                        </TouchableOpacity>
+
+                        <View>
+                            <TouchableOpacity
+                                activeOpacity={0.5}
+                                style={styles.uploadButtonStyle}
+                                onPress={selectRegistrationCrtImg}
+                            >
+                                <Icon
+                                    name="upload"
+                                    size={18}
+                                    color={colors.primary}
+                                    style={styles.downloadIcon}
+                                />
+                                <Text
+                                    style={{
+                                        marginRight: 10,
+                                        fontSize: 18,
+                                        color: "#000",
+                                    }}
+                                >
+                                    Upload Registration Certificate
+                                </Text>
+                                {isRegistrationCertificateImg != null ? (
+                                    <Text style={styles.textStyle}>
+                                        File Name:{" "}
+                                        {isRegistrationCertificateImg?.name
+                                            ? isRegistrationCertificateImg.name
+                                            : ""}
+                                    </Text>
+                                ) : null}
+                            </TouchableOpacity>
+                        </View>
+                        {registrationCertificateImgError?.length > 0 && (
+                            <Text style={styles.errorTextStyle}>
+                                {registrationCertificateImgError}
+                            </Text>
+                        )}
+
+                        <View>
+                            <TouchableOpacity
+                                activeOpacity={0.5}
+                                style={styles.uploadButtonStyle}
+                                onPress={selectInsurancePolicyImg}
+                            >
+                                <Icon
+                                    name="upload"
+                                    size={18}
+                                    color={colors.primary}
+                                    style={styles.downloadIcon}
+                                />
+                                <Text
+                                    style={{
+                                        marginRight: 10,
+                                        fontSize: 18,
+                                        color: "#000",
+                                    }}
+                                >
+                                    Upload Insurance Policy
+                                </Text>
+                                {isInsuranceImg != null ? (
+                                    <Text style={styles.textStyle}>
+                                        File Name:{" "}
+                                        {isInsuranceImg.name
+                                            ? isInsuranceImg.name
+                                            : ""}
+                                    </Text>
+                                ) : null}
+                            </TouchableOpacity>
+                        </View>
+                        {insuranceImgError?.length > 0 && (
+                            <Text style={styles.errorTextStyle}>
+                                {insuranceImgError}
+                            </Text>
+                        )}
+
+                        <Button
+                            style={{ marginTop: 15 }}
+                            mode={"contained"}
+                            onPress={submit}
+                        >
+                            Add
+                        </Button>
+                    </View>
+                </InputScrollView>
                 <Portal>
                     <Modal
                         visible={addBrandModal}
@@ -2019,6 +2002,13 @@ const AddVehicle = ({
                         )}
                     </Modal>
                 </Portal>
+                {isLoading &&
+                    <Spinner
+                        visible={isLoading}
+                        color="#377520"
+                        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
+                    />
+                }
             </View>
         </View>
     );

@@ -239,10 +239,6 @@ const Parts = ({
             }
         } catch (e) {
             console.log(e);
-        } finally {
-          
-          
-            // console.log(page);
         }
     };
 
@@ -373,28 +369,26 @@ const Parts = ({
             <View style={styles.customSurface}>
                 {(userRole == "Super Admin" ||
                     garageId?.length > 1) && (
-                        <>
-                            <View>
-                                <TouchableOpacity 
-                                    style={styles.garageDropDownField} 
-                                    onPress={() => {
-                                        setGarageListModal(true);
-                                    }}
-                                >
-                                </TouchableOpacity>
+                        <View>
+                            <TouchableOpacity 
+                                onPress={() => {
+                                    setGarageListModal(true);
+                                }}
+                            >
                                 <TextInput
                                     mode="outlined"
                                     label='Garage'
                                     style={{marginTop: 10, marginBottom: 20,  backgroundColor: colors.white, width:'100%' }}
                                     placeholder="Select Garage"
+                                    editable={false}
                                     value={isGarageName}
                                     right={<TextInput.Icon name="menu-down" />}
                                 />
-                            </View>
+                            </TouchableOpacity>
                             {garageError?.length > 0 &&
                                 <Text style={styles.errorTextStyle}>{garageError}</Text>
                             }
-                        </>
+                        </View>
                     )}
 
                 {/* Search Bar */}

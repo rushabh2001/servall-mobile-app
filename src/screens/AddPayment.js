@@ -17,6 +17,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import IconX from "react-native-vector-icons/FontAwesome5";
 import moment from "moment";
 import { API_URL } from "../constants/config";
+import Spinner from "react-native-loading-spinner-overlay";
 
 const AddPayment = ({
     navigation,
@@ -29,6 +30,8 @@ const AddPayment = ({
 }) => {
     const scroll1Ref = useRef();
 
+    const [isLoading, setIsLoading] = useState(false);
+    
     const [orderId, setOrderId] = useState(route?.params?.data.order_id);
     const [isAmount, setIsAmount] = useState(route?.params?.data.total);
     const [isPaymentReferenceNumber, setIsPaymentReferenceNumber] = useState();
@@ -89,7 +92,6 @@ const AddPayment = ({
             else setAmountError("");
 
             if (!isPaymentReferenceNumber) setIsPaymentReferenceNumber("");
-
             // if (!isPaymentReferenceNumber)
             //     setPaymentReferenceNumberError(
             //         "Payment Reference Number is required"
@@ -112,11 +114,12 @@ const AddPayment = ({
             comment: isComment?.trim(),
         };
 
-        console.log(data);
+        // console.log(data);
         addPayment(data);
     };
 
     const addPayment = async (data) => {
+        setIsLoading(true);
         try {
             const res = await fetch(`${API_URL}add_payment`, {
                 method: "POST",
@@ -128,9 +131,9 @@ const AddPayment = ({
                 body: JSON.stringify(data),
             });
             const json = await res.json();
-            console.log(json);
-
             if (json !== undefined) {
+                setIsLoading(false);
+                navigation.popToTop();
                 navigation.navigate("Services");
             }
         } catch (e) {
@@ -439,6 +442,13 @@ const AddPayment = ({
                         </View>
                     </InputScrollView>
                 </ScrollView>
+                {isLoading &&
+                    <Spinner
+                        visible={isLoading}
+                        color="#377520"
+                        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
+                    />
+                }
             </View>
         </View>
     );
