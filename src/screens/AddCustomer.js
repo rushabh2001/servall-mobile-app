@@ -420,7 +420,7 @@ const AddCustomer = ({
         data.append("model_id", JSON.stringify(isModel));
         data.append(
             "vehicle_registration_number",
-            isVehicleRegistrationNumber.toUpperCase()?.trim()
+            isVehicleRegistrationNumber?.toUpperCase()?.trim()
         );
         if (isPurchaseDate)
             data.append(

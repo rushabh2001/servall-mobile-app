@@ -78,7 +78,7 @@ const Services = ({
     };
 
     useEffect(() => {
-        if(selectedGarageId) getDashboardData()
+        if(selectedGarageId || selectedGarageId == 0) getDashboardData()
         // console.log('selectedGarageId', selectedGarageId);
     }, [selectedGarageId, isFocused]);
 

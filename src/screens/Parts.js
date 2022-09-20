@@ -302,7 +302,7 @@ const Parts = ({
                 setFilteredPartData(json.data.data);
                 {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
                 {json.data.current_page != json.data.last_page ? setPage(2) : setPage(1)}
-                console.log('setPartList', json.data.data);
+                // console.log('setPartList', json.data.data);
             }
         } catch (error) {
             console.error(error);
@@ -330,6 +330,7 @@ const Parts = ({
     };
 
     useEffect(() => {
+        setIsLoading(true);
         pullGarageRefresh();
         pullRefresh();
     }, [isFocused]);

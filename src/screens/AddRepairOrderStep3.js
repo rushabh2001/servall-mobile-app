@@ -205,7 +205,7 @@ const AddRepairOrderStep3 = ({
         //data.append("comment", isComment?.trim());
         data.append(
             "comment",
-            isComment?.trim()?.length === 0 ? "" : isComment
+            (isComment?.trim()?.length === 0 || isComment == undefined) ? "" : isComment
         );
 
         addOrder(data);

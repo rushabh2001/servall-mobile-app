@@ -496,7 +496,7 @@ const EditVehicle = ({
         const data = {
             brand_id: JSON.stringify(isBrand),
             model_id: JSON.stringify(isModel),
-            vehicle_registration_number: isVehicleRegistrationNumber.toUpperCase()?.trim(),
+            vehicle_registration_number: isVehicleRegistrationNumber?.toUpperCase()?.trim(),
             purchase_date: moment(
                 isPurchaseDate,
                 'YYYY-MM-DD"T"hh:mm ZZ'
