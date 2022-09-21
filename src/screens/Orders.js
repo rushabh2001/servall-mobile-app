@@ -6,7 +6,6 @@ import {
     ActivityIndicator,
     FlatList,
     TouchableOpacity,
-    Linking,
     RefreshControl,
     ScrollView,
 } from "react-native";
@@ -15,27 +14,22 @@ import {
     Button,
     Divider,
     TextInput,
-    List,
     Modal,
     Portal,
 } from "react-native-paper";
 import { colors } from "../constants";
 import { API_URL } from "../constants/config";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import IconX from "react-native-vector-icons/FontAwesome5";
 import moment from "moment";
-import RBSheet from "react-native-raw-bottom-sheet";
 import { useIsFocused } from "@react-navigation/native";
+import Spinner from "react-native-loading-spinner-overlay";
 
 const Orders = ({
-    navigation,
     userToken,
     selectedGarageId,
-    selectedGarage,
     user,
 }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState();
     const [filteredData, setFilteredData] = useState([]);
@@ -77,9 +71,7 @@ const Orders = ({
                 setData([...data, ...json.data.data]);
                 setFilteredData([...filteredData, ...json.data.data]);
                 setIsLoading(false);
-                {
-                    page != 1 && setIsScrollLoading(false);
-                }
+                if(page != 1) setIsScrollLoading(false)
                 {json.data.current_page != json.data.last_page ? setLoadMoreOrders(true) : setLoadMoreOrders(false)}
                 {json.data.current_page != json.data.last_page ? setPage(page + 1) : null}
             }
@@ -264,244 +256,228 @@ const Orders = ({
                     </View>
                 </View>
                 <View style={{ flexDirection: "column", flex: 1 }}>
-                    {isLoading ? (
-                        <View style={{ flex: 1, justifyContent: "center" }}>
-                            <ActivityIndicator></ActivityIndicator>
-                        </View>
-                    ) : filteredData.length != 0 ? (
-                        <View>
-                            <FlatList
-                                    showsVerticalScrollIndicator={false}
-                                ItemSeparatorComponent={() => <Divider />}
-                                data={filteredData}
-                                onEndReached={loadMoreOrders ? getOrderList : null}
-                                onEndReachedThreshold={0.5}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={refreshing}
-                                        onRefresh={onRefresh}
-                                        colors={["green"]}
-                                    />
-                                }
-                                ListFooterComponent={loadMoreOrders ? renderFooter : null}
-                                keyExtractor={(item) => item.id}
-                                renderItem={({ item, index }) => (
-                                    <>
-                                        <View style={styles.cards}>
-                                            <View style={styles.upperInfo}>
-                                                <View
+                    {!isLoading && 
+                        <FlatList
+                            showsVerticalScrollIndicator={false}
+                            ItemSeparatorComponent={() => <Divider />}
+                            data={filteredData}
+                            onEndReached={loadMoreOrders ? getOrderList : null}
+                            onEndReachedThreshold={0.5}
+                            contentContainerStyle={{ flexGrow: 1 }}
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={refreshing}
+                                    onRefresh={onRefresh}
+                                    colors={["green"]}
+                                />
+                            }
+                            ListFooterComponent={loadMoreOrders ? renderFooter : null}
+                            ListEmptyComponent={() => (
+                                !isLoading && (
+                                    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                        <Text style={{ color: colors.black }}>
+                                            No order exist!
+                                        </Text>
+                                    </View>
+                            ))}
+                            keyExtractor={(item) => item.id}
+                            renderItem={({ item, index }) => (
+                                <>
+                                    <View style={styles.cards}>
+                                        <View style={styles.upperInfo}>
+                                            <View
+                                                style={
+                                                    styles.cardOrderDetails
+                                                }
+                                            >
+                                                <Text
+                                                    style={styles.orderID}
+                                                >
+                                                    Order Id: {item.id}
+                                                </Text>
+                                                <Text
                                                     style={
-                                                        styles.cardOrderDetails
+                                                        styles.orderStatus
                                                     }
                                                 >
+                                                    {item.status}
+                                                </Text>
+                                            </View>
+
+                                            <View>
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                    }}
+                                                >
                                                     <Text
-                                                        style={styles.orderID}
+                                                        style={
+                                                            styles.orderAmount
+                                                        }
                                                     >
-                                                        Order Id: {item.id}
+                                                        Order Amount:
                                                     </Text>
                                                     <Text
                                                         style={
-                                                            styles.orderStatus
+                                                            styles.orderAmount
                                                         }
                                                     >
-                                                        {item.status}
+                                                        {" "}
+                                                        ₹ {item.total}
                                                     </Text>
-                                                </View>
-
-                                                <View>
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={
-                                                                styles.orderAmount
-                                                            }
-                                                        >
-                                                            Order Amount:
-                                                        </Text>
-                                                        <Text
-                                                            style={
-                                                                styles.orderAmount
-                                                            }
-                                                        >
-                                                            {" "}
-                                                            ₹ {item.total}
-                                                        </Text>
-                                                        <Text
-                                                            style={[
-                                                                styles.orderAmount,
-                                                                {
-                                                                    marginLeft: 8,
-                                                                    color:
-                                                                        item.payment_status ==
-                                                                        "Completed"
-                                                                            ? colors.green
-                                                                            : colors.danger,
-                                                                },
-                                                            ]}
-                                                        >
-                                                            {item.payment_status ==
-                                                            "Completed"
-                                                                ? "(Paid)"
-                                                                : "(Due)"}
-                                                        </Text>
-                                                    </View>
-                                                    <Divider />
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={
-                                                                styles.cardCustomerName
-                                                            }
-                                                        >
-                                                            Name:
-                                                        </Text>
-                                                        <Text
-                                                            style={
-                                                                styles.cardCustomerName
-                                                            }
-                                                        >
-                                                            {" "}
-                                                            {item.user.name}
-                                                        </Text>
-                                                    </View>
-                                                    <Divider />
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={
-                                                                styles.orderDate
-                                                            }
-                                                        >
-                                                            Order Date:{" "}
-                                                            {moment(
-                                                                item.created_at,
-                                                                "YYYY-MM-DD HH:mm:ss"
-                                                            ).format(
-                                                                "DD-MM-YYYY"
-                                                            )}
-                                                        </Text>
-                                                    </View>
-                                                    <Divider />
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={
-                                                                styles.cardCustomerName
-                                                            }
-                                                        >
-                                                            Registration Number:{" "}
-                                                        </Text>
-                                                        <Text
-                                                            style={
-                                                                styles.cardCustomerName
-                                                            }
-                                                        >
-                                                            {
-                                                                item.vehicle
-                                                                    .vehicle_registration_number
-                                                            }
-                                                        </Text>
-                                                    </View>
-                                                    <Divider />
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={
-                                                                styles.cardCustomerName
-                                                            }
-                                                        >
-                                                            Estimate Delivery
-                                                            Date:{" "}
-                                                        </Text>
-                                                        <Text
-                                                            style={
-                                                                styles.cardCustomerName
-                                                            }
-                                                        >
-                                                            {moment(
-                                                                item.estimated_delivery_time,
-                                                                "YYYY-MM-DD HH:mm:ss"
-                                                            ).format(
-                                                                "DD-MM-YYYY hh:mm A"
-                                                            )}
-                                                        </Text>
-                                                    </View>
-                                                </View>
-                                                <View
-                                                    style={styles.cardActions}
-                                                >
-                                                    <TouchableOpacity
-                                                        onPress={() => {
-                                                            setOrderDataModal(
-                                                                true
-                                                            );
-                                                            getOrderDetails(
-                                                                item.id
-                                                            );
-                                                        }}
+                                                    <Text
                                                         style={[
-                                                            styles.smallButton,
+                                                            styles.orderAmount,
                                                             {
-                                                                width: 150,
-                                                                marginTop: 8,
+                                                                marginLeft: 8,
+                                                                color:
+                                                                    item.payment_status ==
+                                                                    "Completed"
+                                                                        ? colors.green
+                                                                        : colors.danger,
                                                             },
                                                         ]}
                                                     >
-                                                        <Text
-                                                            style={{
-                                                                color: colors.primary,
-                                                            }}
-                                                        >
-                                                            View Details
-                                                        </Text>
-                                                    </TouchableOpacity>
+                                                        {item.payment_status ==
+                                                        "Completed"
+                                                            ? "(Paid)"
+                                                            : "(Due)"}
+                                                    </Text>
+                                                </View>
+                                                <Divider />
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                    }}
+                                                >
+                                                    <Text
+                                                        style={
+                                                            styles.cardCustomerName
+                                                        }
+                                                    >
+                                                        Name:
+                                                    </Text>
+                                                    <Text
+                                                        style={
+                                                            styles.cardCustomerName
+                                                        }
+                                                    >
+                                                        {" "}
+                                                        {item.user.name}
+                                                    </Text>
+                                                </View>
+                                                <Divider />
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                    }}
+                                                >
+                                                    <Text
+                                                        style={
+                                                            styles.orderDate
+                                                        }
+                                                    >
+                                                        Order Date:{" "}
+                                                        {moment(
+                                                            item.created_at,
+                                                            "YYYY-MM-DD HH:mm:ss"
+                                                        ).format(
+                                                            "DD-MM-YYYY"
+                                                        )}
+                                                    </Text>
+                                                </View>
+                                                <Divider />
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                    }}
+                                                >
+                                                    <Text
+                                                        style={
+                                                            styles.cardCustomerName
+                                                        }
+                                                    >
+                                                        Registration Number:{" "}
+                                                    </Text>
+                                                    <Text
+                                                        style={
+                                                            styles.cardCustomerName
+                                                        }
+                                                    >
+                                                        {
+                                                            item.vehicle
+                                                                .vehicle_registration_number
+                                                        }
+                                                    </Text>
+                                                </View>
+                                                <Divider />
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                    }}
+                                                >
+                                                    <Text
+                                                        style={
+                                                            styles.cardCustomerName
+                                                        }
+                                                    >
+                                                        Estimate Delivery
+                                                        Date:{" "}
+                                                    </Text>
+                                                    <Text
+                                                        style={
+                                                            styles.cardCustomerName
+                                                        }
+                                                    >
+                                                        {moment(
+                                                            item.estimated_delivery_time,
+                                                            "YYYY-MM-DD HH:mm:ss"
+                                                        ).format(
+                                                            "DD-MM-YYYY hh:mm A"
+                                                        )}
+                                                    </Text>
                                                 </View>
                                             </View>
+                                            <View
+                                                style={styles.cardActions}
+                                            >
+                                                <TouchableOpacity
+                                                    onPress={() => {
+                                                        setOrderDataModal(
+                                                            true
+                                                        );
+                                                        getOrderDetails(
+                                                            item.id
+                                                        );
+                                                    }}
+                                                    style={[
+                                                        styles.smallButton,
+                                                        {
+                                                            width: 150,
+                                                            marginTop: 8,
+                                                        },
+                                                    ]}
+                                                >
+                                                    <Text
+                                                        style={{
+                                                            color: colors.primary,
+                                                        }}
+                                                    >
+                                                        View Details
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            </View>
                                         </View>
-                                    </>
-                                )}
-                            />
-                        </View>
-                    ) : (
-                        <View
-                            style={{
-                                alignItems: "center",
-                                justifyContent: "center",
-                                paddingVertical: 50,
-                                backgroundColor: colors.white,
-                                flex: 1,
-                            }}
-                        >
-                            <Text
-                                style={{
-                                    color: colors.black,
-                                    textAlign: "center",
-                                }}
-                            >
-                                No orders found.
-                            </Text>
-                        </View>
-                    )}
+                                    </View>
+                                </>
+                            )}
+                        />
+                    }
                 </View>
             </View>
             <Portal>
@@ -889,6 +865,13 @@ const Orders = ({
                     </View>
                 </Modal>
             </Portal>
+            {isLoading &&
+                <Spinner
+                    visible={isLoading}
+                    color="#377520"
+                    style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
+                />
+            }
         </View>
     );
 };
@@ -1067,7 +1050,6 @@ const mapStateToProps = (state) => ({
     user: state.user.user,
     userToken: state.user.userToken,
     selectedGarageId: state.garage.selected_garage_id,
-    selectedGarage: state.garage.selected_garage,
 });
 
 export default connect(mapStateToProps)(Orders);

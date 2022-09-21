@@ -276,6 +276,13 @@ const OrderCompleted = ({ navigation, userRole, route, userToken, selectedGarage
                     {/* <View style={styles.lowerContainer}>
                     </View> */}
                 </ScrollView>
+                {isLoading &&
+                    <Spinner
+                        visible={isLoading}
+                        color="#377520"
+                        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
+                    />
+                }
             </View>
         </View>
     )

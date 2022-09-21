@@ -26,6 +26,7 @@ import IconX from "react-native-vector-icons/FontAwesome5";
 import moment from "moment";
 import Lightbox from "react-native-lightbox-v2";
 import RBSheet from "react-native-raw-bottom-sheet";
+import Spinner from "react-native-loading-spinner-overlay";
 
 const InvoicePreviewSelectOrder = ({
     navigation,
@@ -77,12 +78,8 @@ const InvoicePreviewSelectOrder = ({
             if (json !== undefined) {
                 setData([...data, ...json.data.data]);
                 setFilteredData([...filteredData, ...json.data.data]);
-                {
-                    page == 1 && setIsLoading(false);
-                }
-                {
-                    page != 1 && setIsScrollLoading(false);
-                }
+                if(page == 1) setIsLoading(false)
+                if(page != 1) setIsScrollLoading(false)
                 {json.data.current_page != json.data.last_page ? setLoadMoreOrders(true) : setLoadMoreOrders(false)}
                 {json.data.current_page != json.data.last_page ? setPage(page + 1) : null}
             }
@@ -267,929 +264,920 @@ const InvoicePreviewSelectOrder = ({
                         </TouchableOpacity>
                     </View>
                 </View>
-                <View style={{ flexDirection: "column", flex: 1 }}>
-                    {isLoading ? (
-                        <View style={{ flex: 1, justifyContent: "center" }}>
-                            <ActivityIndicator></ActivityIndicator>
-                        </View>
-                    ) : filteredData.length != 0 ? (
-                        <View>
-                            <FlatList
-                                showsVerticalScrollIndicator={false}
-                                ItemSeparatorComponent={() => <Divider />}
-                                data={filteredData}
-                                onEndReached={loadMoreOrders ? getOrderList : null}
-                                onEndReachedThreshold={0.5}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={refreshing}
-                                        onRefresh={onRefresh}
-                                        colors={["green"]}
-                                    />
-                                }
-                                ListFooterComponent={loadMoreOrders ? renderFooter : null}
-                                keyExtractor={(item) => item.id}
-                                renderItem={({ item, index }) => (
-                                    <>
-                                        <View style={styles.cards}>
-                                            <View style={styles.upperInfo}>
-                                                <View
+                {!isLoading &&
+                    <View style={{ flexDirection: "column", flex: 1 }}>
+                        <FlatList
+                            showsVerticalScrollIndicator={false}
+                            ItemSeparatorComponent={() => <Divider />}
+                            data={filteredData}
+                            onEndReached={loadMoreOrders ? getOrderList : null}
+                            onEndReachedThreshold={0.5}
+                            contentContainerStyle={{ flexGrow: 1 }}
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={refreshing}
+                                    onRefresh={onRefresh}
+                                    colors={["green"]}
+                                />
+                            }
+                            ListFooterComponent={loadMoreOrders ? renderFooter : null}
+                            ListEmptyComponent={() => (
+                                !isLoading && (
+                                    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                        <Text style={{ color: colors.black }}>
+                                            No order exist!
+                                        </Text>
+                                    </View>
+                            ))}
+                            keyExtractor={(item) => item.id}
+                            renderItem={({ item, index }) => (
+                                <>
+                                    <View style={styles.cards}>
+                                        <View style={styles.upperInfo}>
+                                            <View
+                                                style={
+                                                    styles.cardOrderDetails
+                                                }
+                                            >
+                                                <Text
+                                                    style={styles.orderID}
+                                                >
+                                                    Order Id: {item.id}
+                                                </Text>
+                                                <Text
                                                     style={
-                                                        styles.cardOrderDetails
+                                                        styles.orderStatus
                                                     }
                                                 >
+                                                    {item.status}
+                                                </Text>
+
+                                                {/* <Text style={styles.orderStatus}>Completed</Text> */}
+                                            </View>
+                                            <View
+                                                style={{
+                                                    right: 30,
+                                                    top: 35,
+                                                    position: "absolute",
+                                                }}
+                                            >
+                                                {/* <Icon onPress={() => {this[RBSheet + index].open(); console.log(this[RBSheet + index]);}} type={"MaterialCommunityIcons"} name={'eye'} size={22}  color={colors.gray} /> */}
+                                                <Icon
+                                                    onPress={() => {
+                                                        setSelectedOrderId(
+                                                            item.id
+                                                        );
+                                                        refRBSheet.current.open();
+                                                    }}
+                                                    type={
+                                                        "MaterialCommunityIcons"
+                                                    }
+                                                    style={{
+                                                        right: 0,
+                                                        top: 0,
+                                                        position:
+                                                            "absolute",
+                                                    }}
+                                                    name={"dots-vertical"}
+                                                    size={22}
+                                                    color={colors.gray}
+                                                />
+                                            </View>
+                                            <View>
+                                                {/* <Text style={styles.cardCustomerName}>Owner Name: </Text>
+                                                <Divider /> */}
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                    }}
+                                                >
                                                     <Text
-                                                        style={styles.orderID}
+                                                        style={
+                                                            styles.orderAmount
+                                                        }
                                                     >
-                                                        Order Id: {item.id}
+                                                        Order Amount:
                                                     </Text>
                                                     <Text
                                                         style={
-                                                            styles.orderStatus
+                                                            styles.orderAmount
                                                         }
                                                     >
-                                                        {item.status}
+                                                        {" "}
+                                                        ₹ {item.total}
                                                     </Text>
-
-                                                    {/* <Text style={styles.orderStatus}>Completed</Text> */}
                                                 </View>
+                                                <Divider />
                                                 <View
                                                     style={{
-                                                        right: 30,
-                                                        top: 35,
-                                                        position: "absolute",
+                                                        flexDirection:
+                                                            "row",
                                                     }}
                                                 >
-                                                    {/* <Icon onPress={() => {this[RBSheet + index].open(); console.log(this[RBSheet + index]);}} type={"MaterialCommunityIcons"} name={'eye'} size={22}  color={colors.gray} /> */}
-                                                    <Icon
-                                                        onPress={() => {
-                                                            setSelectedOrderId(
-                                                                item.id
-                                                            );
-                                                            refRBSheet.current.open();
-                                                        }}
-                                                        type={
-                                                            "MaterialCommunityIcons"
+                                                    <Text
+                                                        style={
+                                                            styles.cardCustomerName
                                                         }
-                                                        style={{
-                                                            right: 0,
-                                                            top: 0,
-                                                            position:
-                                                                "absolute",
-                                                        }}
-                                                        name={"dots-vertical"}
-                                                        size={22}
-                                                        color={colors.gray}
-                                                    />
+                                                    >
+                                                        Name:
+                                                    </Text>
+                                                    <Text
+                                                        style={
+                                                            styles.cardCustomerName
+                                                        }
+                                                    >
+                                                        {" "}
+                                                        {item.user.name}
+                                                    </Text>
                                                 </View>
-                                                <View>
-                                                    {/* <Text style={styles.cardCustomerName}>Owner Name: </Text>
-                                                    <Divider /> */}
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={
-                                                                styles.orderAmount
-                                                            }
-                                                        >
-                                                            Order Amount:
-                                                        </Text>
-                                                        <Text
-                                                            style={
-                                                                styles.orderAmount
-                                                            }
-                                                        >
-                                                            {" "}
-                                                            ₹ {item.total}
-                                                        </Text>
-                                                    </View>
-                                                    <Divider />
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={
-                                                                styles.cardCustomerName
-                                                            }
-                                                        >
-                                                            Name:
-                                                        </Text>
-                                                        <Text
-                                                            style={
-                                                                styles.cardCustomerName
-                                                            }
-                                                        >
-                                                            {" "}
-                                                            {item.user.name}
-                                                        </Text>
-                                                    </View>
-                                                    <Divider />
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={
-                                                                styles.orderDate
-                                                            }
-                                                        >
-                                                            Order Date:{" "}
-                                                            {moment(
-                                                                item.created_at,
-                                                                "YYYY-MM-DD HH:mm:ss"
-                                                            ).format(
-                                                                "DD-MM-YYYY"
-                                                            )}
-                                                        </Text>
-                                                    </View>
-                                                    {/* <Divider />
-                                                    <Text style={styles.kmNoted}>KM: 9311 KM</Text>
-                                                    <Text style={styles.cardCustomerName}>Owner`s Phone Number: </Text>
-                                                    <Divider />
-                                                    <Text style={styles.cardCustomerName}>Brand:</Text>
-                                                    <Divider />
-                                                    <Text style={styles.cardCustomerName}>Model: </Text> */}
-                                                    <Divider />
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={
-                                                                styles.cardCustomerName
-                                                            }
-                                                        >
-                                                            Registration Number:{" "}
-                                                        </Text>
-                                                        <Text
-                                                            style={
-                                                                styles.cardCustomerName
-                                                            }
-                                                        >
-                                                            {
-                                                                item.vehicle
-                                                                    .vehicle_registration_number
-                                                            }
-                                                        </Text>
-                                                    </View>
-                                                    <Divider />
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={
-                                                                styles.cardCustomerName
-                                                            }
-                                                        >
-                                                            Estimate Delivery
-                                                            Date:{" "}
-                                                        </Text>
-                                                        <Text
-                                                            style={
-                                                                styles.cardCustomerName
-                                                            }
-                                                        >
-                                                            {moment(
-                                                                item.estimated_delivery_time,
-                                                                "YYYY-MM-DD HH:mm:ss"
-                                                            ).format(
-                                                                "DD-MM-YYYY hh:mm A"
-                                                            )}
-                                                        </Text>
-                                                    </View>
-                                                    {/* <Divider />
-                                                    <Text style={styles.cardCustomerName}>Services:</Text>
-                                                    <Divider />
-                                                    <Text style={styles.cardCustomerName}>Parts:</Text> */}
-                                                </View>
+                                                <Divider />
                                                 <View
-                                                    style={styles.cardActions}
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                    }}
                                                 >
-                                                    {/* <TouchableOpacity onPress={()=>{setOrderDataModal(true); }} style={styles.smallActionButton}><Text style={{color:colors.primary}}>View More Details...</Text></TouchableOpacity> */}
-                                                    <TouchableOpacity
-                                                        onPress={() => {
-                                                            const data = {
-                                                                order_id:
-                                                                    item.id,
-                                                            };
-                                                            navigation.navigate(
-                                                                "InvoicePreview",
-                                                                { data: data }
-                                                            );
-                                                        }}
-                                                        style={[
-                                                            styles.smallActionButton,
-                                                            {
-                                                                width: 150,
-                                                                marginTop: 8,
-                                                            },
-                                                        ]}
+                                                    <Text
+                                                        style={
+                                                            styles.orderDate
+                                                        }
                                                     >
-                                                        <Text
-                                                            style={{
-                                                                color: colors.primary,
-                                                            }}
-                                                        >
-                                                            Select Order
-                                                        </Text>
-                                                    </TouchableOpacity>
+                                                        Order Date:{" "}
+                                                        {moment(
+                                                            item.created_at,
+                                                            "YYYY-MM-DD HH:mm:ss"
+                                                        ).format(
+                                                            "DD-MM-YYYY"
+                                                        )}
+                                                    </Text>
                                                 </View>
+                                                {/* <Divider />
+                                                <Text style={styles.kmNoted}>KM: 9311 KM</Text>
+                                                <Text style={styles.cardCustomerName}>Owner`s Phone Number: </Text>
+                                                <Divider />
+                                                <Text style={styles.cardCustomerName}>Brand:</Text>
+                                                <Divider />
+                                                <Text style={styles.cardCustomerName}>Model: </Text> */}
+                                                <Divider />
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                    }}
+                                                >
+                                                    <Text
+                                                        style={
+                                                            styles.cardCustomerName
+                                                        }
+                                                    >
+                                                        Registration Number:{" "}
+                                                    </Text>
+                                                    <Text
+                                                        style={
+                                                            styles.cardCustomerName
+                                                        }
+                                                    >
+                                                        {
+                                                            item.vehicle
+                                                                .vehicle_registration_number
+                                                        }
+                                                    </Text>
+                                                </View>
+                                                <Divider />
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                    }}
+                                                >
+                                                    <Text
+                                                        style={
+                                                            styles.cardCustomerName
+                                                        }
+                                                    >
+                                                        Estimate Delivery
+                                                        Date:{" "}
+                                                    </Text>
+                                                    <Text
+                                                        style={
+                                                            styles.cardCustomerName
+                                                        }
+                                                    >
+                                                        {moment(
+                                                            item.estimated_delivery_time,
+                                                            "YYYY-MM-DD HH:mm:ss"
+                                                        ).format(
+                                                            "DD-MM-YYYY hh:mm A"
+                                                        )}
+                                                    </Text>
+                                                </View>
+                                                {/* <Divider />
+                                                <Text style={styles.cardCustomerName}>Services:</Text>
+                                                <Divider />
+                                                <Text style={styles.cardCustomerName}>Parts:</Text> */}
+                                            </View>
+                                            <View
+                                                style={styles.cardActions}
+                                            >
+                                                {/* <TouchableOpacity onPress={()=>{setOrderDataModal(true); }} style={styles.smallActionButton}><Text style={{color:colors.primary}}>View More Details...</Text></TouchableOpacity> */}
+                                                <TouchableOpacity
+                                                    onPress={() => {
+                                                        const data = {
+                                                            order_id:
+                                                                item.id,
+                                                        };
+                                                        navigation.navigate(
+                                                            "InvoicePreview",
+                                                            { data: data }
+                                                        );
+                                                    }}
+                                                    style={[
+                                                        styles.smallActionButton,
+                                                        {
+                                                            width: 150,
+                                                            marginTop: 8,
+                                                        },
+                                                    ]}
+                                                >
+                                                    <Text
+                                                        style={{
+                                                            color: colors.primary,
+                                                        }}
+                                                    >
+                                                        Select Order
+                                                    </Text>
+                                                </TouchableOpacity>
                                             </View>
                                         </View>
-                                    </>
-                                )}
-                            />
-                            <Portal>
-                                <Modal
-                                    visible={orderDataModal}
-                                    onDismiss={() => {
+                                    </View>
+                                </>
+                            )}
+                        />
+                        <Portal>
+                            <Modal
+                                visible={orderDataModal}
+                                onDismiss={() => {
+                                    setOrderDataModal(false);
+                                }}
+                                contentContainerStyle={[
+                                    styles.modalContainerStyle,
+                                    { flex: 1 },
+                                ]}
+                            >
+                                <IconX
+                                    name="times"
+                                    size={20}
+                                    color={colors.black}
+                                    style={{
+                                        position: "absolute",
+                                        top: 25,
+                                        right: 25,
+                                        zIndex: 99,
+                                    }}
+                                    onPress={() => {
                                         setOrderDataModal(false);
                                     }}
-                                    contentContainerStyle={[
-                                        styles.modalContainerStyle,
-                                        { flex: 1 },
+                                />
+                                <Text
+                                    style={[
+                                        styles.headingStyle,
+                                        {
+                                            marginTop: 0,
+                                            alignSelf: "center",
+                                        },
                                     ]}
                                 >
-                                    <IconX
-                                        name="times"
-                                        size={20}
-                                        color={colors.black}
+                                    Order Details
+                                </Text>
+                                {orderDataLoading ? (
+                                    <View
                                         style={{
-                                            position: "absolute",
-                                            top: 25,
-                                            right: 25,
-                                            zIndex: 99,
+                                            flex: 1,
+                                            justifyContent: "center",
                                         }}
+                                    >
+                                        <ActivityIndicator></ActivityIndicator>
+                                    </View>
+                                ) : (
+                                            <ScrollView showsVerticalScrollIndicator={false}>
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Order ID:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.id}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Order Status:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.status}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Odometer:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.odometer}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Fuel Level:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.fuel_level}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Order Date:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {moment(
+                                                orderData.created_at,
+                                                "YYYY-MM-DD HH:mm:ss"
+                                            ).format("DD-MM-YYYY")}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Estimated Delivery Time:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {moment(
+                                                orderData.estimated_delivery_time,
+                                                "YYYY-MM-DD HH:mm:ss"
+                                            ).format("DD-MM-YYYY hh:mm A")}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Services Total:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.labor_total}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Parts Total:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.parts_total}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Total Discount:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.discount}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Order Total:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.total}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Order Belongs to Garage:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.garage.garage_name}
+                                        </Text>
+                                        {/* <Divider /> */}
+
+                                        <Text
+                                            style={[
+                                                styles.headingStyle,
+                                                {
+                                                    marginTop: 10,
+                                                    color: colors.white,
+                                                    textAlign: "center",
+                                                    backgroundColor:
+                                                        colors.primary,
+                                                    width: "100%",
+                                                    justifyContent:
+                                                        "center",
+                                                },
+                                            ]}
+                                        >
+                                            User Details
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Name:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.user.name}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Phone Number:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.user.phone_number}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Email Address:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.user.email}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Address:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.user.address}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            State:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.user.state}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            City:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.user.city}
+                                        </Text>
+                                        {/* <Divider /> */}
+
+                                        <Text
+                                            style={[
+                                                styles.headingStyle,
+                                                {
+                                                    marginTop: 10,
+                                                    color: colors.white,
+                                                    textAlign: "center",
+                                                    backgroundColor:
+                                                        colors.primary,
+                                                    width: "100%",
+                                                    justifyContent:
+                                                        "center",
+                                                },
+                                            ]}
+                                        >
+                                            Vehicle Details
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Vehicle Registration Number:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.vehicle
+                                                ?.vehicle_registration_number
+                                                ? orderData.vehicle
+                                                        ?.vehicle_registration_number
+                                                : null}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Vehicle Brand:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.vehicle?.brand?.name
+                                                ? orderData.vehicle?.brand
+                                                        ?.name
+                                                : null}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Vehicle Model:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.vehicle
+                                                ?.vehicle_model?.model_name
+                                                ? orderData.vehicle
+                                                        ?.vehicle_model
+                                                        ?.model_name
+                                                : null}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Purchase Date:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.vehicle
+                                                ?.purchase_date
+                                                ? moment(
+                                                        orderData.vehicle
+                                                            ?.purchase_date,
+                                                        "YYYY MMMM D"
+                                                    ).format("DD-MM-YYYY")
+                                                : null}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Manufacturing Date:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.vehicle
+                                                ?.manufacturing_date
+                                                ? moment(
+                                                        orderData.vehicle
+                                                            ?.manufacturing_date,
+                                                        "YYYY MMMM D"
+                                                    ).format("DD-MM-YYYY")
+                                                : null}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Engine Number:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.vehicle
+                                                ?.engine_number
+                                                ? orderData.vehicle
+                                                        ?.engine_number
+                                                : null}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Chasis Number:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.vehicle
+                                                ?.chasis_number
+                                                ? orderData.vehicle
+                                                        ?.chasis_number
+                                                : null}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Insurance Provider Company:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.vehicle
+                                                ?.insurance_provider?.name
+                                                ? orderData.vehicle
+                                                        ?.insurance_provider
+                                                        ?.name
+                                                : null}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Insurer GSTIN:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.vehicle
+                                                ?.insurer_gstin
+                                                ? orderData.vehicle
+                                                        ?.insurer_gstin
+                                                : null}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Insurer Address:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.vehicle
+                                                ?.insurer_address
+                                                ? orderData.vehicle
+                                                        ?.insurer_address
+                                                : null}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Policy Number:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.vehicle
+                                                ?.policy_number
+                                                ? orderData.vehicle
+                                                        ?.policy_number
+                                                : null}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Insurance Expiry Date:
+                                        </Text>
+                                        <Text
+                                            style={styles.cardDetailsData}
+                                        >
+                                            {orderData.vehicle
+                                                ?.insurance_expiry_date
+                                                ? moment(
+                                                        orderData.vehicle
+                                                            ?.insurance_expiry_date,
+                                                        "YYYY MMMM D"
+                                                    ).format("DD-MM-YYYY")
+                                                : null}
+                                        </Text>
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Registration Certificate:
+                                        </Text>
+                                        {orderData.vehicle
+                                            ?.registration_certificate_img !==
+                                        null ? (
+                                            <Lightbox
+                                                navigator={navigator}
+                                                style={
+                                                    styles.lightBoxWrapper
+                                                }
+                                            >
+                                                <Image
+                                                    resizeMode={"cover"}
+                                                    style={
+                                                        styles.verticleImage
+                                                    }
+                                                    source={{
+                                                        uri:
+                                                            WEB_URL +
+                                                            "uploads/registration_certificate_img/" +
+                                                            orderData
+                                                                .vehicle
+                                                                ?.registration_certificate_img,
+                                                    }}
+                                                />
+                                            </Lightbox>
+                                        ) : (
+                                            <Text
+                                                style={
+                                                    styles.cardDetailsData
+                                                }
+                                            >
+                                                Not Uploaded Registration
+                                                Certificate
+                                            </Text>
+                                        )}
+                                        <Divider />
+                                        <Text
+                                            style={
+                                                styles.cardDetailsHeading
+                                            }
+                                        >
+                                            Insurance Policy:
+                                        </Text>
+                                        {orderData.vehicle
+                                            ?.insurance_img !== null ? (
+                                            <Lightbox
+                                                navigator={navigator}
+                                                style={
+                                                    styles.lightBoxWrapper
+                                                }
+                                            >
+                                                <Image
+                                                    resizeMode={"cover"}
+                                                    style={
+                                                        styles.verticleImage
+                                                    }
+                                                    source={{
+                                                        uri:
+                                                            WEB_URL +
+                                                            "uploads/insurance_img/" +
+                                                            orderData
+                                                                .vehicle
+                                                                ?.insurance_img,
+                                                    }}
+                                                />
+                                            </Lightbox>
+                                        ) : (
+                                            <Text
+                                                style={
+                                                    styles.cardDetailsData
+                                                }
+                                            >
+                                                Not Uploaded Insurance
+                                                Policy
+                                            </Text>
+                                        )}
+                                    </ScrollView>
+                                )}
+                                <View style={{ flexDirection: "row" }}>
+                                    <View style={{ flex: 1 }}></View>
+                                    <Button
+                                        style={{
+                                            marginTop: 15,
+                                            flex: 1.4,
+                                            alignSelf: "center",
+                                        }}
+                                        mode={"contained"}
                                         onPress={() => {
                                             setOrderDataModal(false);
                                         }}
-                                    />
-                                    <Text
-                                        style={[
-                                            styles.headingStyle,
-                                            {
-                                                marginTop: 0,
-                                                alignSelf: "center",
-                                            },
-                                        ]}
                                     >
-                                        Order Details
-                                    </Text>
-                                    {orderDataLoading ? (
-                                        <View
+                                        Close
+                                    </Button>
+                                    <View style={{ flex: 1 }}></View>
+                                </View>
+                            </Modal>
+                        </Portal>
+                        <RBSheet ref={refRBSheet} height={63} openDuration={250}>
+                            <View style={{ flexDirection: "column", flex: 1 }}>
+                                <List.Item
+                                    title="View Order Details"
+                                    style={{ paddingVertical: 15 }}
+                                    onPress={() => {
+                                        setOrderDataModal(true);
+                                        refRBSheet.current.close();
+                                        getOrderDetails(selectedOrderId);
+                                    }}
+                                    left={() => (
+                                        <Icon
+                                            type={"MaterialCommunityIcons"}
+                                            name="eye"
                                             style={{
-                                                flex: 1,
-                                                justifyContent: "center",
-                                            }}
-                                        >
-                                            <ActivityIndicator></ActivityIndicator>
-                                        </View>
-                                    ) : (
-                                                <ScrollView showsVerticalScrollIndicator={false}>
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Order ID:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.id}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Order Status:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.status}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Odometer:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.odometer}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Fuel Level:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.fuel_level}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Order Date:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {moment(
-                                                    orderData.created_at,
-                                                    "YYYY-MM-DD HH:mm:ss"
-                                                ).format("DD-MM-YYYY")}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Estimated Delivery Time:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {moment(
-                                                    orderData.estimated_delivery_time,
-                                                    "YYYY-MM-DD HH:mm:ss"
-                                                ).format("DD-MM-YYYY hh:mm A")}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Services Total:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.labor_total}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Parts Total:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.parts_total}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Total Discount:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.discount}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Order Total:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.total}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Order Belongs to Garage:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.garage.garage_name}
-                                            </Text>
-                                            {/* <Divider /> */}
-
-                                            <Text
-                                                style={[
-                                                    styles.headingStyle,
-                                                    {
-                                                        marginTop: 10,
-                                                        color: colors.white,
-                                                        textAlign: "center",
-                                                        backgroundColor:
-                                                            colors.primary,
-                                                        width: "100%",
-                                                        justifyContent:
-                                                            "center",
-                                                    },
-                                                ]}
-                                            >
-                                                User Details
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Name:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.user.name}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Phone Number:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.user.phone_number}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Email Address:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.user.email}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Address:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.user.address}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                State:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.user.state}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                City:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.user.city}
-                                            </Text>
-                                            {/* <Divider /> */}
-
-                                            <Text
-                                                style={[
-                                                    styles.headingStyle,
-                                                    {
-                                                        marginTop: 10,
-                                                        color: colors.white,
-                                                        textAlign: "center",
-                                                        backgroundColor:
-                                                            colors.primary,
-                                                        width: "100%",
-                                                        justifyContent:
-                                                            "center",
-                                                    },
-                                                ]}
-                                            >
-                                                Vehicle Details
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Vehicle Registration Number:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.vehicle
-                                                    ?.vehicle_registration_number
-                                                    ? orderData.vehicle
-                                                          ?.vehicle_registration_number
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Vehicle Brand:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.vehicle?.brand?.name
-                                                    ? orderData.vehicle?.brand
-                                                          ?.name
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Vehicle Model:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.vehicle
-                                                    ?.vehicle_model?.model_name
-                                                    ? orderData.vehicle
-                                                          ?.vehicle_model
-                                                          ?.model_name
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Purchase Date:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.vehicle
-                                                    ?.purchase_date
-                                                    ? moment(
-                                                          orderData.vehicle
-                                                              ?.purchase_date,
-                                                          "YYYY MMMM D"
-                                                      ).format("DD-MM-YYYY")
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Manufacturing Date:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.vehicle
-                                                    ?.manufacturing_date
-                                                    ? moment(
-                                                          orderData.vehicle
-                                                              ?.manufacturing_date,
-                                                          "YYYY MMMM D"
-                                                      ).format("DD-MM-YYYY")
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Engine Number:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.vehicle
-                                                    ?.engine_number
-                                                    ? orderData.vehicle
-                                                          ?.engine_number
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Chasis Number:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.vehicle
-                                                    ?.chasis_number
-                                                    ? orderData.vehicle
-                                                          ?.chasis_number
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Insurance Provider Company:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.vehicle
-                                                    ?.insurance_provider?.name
-                                                    ? orderData.vehicle
-                                                          ?.insurance_provider
-                                                          ?.name
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Insurer GSTIN:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.vehicle
-                                                    ?.insurer_gstin
-                                                    ? orderData.vehicle
-                                                          ?.insurer_gstin
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Insurer Address:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.vehicle
-                                                    ?.insurer_address
-                                                    ? orderData.vehicle
-                                                          ?.insurer_address
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Policy Number:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.vehicle
-                                                    ?.policy_number
-                                                    ? orderData.vehicle
-                                                          ?.policy_number
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Insurance Expiry Date:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {orderData.vehicle
-                                                    ?.insurance_expiry_date
-                                                    ? moment(
-                                                          orderData.vehicle
-                                                              ?.insurance_expiry_date,
-                                                          "YYYY MMMM D"
-                                                      ).format("DD-MM-YYYY")
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Registration Certificate:
-                                            </Text>
-                                            {orderData.vehicle
-                                                ?.registration_certificate_img !==
-                                            null ? (
-                                                <Lightbox
-                                                    navigator={navigator}
-                                                    style={
-                                                        styles.lightBoxWrapper
-                                                    }
-                                                >
-                                                    <Image
-                                                        resizeMode={"cover"}
-                                                        style={
-                                                            styles.verticleImage
-                                                        }
-                                                        source={{
-                                                            uri:
-                                                                WEB_URL +
-                                                                "uploads/registration_certificate_img/" +
-                                                                orderData
-                                                                    .vehicle
-                                                                    ?.registration_certificate_img,
-                                                        }}
-                                                    />
-                                                </Lightbox>
-                                            ) : (
-                                                <Text
-                                                    style={
-                                                        styles.cardDetailsData
-                                                    }
-                                                >
-                                                    Not Uploaded Registration
-                                                    Certificate
-                                                </Text>
-                                            )}
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Insurance Policy:
-                                            </Text>
-                                            {orderData.vehicle
-                                                ?.insurance_img !== null ? (
-                                                <Lightbox
-                                                    navigator={navigator}
-                                                    style={
-                                                        styles.lightBoxWrapper
-                                                    }
-                                                >
-                                                    <Image
-                                                        resizeMode={"cover"}
-                                                        style={
-                                                            styles.verticleImage
-                                                        }
-                                                        source={{
-                                                            uri:
-                                                                WEB_URL +
-                                                                "uploads/insurance_img/" +
-                                                                orderData
-                                                                    .vehicle
-                                                                    ?.insurance_img,
-                                                        }}
-                                                    />
-                                                </Lightbox>
-                                            ) : (
-                                                <Text
-                                                    style={
-                                                        styles.cardDetailsData
-                                                    }
-                                                >
-                                                    Not Uploaded Insurance
-                                                    Policy
-                                                </Text>
-                                            )}
-                                        </ScrollView>
-                                    )}
-                                    <View style={{ flexDirection: "row" }}>
-                                        <View style={{ flex: 1 }}></View>
-                                        <Button
-                                            style={{
-                                                marginTop: 15,
-                                                flex: 1.4,
+                                                marginHorizontal: 10,
                                                 alignSelf: "center",
                                             }}
-                                            mode={"contained"}
-                                            onPress={() => {
-                                                setOrderDataModal(false);
-                                            }}
-                                        >
-                                            Close
-                                        </Button>
-                                        <View style={{ flex: 1 }}></View>
-                                    </View>
-                                </Modal>
-                            </Portal>
-                        </View>
-                    ) : (
-                        <View
-                            style={{
-                                alignItems: "center",
-                                justifyContent: "center",
-                                backgroundColor: colors.white,
-                                flex: 1,
-                            }}
-                        >
-                            <Text
-                                style={{
-                                    color: colors.black,
-                                    textAlign: "center",
-                                }}
-                            >
-                                No Orders are exist for this Garage!
-                            </Text>
-                        </View>
-                    )}
-
-                    <RBSheet ref={refRBSheet} height={63} openDuration={250}>
-                        <View style={{ flexDirection: "column", flex: 1 }}>
-                            <List.Item
-                                title="View Order Details"
-                                style={{ paddingVertical: 15 }}
-                                onPress={() => {
-                                    setOrderDataModal(true);
-                                    refRBSheet.current.close();
-                                    getOrderDetails(selectedOrderId);
-                                }}
-                                left={() => (
-                                    <Icon
-                                        type={"MaterialCommunityIcons"}
-                                        name="eye"
-                                        style={{
-                                            marginHorizontal: 10,
-                                            alignSelf: "center",
-                                        }}
-                                        color={colors.black}
-                                        size={26}
-                                    />
-                                )}
-                            />
-                            {/* <Divider /> */}
-                        </View>
-                    </RBSheet>
-                </View>
+                                            color={colors.black}
+                                            size={26}
+                                        />
+                                    )}
+                                />
+                                {/* <Divider /> */}
+                            </View>
+                        </RBSheet>
+                    </View>
+                }
+                {isLoading &&
+                    <Spinner
+                        visible={isLoading}
+                        color="#377520"
+                        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
+                    />
+                }
             </View>
         </View>
     );

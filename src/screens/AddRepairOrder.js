@@ -12,8 +12,8 @@ import { Divider, TextInput } from "react-native-paper";
 import { connect } from "react-redux";
 import { colors } from "../constants";
 import { API_URL } from "../constants/config";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import IconX from "react-native-vector-icons/FontAwesome5";
+import Spinner from "react-native-loading-spinner-overlay";
 
 const AddRepairOrder = ({
     navigation,
@@ -59,9 +59,7 @@ const AddRepairOrder = ({
                 setData([...data, ...json.vehicle_list.data]);
                 setFilteredData([...filteredData, ...json.vehicle_list.data]);
                 setIsLoading(false);
-                {
-                    page != 1 && setIsScrollLoading(false);
-                }
+                if(page != 1) setIsScrollLoading(false)
                 {json.vehicle_list.current_page != json.vehicle_list.last_page ? setLoadMoreVehicles(true) : setLoadMoreVehicles(false)}
                 {json.vehicle_list.current_page != json.vehicle_list.last_page ? setPage(page + 1) : null}
             }
@@ -260,134 +258,107 @@ const AddRepairOrder = ({
                     </View>
                 </View>
                 <View style={{ flexDirection: "column", flex: 1 }}>
-                    {isLoading ? (
-                        <View style={{ flex: 1, justifyContent: "center" }}>
-                            <ActivityIndicator></ActivityIndicator>
-                        </View>
-                    ) : filteredData.length != 0 ? (
-                        <View>
-                            <FlatList
-                                showsVerticalScrollIndicator={false}
-                                ItemSeparatorComponent={() => <Divider />}
-                                data={filteredData}
-                                onEndReached={loadMoreVehicles ? getVehicleList : null}
-                                onEndReachedThreshold={0.5}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={refreshing}
-                                        onRefresh={onRefresh}
-                                        colors={["green"]}
-                                    />
-                                }
-                                ListFooterComponent={loadMoreVehicles ? renderFooter : null}
-                                keyExtractor={(item) => item.id}
-                                renderItem={({ item, index }) => (
-                                    <View style={styles.cards}>
-                                        <View>
-                                            <Text
-                                                style={styles.cardCustomerName}
-                                            >
-                                                Owner Name:{" "}
-                                                {item.users[0]
-                                                    ? item?.users[0].name
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={styles.cardCustomerName}
-                                            >
-                                                Owner`s Phone Number:{" "}
-                                                {item.users[0]
-                                                    ? item?.users[0]
-                                                          .phone_number
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={styles.cardCustomerName}
-                                            >
-                                                Brand: {item.brand.name}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={styles.cardCustomerName}
-                                            >
-                                                Model:{" "}
-                                                {item.vehicle_model.model_name}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={styles.cardCustomerName}
-                                            >
-                                                Registration Number:{" "}
-                                                {
-                                                    item.vehicle_registration_number
-                                                }
-                                            </Text>
-                                        </View>
-                                        <View style={styles.cardActions}>
-                                            <TouchableOpacity
-                                                onPress={() =>
-                                                    sendVehicleData(index)
-                                                }
-                                                style={[
-                                                    styles.smallButton,
-                                                    {
-                                                        width: 150,
-                                                        marginTop: 8,
-                                                    },
-                                                ]}
-                                            >
-                                                <Text
-                                                    style={{
-                                                        color: colors.primary,
-                                                    }}
-                                                >
-                                                    Select Vehicle
-                                                </Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                )}
+                    <FlatList
+                        showsVerticalScrollIndicator={false}
+                        ItemSeparatorComponent={() => <Divider />}
+                        data={filteredData}
+                        onEndReached={loadMoreVehicles ? getVehicleList : null}
+                        onEndReachedThreshold={0.5}
+                        contentContainerStyle={{ flexGrow: 1 }}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing}
+                                onRefresh={onRefresh}
+                                colors={["green"]}
                             />
-                        </View>
-                    ) : (
-                        <View
-                            style={{
-                                alignItems: "center",
-                                justifyContent: "center",
-                                flex: 1,
-                                backgroundColor: colors.white,
-                            }}
-                        >
-                            <Text
-                                style={{
-                                    color: colors.black,
-                                    textAlign: "center",
-                                }}
-                            >
-                                No Vehicles are associated with this Garage!
-                            </Text>
-                            <TouchableOpacity
-                                style={[styles.buttonStyle, { marginTop: 15 }]}
-                                onPress={() =>
-                                    navigation.navigate("AddRepairOrderStep2")
-                                }
-                            >
-                                <Text
-                                    style={{ color: colors.black, padding: 5 }}
-                                >
-                                    <Icon
-                                        name={"plus"}
-                                        size={16}
-                                        color={colors.secondary}
-                                    />{" "}
-                                    Add New Vehicle
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
+                        }
+                        ListFooterComponent={loadMoreVehicles ? renderFooter : null}
+                        ListEmptyComponent={() => (
+                            !isLoading && (
+                                <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                    <Text style={{ color: colors.black }}>
+                                        No vehicle exist!
+                                    </Text>
+                                </View>
+                        ))}
+                        keyExtractor={(item) => item.id}
+                        renderItem={({ item, index }) => (
+                            <View style={styles.cards}>
+                                <View>
+                                    <Text
+                                        style={styles.cardCustomerName}
+                                    >
+                                        Owner Name:{" "}
+                                        {item.users[0]
+                                            ? item?.users[0].name
+                                            : null}
+                                    </Text>
+                                    <Divider />
+                                    <Text
+                                        style={styles.cardCustomerName}
+                                    >
+                                        Owner`s Phone Number:{" "}
+                                        {item.users[0]
+                                            ? item?.users[0]
+                                                    .phone_number
+                                            : null}
+                                    </Text>
+                                    <Divider />
+                                    <Text
+                                        style={styles.cardCustomerName}
+                                    >
+                                        Brand: {item.brand.name}
+                                    </Text>
+                                    <Divider />
+                                    <Text
+                                        style={styles.cardCustomerName}
+                                    >
+                                        Model:{" "}
+                                        {item.vehicle_model.model_name}
+                                    </Text>
+                                    <Divider />
+                                    <Text
+                                        style={styles.cardCustomerName}
+                                    >
+                                        Registration Number:{" "}
+                                        {
+                                            item.vehicle_registration_number
+                                        }
+                                    </Text>
+                                </View>
+                                <View style={styles.cardActions}>
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            sendVehicleData(index)
+                                        }
+                                        style={[
+                                            styles.smallButton,
+                                            {
+                                                width: 150,
+                                                marginTop: 8,
+                                            },
+                                        ]}
+                                    >
+                                        <Text
+                                            style={{
+                                                color: colors.primary,
+                                            }}
+                                        >
+                                            Select Vehicle
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        )}
+                    />
                 </View>
+                {isLoading &&
+                    <Spinner
+                        visible={isLoading}
+                        color="#377520"
+                        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
+                    />
+                }
             </View>
         </View>
     );

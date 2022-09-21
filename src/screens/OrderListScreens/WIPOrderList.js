@@ -18,6 +18,7 @@ import IconX from "react-native-vector-icons/FontAwesome5";
 import moment from "moment";
 import RBSheet from "react-native-raw-bottom-sheet";
 import { useIsFocused } from "@react-navigation/native";
+import Spinner from "react-native-loading-spinner-overlay";
 
 const WIPOrderList = ({
     navigation,
@@ -64,12 +65,8 @@ const WIPOrderList = ({
             if (json !== undefined) {
                 setData([...data, ...json.data.data]);
                 setFilteredData([...filteredData, ...json.data.data]);
-                {
-                    page == 1 && setIsLoading(false);
-                }
-                {
-                    page != 1 && setIsScrollLoading(false);
-                }
+                if(page == 1) setIsLoading(false)
+                if(page != 1) setIsScrollLoading(false)
                 {json.data.current_page != json.data.last_page ? setLoadMoreOrders(true) : setLoadMoreOrders(false)}
                 {json.data.current_page != json.data.last_page ? setPage(page + 1) : null}
             }
@@ -234,401 +231,539 @@ const WIPOrderList = ({
                     </View>
                 </View>
                 <View style={{ flexDirection: "column", flex: 1 }}>
-                    {isLoading ? (
-                        <View style={{ flex: 1, justifyContent: "center" }}>
-                            <ActivityIndicator></ActivityIndicator>
-                        </View>
-                    ) : filteredData.length != 0 ? (
-                        <View>
-                            <FlatList
-                                    showsVerticalScrollIndicator={false}
-                                ItemSeparatorComponent={() => <Divider />}
-                                data={filteredData}
-                                onEndReached={loadMoreOrders ? getOrderList : null}
-                                onEndReachedThreshold={0.5}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={refreshing}
-                                        onRefresh={onRefresh}
-                                        colors={["green"]}
-                                    />
-                                }
-                                ListFooterComponent={loadMoreOrders ? renderFooter : null}
-                                keyExtractor={(item) => item.id}
-                                renderItem={({ item, index }) => (
-                                    <>
-                                        <View style={styles.cards}>
-                                            <View style={styles.upperInfo}>
-                                                <View
+                    <FlatList
+                        showsVerticalScrollIndicator={false}
+                        ItemSeparatorComponent={() => <Divider />}
+                        data={filteredData}
+                        contentContainerStyle={{ flexGrow: 1 }}
+                        onEndReached={loadMoreOrders ? getOrderList : null}
+                        onEndReachedThreshold={0.5}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing}
+                                onRefresh={onRefresh}
+                                colors={["green"]}
+                            />
+                        }
+                        ListFooterComponent={loadMoreOrders ? renderFooter : null}
+                        ListEmptyComponent={() => (
+                            !isLoading && (
+                                <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                    <Text style={{ color: colors.black }}>
+                                        No order exist!
+                                    </Text>
+                                </View>
+                        ))}
+                        keyExtractor={(item) => item.id}
+                        renderItem={({ item, index }) => (
+                            <>
+                                <View style={styles.cards}>
+                                    <View style={styles.upperInfo}>
+                                        <View
+                                            style={
+                                                styles.cardOrderDetails
+                                            }
+                                        >
+                                            <Text
+                                                style={styles.orderID}
+                                            >
+                                                Order Id: {item.id}
+                                            </Text>
+                                            <Text
+                                                style={
+                                                    styles.orderStatus
+                                                }
+                                            >
+                                                {item.status}
+                                            </Text>
+                                        </View>
+                                        <View
+                                            style={{
+                                                right: 30,
+                                                top: 35,
+                                                position: "absolute",
+                                            }}
+                                        >
+                                            <Icon
+                                                onPress={() => {
+                                                    this[
+                                                        RBSheet + index
+                                                    ].open();
+                                                }}
+                                                type={
+                                                    "MaterialCommunityIcons"
+                                                }
+                                                name={"dots-vertical"}
+                                                size={22}
+                                                color={colors.gray}
+                                            />
+                                        </View>
+                                        <View>
+                                            <View
+                                                style={{
+                                                    flexDirection:
+                                                        "row",
+                                                }}
+                                            >
+                                                <Text
                                                     style={
-                                                        styles.cardOrderDetails
+                                                        styles.orderAmount
                                                     }
                                                 >
-                                                    <Text
-                                                        style={styles.orderID}
-                                                    >
-                                                        Order Id: {item.id}
-                                                    </Text>
-                                                    <Text
-                                                        style={
-                                                            styles.orderStatus
-                                                        }
-                                                    >
-                                                        {item.status}
-                                                    </Text>
-                                                </View>
-                                                <View
-                                                    style={{
-                                                        right: 30,
-                                                        top: 35,
-                                                        position: "absolute",
-                                                    }}
+                                                    Order Amount:
+                                                </Text>
+                                                <Text
+                                                    style={
+                                                        styles.orderAmount
+                                                    }
                                                 >
-                                                    <Icon
-                                                        onPress={() => {
-                                                            this[
-                                                                RBSheet + index
-                                                            ].open();
-                                                        }}
-                                                        type={
-                                                            "MaterialCommunityIcons"
-                                                        }
-                                                        name={"dots-vertical"}
-                                                        size={22}
-                                                        color={colors.gray}
-                                                    />
-                                                </View>
-                                                <View>
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={
-                                                                styles.orderAmount
-                                                            }
-                                                        >
-                                                            Order Amount:
-                                                        </Text>
-                                                        <Text
-                                                            style={
-                                                                styles.orderAmount
-                                                            }
-                                                        >
-                                                            {" "}
-                                                            ₹ {item.total}
-                                                        </Text>
-                                                        <Text
-                                                            style={[
-                                                                styles.orderAmount,
-                                                                {
-                                                                    marginLeft: 8,
-                                                                    color:
-                                                                        item.payment_status ==
-                                                                        "Completed"
-                                                                            ? colors.green
-                                                                            : colors.danger,
-                                                                },
-                                                            ]}
-                                                        >
-                                                            {item.payment_status ==
-                                                            "Completed"
-                                                                ? "(Paid)"
-                                                                : "(Due)"}
-                                                        </Text>
-                                                    </View>
-                                                    <Divider />
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={
-                                                                styles.cardCustomerName
-                                                            }
-                                                        >
-                                                            Name:
-                                                        </Text>
-                                                        <Text
-                                                            style={
-                                                                styles.cardCustomerName
-                                                            }
-                                                        >
-                                                            {" "}
-                                                            {item.user.name}
-                                                        </Text>
-                                                    </View>
-                                                    <Divider />
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={
-                                                                styles.orderDate
-                                                            }
-                                                        >
-                                                            Order Date:{" "}
-                                                            {moment(
-                                                                item.created_at,
-                                                                "YYYY-MM-DD HH:mm:ss"
-                                                            ).format(
-                                                                "DD-MM-YYYY"
-                                                            )}
-                                                        </Text>
-                                                    </View>
-                                                    <Divider />
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={
-                                                                styles.cardCustomerName
-                                                            }
-                                                        >
-                                                            Registration Number:{" "}
-                                                        </Text>
-                                                        <Text
-                                                            style={
-                                                                styles.cardCustomerName
-                                                            }
-                                                        >
-                                                            {
-                                                                item.vehicle
-                                                                    .vehicle_registration_number
-                                                            }
-                                                        </Text>
-                                                    </View>
-                                                    <Divider />
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={
-                                                                styles.cardCustomerName
-                                                            }
-                                                        >
-                                                            Estimate Delivery
-                                                            Date:{" "}
-                                                        </Text>
-                                                        <Text
-                                                            style={
-                                                                styles.cardCustomerName
-                                                            }
-                                                        >
-                                                            {moment(
-                                                                item.estimated_delivery_time,
-                                                                "YYYY-MM-DD hh:mm:ss"
-                                                            ).format(
-                                                                "DD-MM-YYYY hh:mm A"
-                                                            )}
-                                                        </Text>
-                                                    </View>
-                                                </View>
-                                                <View
-                                                    style={styles.cardActions}
-                                                ></View>
-                                            </View>
-                                            <View style={styles.btnActions}>
-                                                <View style={styles.btnAction}>
-                                                    <Button
-                                                        onPress={() =>
-                                                            Linking.openURL(
-                                                                `tel:${item.user.phone_number}`
-                                                            )
-                                                        }
-                                                        color={colors.white}
-                                                        icon={(color) => (
-                                                            <Icon
-                                                                name={"phone"}
-                                                                size={24}
-                                                                color={
-                                                                    colors.white
-                                                                }
-                                                            />
-                                                        )}
-                                                        uppercase={false}
-                                                    >
-                                                        <Text
-                                                            style={
-                                                                styles.btnActionText
-                                                            }
-                                                        >
-                                                            Call
-                                                        </Text>
-                                                    </Button>
-                                                </View>
-                                                <View
+                                                    {" "}
+                                                    ₹ {item.total}
+                                                </Text>
+                                                <Text
                                                     style={[
-                                                        styles.btnAction,
+                                                        styles.orderAmount,
                                                         {
-                                                            borderColor:
-                                                                "#ffffff20",
-                                                            borderWidth: 1,
-                                                            borderTopWidth: 0,
-                                                            borderBottomWidth: 0,
+                                                            marginLeft: 8,
+                                                            color:
+                                                                item.payment_status ==
+                                                                "Completed"
+                                                                    ? colors.green
+                                                                    : colors.danger,
                                                         },
                                                     ]}
                                                 >
-                                                    <Button
-                                                        onPress={() =>
-                                                            Linking.openURL(
-                                                                `sms:${item.user.phone_number}`
-                                                            )
-                                                        }
-                                                        color={colors.white}
-                                                        icon={(color) => (
-                                                            <Icon
-                                                                name={"message"}
-                                                                size={24}
-                                                                color={
-                                                                    colors.white
-                                                                }
-                                                            />
-                                                        )}
-                                                        uppercase={false}
-                                                    >
-                                                        <Text
-                                                            style={
-                                                                styles.btnActionText
-                                                            }
-                                                        >
-                                                            Message
-                                                        </Text>
-                                                    </Button>
-                                                </View>
-                                                <View style={styles.btnAction}>
-                                                    <Button
-                                                        onPress={() =>
-                                                            Linking.openURL(
-                                                                `https://wa.me/${item.user.phone_number}`
-                                                            )
-                                                        }
-                                                        color={colors.white}
-                                                        icon={(color) => (
-                                                            <Icon
-                                                                name={
-                                                                    "whatsapp"
-                                                                }
-                                                                size={24}
-                                                                color={
-                                                                    colors.white
-                                                                }
-                                                            />
-                                                        )}
-                                                        uppercase={false}
-                                                    >
-                                                        <Text
-                                                            style={
-                                                                styles.btnActionText
-                                                            }
-                                                        >
-                                                            WhatsApp
-                                                        </Text>
-                                                    </Button>
-                                                </View>
+                                                    {item.payment_status ==
+                                                    "Completed"
+                                                        ? "(Paid)"
+                                                        : "(Due)"}
+                                                </Text>
                                             </View>
-                                        </View>
-
-                                        <RBSheet
-                                            ref={(ref) => {
-                                                this[RBSheet + index] = ref;
-                                            }}
-                                            height={
-                                                item?.payment_status ==
-                                                "Pending"
-                                                    ? 190
-                                                    : 63
-                                            }
-                                            openDuration={250}
-                                        >
+                                            <Divider />
                                             <View
                                                 style={{
-                                                    flexDirection: "column",
-                                                    flex: 1,
+                                                    flexDirection:
+                                                        "row",
                                                 }}
                                             >
+                                                <Text
+                                                    style={
+                                                        styles.cardCustomerName
+                                                    }
+                                                >
+                                                    Name:
+                                                </Text>
+                                                <Text
+                                                    style={
+                                                        styles.cardCustomerName
+                                                    }
+                                                >
+                                                    {" "}
+                                                    {item.user.name}
+                                                </Text>
+                                            </View>
+                                            <Divider />
+                                            <View
+                                                style={{
+                                                    flexDirection:
+                                                        "row",
+                                                }}
+                                            >
+                                                <Text
+                                                    style={
+                                                        styles.orderDate
+                                                    }
+                                                >
+                                                    Order Date:{" "}
+                                                    {moment(
+                                                        item.created_at,
+                                                        "YYYY-MM-DD HH:mm:ss"
+                                                    ).format(
+                                                        "DD-MM-YYYY"
+                                                    )}
+                                                </Text>
+                                            </View>
+                                            <Divider />
+                                            <View
+                                                style={{
+                                                    flexDirection:
+                                                        "row",
+                                                }}
+                                            >
+                                                <Text
+                                                    style={
+                                                        styles.cardCustomerName
+                                                    }
+                                                >
+                                                    Registration Number:{" "}
+                                                </Text>
+                                                <Text
+                                                    style={
+                                                        styles.cardCustomerName
+                                                    }
+                                                >
+                                                    {
+                                                        item.vehicle
+                                                            .vehicle_registration_number
+                                                    }
+                                                </Text>
+                                            </View>
+                                            <Divider />
+                                            <View
+                                                style={{
+                                                    flexDirection:
+                                                        "row",
+                                                }}
+                                            >
+                                                <Text
+                                                    style={
+                                                        styles.cardCustomerName
+                                                    }
+                                                >
+                                                    Estimate Delivery
+                                                    Date:{" "}
+                                                </Text>
+                                                <Text
+                                                    style={
+                                                        styles.cardCustomerName
+                                                    }
+                                                >
+                                                    {moment(
+                                                        item.estimated_delivery_time,
+                                                        "YYYY-MM-DD hh:mm:ss"
+                                                    ).format(
+                                                        "DD-MM-YYYY hh:mm A"
+                                                    )}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                        <View
+                                            style={styles.cardActions}
+                                        ></View>
+                                    </View>
+                                    <View style={styles.btnActions}>
+                                        <View style={styles.btnAction}>
+                                            <Button
+                                                onPress={() =>
+                                                    Linking.openURL(
+                                                        `tel:${item.user.phone_number}`
+                                                    )
+                                                }
+                                                color={colors.white}
+                                                icon={(color) => (
+                                                    <Icon
+                                                        name={"phone"}
+                                                        size={24}
+                                                        color={
+                                                            colors.white
+                                                        }
+                                                    />
+                                                )}
+                                                uppercase={false}
+                                            >
+                                                <Text
+                                                    style={
+                                                        styles.btnActionText
+                                                    }
+                                                >
+                                                    Call
+                                                </Text>
+                                            </Button>
+                                        </View>
+                                        <View
+                                            style={[
+                                                styles.btnAction,
+                                                {
+                                                    borderColor:
+                                                        "#ffffff20",
+                                                    borderWidth: 1,
+                                                    borderTopWidth: 0,
+                                                    borderBottomWidth: 0,
+                                                },
+                                            ]}
+                                        >
+                                            <Button
+                                                onPress={() =>
+                                                    Linking.openURL(
+                                                        `sms:${item.user.phone_number}`
+                                                    )
+                                                }
+                                                color={colors.white}
+                                                icon={(color) => (
+                                                    <Icon
+                                                        name={"message"}
+                                                        size={24}
+                                                        color={
+                                                            colors.white
+                                                        }
+                                                    />
+                                                )}
+                                                uppercase={false}
+                                            >
+                                                <Text
+                                                    style={
+                                                        styles.btnActionText
+                                                    }
+                                                >
+                                                    Message
+                                                </Text>
+                                            </Button>
+                                        </View>
+                                        <View style={styles.btnAction}>
+                                            <Button
+                                                onPress={() =>
+                                                    Linking.openURL(
+                                                        `https://wa.me/${item.user.phone_number}`
+                                                    )
+                                                }
+                                                color={colors.white}
+                                                icon={(color) => (
+                                                    <Icon
+                                                        name={
+                                                            "whatsapp"
+                                                        }
+                                                        size={24}
+                                                        color={
+                                                            colors.white
+                                                        }
+                                                    />
+                                                )}
+                                                uppercase={false}
+                                            >
+                                                <Text
+                                                    style={
+                                                        styles.btnActionText
+                                                    }
+                                                >
+                                                    WhatsApp
+                                                </Text>
+                                            </Button>
+                                        </View>
+                                    </View>
+                                </View>
+
+                                <RBSheet
+                                    ref={(ref) => {
+                                        this[RBSheet + index] = ref;
+                                    }}
+                                    height={
+                                        item?.payment_status ==
+                                        "Pending"
+                                            ? 190
+                                            : 63
+                                    }
+                                    openDuration={250}
+                                >
+                                    <View
+                                        style={{
+                                            flexDirection: "column",
+                                            flex: 1,
+                                        }}
+                                    >
+                                        <List.Item
+                                            title="Change Order Status"
+                                            style={{
+                                                paddingVertical: 15,
+                                            }}
+                                            onPress={() => {
+                                                let arrData = {
+                                                    order_id: item.id,
+                                                    user_id:
+                                                        item.user_id,
+                                                    garage_id:
+                                                        item.garage_id,
+                                                    vehicle_id:
+                                                        item.vehicle_id,
+                                                    name: item.user
+                                                        .name,
+                                                    email: item.user
+                                                        .email,
+                                                    phone_number:
+                                                        item.user
+                                                            .phone_number,
+                                                    brand_id:
+                                                        item.vehicle
+                                                            .brand_id,
+                                                    brand_name:
+                                                        item?.vehicle
+                                                            ?.brand
+                                                            ?.name,
+                                                    model_id:
+                                                        item?.vehicle
+                                                            ?.model_id,
+                                                    model_name:
+                                                        item?.vehicle
+                                                            ?.vehicle_model
+                                                            ?.model_name,
+                                                    vehicle_registration_number:
+                                                        item?.vehicle
+                                                            ?.vehicle_registration_number,
+                                                    odometer:
+                                                        item?.odometer,
+                                                    fuel_level:
+                                                        item?.fuel_level,
+                                                    comment:
+                                                        item?.comment,
+                                                    estimated_delivery_time:
+                                                        item?.estimated_delivery_time,
+                                                    labor_total:
+                                                        item?.labor_total,
+                                                    parts_total:
+                                                        item?.parts_total,
+                                                    status: item?.status,
+                                                    services_list:
+                                                        item?.orderservice,
+                                                    parts_list:
+                                                        item?.orderparts,
+                                                    created_at:
+                                                        item?.created_at,
+                                                    payment_status:
+                                                        item?.payment_status,
+                                                    total: item?.total,
+                                                    applicable_discount:
+                                                        item?.discount,
+                                                };
+                                                navigation.navigate(
+                                                    "OrderWorkInProgress",
+                                                    { data: arrData }
+                                                );
+                                                this[
+                                                    RBSheet + index
+                                                ].close();
+                                            }}
+                                            left={() => (
+                                                <Icon
+                                                    type={
+                                                        "MaterialCommunityIcons"
+                                                    }
+                                                    name="clipboard-list-outline"
+                                                    style={{
+                                                        marginHorizontal: 10,
+                                                        alignSelf:
+                                                            "center",
+                                                    }}
+                                                    color={colors.black}
+                                                    size={26}
+                                                />
+                                            )}
+                                        />
+                                        {item?.payment_status ==
+                                            "Pending" && (
+                                                <>
+                                                    <Divider />
+                                                    <List.Item
+                                                        title="Edit Order"
+                                                        style={{
+                                                            paddingVertical: 15,
+                                                        }}
+                                                        onPress={() => {
+                                                            let arrData = {
+                                                                order_id: item.id,
+                                                                user_id:
+                                                                    item.user_id,
+                                                                garage_id:
+                                                                    item.garage_id,
+                                                                vehicle_id:
+                                                                    item.vehicle_id,
+                                                                name: item.user
+                                                                    .name,
+                                                                email: item.user
+                                                                    .email,
+                                                                phone_number:
+                                                                    item.user
+                                                                        .phone_number,
+                                                                brand_id:
+                                                                    item.vehicle
+                                                                        .brand_id,
+                                                                brand_name:
+                                                                    item?.vehicle
+                                                                        ?.brand
+                                                                        ?.name,
+                                                                model_id:
+                                                                    item?.vehicle
+                                                                        ?.model_id,
+                                                                model_name:
+                                                                    item?.vehicle
+                                                                        ?.vehicle_model
+                                                                        ?.model_name,
+                                                                vehicle_registration_number:
+                                                                    item?.vehicle
+                                                                        ?.vehicle_registration_number,
+                                                                odometer:
+                                                                    item?.odometer,
+                                                                fuel_level:
+                                                                    item?.fuel_level,
+                                                                comment:
+                                                                    item?.comment,
+                                                                estimated_delivery_time:
+                                                                    item?.estimated_delivery_time,
+                                                                labor_total:
+                                                                    item?.labor_total,
+                                                                parts_total:
+                                                                    item?.parts_total,
+                                                                services_list:
+                                                                    item?.orderservice,
+                                                                parts_list:
+                                                                    item?.orderparts,
+                                                                created_at:
+                                                                    item?.created_at,
+                                                                total: item?.total,
+                                                                payment_status:
+                                                                    item?.payment_status,
+                                                                status: item?.status,
+                                                                applicable_discount:
+                                                                    item?.discount,
+                                                            };
+                                                            navigation.navigate(
+                                                                "EditRepairOrder",
+                                                                { data: arrData }
+                                                            );
+                                                            this[
+                                                                RBSheet + index
+                                                            ].close();
+                                                        }}
+                                                        left={() => (
+                                                            <Icon
+                                                                type={
+                                                                    "MaterialCommunityIcons"
+                                                                }
+                                                                name="clipboard-edit-outline"
+                                                                style={{
+                                                                    marginHorizontal: 10,
+                                                                    alignSelf:
+                                                                        "center",
+                                                                }}
+                                                                color={colors.black}
+                                                                size={26}
+                                                            />
+                                                        )}
+                                                    />
+                                                </>
+                                        )}
+                                        {item?.payment_status ==
+                                            "Pending" && (
+                                            <>
+                                                <Divider />
                                                 <List.Item
-                                                    title="Change Order Status"
+                                                    title="Add Payment"
                                                     style={{
                                                         paddingVertical: 15,
                                                     }}
                                                     onPress={() => {
                                                         let arrData = {
-                                                            order_id: item.id,
-                                                            user_id:
-                                                                item.user_id,
-                                                            garage_id:
-                                                                item.garage_id,
-                                                            vehicle_id:
-                                                                item.vehicle_id,
-                                                            name: item.user
-                                                                .name,
-                                                            email: item.user
-                                                                .email,
-                                                            phone_number:
-                                                                item.user
-                                                                    .phone_number,
-                                                            brand_id:
-                                                                item.vehicle
-                                                                    .brand_id,
-                                                            brand_name:
-                                                                item?.vehicle
-                                                                    ?.brand
-                                                                    ?.name,
-                                                            model_id:
-                                                                item?.vehicle
-                                                                    ?.model_id,
-                                                            model_name:
-                                                                item?.vehicle
-                                                                    ?.vehicle_model
-                                                                    ?.model_name,
-                                                            vehicle_registration_number:
-                                                                item?.vehicle
-                                                                    ?.vehicle_registration_number,
-                                                            odometer:
-                                                                item?.odometer,
-                                                            fuel_level:
-                                                                item?.fuel_level,
-                                                            comment:
-                                                                item?.comment,
-                                                            estimated_delivery_time:
-                                                                item?.estimated_delivery_time,
-                                                            labor_total:
-                                                                item?.labor_total,
-                                                            parts_total:
-                                                                item?.parts_total,
-                                                            status: item?.status,
-                                                            services_list:
-                                                                item?.orderservice,
-                                                            parts_list:
-                                                                item?.orderparts,
-                                                            created_at:
-                                                                item?.created_at,
-                                                            payment_status:
-                                                                item?.payment_status,
+                                                            order_id:
+                                                                item.id,
                                                             total: item?.total,
-                                                            applicable_discount:
-                                                                item?.discount,
                                                         };
                                                         navigation.navigate(
-                                                            "OrderWorkInProgress",
-                                                            { data: arrData }
+                                                            "AddPayment",
+                                                            {
+                                                                data: arrData,
+                                                            }
                                                         );
                                                         this[
-                                                            RBSheet + index
+                                                            RBSheet +
+                                                                index
                                                         ].close();
                                                     }}
                                                     left={() => (
@@ -636,182 +771,34 @@ const WIPOrderList = ({
                                                             type={
                                                                 "MaterialCommunityIcons"
                                                             }
-                                                            name="clipboard-list-outline"
+                                                            name="account-cash"
                                                             style={{
                                                                 marginHorizontal: 10,
                                                                 alignSelf:
                                                                     "center",
                                                             }}
-                                                            color={colors.black}
+                                                            color={
+                                                                colors.black
+                                                            }
                                                             size={26}
                                                         />
                                                     )}
                                                 />
-                                                {item?.payment_status ==
-                                                    "Pending" && (
-                                                        <>
-                                                            <Divider />
-                                                            <List.Item
-                                                                title="Edit Order"
-                                                                style={{
-                                                                    paddingVertical: 15,
-                                                                }}
-                                                                onPress={() => {
-                                                                    let arrData = {
-                                                                        order_id: item.id,
-                                                                        user_id:
-                                                                            item.user_id,
-                                                                        garage_id:
-                                                                            item.garage_id,
-                                                                        vehicle_id:
-                                                                            item.vehicle_id,
-                                                                        name: item.user
-                                                                            .name,
-                                                                        email: item.user
-                                                                            .email,
-                                                                        phone_number:
-                                                                            item.user
-                                                                                .phone_number,
-                                                                        brand_id:
-                                                                            item.vehicle
-                                                                                .brand_id,
-                                                                        brand_name:
-                                                                            item?.vehicle
-                                                                                ?.brand
-                                                                                ?.name,
-                                                                        model_id:
-                                                                            item?.vehicle
-                                                                                ?.model_id,
-                                                                        model_name:
-                                                                            item?.vehicle
-                                                                                ?.vehicle_model
-                                                                                ?.model_name,
-                                                                        vehicle_registration_number:
-                                                                            item?.vehicle
-                                                                                ?.vehicle_registration_number,
-                                                                        odometer:
-                                                                            item?.odometer,
-                                                                        fuel_level:
-                                                                            item?.fuel_level,
-                                                                        comment:
-                                                                            item?.comment,
-                                                                        estimated_delivery_time:
-                                                                            item?.estimated_delivery_time,
-                                                                        labor_total:
-                                                                            item?.labor_total,
-                                                                        parts_total:
-                                                                            item?.parts_total,
-                                                                        services_list:
-                                                                            item?.orderservice,
-                                                                        parts_list:
-                                                                            item?.orderparts,
-                                                                        created_at:
-                                                                            item?.created_at,
-                                                                        total: item?.total,
-                                                                        payment_status:
-                                                                            item?.payment_status,
-                                                                        status: item?.status,
-                                                                        applicable_discount:
-                                                                            item?.discount,
-                                                                    };
-                                                                    navigation.navigate(
-                                                                        "EditRepairOrder",
-                                                                        { data: arrData }
-                                                                    );
-                                                                    this[
-                                                                        RBSheet + index
-                                                                    ].close();
-                                                                }}
-                                                                left={() => (
-                                                                    <Icon
-                                                                        type={
-                                                                            "MaterialCommunityIcons"
-                                                                        }
-                                                                        name="clipboard-edit-outline"
-                                                                        style={{
-                                                                            marginHorizontal: 10,
-                                                                            alignSelf:
-                                                                                "center",
-                                                                        }}
-                                                                        color={colors.black}
-                                                                        size={26}
-                                                                    />
-                                                                )}
-                                                            />
-                                                        </>
-                                                )}
-                                                {item?.payment_status ==
-                                                    "Pending" && (
-                                                    <>
-                                                        <Divider />
-                                                        <List.Item
-                                                            title="Add Payment"
-                                                            style={{
-                                                                paddingVertical: 15,
-                                                            }}
-                                                            onPress={() => {
-                                                                let arrData = {
-                                                                    order_id:
-                                                                        item.id,
-                                                                    total: item?.total,
-                                                                };
-                                                                navigation.navigate(
-                                                                    "AddPayment",
-                                                                    {
-                                                                        data: arrData,
-                                                                    }
-                                                                );
-                                                                this[
-                                                                    RBSheet +
-                                                                        index
-                                                                ].close();
-                                                            }}
-                                                            left={() => (
-                                                                <Icon
-                                                                    type={
-                                                                        "MaterialCommunityIcons"
-                                                                    }
-                                                                    name="account-cash"
-                                                                    style={{
-                                                                        marginHorizontal: 10,
-                                                                        alignSelf:
-                                                                            "center",
-                                                                    }}
-                                                                    color={
-                                                                        colors.black
-                                                                    }
-                                                                    size={26}
-                                                                />
-                                                            )}
-                                                        />
-                                                    </>
-                                                )}
-                                            </View>
-                                        </RBSheet>
-                                    </>
-                                )}
-                            />
-                        </View>
-                    ) : (
-                        <View
-                            style={{
-                                alignItems: "center",
-                                justifyContent: "center",
-                                flex: 1,
-                                backgroundColor: colors.white,
-                            }}
-                        >
-                            <Text
-                                style={{
-                                    color: colors.black,
-                                    textAlign: "center",
-                                }}
-                            >
-                                No Orders are exist for this Garage!
-                            </Text>
-                        </View>
-                    )}
+                                            </>
+                                        )}
+                                    </View>
+                                </RBSheet>
+                            </>
+                        )}
+                    />
                 </View>
+                {isLoading &&
+                    <Spinner
+                        visible={isLoading}
+                        color="#377520"
+                        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
+                    />
+                }
             </View>
         </View>
     );

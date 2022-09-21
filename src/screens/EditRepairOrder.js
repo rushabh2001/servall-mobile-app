@@ -116,9 +116,9 @@ const EditRepairOrder = ({
         useState(false);
     const [displayDeliveryTimeClock, setDisplayDeliveryTimeClock] =
         useState(false);
-    const [isDeliveryDate, setIsDeliveryDate] = useState(new Date());
+    const [isDeliveryDate, setIsDeliveryDate] = useState();
     const [isDeliveryDate1, setIsDeliveryDate1] = useState("");
-    const [isDeliveryTime, setIsDeliveryTime] = useState(new Date());
+    const [isDeliveryTime, setIsDeliveryTime] = useState();
     const [estimateDeliveryDateError, setEstimateDeliveryDateError] =
         useState();
 
@@ -364,7 +364,7 @@ const EditRepairOrder = ({
     };
 
     const changeEstimateDeliverySelectedDate = (event, selectedDate) => {
-        if (selectedDate != null) {
+        if (selectedDate != null && event.type == 'set') {
             let currentDate = selectedDate || isEstimatedDeliveryDateTime;
             let formattedDate = moment(currentDate, "YYYY MMMM D", true).format(
                 "DD-MM-YYYY"
@@ -374,6 +374,8 @@ const EditRepairOrder = ({
             setIsDeliveryDate(formattedDate2);
             setIsDeliveryDate1(formattedDate);
             setDisplayDeliveryTimeClock(true);
+        } else if(event.type == 'dismissed') {
+            setDisplayDeliveryDateCalender(false);
         }
     };
 
@@ -492,12 +494,8 @@ const EditRepairOrder = ({
     };
 
     const getPartList = async () => {
-        {
-            partPage == 1 && setIsLoadingPartList(true);
-        }
-        {
-            partPage != 1 && setIsPartScrollLoading(true);
-        }
+        if(partPage == 1) setIsLoadingPartList(true)
+        if(partPage != 1) setIsPartScrollLoading(false)
         try {
             const res = await fetch(`${API_URL}fetch_parts?page=${partPage}`, {
                 method: "POST",
@@ -517,9 +515,7 @@ const EditRepairOrder = ({
                 setPartList([...partList, ...json.data.data]);
                 setFilteredPartData([...filteredPartData, ...json.data.data]);
                 setIsLoadingPartList(false);
-                {
-                    partPage != 1 && setIsPartScrollLoading(false);
-                }
+                if(partPage != 1) setIsPartScrollLoading(false)
                 {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
                 {json.data.current_page != json.data.last_page ? setPartPage(partPage + 1) : null}
             }
@@ -603,12 +599,8 @@ const EditRepairOrder = ({
     };
 
     const getServiceList = async () => {
-        {
-            servicePage == 1 && setIsLoadingServiceList(true);
-        }
-        {
-            servicePage != 1 && setIsServiceScrollLoading(true);
-        }
+        if(servicePage == 1) setIsLoadingServiceList(true)
+        if(servicePage != 1) setIsServiceScrollLoading(true)
         try {
             const res = await fetch(
                 `${API_URL}fetch_service?page=${servicePage}`,
@@ -632,9 +624,7 @@ const EditRepairOrder = ({
                     ...json.data.data,
                 ]);
                 setIsLoadingServiceList(false);
-                {
-                    servicePage != 1 && setIsServiceScrollLoading(false);
-                }
+                if(servicePage != 1) setIsServiceScrollLoading(false)
                 {json.data.current_page != json.data.last_page ? setLoadMoreServices(true) : setLoadMoreServices(false)}
                 {json.data.current_page != json.data.last_page ? setServicePage(servicePage + 1) : null}
             }
@@ -1599,58 +1589,50 @@ const EditRepairOrder = ({
                         />
 
                         <TouchableOpacity
-                            style={{ flex: 1 }}
+                            style={{ flex: 1, marginTop: 20 }}
                             onPress={() =>
                                 setDisplayDeliveryDateCalender(true)
                             }
-                            activeOpacity={1}
                         >
-                            <View
-                                style={styles.datePickerContainer}
-                                pointerEvents="none"
-                            >
-                                <Icon
-                                    style={styles.datePickerIcon}
-                                    name="calendar-month"
-                                    size={24}
-                                    color="#000"
+                            <TextInput
+                                mode="outlined"
+                                label="Estimate Delivery Time"
+                                placeholder="Estimate Delivery Time"
+                                value={estimatedDeliveryDateTime}
+                                editable={false}
+                                right={
+                                    <TextInput.Icon name="calendar-month" />
+                                }
+                            />
+                            {displayDeliveryDateCalender == true && (
+                                <DateTimePicker
+                                    value={
+                                        isDeliveryDate
+                                            ? isDeliveryDate
+                                            : new Date()
+                                    }
+                                    mode={"date"}
+                                    is24Hour={true}
+                                    minimumDate={new Date()}
+                                    display="spinner"
+                                    onChange={
+                                        changeEstimateDeliverySelectedDate
+                                    }
                                 />
-                                <TextInput
-                                    mode="outlined"
-                                    label="Estimate Delivery Time"
-                                    style={styles.datePickerField}
-                                    placeholder="Estimate Delivery Time"
-                                    value={estimatedDeliveryDateTime}
+                            )}
+                            {displayDeliveryTimeClock && (
+                                <DateTimePicker
+                                    value={
+                                        isDeliveryTime
+                                            ? isDeliveryTime
+                                            : new Date()
+                                    }
+                                    mode={"time"}
+                                    is24Hour={false}
+                                    display="spinner"
+                                    onChange={changeSelectedTime}
                                 />
-                                {displayDeliveryDateCalender == true && (
-                                    <DateTimePicker
-                                        value={
-                                            isDeliveryDate
-                                                ? isDeliveryDate
-                                                : null
-                                        }
-                                        mode={"date"}
-                                        is24Hour={true}
-                                        display="spinner"
-                                        onChange={
-                                            changeEstimateDeliverySelectedDate
-                                        }
-                                    />
-                                )}
-                                {displayDeliveryTimeClock && (
-                                    <DateTimePicker
-                                        value={
-                                            isDeliveryTime
-                                                ? isDeliveryTime
-                                                : null
-                                        }
-                                        mode={"time"}
-                                        is24Hour={false}
-                                        display="spinner"
-                                        onChange={changeSelectedTime}
-                                    />
-                                )}
-                            </View>
+                            )}
                         </TouchableOpacity>
                         {estimateDeliveryDateError?.length > 0 && (
                             <Text style={styles.errorTextStyle}>

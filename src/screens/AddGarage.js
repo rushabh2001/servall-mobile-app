@@ -327,12 +327,8 @@ const AddGarage = ({
     };
 
     const getAdminList = async () => {
-        {
-            userPage == 1 && setIsLoadingUserList(true);
-        }
-        {
-            userPage != 1 && setIsUserScrollLoading(true);
-        }
+        if(userPage == 1) setIsLoadingUserList(true)
+        if(userPage != 1) setIsUserScrollLoading(true)
         try {
             const res = await fetch(
                 `${API_URL}fetch_admin_list?page=${userPage}`,
@@ -356,9 +352,7 @@ const AddGarage = ({
                     ...json.admin_user_list.data,
                 ]);
                 setIsLoadingUserList(false);
-                {
-                    userPage != 1 && setIsUserScrollLoading(false);
-                }
+                if(userPage != 1) setIsUserScrollLoading(false)
                 {json.admin_user_list.current_page != json.admin_user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
                 {json.admin_user_list.current_page != json.admin_user_list.last_page ? setUserPage(userPage + 1) : null}
             }
@@ -387,8 +381,6 @@ const AddGarage = ({
                 {json.admin_user_list.current_page != json.admin_user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
                 {json.admin_user_list.current_page != json.admin_user_list.last_page ? setUserPage(2) : null}
                 setUserRefreshing(false);
-            } else {
-                setUserRefreshing(false);
             }
         } catch (error) {
             console.error(error);
@@ -415,9 +407,6 @@ const AddGarage = ({
                 setFilteredUserData(json.admin_user_list.data);
                 {json.admin_user_list.current_page != json.admin_user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
                 {json.admin_user_list.current_page != json.admin_user_list.last_page ? setUserPage(2) : null}
-                setIsLoadingUserList(false);
-                setUserRefreshing(false);
-            } else {
                 setIsLoadingUserList(false);
                 setUserRefreshing(false);
             }
@@ -568,7 +557,7 @@ const AddGarage = ({
                             )}
                         </View>
 
-                        {cityFieldToggle == false && (
+                        {cityFieldToggle == true && (
                             <View style={{marginTop: 20}}>
                                 <TouchableOpacity
                                     onPress={() => {

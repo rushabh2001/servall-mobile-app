@@ -17,6 +17,7 @@ import { connect } from "react-redux";
 import { API_URL } from "../constants/config";
 import { useIsFocused } from "@react-navigation/native";
 import { Table, Row, Cell } from "react-native-table-component";
+import Spinner from "react-native-loading-spinner-overlay";
 
 const Parts = ({
     navigation,
@@ -54,36 +55,10 @@ const Parts = ({
     const [garagePage, setGaragePage] = useState(1);
     const [isGarageScrollLoading, setIsGarageScrollLoading] = useState(false);
     const [garageRefreshing, setGarageRefreshing] = useState(false);
-
-    // const selectOneFile = async () => {
-    //   //Opening Document Picker for selection of one file
-    //   try {
-    //     const res = await DocumentPicker.pick({
-    //       type: [DocumentPicker.types.allFiles],
-    //     });
-    //     //Setting the state to show single file attributes
-    //     setSingleFile(res);
-    //   } catch (err) {
-    //     //Handling any exception (If any)
-    //     if (DocumentPicker.isCancel(err)) {
-    //       //If user canceled the document selection
-    //       alert('Canceled from single doc picker');
-    //     } else {
-    //       //For Unknown Error
-    //       alert('Unknown Error: ' + JSON.stringify(err));
-    //       throw err;
-    //     }
-    //   }
-    // };
-
     
     const getGarageList = async () => {
-        {
-            garagePage == 1 && setIsLoadingGarageList(true);
-        }
-        {
-            garagePage != 1 && setIsGarageScrollLoading(true);
-        }
+    if(garagePage == 1) setIsLoadingGarageList(true)
+        if(garagePage != 1) setIsGarageScrollLoading(true)
         try {
             const res = await fetch(
                 `${API_URL}fetch_owner_garages?page=${garagePage}`,
@@ -110,9 +85,7 @@ const Parts = ({
                     ...json.garage_list.data,
                 ]);
                 setIsLoadingGarageList(false);
-                {
-                    garagePage != 1 && setIsGarageScrollLoading(false);
-                }
+                if(garagePage != 1) setIsGarageScrollLoading(false)
                 {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
                 {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(garagePage + 1) : null}
             }
@@ -202,12 +175,8 @@ const Parts = ({
 
 
     const getPartList = async () => {
-        {
-            page == 1 && setIsLoading(true);
-        }
-        {
-            page != 1 && setIsScrollLoading(true);
-        }
+        if(page == 1) setIsLoading(true)
+        if(page != 1) setIsScrollLoading(true)
         try {
             const res = await fetch(
                 `${API_URL}fetch_garage_inventory/${isGarageId}?page=${page}`,
@@ -228,12 +197,8 @@ const Parts = ({
                 setPartList([...partList, ...json.data.data]);
                 // setTableData(json.data);
                 setFilteredPartData([...filteredPartData, ...json.data.data]);
-                {
-                    page == 1 && setIsLoading(false);
-                }
-                {
-                    page != 1 && setIsScrollLoading(false);
-                }
+                if(page == 1) setIsLoading(false)
+                if(page != 1) setIsScrollLoading(false)
                 {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
                 {json.data.current_page != json.data.last_page ? setPage(page + 1) : null}
             }
@@ -265,14 +230,13 @@ const Parts = ({
                 setFilteredPartData(json.data.data);
                 {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
                 {json.data.current_page != json.data.last_page ? setPage(2) : setPage(1)}
-                setRefreshing(false);
-            } else {
-                setRefreshing(false);
             }
+          
         } catch (error) {
             console.error(error);
         }
         setIsLoading(false);
+        setRefreshing(false);
     };
 
     const pullRefresh = async () => {
@@ -328,7 +292,7 @@ const Parts = ({
     useEffect(() => {
         setIsLoading(true);
         pullGarageRefresh();
-        pullRefresh();
+        console.log('1');
     }, [isFocused]);
 
     useEffect(() => {
@@ -339,9 +303,11 @@ const Parts = ({
     }, [garageList]);
 
     useEffect(() => {
-        if(isGarageId != 0 && selectedGarageId != isGarageId) {
+            console.log('4', isGarageId);
+        if(isGarageId) {
             setIsLoading(true);
             pullRefresh();
+            console.log('2');
         }
     }, [isGarageId]);
 
@@ -449,12 +415,8 @@ const Parts = ({
                 </View>
 
                 <View style={{ flex: 1 }}>
-                    {isLoading ? (
-                        <View style={{ flex: 1, justifyContent: "center" }}>
-                            <ActivityIndicator></ActivityIndicator>
-                        </View>
-                    ) : (
-                            <ScrollView showsVerticalScrollIndicator={false}>
+                    {!isLoading &&
+                        <ScrollView showsVerticalScrollIndicator={false}>
                             <View style={styles.container}>
                                 <Table>
                                     <Row
@@ -463,110 +425,98 @@ const Parts = ({
                                         textStyle={styles.textHeading}
                                         flexArr={[2, 1, 1, 1, 1]}
                                     />
-                                    {filteredPartData?.length > 0 ? (
-                                        <FlatList
-                                            showsVerticalScrollIndicator={false}
-                                            ItemSeparatorComponent={() => (
-                                                <>
-                                                    <Divider />
-                                                    <Divider />
-                                                </>
-                                            )}
-                                            data={filteredPartData}
-                                            onEndReached={loadMoreParts ? getPartList : null}
-                                            onEndReachedThreshold={0.5}
-                                            refreshControl={
-                                                <RefreshControl
-                                                    refreshing={refreshing}
-                                                    onRefresh={onRefresh}
-                                                    colors={["green"]}
-                                                />
-                                            }
-                                            ListFooterComponent={loadMoreParts ? renderFooter : null}
-                                            keyExtractor={(item) => item.id}
-                                            renderItem={({ item, index }) => (
-                                                <View style={{ margin: 5 }}>
-                                                    <TouchableOpacity
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                        }}
-                                                        onPress={() => {
-                                                            navigation.navigate(
-                                                                "EditStock",
-                                                                { data: item }
-                                                            );
-                                                        }}
-                                                    >
-                                                        <Cell
-                                                            data={
-                                                                item.parts.name
-                                                            }
-                                                            style={{ flex: 2 }}
-                                                            textStyle={
-                                                                styles.text
-                                                            }
-                                                        />
-                                                        <Cell
-                                                            data={
-                                                                item.current_stock
-                                                            }
-                                                            style={{ flex: 1 }}
-                                                            textStyle={
-                                                                styles.text
-                                                            }
-                                                        />
-                                                        <Cell
-                                                            data={item.mrp}
-                                                            style={{ flex: 1 }}
-                                                            textStyle={
-                                                                styles.text
-                                                            }
-                                                        />
-                                                        <Cell
-                                                            data={item.rack_id}
-                                                            style={{ flex: 1 }}
-                                                            textStyle={
-                                                                styles.text
-                                                            }
-                                                        />
-                                                        <Cell
-                                                            data={element(
-                                                                item,
-                                                                index
-                                                            )}
-                                                            style={{ flex: 1 }}
-                                                            textStyle={
-                                                                styles.text
-                                                            }
-                                                        />
-                                                    </TouchableOpacity>
+                                    <FlatList
+                                        showsVerticalScrollIndicator={false}
+                                        ItemSeparatorComponent={() => (
+                                            <>
+                                                <Divider />
+                                                <Divider />
+                                            </>
+                                        )}
+                                        data={filteredPartData}
+                                        onEndReached={loadMoreParts ? getPartList : null}
+                                        onEndReachedThreshold={0.5}
+                                        refreshControl={
+                                            <RefreshControl
+                                                refreshing={refreshing}
+                                                onRefresh={onRefresh}
+                                                colors={["green"]}
+                                            />
+                                        }
+                                        ListFooterComponent={loadMoreParts ? renderFooter : null}
+                                        ListEmptyComponent={() => (
+                                            !isLoading && (
+                                                <View style={{ marginVertical: 40, flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                                    <Text style={{ color: colors.black }}>
+                                                        No part exist!
+                                                    </Text>
                                                 </View>
-                                            )}
-                                        />
-                                    ) : (
-                                        <View
-                                            style={{
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                                marginVertical: 50,
-                                            }}
-                                        >
-                                            <Text
-                                                style={{
-                                                    color: colors.black,
-                                                    textAlign: "center",
-                                                }}
-                                            >
-                                                No such part is associated to
-                                                your garage!
-                                            </Text>
-                                        </View>
-                                    )}
+                                        ))}
+                                        keyExtractor={(item) => item.id}
+                                        renderItem={({ item, index }) => (
+                                            <View style={{ margin: 5 }}>
+                                                <TouchableOpacity
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                    }}
+                                                    onPress={() => {
+                                                        navigation.navigate(
+                                                            "EditStock",
+                                                            { data: item }
+                                                        );
+                                                    }}
+                                                >
+                                                    <Cell
+                                                        data={
+                                                            item.parts.name
+                                                        }
+                                                        style={{ flex: 2 }}
+                                                        textStyle={
+                                                            styles.text
+                                                        }
+                                                    />
+                                                    <Cell
+                                                        data={
+                                                            item.current_stock
+                                                        }
+                                                        style={{ flex: 1 }}
+                                                        textStyle={
+                                                            styles.text
+                                                        }
+                                                    />
+                                                    <Cell
+                                                        data={item.mrp}
+                                                        style={{ flex: 1 }}
+                                                        textStyle={
+                                                            styles.text
+                                                        }
+                                                    />
+                                                    <Cell
+                                                        data={item.rack_id}
+                                                        style={{ flex: 1 }}
+                                                        textStyle={
+                                                            styles.text
+                                                        }
+                                                    />
+                                                    <Cell
+                                                        data={element(
+                                                            item,
+                                                            index
+                                                        )}
+                                                        style={{ flex: 1 }}
+                                                        textStyle={
+                                                            styles.text
+                                                        }
+                                                    />
+                                                </TouchableOpacity>
+                                            </View>
+                                        )}
+                                    />
                                 </Table>
                             </View>
                         </ScrollView>
-                    )}
+                    }
                 </View>
             </View>
             <Portal>
@@ -776,6 +726,13 @@ const Parts = ({
                         )}
                     </Modal>
             </Portal>
+            {isLoading &&
+                <Spinner
+                    visible={isLoading}
+                    color="#377520"
+                    style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
+                />
+            }
         </View>
     );
 };

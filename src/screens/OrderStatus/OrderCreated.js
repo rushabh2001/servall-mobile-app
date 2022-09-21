@@ -31,7 +31,8 @@ const OrderCreated = ({ navigation, userRole, route, userToken, selectedGarageId
 
     const changeOrderStatus = async () => {
         console.log('working');
-
+        setIsLoading(true);
+        
         // Data to call API 
         let orderServicesArray = [];
         let orderPartsArray = [];

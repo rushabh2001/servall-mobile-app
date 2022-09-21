@@ -5,17 +5,10 @@ import {
     View,
     StyleSheet,
     TouchableOpacity,
-    ScrollView,
     Linking,
-    ActivityIndicator,
 } from "react-native";
 import {
-    Badge,
     Divider,
-    Modal,
-    Portal,
-    Button,
-    List,
 } from "react-native-paper";
 import { colors } from "../constants";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -25,20 +18,16 @@ import { connect } from "react-redux";
 import { useIsFocused } from "@react-navigation/native";
 import DocumentPicker from "react-native-document-picker";
 import Lightbox from "react-native-lightbox-v2";
-import RBSheet from "react-native-raw-bottom-sheet";
-import moment from "moment";
 import ServAllLogo from "../assets/images/placeholder_servall.jpg";
 import Spinner from "react-native-loading-spinner-overlay";
 
 const customerTopTabs = createMaterialTopTabNavigator();
 
 const CustomerProfile = ({
-    navigation,
     route,
     userToken,
     userRole,
     selectedGarageId,
-    selectedGarage,
     user,
 }) => {
     const [isLoading, setIsLoading] = useState(true);
@@ -69,7 +58,7 @@ const CustomerProfile = ({
             );
             const json = await res.json();
             if (json !== undefined) {
-                console.log("setIsCustomerData", json?.user_details);
+                // console.log("setIsCustomerData", json?.user_details);
                 setIsCustomerData(json?.user_details);
                 if (json.user_details.profile_image != null) {
                     setImageUri(
@@ -80,8 +69,6 @@ const CustomerProfile = ({
                 } else {
                     setImageUri(Image.resolveAssetSource(ServAllLogo).uri);
                 }
-                // console.log('isCustomerData', isCustomerData.order);
-                // console.log('isCustomerData Length', isCustomerData.order.length);
             }
         } catch (e) {
             console.log(e);
@@ -411,22 +398,7 @@ const CustomerProfile = ({
     );
 };
 
-// const CustomerNotifications = ({ route }) => {
-//     return (
 
-//     )
-// }
-
-// const CustomerOrders = ({ route }) => {
-// const refRBSheet = useRef();
-// useEffect(() => {
-//   console.log('orders', isCustomerData);
-// }, [])
-
-//     return (
-
-//     )
-// }
 
 const styles = StyleSheet.create({
     garageNameTitle: {

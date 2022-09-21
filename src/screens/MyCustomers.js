@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
     View,
     Text,
@@ -17,6 +17,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import IconX from "react-native-vector-icons/FontAwesome5";
 import RBSheet from "react-native-raw-bottom-sheet";
 import { useIsFocused } from "@react-navigation/native";
+import Spinner from "react-native-loading-spinner-overlay";
 
 const MyCustomer = ({
     navigation,
@@ -26,10 +27,8 @@ const MyCustomer = ({
     user,
 }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const refRBSheet = useRef();
     const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [data, setData] = useState([]);
-    const [customerId, setCustomerId] = useState();
     const [searchQuery, setSearchQuery] = useState();
     const [filteredData, setFilteredData] = useState([]);
     const isFocused = useIsFocused();
@@ -67,9 +66,7 @@ const MyCustomer = ({
                 setData([...data, ...json.user_list.data]);
                 setFilteredData([...filteredData, ...json.user_list.data]);
                 setIsLoading(false);
-                {
-                    page != 1 && setIsScrollLoading(false);
-                }
+                if(page != 1) setIsScrollLoading(false)
                 {json.user_list.current_page != json.user_list.last_page ? setLoadMoreCustomers(true) : setLoadMoreCustomers(false)}
                 {json.user_list.current_page != json.user_list.last_page ? setPage(page + 1) : null}
             }
@@ -185,7 +182,6 @@ const MyCustomer = ({
                 )}
             </View>
             <View style={styles.surfaceContainer}>
-                {/* {selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name}</Text> } */}
                 {/* Search Bar */}
                 <View>
                     <View style={{ marginBottom: 15, flexDirection: "row" }}>
@@ -248,256 +244,248 @@ const MyCustomer = ({
                         elevation: 2,
                     }}
                 >
-                    {isLoading ? (
-                        <View style={{ flex: 1, justifyContent: "center" }}>
-                            <ActivityIndicator></ActivityIndicator>
-                        </View>
-                    ) : filteredData?.length > 0 ? (
-                        <>
-                            <FlatList
-                                showsVerticalScrollIndicator={false}
-                                ItemSeparatorComponent={() => <Divider />}
-                                data={filteredData}
-                                onEndReached={loadMoreCustomers ? getCustomerList : null}
-                                onEndReachedThreshold={0.5}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={refreshing}
-                                        onRefresh={onRefresh}
-                                        colors={["green"]}
-                                    />
-                                }
-                                ListFooterComponent={loadMoreCustomers ? renderFooter : null}
-                                keyExtractor={(item) => item.id}
-                                renderItem={({ item, index }) => (
-                                    <>
-                                        <List.Item
-                                            title={
+                    {!isLoading &&
+                        <FlatList
+                            showsVerticalScrollIndicator={false}
+                            ItemSeparatorComponent={() => <Divider />}
+                            data={filteredData}
+                            onEndReached={loadMoreCustomers ? getCustomerList : null}
+                            onEndReachedThreshold={0.5}
+                            contentContainerStyle={{ flexGrow: 1 }}
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={refreshing}
+                                    onRefresh={onRefresh}
+                                    colors={["green"]}
+                                />
+                            }
+                            ListFooterComponent={loadMoreCustomers ? renderFooter : null}
+                            ListEmptyComponent={() => (
+                                !isLoading && (
+                                    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                        <Text style={{ color: colors.black }}>
+                                            No customer exist!
+                                        </Text>
+                                    </View>
+                            ))}
+                            keyExtractor={(item) => item.id}
+                            renderItem={({ item, index }) => (
+                                <>
+                                    <List.Item
+                                        title={
+                                            <View
+                                                style={{
+                                                    flexDirection: "column",
+                                                }}
+                                            >
                                                 <View
                                                     style={{
-                                                        flexDirection: "column",
+                                                        flexDirection:
+                                                            "row",
+                                                        display: "flex",
+                                                        flexWrap: "wrap",
+                                                    }}
+                                                >
+                                                    <Text
+                                                        style={{
+                                                            fontSize: 16,
+                                                            color: colors.black,
+                                                        }}
+                                                    >
+                                                        {item.name}
+                                                    </Text>
+                                                    <Text>
+                                                        {" "}
+                                                        ({item.phone_number}
+                                                        )
+                                                    </Text>
+                                                </View>
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                        alignItems:
+                                                            "center",
+                                                        marginVertical: 15,
+                                                        flex: 1,
                                                     }}
                                                 >
                                                     <View
                                                         style={{
-                                                            flexDirection:
-                                                                "row",
-                                                            display: "flex",
-                                                            flexWrap: "wrap",
+                                                            width: 130,
                                                         }}
                                                     >
-                                                        <Text
-                                                            style={{
-                                                                fontSize: 16,
-                                                                color: colors.black,
-                                                            }}
+                                                        <Button
+                                                            onPress={() =>
+                                                                Linking.openURL(
+                                                                    `https://wa.me/${item.phone_number}`
+                                                                )
+                                                            }
+                                                            style={
+                                                                styles.buttonStyle
+                                                            }
+                                                            color={
+                                                                colors.secondary
+                                                            }
+                                                            icon={(
+                                                                color
+                                                            ) => (
+                                                                <Icon
+                                                                    name={
+                                                                        "whatsapp"
+                                                                    }
+                                                                    size={
+                                                                        24
+                                                                    }
+                                                                    color={
+                                                                        colors.secondary
+                                                                    }
+                                                                />
+                                                            )}
+                                                            uppercase={
+                                                                false
+                                                            }
                                                         >
-                                                            {item.name}
-                                                        </Text>
-                                                        <Text>
-                                                            {" "}
-                                                            ({item.phone_number}
-                                                            )
-                                                        </Text>
+                                                            <Text
+                                                                style={{
+                                                                    fontSize: 12,
+                                                                }}
+                                                            >
+                                                                Whatsapp
+                                                            </Text>
+                                                        </Button>
                                                     </View>
                                                     <View
                                                         style={{
-                                                            flexDirection:
-                                                                "row",
-                                                            alignItems:
-                                                                "center",
-                                                            marginVertical: 15,
-                                                            flex: 1,
+                                                            width: 15,
+                                                        }}
+                                                    ></View>
+                                                    <View
+                                                        style={{
+                                                            width: 100,
                                                         }}
                                                     >
-                                                        <View
-                                                            style={{
-                                                                width: 130,
-                                                            }}
+                                                        <Button
+                                                            onPress={() =>
+                                                                Linking.openURL(
+                                                                    `tel:${item.phone_number}`
+                                                                )
+                                                            }
+                                                            style={
+                                                                styles.buttonStyle
+                                                            }
+                                                            color={
+                                                                colors.secondary
+                                                            }
+                                                            icon={(
+                                                                color
+                                                            ) => (
+                                                                <Icon
+                                                                    name={
+                                                                        "phone"
+                                                                    }
+                                                                    size={
+                                                                        24
+                                                                    }
+                                                                    color={
+                                                                        colors.secondary
+                                                                    }
+                                                                />
+                                                            )}
+                                                            uppercase={
+                                                                false
+                                                            }
                                                         >
-                                                            <Button
-                                                                onPress={() =>
-                                                                    Linking.openURL(
-                                                                        `https://wa.me/${item.phone_number}`
-                                                                    )
-                                                                }
-                                                                style={
-                                                                    styles.buttonStyle
-                                                                }
-                                                                color={
-                                                                    colors.secondary
-                                                                }
-                                                                icon={(
-                                                                    color
-                                                                ) => (
-                                                                    <Icon
-                                                                        name={
-                                                                            "whatsapp"
-                                                                        }
-                                                                        size={
-                                                                            24
-                                                                        }
-                                                                        color={
-                                                                            colors.secondary
-                                                                        }
-                                                                    />
-                                                                )}
-                                                                uppercase={
-                                                                    false
-                                                                }
+                                                            <Text
+                                                                style={{
+                                                                    fontSize: 12,
+                                                                }}
                                                             >
-                                                                <Text
-                                                                    style={{
-                                                                        fontSize: 12,
-                                                                    }}
-                                                                >
-                                                                    Whatsapp
-                                                                </Text>
-                                                            </Button>
-                                                        </View>
-                                                        <View
-                                                            style={{
-                                                                width: 15,
-                                                            }}
-                                                        ></View>
-                                                        <View
-                                                            style={{
-                                                                width: 100,
-                                                            }}
-                                                        >
-                                                            <Button
-                                                                onPress={() =>
-                                                                    Linking.openURL(
-                                                                        `tel:${item.phone_number}`
-                                                                    )
-                                                                }
-                                                                style={
-                                                                    styles.buttonStyle
-                                                                }
-                                                                color={
-                                                                    colors.secondary
-                                                                }
-                                                                icon={(
-                                                                    color
-                                                                ) => (
-                                                                    <Icon
-                                                                        name={
-                                                                            "phone"
-                                                                        }
-                                                                        size={
-                                                                            24
-                                                                        }
-                                                                        color={
-                                                                            colors.secondary
-                                                                        }
-                                                                    />
-                                                                )}
-                                                                uppercase={
-                                                                    false
-                                                                }
-                                                            >
-                                                                <Text
-                                                                    style={{
-                                                                        fontSize: 12,
-                                                                    }}
-                                                                >
-                                                                    Call
-                                                                </Text>
-                                                            </Button>
-                                                        </View>
+                                                                Call
+                                                            </Text>
+                                                        </Button>
                                                     </View>
                                                 </View>
-                                            }
-                                            right={() => (
-                                                <Icon
-                                                    onPress={() => {
-                                                        this[
-                                                            RBSheet + index
-                                                        ].open();
-                                                    }}
-                                                    type={
-                                                        "MaterialCommunityIcons"
-                                                    }
-                                                    style={{
-                                                        right: 5,
-                                                        top: 8,
-                                                        position: "absolute",
-                                                    }}
-                                                    name={"dots-vertical"}
-                                                    size={22}
-                                                    color={colors.gray}
-                                                />
-                                            )}
-                                        />
-                                        <RBSheet
-                                            ref={(ref) => {
-                                                this[RBSheet + index] = ref;
-                                            }}
-                                            height={63}
-                                            openDuration={250}
-                                        >
-                                            <View
-                                                style={{
-                                                    flexDirection: "column",
-                                                    flex: 1,
-                                                }}
-                                            >
-                                                <List.Item
-                                                    title="View Customer Details"
-                                                    style={{
-                                                        paddingVertical: 15,
-                                                    }}
-                                                    onPress={() => {
-                                                        navigation.navigate(
-                                                            "CustomerDetails",
-                                                            { userId: item.id }
-                                                        );
-                                                        this[
-                                                            RBSheet + index
-                                                        ].close();
-                                                    }}
-                                                    left={() => (
-                                                        <Icon
-                                                            type={
-                                                                "MaterialCommunityIcons"
-                                                            }
-                                                            name="eye"
-                                                            style={{
-                                                                marginHorizontal: 10,
-                                                                alignSelf:
-                                                                    "center",
-                                                            }}
-                                                            color={colors.black}
-                                                            size={26}
-                                                        />
-                                                    )}
-                                                />
                                             </View>
-                                        </RBSheet>
-                                    </>
-                                )}
-                            />
-                        </>
-                    ) : (
-                        <View
-                            style={{
-                                alignItems: "center",
-                                justifyContent: "center",
-                                marginVertical: 50,
-                                flex: 1,
-                            }}
-                        >
-                            <Text
-                                style={{
-                                    color: colors.black,
-                                    textAlign: "center",
-                                }}
-                            >
-                                No Customers are associated with this Garage!
-                            </Text>
-                        </View>
-                    )}
+                                        }
+                                        right={() => (
+                                            <Icon
+                                                onPress={() => {
+                                                    this[
+                                                        RBSheet + index
+                                                    ].open();
+                                                }}
+                                                type={
+                                                    "MaterialCommunityIcons"
+                                                }
+                                                style={{
+                                                    right: 5,
+                                                    top: 8,
+                                                    position: "absolute",
+                                                }}
+                                                name={"dots-vertical"}
+                                                size={22}
+                                                color={colors.gray}
+                                            />
+                                        )}
+                                    />
+                                    <RBSheet
+                                        ref={(ref) => {
+                                            this[RBSheet + index] = ref;
+                                        }}
+                                        height={63}
+                                        openDuration={250}
+                                    >
+                                        <View
+                                            style={{
+                                                flexDirection: "column",
+                                                flex: 1,
+                                            }}
+                                        >
+                                            <List.Item
+                                                title="View Customer Details"
+                                                style={{
+                                                    paddingVertical: 15,
+                                                }}
+                                                onPress={() => {
+                                                    navigation.navigate(
+                                                        "CustomerDetails",
+                                                        { userId: item.id }
+                                                    );
+                                                    this[
+                                                        RBSheet + index
+                                                    ].close();
+                                                }}
+                                                left={() => (
+                                                    <Icon
+                                                        type={
+                                                            "MaterialCommunityIcons"
+                                                        }
+                                                        name="eye"
+                                                        style={{
+                                                            marginHorizontal: 10,
+                                                            alignSelf:
+                                                                "center",
+                                                        }}
+                                                        color={colors.black}
+                                                        size={26}
+                                                    />
+                                                )}
+                                            />
+                                        </View>
+                                    </RBSheet>
+                                </>
+                            )}
+                        />
+                    }
                 </View>
+                {isLoading &&
+                    <Spinner
+                        visible={isLoading}
+                        color="#377520"
+                        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
+                    />
+                }
             </View>
         </View>
     );
@@ -555,16 +543,6 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         textAlign: "center",
     },
-    // garageNameTitle: {
-    //     borderRadius: 6,
-    //     marginBottom: 15,
-    //     textAlign: 'center',
-    //     fontSize: 18,
-    //     fontWeight: '600',
-    //     color: colors.white,
-    //     paddingVertical: 7,
-    //     backgroundColor: colors.secondary
-    // },
     footer: {
         marginVertical: 15,
     },
@@ -575,8 +553,6 @@ const mapStateToProps = (state) => ({
     selectedGarageId: state.garage.selected_garage_id,
     selectedGarage: state.garage.selected_garage,
     user: state.user.user,
-    // garage: state.garage.garage,
-    // userId: state.user.user.user_data.id,
 });
 
 export default connect(mapStateToProps)(MyCustomer);

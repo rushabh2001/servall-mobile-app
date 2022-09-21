@@ -8,6 +8,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { WebView } from 'react-native-webview';
 import RNFetchBlob from 'rn-fetch-blob';
 import Toast from 'react-native-toast-message';
+import Spinner from "react-native-loading-spinner-overlay";
 
 const InvoicePreview = ({ userToken, route, selectedGarageId, selectedGarage, user  }) => {
     const [isLoading, setIsLoading] = useState(true);
@@ -132,31 +133,30 @@ const InvoicePreview = ({ userToken, route, selectedGarageId, selectedGarage, us
                 { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
             </View>
             <View style={styles.surfaceContainer}>
-                {isLoading ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
-                    <>  
-                        <View style={{ marginHorizontal: 20, flexDirection: 'row' }}>
-                            <Button
-                                style={{ marginBottom:15, flex: 1, borderColor: colors.primary, borderWidth: 1, }}
-                                mode={'outline'}
-                                onPress={historyDownload}
-                            >
-                                Download
-                            </Button>
-                        </View>
-                        <WebView
-                            source={{
-                            uri: `${webViewLink}`
-                            }}
-                            style={{ paddingTop: 20,}}
-                            automaticallyAdjustContentInsets={false}
-                            // useWebKit={true}
-                            // domStorageEnabled={true}
-                            // javaScriptEnabled={false}
-                        />
-                    </>
-                }
+                <View style={{ marginHorizontal: 20, flexDirection: 'row' }}>
+                    <Button
+                        style={{ marginBottom:15, flex: 1, borderColor: colors.primary, borderWidth: 1, }}
+                        mode={'outline'}
+                        onPress={historyDownload}
+                    >
+                        Download
+                    </Button>
+                </View>
+                <WebView
+                    source={{
+                    uri: `${webViewLink}`
+                    }}
+                    style={{ paddingTop: 20,}}
+                    automaticallyAdjustContentInsets={false}
+                />
                 <Toast />
-                {/* <TouchableOpacity onPress={() => loadAndSharePDF()}><Text>Click Me</Text></TouchableOpacity> */}
+                {isLoading &&
+                    <Spinner
+                        visible={isLoading}
+                        color="#377520"
+                        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
+                    />
+                }
             </View>
         </View>
     );

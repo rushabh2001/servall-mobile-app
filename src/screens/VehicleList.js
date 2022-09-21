@@ -17,6 +17,7 @@ import IconX from "react-native-vector-icons/FontAwesome5";
 import moment from "moment";
 import Lightbox from "react-native-lightbox-v2";
 import { API_URL, WEB_URL } from "../constants/config";
+import Spinner from "react-native-loading-spinner-overlay";
 
 const VehicleList = ({
     userToken,
@@ -91,9 +92,7 @@ const VehicleList = ({
                 setData([...data, ...json.vehicle_list.data]);
                 setFilteredData([...filteredData, ...json.vehicle_list.data]);
                 setIsLoading(false);
-                {
-                    page != 1 && setIsScrollLoading(false);
-                }
+                if(page != 1) setIsScrollLoading(false)
                 {json.vehicle_list.current_page != json.vehicle_list.last_page ? setLoadMoreVehicles(true) : setLoadMoreVehicles(false)}
                 {json.vehicle_list.current_page != json.vehicle_list.last_page ? setPage(page + 1) : null}
             }
@@ -125,12 +124,9 @@ const VehicleList = ({
                 setFilteredData(json.vehicle_list.data);
                 {json.vehicle_list.current_page != json.vehicle_list.last_page ? setLoadMoreVehicles(true) : setLoadMoreVehicles(false)}
                 {json.vehicle_list.current_page != json.vehicle_list.last_page ? setPage(2) : null}
-                setRefreshing(false);
-                setIsLoading(false);
-            } else {
-                setRefreshing(false);
-                setIsLoading(false);
             }
+            setRefreshing(false);
+            setIsLoading(false);
         } catch (error) {
             console.error(error);
         }
@@ -257,18 +253,15 @@ const VehicleList = ({
                     </View>
                 </View>
                 <View style={{ flexDirection: "column", flex: 1 }}>
-                    {isLoading ? (
-                        <View style={{ flex: 1, justifyContent: "center" }}>
-                            <ActivityIndicator></ActivityIndicator>
-                        </View>
-                    ) : filteredData.length != 0 ? (
-                        <View>
+                    {!isLoading &&
+                        <>
                             <FlatList
                                 showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent={() => <Divider />}
                                 data={filteredData}
                                 onEndReached={loadMoreVehicles ? getVehicleList : null}
                                 onEndReachedThreshold={0.5}
+                                contentContainerStyle={{ flexGrow: 1 }}
                                 refreshControl={
                                     <RefreshControl
                                         refreshing={refreshing}
@@ -277,6 +270,14 @@ const VehicleList = ({
                                     />
                                 }
                                 ListFooterComponent={loadMoreVehicles ? renderFooter : null}
+                                ListEmptyComponent={() => (
+                                    !isLoading && (
+                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                            <Text style={{ color: colors.black }}>
+                                                No vehicle exist!
+                                            </Text>
+                                        </View>
+                                ))}
                                 keyExtractor={(item) => item.id}
                                 renderItem={({ item }) => (
                                     <View style={styles.cards}>
@@ -377,7 +378,7 @@ const VehicleList = ({
                                             style={{ marginVertical: 30, flex: 1 }}
                                         ></ActivityIndicator>
                                     ) : (
-                                                <ScrollView showsVerticalScrollIndicator={false}>
+                                        <ScrollView showsVerticalScrollIndicator={false}>
                                             <Text
                                                 style={
                                                     styles.cardDetailsHeading
@@ -721,28 +722,16 @@ const VehicleList = ({
                                     </View>
                                 </Modal>
                             </Portal>
-                        </View>
-                    ) : (
-                        <View
-                            style={{
-                                alignItems: "center",
-                                justifyContent: "center",
-                                paddingVertical: 50,
-                                backgroundColor: colors.white,
-                                flex: 1
-                            }}
-                        >
-                            <Text
-                                style={{
-                                    color: colors.black,
-                                    textAlign: "center",
-                                }}
-                            >
-                                No such vehicle found!
-                            </Text>
-                        </View>
-                    )}
+                        </>
+                    }
                 </View>
+                {isLoading &&
+                    <Spinner
+                        visible={isLoading}
+                        color="#377520"
+                        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
+                    />
+                }
             </View>
         </View>
     );

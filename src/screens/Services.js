@@ -6,15 +6,14 @@ import {
     Image,
     TouchableOpacity,
     ScrollView,
-    ActivityIndicator,
 } from "react-native";
-import { useTheme, Badge } from "react-native-paper";
+import { Badge } from "react-native-paper";
 import { colors } from "../constants";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import { connect } from "react-redux";
 import { API_URL } from "../constants/config";
 import { useIsFocused } from "@react-navigation/native";
-import { set } from "react-hook-form";
+import Spinner from "react-native-loading-spinner-overlay";
 
 const Services = ({
     navigation,
@@ -30,12 +29,13 @@ const Services = ({
     const [isPaymentDue, setIsPaymentDue] = useState(0);
     const [isCompletedOrders, setIsCompletedOrders] = useState(0);
     const [isCompletedPaymentOrders, setIsCompletedPaymentOrders] = useState(0);
-    const [isLoadingDashboard, setIsLoadingDashboard] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [duePaymentDashboard, setDuePaymentDashboard] = useState(0);
     const isFocused = useIsFocused();
 
     const getDashboardData = async () => {
-        setIsLoadingDashboard(true);
+        setIsLoading(true);
+        console.log('clicked');
         try {
             const res = await fetch(
                 `${API_URL}fetch_dashboard_data/${selectedGarageId}`,
@@ -67,18 +67,17 @@ const Services = ({
                     otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") +
                     lastThree;
                 setDuePaymentDashboard(finalValue);
+                setIsLoading(false);
                 // setPartList(json.data);
                 // setFilteredPartData(json.data);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            setIsLoadingDashboard(false);
-        }
+        } 
     };
 
     useEffect(() => {
-        if(selectedGarageId || selectedGarageId == 0) getDashboardData()
+        if((selectedGarageId || selectedGarageId == 0) && isFocused) getDashboardData()
         // console.log('selectedGarageId', selectedGarageId);
     }, [selectedGarageId, isFocused]);
 
@@ -96,7 +95,7 @@ const Services = ({
                 )}
             </View>
             <View style={styles.customSurface}>
-                {/* {isLoadingDashboard == true ? <ActivityIndicator></ActivityIndicator> : */}
+                {/* {isLoading == true ? <ActivityIndicator></ActivityIndicator> : */}
                 <ScrollView showsVerticalScrollIndicator={false}>
                     {/* Create Repair Order Card */}
                     <View style={styles.mainCards}>
@@ -458,6 +457,13 @@ const Services = ({
                         </TouchableOpacity>
                     </View>
                 </ScrollView>
+                {isLoading &&
+                    <Spinner
+                        visible={isLoading}
+                        color="#377520"
+                        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
+                    />
+                }
                 {/* } */}
             </View>
         </View>

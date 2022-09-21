@@ -63,16 +63,14 @@ const AddCustomer = ({
     // Vehicle Fields
     const [isVehicleRegistrationNumber, setIsVehicleRegistrationNumber] =
         useState();
-    const [isPurchaseDate, setIsPurchaseDate] = useState(new Date());
-    const [isManufacturingDate, setIsManufacturingDate] = useState(new Date());
+    const [isPurchaseDate, setIsPurchaseDate] = useState();
+    const [isManufacturingDate, setIsManufacturingDate] = useState();
     const [isEngineNumber, setIsEngineNumber] = useState("");
     const [isChasisNumber, setIsChasisNumber] = useState("");
     const [isInsurerGstin, setIsInsurerGstin] = useState("");
     const [isInsurerAddress, setIsInsurerAddress] = useState("");
     const [isPolicyNumber, setIsPolicyNumber] = useState("");
-    const [isInsuranceExpiryDate, setIsInsuranceExpiryDate] = useState(
-        new Date()
-    );
+    const [isInsuranceExpiryDate, setIsInsuranceExpiryDate] = useState();
     const [isRegistrationCertificateImg, setIsRegistrationCertificateImg] =
         useState(null);
     const [isInsuranceImg, setIsInsuranceImg] = useState(null);
@@ -294,7 +292,7 @@ const AddCustomer = ({
     };
 
     const changePurchaseSelectedDate = (event, selectedDate) => {
-        if (selectedDate != null) {
+        if (selectedDate != null && event.type == 'set') {
             let currentDate = selectedDate || datePurchase;
             let formattedDate = moment(currentDate, "YYYY-MM-DD", true).format(
                 "DD-MM-YYYY"
@@ -306,11 +304,13 @@ const AddCustomer = ({
                 'YYYY-MM-DD"T"hh:mm ZZ'
             ).format("YYYY-MM-DD");
             setIsPurchaseDate(new Date(formateDateForDatabase));
+        } else if(event.type == 'dismissed') {
+            setDisplayPurchaseCalender(false);
         }
     };
 
     const changeManufacturingSelectedDate = (event, selectedDate) => {
-        if (selectedDate != null) {
+        if (selectedDate != null && event.type == 'set') {
             let currentDate = selectedDate || dateManufacturing;
             let formattedDate = moment(currentDate, "YYYY-MM-DD", true).format(
                 "DD-MM-YYYY"
@@ -322,11 +322,13 @@ const AddCustomer = ({
                 'YYYY-MM-DD"T"hh:mm ZZ'
             ).format("YYYY-MM-DD");
             setIsManufacturingDate(new Date(formateDateForDatabase));
+        } else if(event.type == 'dismissed') {
+            setDisplayManufacturingCalender(false);
         }
     };
 
     const changeInsuranceExpirySelectedDate = (event, selectedDate) => {
-        if (selectedDate != null) {
+        if (selectedDate != null && event.type == 'set') {
             let currentDate = selectedDate || dateInsuranceExpiry;
             let formattedDate = moment(currentDate, "YYYY-MM-DD", true).format(
                 "DD-MM-YYYY"
@@ -338,6 +340,8 @@ const AddCustomer = ({
                 'YYYY-MM-DD"T"hh:mm ZZ'
             ).format("YYYY-MM-DD");
             setIsInsuranceExpiryDate(new Date(formateDateForDatabase));
+        } else if(event.type == 'dismissed') {
+            setDisplayInsuranceExpiryCalender(false);
         }
     };
 
@@ -965,12 +969,8 @@ const AddCustomer = ({
     };
 
     const getGarageList = async () => {
-        {
-            garagePage == 1 && setIsLoadingGarageList(true);
-        }
-        {
-            garagePage != 1 && setIsGarageScrollLoading(true);
-        }
+    if(garagePage == 1) setIsLoadingGarageList(true)
+        if(garagePage != 1) setIsGarageScrollLoading(true)
         try {
             const res = await fetch(
                 `${API_URL}fetch_owner_garages?page=${garagePage}`,
@@ -997,9 +997,7 @@ const AddCustomer = ({
                     ...json.garage_list.data,
                 ]);
                 setIsLoadingGarageList(false);
-                {
-                    garagePage != 1 && setIsGarageScrollLoading(false);
-                }
+                if(garagePage != 1) setIsGarageScrollLoading(false)
                 {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
                 {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(garagePage + 1) : null}
             }
@@ -1345,83 +1343,67 @@ const AddCustomer = ({
                         ) : null}
 
                         <TouchableOpacity
-                            style={{ flex: 1 }}
+                            style={{ flex: 1, marginTop: 20 }}
                             onPress={() => setDisplayPurchaseCalender(true)}
-                            activeOpacity={1}
                         >
-                            <View
-                                style={styles.datePickerContainer}
-                                pointerEvents="none"
-                            >
-                                <Icon
-                                    style={styles.datePickerIcon}
-                                    name="calendar-month"
-                                    size={24}
-                                    color="#000"
+                            <TextInput
+                                mode="outlined"
+                                label="Purchase Date"
+                                placeholder="Purchase Date"
+                                editable={false}
+                                value={datePurchase}
+                                right={
+                                    <TextInput.Icon name="calendar-month" />
+                                }
+                            />
+                            {displayPurchaseCalender == true && (
+                                <DateTimePicker
+                                    value={
+                                        isPurchaseDate
+                                            ? isPurchaseDate
+                                            : new Date()
+                                    }
+                                    mode="date"
+                                    maximumDate={new Date()}
+                                    onChange={
+                                        changePurchaseSelectedDate
+                                    }
+                                    display="spinner"
                                 />
-                                <TextInput
-                                    mode="outlined"
-                                    label="Purchase Date"
-                                    style={styles.datePickerField}
-                                    placeholder="Purchase Date"
-                                    value={datePurchase}
-                                />
-                                {displayPurchaseCalender == true && (
-                                    <DateTimePicker
-                                        value={
-                                            isPurchaseDate
-                                                ? isPurchaseDate
-                                                : null
-                                        }
-                                        mode="date"
-                                        onChange={
-                                            changePurchaseSelectedDate
-                                        }
-                                        display="spinner"
-                                    />
-                                )}
-                            </View>
+                            )}
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            style={{ flex: 1 }}
+                            style={{ flex: 1, marginTop: 20 }}
                             onPress={() =>
                                 setDisplayManufacturingCalender(true)
                             }
-                            activeOpacity={1}
                         >
-                            <View
-                                style={styles.datePickerContainer}
-                                pointerEvents="none"
-                            >
-                                <Icon
-                                    style={styles.datePickerIcon}
-                                    name="calendar-month"
-                                    size={24}
-                                    color="#000"
+                            <TextInput
+                                mode="outlined"
+                                label="Manufacturing Date"
+                                placeholder="Manufacturing Date"
+                                editable={false}
+                                value={dateManufacturing}
+                                right={
+                                    <TextInput.Icon name="calendar-month" />
+                                }
+                            />
+                            {displayManufacturingCalender == true && (
+                                <DateTimePicker
+                                    value={
+                                        isManufacturingDate
+                                            ? isManufacturingDate
+                                            : new Date()
+                                    }
+                                    mode="date"
+                                    maximumDate={new Date()}
+                                    onChange={
+                                        changeManufacturingSelectedDate
+                                    }
+                                    display="spinner"
                                 />
-                                <TextInput
-                                    mode="outlined"
-                                    label="Manufacturing Date"
-                                    style={styles.datePickerField}
-                                    placeholder="Manufacturing Date"
-                                    value={dateManufacturing}
-                                />
-                                {displayManufacturingCalender == true && (
-                                    <DateTimePicker
-                                        value={
-                                            isManufacturingDate
-                                                ? isManufacturingDate
-                                                : null
-                                        }
-                                        mode="date"
-                                        onChange={
-                                            changeManufacturingSelectedDate
-                                        }
-                                        display="spinner"
-                                    />
-                                )}
-                            </View>
+                            )}
                         </TouchableOpacity>
 
                         <TextInput
@@ -1500,44 +1482,36 @@ const AddCustomer = ({
                         />
 
                         <TouchableOpacity
-                            style={{ flex: 1 }}
+                            style={{ flex: 1, marginTop: 20 }}
                             onPress={() =>
                                 setDisplayInsuranceExpiryCalender(true)
                             }
-                            activeOpacity={1}
                         >
-                            <View
-                                style={styles.datePickerContainer}
-                                pointerEvents="none"
-                            >
-                                <Icon
-                                    style={styles.datePickerIcon}
-                                    name="calendar-month"
-                                    size={24}
-                                    color="#000"
+                            <TextInput
+                                mode="outlined"
+                                label="Insurance Expiry Date"
+                                placeholder="Insurance Expiry Date"
+                                editable={false}
+                                value={dateInsuranceExpiry}
+                                right={
+                                    <TextInput.Icon name="calendar-month" />
+                                }
+                            />
+                            {displayInsuranceExpiryCalender == true && (
+                                <DateTimePicker
+                                    value={
+                                        isInsuranceExpiryDate
+                                            ? isInsuranceExpiryDate
+                                            : new Date()
+                                    }
+                                    mode="date"
+                                    minimumDate={new Date()}
+                                    onChange={
+                                        changeInsuranceExpirySelectedDate
+                                    }
+                                    display="spinner"
                                 />
-                                <TextInput
-                                    mode="outlined"
-                                    label="Insurance Expiry Date"
-                                    style={styles.datePickerField}
-                                    placeholder="Insurance Expiry Date"
-                                    value={dateInsuranceExpiry}
-                                />
-                                {displayInsuranceExpiryCalender == true && (
-                                    <DateTimePicker
-                                        value={
-                                            isInsuranceExpiryDate
-                                                ? isInsuranceExpiryDate
-                                                : null
-                                        }
-                                        mode="date"
-                                        onChange={
-                                            changeInsuranceExpirySelectedDate
-                                        }
-                                        display="spinner"
-                                    />
-                                )}
-                            </View>
+                            )}
                         </TouchableOpacity>
 
                         <View>

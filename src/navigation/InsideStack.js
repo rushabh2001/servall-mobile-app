@@ -1130,56 +1130,6 @@ const InsideCustomerStack = () => {
 
 const InsideStack = ({ navigation }) => {
     return (
-        // <Tab.Navigator
-        //     initialRouteName="ServicesStack"
-        //     screenOptions={{
-        //         tabBarActiveTintColor: colors.default_theme.primary,
-        //         tabBarStyle: { height: 60, marginTop: 0 },
-        //         tabBarItemStyle: { paddingVertical: 7 },
-        //         tabBarLabelStyle: { fontSize: 14 },
-        //         keyboardHidesTabBar: true,
-        //     }}
-        // >
-        //     <Tab.Screen
-        //         name="ServicesStack"
-        //         component={ServicesStack}
-        //         options={{
-        //             tabBarLabel: "Service",
-        //             tabBarIcon: ({ color }) => (
-        //                 <Icon name={"tools"} size={20} color={color} />
-        //             ),
-        //             headerShown: false,
-        //         }}
-        //     />
-        //     <Tab.Screen
-        //         name="PartsStack"
-        //         component={PartsStack}
-        //         options={{
-        //             tabBarLabel: "Parts",
-        //             tabBarIcon: ({ color }) => (
-        //                 <Icon name={"wrench"} size={20} color={color} />
-        //             ),
-        //             headerShown: false,
-        //         }}
-        //     />
-        //     <Tab.Screen
-        //         name="AllStack"
-        //         component={AllStack}
-        //         options={{
-        //             tabBarLabel: "More",
-        //             tabBarIcon: ({ color }) => (
-        //                 <Icon name={"bars"} size={20} color={color} />
-        //             ),
-        //             headerShown: false,
-        //         }}
-        //         listeners={({ navigation }) => ({
-        //             tabPress: (event) => {
-        //                 event.preventDefault();
-        //                 navigation.navigate("AllStack", { screen: "More" });
-        //             },
-        //         })}
-        //     />
-        // </Tab.Navigator>
       <Tab.Navigator
         backBehavior={'initialRoute'}
         screenOptions={{

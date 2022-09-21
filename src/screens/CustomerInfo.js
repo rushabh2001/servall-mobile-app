@@ -513,7 +513,7 @@ const CustomerInfo = ({
                             />
                             {filteredStateData?.length > 0 ? (
                                 <FlatList
-                                        showsVerticalScrollIndicator={false}
+                                    showsVerticalScrollIndicator={false}
                                     ItemSeparatorComponent={() => (
                                         <>
                                             <Divider />

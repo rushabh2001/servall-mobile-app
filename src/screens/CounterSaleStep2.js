@@ -183,7 +183,7 @@ const CounterSaleStep2 = ({
     }
 
     const changeEstimateDeliverySelectedDate = (event, selectedDate) => {
-        if (selectedDate != null) {
+        if (selectedDate != null && event.type == 'set') {
             let currentDate = selectedDate;
             let formattedDate = moment(currentDate, "YYYY MMMM D", true).format(
                 "DD-MM-YYYY"
@@ -193,6 +193,8 @@ const CounterSaleStep2 = ({
             setIsDeliveryDate(formattedDate2);
             setIsDeliveryDate1(formattedDate);
             setDisplayDeliveryTimeClock(true);
+        } else if(event.type == 'dismissed') {
+            setDisplayDeliveryDateCalender(false);
         }
     };
 

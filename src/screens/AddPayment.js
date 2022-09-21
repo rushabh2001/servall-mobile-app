@@ -43,7 +43,7 @@ const AddPayment = ({
         useState("");
     const [paymentMethodError, setPaymentMethodError] = useState("");
 
-    const [isPaymentDate, setIsPaymentDate] = useState(new Date());
+    const [isPaymentDate, setIsPaymentDate] = useState();
     const [paymentDateError, setPaymentDateError] = useState("");
     const [datePayment, setDatePayment] = useState(
         moment(new Date(), "YYYY MMMM D").format("DD-MM-YYYY")
@@ -54,7 +54,7 @@ const AddPayment = ({
     const [isTotal, setIsTotal] = useState(route?.params?.data?.total);
 
     const changePurchaseSelectedDate = (event, selectedDate) => {
-        if (selectedDate != null) {
+        if (selectedDate != null && event.type == 'set') {
             let currentDate = selectedDate || datePayment;
             let formattedDate = moment(currentDate, "YYYY MMMM D").format(
                 "DD-MM-YYYY"
@@ -66,6 +66,8 @@ const AddPayment = ({
                 "YYYY MMMM D"
             ).format("YYYY-MM-DD");
             setIsPaymentDate(new Date(formateDateForDatabase));
+        } else if(event.type == 'dismissed') {
+            setDisplayPaymentCalender(false);
         }
     };
 
@@ -378,42 +380,34 @@ const AddPayment = ({
                             )} */}
 
                             <TouchableOpacity
-                                style={{ flex: 1 }}
+                                style={{ flex: 1, marginTop: 20 }}
                                 onPress={() => setDisplayPaymentCalender(true)}
-                                activeOpacity={1}
                             >
-                                <View
-                                    style={styles.datePickerContainer}
-                                    pointerEvents="none"
-                                >
-                                    <Icon
-                                        style={styles.datePickerIcon}
-                                        name="calendar-month"
-                                        size={24}
-                                        color="#000"
+                                <TextInput
+                                    mode="outlined"
+                                    label="Payment Date"
+                                    placeholder="Payment Date"
+                                    value={datePayment}
+                                    editable={false}
+                                    right={
+                                        <TextInput.Icon name="calendar-month" />
+                                    }
+                                />
+                                {displayPaymentCalender == true && (
+                                    <DateTimePicker
+                                        value={
+                                            isPaymentDate
+                                                ? isPaymentDate
+                                                : new Date()
+                                        }
+                                        mode="date"
+                                        maximumDate={new Date()}
+                                        onChange={
+                                            changePurchaseSelectedDate
+                                        }
+                                        display="spinner"
                                     />
-                                    <TextInput
-                                        mode="outlined"
-                                        label="Payment Date"
-                                        style={styles.datePickerField}
-                                        placeholder="Payment Date"
-                                        value={datePayment}
-                                    />
-                                    {displayPaymentCalender == true && (
-                                        <DateTimePicker
-                                            value={
-                                                isPaymentDate
-                                                    ? isPaymentDate
-                                                    : null
-                                            }
-                                            mode="date"
-                                            onChange={
-                                                changePurchaseSelectedDate
-                                            }
-                                            display="spinner"
-                                        />
-                                    )}
-                                </View>
+                                )}
                             </TouchableOpacity>
                             {paymentDateError?.length > 0 && (
                                 <Text style={styles.errorTextStyle}>

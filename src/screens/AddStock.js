@@ -244,8 +244,6 @@ const AddStock = ({
                 {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
                 {json.data.current_page != json.data.last_page ? setPartPage(2) : null}
                 setPartRefreshing(false);
-            } else {
-                setPartRefreshing(false);
             }
         } catch (error) {
             console.error(error);
@@ -253,12 +251,8 @@ const AddStock = ({
     };
 
     const getPartList = async () => {
-        {
-            partPage == 1 && setIsLoadingPartList(true);
-        }
-        {
-            partPage != 1 && setIsPartScrollLoading(true);
-        }
+        if(partPage == 1) setIsLoadingPartList(true)
+        if(partPage != 1) setIsPartScrollLoading(true)
         try {
             const res = await fetch(`${API_URL}fetch_parts?page=${partPage}`, {
                 method: "POST",
@@ -276,9 +270,7 @@ const AddStock = ({
                 setPartList([...partList, ...json.data.data]);
                 setFilteredPartData([...filteredPartData, ...json.data.data]);
                 setIsLoadingPartList(false);
-                {
-                    partPage != 1 && setIsPartScrollLoading(false);
-                }
+                if(partPage != 1) setIsPartScrollLoading(false)
                 {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
                 {json.data.current_page != json.data.last_page ? setPartPage(partPage + 1) : null}
             }
@@ -334,12 +326,8 @@ const AddStock = ({
     };
 
     const getGarageList = async () => {
-        {
-            garagePage == 1 && setIsLoadingGarageList(true);
-        }
-        {
-            garagePage != 1 && setIsGarageScrollLoading(true);
-        }
+        if(garagePage == 1) setIsLoadingGarageList(true)
+        if(garagePage != 1) setIsGarageScrollLoading(true)
         try {
             const res = await fetch(
                 `${API_URL}fetch_owner_garages?page=${garagePage}`,
@@ -366,9 +354,7 @@ const AddStock = ({
                     ...json.garage_list.data,
                 ]);
                 setIsLoadingGarageList(false);
-                {
-                    garagePage != 1 && setIsGarageScrollLoading(false);
-                }
+                if(garagePage != 1) setIsGarageScrollLoading(false)
                 {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
                 {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(garagePage + 1) : null}
             }
