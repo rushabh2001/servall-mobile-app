@@ -36,12 +36,8 @@ const ChooseGarage = ({
     const [loadMoreGarages, setLoadMoreGarages] = useState(true);
 
     const getGarageList = async () => {
-        {
-            page == 1 && setIsLoading(true);
-        }
-        {
-            page != 1 && setIsScrollLoading(true);
-        }
+        if(page == 1) setIsLoading(true)
+        if(page != 1) setIsScrollLoading(true)
         try {
             const res = await fetch(
                 `${API_URL}fetch_owner_garages?page=${page}`,
@@ -63,12 +59,8 @@ const ChooseGarage = ({
             console.log("fetch_owner_garages", json);
             if (json !== undefined) {
                 setData([...data, ...json.garage_list.data]);
-                {
-                    page == 1 ? setIsLoading(false) : null
-                }
-                {
-                    page != 1 ? setIsScrollLoading(false) : null
-                }
+                if(page == 1) setIsLoading(false)
+                if(page != 1) setIsScrollLoading(false)
                 {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
                 {json.garage_list.current_page != json.garage_list.last_page ? setPage(page + 1) : null}
             }
@@ -99,15 +91,11 @@ const ChooseGarage = ({
                 {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
                 {json.garage_list.current_page != json.garage_list.last_page ? setPage(2) : null}
                 setRefreshing(false);
-            } else {
-                // console.log('2', response.status);
-                setRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             // if (error?.message == 'Unauthenticated.') signOut();
             console.error(error);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -130,12 +118,14 @@ const ChooseGarage = ({
 
     useEffect(() => {
         setIsLoading(true);
-        if (isFocused) {
-            setData([]);
-            pullRefresh();
-        } else {
-            setData([]);
-        }
+        pullRefresh();
+
+        // if (isFocused) {
+        //     setData([]);
+        // pullRefresh();
+        // } else {
+        //     setData([]);
+        // }
     }, [isFocused]);
 
     return (

@@ -95,14 +95,13 @@ const OpenOrderList = ({
                 setFilteredData(json.data.data);
                 {json.data.current_page != json.data.last_page ? setLoadMoreOrders(true) : setLoadMoreOrders(false)}
                 {json.data.current_page != json.data.last_page ? setPage(2) : null}
-                setRefreshing(false);
-            } else {
+                setIsLoading(false);
                 setRefreshing(false);
             }
         } catch (error) {
             console.error(error);
         }
-        setIsLoading(false);
+       
     };
 
     useEffect(() => {
@@ -138,12 +137,11 @@ const OpenOrderList = ({
                 setFilteredData(json.data.data);
                 {json.data.current_page != json.data.last_page ? setLoadMoreOrders(true) : setLoadMoreOrders(false)}
                 {json.data.current_page != json.data.last_page ? setPage(2) : null}
+                setRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
-        } finally {
-            setRefreshing(false);
-            setIsLoading(false);
         }
     };
 

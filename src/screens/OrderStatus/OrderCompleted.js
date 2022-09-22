@@ -29,55 +29,55 @@ const OrderCompleted = ({ navigation, userRole, route, userToken, selectedGarage
 
     const [isLoading, setIsLoading] = useState(false);
 
-    const changeOrderStatus = async () => {
-        setIsLoading(true);
+    // const changeOrderStatus = async () => {
+    //     setIsLoading(true);
 
-        // Data to call API 
-        let orderServicesArray = [];
-        let orderPartsArray = [];
-        serviceData.forEach(item => {
-            orderServicesArray.push({ order_service_id: item.id, is_done: item.is_done });
-        });
-        partData.forEach(item => {
-            orderPartsArray.push({ order_part_id: item.id, is_done: item.is_done });
-        });
+    //     // Data to call API 
+    //     let orderServicesArray = [];
+    //     let orderPartsArray = [];
+    //     serviceData.forEach(item => {
+    //         orderServicesArray.push({ order_service_id: item.id, is_done: item.is_done });
+    //     });
+    //     partData.forEach(item => {
+    //         orderPartsArray.push({ order_part_id: item.id, is_done: item.is_done });
+    //     });
 
-        // Data to send for next screen 
-        isOrderData.parts_list = partData;
-        isOrderData.services_list = serviceData;
+    //     // Data to send for next screen 
+    //     isOrderData.parts_list = partData;
+    //     isOrderData.services_list = serviceData;
 
-        try {
-            const res = await fetch(`${API_URL}order_status/update`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + userToken
-                },
-                body: JSON.stringify({
-                    order_id: isOrderId,
-                    order_service: orderServicesArray,
-                    order_part: orderPartsArray,
-                }),
-            });
-            const json = await res.json();
-            if (json !== undefined) {
-                setIsLoading(false);
-                // console.log(json);
-                if (json.order_status == "Vehicle Received") {
-                    navigation.navigate('OrderCreated', {'data': isOrderData});
-                } else if(json.order_status == "Work in Progress Order") {
-                    navigation.navigate('OrderWorkInProgress', {'data': isOrderData});
-                } else if(json.order_status == "Vehicle Ready") {
-                    navigation.navigate('OrderVehicleReady', {'data': isOrderData});
-                } else if(json.order_status == "Completed Order") {
-                    // navigation.navigate('OrderCompleted', {'data': isOrderData});
-                }
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    }
+    //     try {
+    //         const res = await fetch(`${API_URL}order_status/update`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Accept': 'application/json',
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': 'Bearer ' + userToken
+    //             },
+    //             body: JSON.stringify({
+    //                 order_id: isOrderId,
+    //                 order_service: orderServicesArray,
+    //                 order_part: orderPartsArray,
+    //             }),
+    //         });
+    //         const json = await res.json();
+    //         if (json !== undefined) {
+    //             setIsLoading(false);
+    //             // console.log(json);
+    //             if (json.order_status == "Vehicle Received") {
+    //                 navigation.navigate('OrderCreated', {'data': isOrderData});
+    //             } else if(json.order_status == "Work in Progress Order") {
+    //                 navigation.navigate('OrderWorkInProgress', {'data': isOrderData});
+    //             } else if(json.order_status == "Vehicle Ready") {
+    //                 navigation.navigate('OrderVehicleReady', {'data': isOrderData});
+    //             } else if(json.order_status == "Completed Order") {
+    //                 // navigation.navigate('OrderCompleted', {'data': isOrderData});
+    //             }
+    //         }
+    //     } catch (e) {
+    //         console.log(e);
+    //     }
+    // }
 
     useEffect(() => {
         setServiceData(route?.params?.data?.services_list);

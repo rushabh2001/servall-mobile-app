@@ -26,8 +26,8 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import IconX from "react-native-vector-icons/FontAwesome5";
 import InputScrollView from "react-native-input-scroll-view";
 import DocumentPicker from "react-native-document-picker";
-import { Picker } from "@react-native-picker/picker";
 import RadioForm from "react-native-simple-radio-button";
+import Spinner from "react-native-loading-spinner-overlay";
 
 const AddGarage = ({
     navigation,
@@ -54,7 +54,6 @@ const AddGarage = ({
     const [isEmail, setIsEmail] = useState("");
     const [isPhoneNumber, setIsPhoneNumber] = useState("");
     const [isAddress, setIsAddress] = useState("");
-    const [isProfileImage, setIsProfileImage] = useState(null);
     const [imageFile, setImageFile] = useState(null);
 
     // Error States
@@ -68,11 +67,7 @@ const AddGarage = ({
     const [cityFieldToggle, setCityFieldToggle] = useState(false);
 
     // States for Dropdown
-    // const [isUser, setIsUser] = useState('');
-    // const [isName, setIsName] = useState("");
-    // const [userList, setAdminList] = useState([]);
     const [userListModal, setUserListModal] = useState(false);
-    const [isLoadingUserList, setIsLoadingUserList] = useState(false);
     const [filteredUserData, setFilteredUserData] = useState([]);
     const [searchQueryForUsers, setSearchQueryForUsers] = useState();
     const [userError, setUserError] = useState("");
@@ -87,7 +82,6 @@ const AddGarage = ({
     const [isStateName, setIsStateName] = useState("");
     const [stateList, setStateList] = useState([]);
     const [stateListModal, setStateListModal] = useState(false);
-    const [isLoadingStateList, setIsLoadingStateList] = useState(false);
     const [filteredStateData, setFilteredStateData] = useState([]);
     const [searchQueryForStates, setSearchQueryForStates] = useState();
     const [stateError, setStateError] = useState();
@@ -97,7 +91,6 @@ const AddGarage = ({
     const [isCityName, setIsCityName] = useState("");
     const [cityList, setCityList] = useState([]);
     const [cityListModal, setCityListModal] = useState(false);
-    const [isLoadingCityList, setIsLoadingCityList] = useState(false);
     const [filteredCityData, setFilteredCityData] = useState([]);
     const [searchQueryForCity, setSearchQueryForCity] = useState();
     const [cityError, setCityError] = useState();
@@ -238,12 +231,9 @@ const AddGarage = ({
     const searchFilterForStates = (text) => {
         if (text) {
             let newData = stateList.filter(function (listData) {
-                // let arr2 = listData.phone_number ? listData.phone_number : ''.toUpperCase()
                 let itemData = listData.name
                     ? listData.name.toUpperCase()
                     : "".toUpperCase();
-                // let itemData = arr1.concat(arr2);
-                // console.log(itemData);
                 let textData = text.toUpperCase();
                 return itemData.indexOf(textData) > -1;
             });
@@ -256,7 +246,7 @@ const AddGarage = ({
     };
 
     const getStateList = async () => {
-        setIsLoadingStateList(true);
+        setIsLoading(true);
         try {
             const res = await fetch(`${API_URL}fetch_states`, {
                 method: "GET",
@@ -272,13 +262,11 @@ const AddGarage = ({
                 // console.log('setStateList', json.data);
                 setStateList(json.states);
                 setFilteredStateData(json.states);
+                setIsLoading(false);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            // setIsLoading2(false);
-            setIsLoadingStateList(false);
-        }
+        } 
     };
 
     // City Functionalities
@@ -300,7 +288,7 @@ const AddGarage = ({
     };
 
     const getCityList = async () => {
-        setIsLoadingCityList(true);
+        setIsLoading(true);
         try {
             const res = await fetch(
                 `${API_URL}fetch_cities?state_id=${isState}`,
@@ -318,16 +306,15 @@ const AddGarage = ({
                 setCityList(json.cities);
                 setFilteredCityData(json.cities);
                 setCityFieldToggle(true);
+                setIsLoading(false);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            setIsLoadingCityList(false);
         }
     };
 
     const getAdminList = async () => {
-        if(userPage == 1) setIsLoadingUserList(true)
+        if(userPage == 1) setIsLoading(true)
         if(userPage != 1) setIsUserScrollLoading(true)
         try {
             const res = await fetch(
@@ -351,7 +338,7 @@ const AddGarage = ({
                     ...filteredUserData,
                     ...json.admin_user_list.data,
                 ]);
-                setIsLoadingUserList(false);
+                setIsLoading(false);
                 if(userPage != 1) setIsUserScrollLoading(false)
                 {json.admin_user_list.current_page != json.admin_user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
                 {json.admin_user_list.current_page != json.admin_user_list.last_page ? setUserPage(userPage + 1) : null}
@@ -362,6 +349,7 @@ const AddGarage = ({
     };
 
     const searchFilterForUsers = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_admin_list`, {
                 method: "POST",
@@ -380,6 +368,7 @@ const AddGarage = ({
                 setFilteredUserData(json.admin_user_list.data);
                 {json.admin_user_list.current_page != json.admin_user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
                 {json.admin_user_list.current_page != json.admin_user_list.last_page ? setUserPage(2) : null}
+                setIsLoading(false);
                 setUserRefreshing(false);
             }
         } catch (error) {
@@ -407,7 +396,7 @@ const AddGarage = ({
                 setFilteredUserData(json.admin_user_list.data);
                 {json.admin_user_list.current_page != json.admin_user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
                 {json.admin_user_list.current_page != json.admin_user_list.last_page ? setUserPage(2) : null}
-                setIsLoadingUserList(false);
+                setIsLoading(false);
                 setUserRefreshing(false);
             }
         } catch (error) {
@@ -530,7 +519,6 @@ const AddGarage = ({
 
                         <View style={{marginTop: 20}}>
                             <TouchableOpacity
-                                style={styles.stateDropDownField}
                                 onPress={() => {
                                     setStateListModal(true);
                                 }}
@@ -617,30 +605,10 @@ const AddGarage = ({
                                 labelStyle={{ marginRight: 40 }}
                             />
                         </View>
-                        {/* <View style={{borderWidth:1, borderColor: colors.light_gray, borderRadius: 5, marginTop: 10}}>
-                            <Picker
-                                selectedValue={ownerId}
-                                onValueChange={(value) => setOwnerId(value)}
-                                style={{padding: 0}}
-                                itemStyle={{padding: 0}}
-                            >
-                                <Picker.Item label="Select Admin User" value="0" />
-                                {adminList.map((List, i) => {
-                                    return (
-                                        <Picker.Item
-                                            key={i}
-                                            label={List.name}
-                                            value={List.id}
-                                        />
-                                    );
-                                })} 
-                            </Picker>
-                        </View> */}
 
                         {ownerOption == "existing_user" ? (
                             <View style={{marginTop: 20}}>
                                 <TouchableOpacity
-                                    style={styles.userDropDownField}
                                     onPress={() => {
                                         setUserListModal(true);
                                     }}
@@ -831,159 +799,136 @@ const AddGarage = ({
                             searchFilterForUsers();
                         }}
                     />
-                    {isLoadingUserList == true ? (
-                        <View style={{ flex: 1, justifyContent: "center" }}>
-                            <ActivityIndicator></ActivityIndicator>
-                        </View>
-                    ) : (
-                        <View
-                            style={{ marginTop: 20, marginBottom: 10, flex: 1 }}
-                        >
-                            <View>
-                                <View
-                                    style={{
-                                        marginBottom: 15,
-                                        flexDirection: "row",
-                                    }}
-                                >
-                                    <TextInput
-                                        mode={"flat"}
-                                        placeholder="Search here..."
-                                        onChangeText={(text) =>
-                                            setSearchQueryForUsers(text)
-                                        }
-                                        value={searchQueryForUsers}
-                                        activeUnderlineColor={
-                                            colors.transparent
-                                        }
-                                        selectionColor="black"
-                                        underlineColor={colors.transparent}
-                                        style={{
-                                            elevation: 4,
-                                            height: 50,
-                                            backgroundColor: colors.white,
-                                            flex: 1,
-                                            borderTopRightRadius: 0,
-                                            borderBottomRightRadius: 0,
-                                            borderTopLeftRadius: 5,
-                                            borderBottomLeftRadius: 5,
-                                        }}
-                                        right={
-                                            searchQueryForUsers != null &&
-                                            searchQueryForUsers != "" && (
-                                                <TextInput.Icon
-                                                    icon="close"
-                                                    color={colors.light_gray}
-                                                    onPress={() =>
-                                                        onUserRefresh()
-                                                    }
-                                                />
-                                            )
-                                        }
-                                    />
-                                    <TouchableOpacity
-                                        onPress={() => searchFilterForUsers()}
-                                        style={{
-                                            elevation: 4,
-                                            borderTopRightRadius: 5,
-                                            borderBottomRightRadius: 5,
-                                            paddingRight: 25,
-                                            paddingLeft: 25,
-                                            zIndex: 2,
-                                            backgroundColor: colors.primary,
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                        }}
-                                    >
-                                        <IconX
-                                            name={"search"}
-                                            size={17}
-                                            color={colors.white}
-                                        />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                            {filteredUserData?.length > 0 ? (
-                                <FlatList
-                                    showsVerticalScrollIndicator={false}
-                                    ItemSeparatorComponent={() => (
-                                        <>
-                                            <Divider />
-                                            <Divider />
-                                        </>
-                                    )}
-                                    data={filteredUserData}
-                                    onEndReached={loadMoreUsers ? getAdminList : null}
-                                    onEndReachedThreshold={0.5}
-                                    refreshControl={
-                                        <RefreshControl
-                                            refreshing={userRefreshing}
-                                            onRefresh={onUserRefresh}
-                                            colors={["green"]}
-                                        />
+                    <View
+                        style={{ marginTop: 20, marginBottom: 10, flex: 1 }}
+                    >
+                        <View>
+                            <View
+                                style={{
+                                    marginBottom: 15,
+                                    flexDirection: "row",
+                                }}
+                            >
+                                <TextInput
+                                    mode={"flat"}
+                                    placeholder="Search here..."
+                                    onChangeText={(text) =>
+                                        setSearchQueryForUsers(text)
                                     }
-                                    ListFooterComponent={loadMoreUsers ? renderUserFooter : null}
+                                    value={searchQueryForUsers}
+                                    activeUnderlineColor={
+                                        colors.transparent
+                                    }
+                                    selectionColor="black"
+                                    underlineColor={colors.transparent}
                                     style={{
-                                        borderColor: "#0000000a",
-                                        borderWidth: 1,
+                                        elevation: 4,
+                                        height: 50,
+                                        backgroundColor: colors.white,
                                         flex: 1,
+                                        borderTopRightRadius: 0,
+                                        borderBottomRightRadius: 0,
+                                        borderTopLeftRadius: 5,
+                                        borderBottomLeftRadius: 5,
                                     }}
-                                    keyExtractor={(item) => item.id}
-                                    renderItem={({ item }) => (
-                                        <>
-                                            <List.Item
-                                                title={
-                                                    // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setUserListModal(false);  setAddUserModal(true); }}>
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                            display: "flex",
-                                                            flexWrap: "wrap",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={{
-                                                                fontSize: 16,
-                                                                color: colors.black,
-                                                            }}
-                                                        >
-                                                            {item.name}
-                                                        </Text>
-                                                    </View>
-                                                    // </TouchableOpacity>
+                                    right={
+                                        searchQueryForUsers != null &&
+                                        searchQueryForUsers != "" && (
+                                            <TextInput.Icon
+                                                icon="close"
+                                                color={colors.light_gray}
+                                                onPress={() =>
+                                                    onUserRefresh()
                                                 }
-                                                onPress={() => {
-                                                    setIsName(item.name);
-                                                    setOwnerId(item.id);
-                                                    setUserError("");
-                                                    setUserListModal(false);
-                                                }}
                                             />
-                                        </>
-                                    )}
+                                        )
+                                    }
                                 />
-                            ) : (
-                                <View
+                                <TouchableOpacity
+                                    onPress={() => searchFilterForUsers()}
                                     style={{
-                                        alignItems: "center",
+                                        elevation: 4,
+                                        borderTopRightRadius: 5,
+                                        borderBottomRightRadius: 5,
+                                        paddingRight: 25,
+                                        paddingLeft: 25,
+                                        zIndex: 2,
+                                        backgroundColor: colors.primary,
                                         justifyContent: "center",
-                                        marginVertical: 50,
-                                        flex: 1,
+                                        alignItems: "center",
                                     }}
                                 >
-                                    <Text
-                                        style={{
-                                            color: colors.black,
-                                            textAlign: "center",
-                                        }}
-                                    >
-                                        No such user is associated!
-                                    </Text>
-                                </View>
-                            )}
+                                    <IconX
+                                        name={"search"}
+                                        size={17}
+                                        color={colors.white}
+                                    />
+                                </TouchableOpacity>
+                            </View>
                         </View>
-                    )}
+                        <FlatList
+                            showsVerticalScrollIndicator={false}
+                            ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                            data={filteredUserData}
+                            onEndReached={loadMoreUsers ? getAdminList : null}
+                            onEndReachedThreshold={0.5}
+                            contentContainerStyle={{ flexGrow: 1 }}
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={userRefreshing}
+                                    onRefresh={onUserRefresh}
+                                    colors={["green"]}
+                                />
+                            }
+                            ListFooterComponent={loadMoreUsers ? renderUserFooter : null}
+                            ListEmptyComponent={() => (
+                                !isLoading && (
+                                    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                        <Text style={{ color: colors.black }}>
+                                            No user found!
+                                        </Text>
+                                    </View>
+                            ))}
+                            style={{
+                                borderColor: "#0000000a",
+                                borderWidth: 1,
+                                flex: 1,
+                            }}
+                            keyExtractor={(item) => item.id}
+                            renderItem={({ item }) => (
+                                !isLoading &&
+                                    <List.Item
+                                        title={
+                                            // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setUserListModal(false);  setAddUserModal(true); }}>
+                                            <View
+                                                style={{
+                                                    flexDirection:
+                                                        "row",
+                                                    display: "flex",
+                                                    flexWrap: "wrap",
+                                                }}
+                                            >
+                                                <Text
+                                                    style={{
+                                                        fontSize: 16,
+                                                        color: colors.black,
+                                                    }}
+                                                >
+                                                    {item.name}
+                                                </Text>
+                                            </View>
+                                            // </TouchableOpacity>
+                                        }
+                                        onPress={() => {
+                                            setIsName(item.name);
+                                            setOwnerId(item.id);
+                                            setUserError("");
+                                            setUserListModal(false);
+                                        }}
+                                    />
+                            )}
+                        />
+                    </View>
                 </Modal>
 
                 {/* States List Modal */}
@@ -1029,91 +974,70 @@ const AddGarage = ({
                             setCityFieldToggle(false);
                         }}
                     />
-                    {isLoadingStateList == true ? (
-                        <View style={{ flex: 1, justifyContent: "center" }}>
-                            <ActivityIndicator></ActivityIndicator>
-                        </View>
-                    ) : (
-                        <View
-                            style={{ marginTop: 20, marginBottom: 10, flex: 1 }}
-                        >
-                            <Searchbar
-                                placeholder="Search here..."
-                                onChangeText={(text) => {
-                                    if (text != null)
-                                        searchFilterForStates(text);
-                                }}
-                                value={searchQueryForStates}
-                                elevation={0}
-                                style={{ elevation: 0.8, marginBottom: 10 }}
-                            />
-                            {filteredStateData?.length > 0 ? (
-                                <FlatList
-                                        showsVerticalScrollIndicator={false}
-                                    ItemSeparatorComponent={() => (
-                                        <>
-                                            <Divider />
-                                            <Divider />
-                                        </>
-                                    )}
-                                    data={filteredStateData}
-                                    // onEndReachedThreshold={1}
-                                    style={{
-                                        borderColor: "#0000000a",
-                                        borderWidth: 1,
-                                        flex: 1,
-                                    }}
-                                    keyExtractor={(item) => item.id}
-                                    renderItem={({ item }) => (
-                                        <List.Item
-                                            title={
-                                                <View
+                    <View
+                        style={{ marginTop: 20, marginBottom: 10, flex: 1 }}
+                    >
+                        <Searchbar
+                            placeholder="Search here..."
+                            onChangeText={(text) => {
+                                if (text != null)
+                                    searchFilterForStates(text);
+                            }}
+                            value={searchQueryForStates}
+                            elevation={0}
+                            style={{ elevation: 0.8, marginBottom: 10 }}
+                        />
+                        <FlatList
+                            showsVerticalScrollIndicator={false}
+                            ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                            data={filteredStateData}
+                            contentContainerStyle={{ flexGrow: 1 }}
+                            // onEndReachedThreshold={1}
+                            style={{
+                                borderColor: "#0000000a",
+                                borderWidth: 1,
+                                flex: 1,
+                            }}
+                            ListEmptyComponent={() => (
+                                !isLoading && (
+                                    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                        <Text style={{ color: colors.black }}>
+                                            No state found!
+                                        </Text>
+                                    </View>
+                            ))}
+                            keyExtractor={(item) => item.id}
+                            renderItem={({ item }) => (
+                                !isLoading && 
+                                    <List.Item
+                                        title={
+                                            <View
+                                                style={{
+                                                    flexDirection: "row",
+                                                    display: "flex",
+                                                    flexWrap: "wrap",
+                                                }}
+                                            >
+                                                <Text
                                                     style={{
-                                                        flexDirection: "row",
-                                                        display: "flex",
-                                                        flexWrap: "wrap",
+                                                        fontSize: 16,
+                                                        color: colors.black,
                                                     }}
                                                 >
-                                                    <Text
-                                                        style={{
-                                                            fontSize: 16,
-                                                            color: colors.black,
-                                                        }}
-                                                    >
-                                                        {item.name}
-                                                    </Text>
-                                                </View>
-                                            }
-                                            onPress={() => {
-                                                setIsStateName(item.name);
-                                                setIsState(item.id);
-                                                setStateError("");
-                                                setStateListModal(false);
-                                            }}
-                                        />
-                                    )}
-                                />
-                            ) : (
-                                <View
-                                    style={{
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        marginVertical: 50,
-                                        flex: 1,
-                                    }}
-                                >
-                                    <Text
-                                        style={{
-                                            color: colors.black,
-                                            textAlign: "center",
+                                                    {item.name}
+                                                </Text>
+                                            </View>
+                                        }
+                                        onPress={() => {
+                                            setIsStateName(item.name);
+                                            setIsState(item.id);
+                                            setStateError("");
+                                            setStateListModal(false);
                                         }}
-                                    >
-                                        No such state is associated!
-                                    </Text>
-                                </View>
+                                    />
                             )}
-                        </View>
-                    )}
+                        />
+                    </View>
                 </Modal>
 
                 {/* City List Modal */}
@@ -1153,93 +1077,69 @@ const AddGarage = ({
                             searchFilterForCity();
                         }}
                     />
-                    {isLoadingCityList == true ? (
-                        <View style={{ flex: 1, justifyContent: "center" }}>
-                            <ActivityIndicator></ActivityIndicator>
-                        </View>
-                    ) : (
-                        <View
-                            style={{ marginTop: 20, marginBottom: 10, flex: 1 }}
-                        >
-                            <Searchbar
-                                placeholder="Search here..."
-                                onChangeText={(text) => {
-                                    if (text != null) searchFilterForCity(text);
-                                }}
-                                value={searchQueryForCity}
-                                elevation={0}
-                                style={{ elevation: 0.8, marginBottom: 10 }}
-                            />
-                            {filteredCityData?.length > 0 ? (
-                                <FlatList
-                                        showsVerticalScrollIndicator={false}
-                                    ItemSeparatorComponent={() => (
-                                        <>
-                                            <Divider />
-                                            <Divider />
-                                        </>
-                                    )}
-                                    data={filteredCityData}
-                                    // onEndReachedThreshold={1}
-                                    style={{
-                                        borderColor: "#0000000a",
-                                        borderWidth: 1,
-                                        flex: 1,
-                                    }}
-                                    keyExtractor={(item) => item.id}
-                                    renderItem={({ item }) => (
-                                        <>
-                                            <List.Item
-                                                title={
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                            display: "flex",
-                                                            flexWrap: "wrap",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={{
-                                                                fontSize: 16,
-                                                                color: colors.black,
-                                                            }}
-                                                        >
-                                                            {item.name}
-                                                        </Text>
-                                                    </View>
-                                                }
-                                                onPress={() => {
-                                                    setIsCityName(item.name);
-                                                    setIsCity(item.id);
-                                                    setCityError("");
-                                                    setCityListModal(false);
+                    <View
+                        style={{ marginTop: 20, marginBottom: 10, flex: 1 }}
+                    >
+                        <Searchbar
+                            placeholder="Search here..."
+                            onChangeText={(text) => {
+                                if (text != null) searchFilterForCity(text);
+                            }}
+                            value={searchQueryForCity}
+                            elevation={0}
+                            style={{ elevation: 0.8, marginBottom: 10 }}
+                        />
+                        <FlatList
+                            showsVerticalScrollIndicator={false}
+                            ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                            data={filteredCityData}
+                            contentContainerStyle={{ flexGrow: 1 }}
+                            style={{
+                                borderColor: "#0000000a",
+                                borderWidth: 1,
+                                flex: 1,
+                            }}
+                            keyExtractor={(item) => item.id}
+                            ListEmptyComponent={() => (
+                                !isLoading && (
+                                    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                        <Text style={{ color: colors.black }}>
+                                            No city found!
+                                        </Text>
+                                    </View>
+                            ))}
+                            renderItem={({ item }) => (
+                                !isLoading && 
+                                    <List.Item
+                                        title={
+                                            <View
+                                                style={{
+                                                    flexDirection:
+                                                        "row",
+                                                    display: "flex",
+                                                    flexWrap: "wrap",
                                                 }}
-                                            />
-                                        </>
-                                    )}
-                                />
-                            ) : (
-                                <View
-                                    style={{
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        marginVertical: 50,
-                                        flex: 1,
-                                    }}
-                                >
-                                    <Text
-                                        style={{
-                                            color: colors.black,
-                                            textAlign: "center",
+                                            >
+                                                <Text
+                                                    style={{
+                                                        fontSize: 16,
+                                                        color: colors.black,
+                                                    }}
+                                                >
+                                                    {item.name}
+                                                </Text>
+                                            </View>
+                                        }
+                                        onPress={() => {
+                                            setIsCityName(item.name);
+                                            setIsCity(item.id);
+                                            setCityError("");
+                                            setCityListModal(false);
                                         }}
-                                    >
-                                        No such city is associated!
-                                    </Text>
-                                </View>
+                                    />
                             )}
-                        </View>
-                    )}
+                        />
+                    </View>
                 </Modal>
             </Portal>
             {isLoading &&

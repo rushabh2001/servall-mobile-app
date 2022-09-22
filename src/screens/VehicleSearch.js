@@ -66,12 +66,8 @@ const VehicleSearch = ({
     };
 
     const getVehicleList = async () => {
-        {
-            page == 1 && setIsLoading(true);
-        }
-        {
-            page != 1 && setIsScrollLoading(true);
-        }
+        if(page == 1) setIsLoading(true)
+        if(page != 1) setIsScrollLoading(true)
         try {
             const res = await fetch(
                 `${API_URL}fetch_all_vehicle_by_query/${isGarageId}?page=${page}`,

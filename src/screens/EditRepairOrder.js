@@ -153,14 +153,12 @@ const EditRepairOrder = ({
     const [fieldsParts, setFieldsParts] = useState([]);
 
     const [partListModal, setPartListModal] = useState(false);
-    const [isLoadingPartList, setIsLoadingPartList] = useState(true);
     const [filteredPartData, setFilteredPartData] = useState([]);
     const [searchQueryForParts, setSearchQueryForParts] = useState();
 
     const [searchQueryForServices, setSearchQueryForServices] = useState();
     const [filteredServiceData, setFilteredServiceData] = useState([]);
     const [serviceListModal, setServiceListModal] = useState(false);
-    const [isLoadingServiceList, setIsLoadingServiceList] = useState(true);
 
     const [partPage, setPartPage] = useState(1);
     const [isPartScrollLoading, setIsPartScrollLoading] = useState(false);
@@ -397,6 +395,8 @@ const EditRepairOrder = ({
         return !(
             !isOrderStatus ||
             isOrderStatus === 0 ||
+            !isOdometerKMs ||
+            isOdometerKMs?.trim().length === 0 ||
             (!fieldsServices && !fieldsParts) ||
             (fieldsServices.length === 0 && fieldsParts.length === 0) ||
             !estimatedDeliveryDateTime ||
@@ -422,6 +422,9 @@ const EditRepairOrder = ({
                 (!fieldsParts &&
                 !fieldsServices) || (fieldsServices.length === 0 && fieldsParts.length === 0)
             )
+            if (!isOdometerKMs)
+                setOdometerKMsError("Odometer Kilometer is required");
+            else setOdometerKMsError("");
             alert("Minimum 1 service or part should be added in order!");
             return;
         }
@@ -444,9 +447,10 @@ const EditRepairOrder = ({
         data.append("labor_total", parseInt(servicesTotal));
         data.append("parts_total", parseInt(partsTotal));
         data.append("discount", parseInt(isApplicableDiscount));
-        if (isVehicleImg != null) data.append("orderimage", isVehicleImg);
+        data.append("status", isOrderStatus);
+        // if(isVehicleImg != null) data.append("orderimage", isVehicleImg);
         data.append("total", parseInt(isTotal));
-        data.append("comment", isComment?.trim());
+        if(isComment) data.append("comment", isComment?.trim());
 
         editOrder(data);
         // console.log(JSON.stringify(data));
@@ -485,7 +489,15 @@ const EditRepairOrder = ({
                         return;
                     } else if (res.statusCode == 201 || res.statusCode == 200) {
                         navigation.popToTop();
-                        navigation.navigate("OpenOrderList");
+                        if (isOrderStatus =="Vehicle Received") {
+                            navigation.navigate("OpenOrderList");
+                        } else if (isOrderStatus == "Work in Progress Order") {
+                            navigation.navigate("WIPOrderList");
+                        } else if (isOrderStatus == "Vehicle Ready") {
+                            navigation.navigate("VehicleReadyOrderList");
+                        } else if (isOrderStatus == "Completed Order") {
+                            navigation.navigate("OrderCompletedList");
+                        }
                     } 
                 });
         } catch (e) {
@@ -494,7 +506,7 @@ const EditRepairOrder = ({
     };
 
     const getPartList = async () => {
-        if(partPage == 1) setIsLoadingPartList(true)
+        if(partPage == 1) setIsLoading(true)
         if(partPage != 1) setIsPartScrollLoading(false)
         try {
             const res = await fetch(`${API_URL}fetch_parts?page=${partPage}`, {
@@ -514,7 +526,7 @@ const EditRepairOrder = ({
                 // setFilteredPartData(json.data);
                 setPartList([...partList, ...json.data.data]);
                 setFilteredPartData([...filteredPartData, ...json.data.data]);
-                setIsLoadingPartList(false);
+                setIsLoading(false);
                 if(partPage != 1) setIsPartScrollLoading(false)
                 {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
                 {json.data.current_page != json.data.last_page ? setPartPage(partPage + 1) : null}
@@ -572,12 +584,11 @@ const EditRepairOrder = ({
                 setFilteredPartData(json.data.data);
                 {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
                 {json.data.current_page != json.data.last_page ? setPartPage(2) : null}
+                setPartRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
-        } finally {
-            setPartRefreshing(false);
-            setIsLoadingPartList(false);
         }
     };
 
@@ -599,7 +610,7 @@ const EditRepairOrder = ({
     };
 
     const getServiceList = async () => {
-        if(servicePage == 1) setIsLoadingServiceList(true)
+        if(servicePage == 1) setIsLoading(true)
         if(servicePage != 1) setIsServiceScrollLoading(true)
         try {
             const res = await fetch(
@@ -623,7 +634,7 @@ const EditRepairOrder = ({
                     ...filteredServiceData,
                     ...json.data.data,
                 ]);
-                setIsLoadingServiceList(false);
+                setIsLoading(false);
                 if(servicePage != 1) setIsServiceScrollLoading(false)
                 {json.data.current_page != json.data.last_page ? setLoadMoreServices(true) : setLoadMoreServices(false)}
                 {json.data.current_page != json.data.last_page ? setServicePage(servicePage + 1) : null}
@@ -652,8 +663,7 @@ const EditRepairOrder = ({
                 setFilteredServiceData(json.data.data);
                 {json.data.current_page != json.data.last_page ? setLoadMoreServices(true) : setLoadMoreServices(false)}
                 {json.data.current_page != json.data.last_page ? setServicePage(servicePage + 1) : null}
-                setServiceRefreshing(false);
-            } else {
+                setIsLoading(false);
                 setServiceRefreshing(false);
             }
         } catch (error) {
@@ -681,12 +691,11 @@ const EditRepairOrder = ({
                 setFilteredServiceData(json.data.data);
                 {json.data.current_page != json.data.last_page ? setLoadMoreServices(true) : setLoadMoreServices(false)}
                 {json.data.current_page != json.data.last_page ? setServicePage(servicePage + 1) : null}
+                setServiceRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
-        } finally {
-            setServiceRefreshing(false);
-            setIsLoadingServiceList(false);
         }
     };
 
@@ -730,7 +739,6 @@ const EditRepairOrder = ({
                     serviceName: json.data.name,
                 };
                 handleServiceAdd(data);
-
                 setAddNewServiceModal(false);
                 setIsNewService("");
                 setNewServiceError("");
@@ -756,7 +764,7 @@ const EditRepairOrder = ({
             });
             const json = await res.json();
             if (json !== undefined) {
-                setIsLoadingPartList(true);
+                setIsLoading(true);
                 pullPartRefresh();
                 setIsPart(parseInt(json.data.id));
                 setIsPartName(json.data.name);
@@ -1427,7 +1435,7 @@ const EditRepairOrder = ({
                             </View>
                         </View>
 
-                        <Text
+                        {/* <Text
                             style={[styles.headingStyle, { marginTop: 20 }]}
                         >
                             Vehicle Images:
@@ -1467,7 +1475,7 @@ const EditRepairOrder = ({
                                     </Text>
                                 ) : null}
                             </TouchableOpacity>
-                        </View>
+                        </View> */}
 
                         <Text
                             style={[styles.headingStyle, { marginTop: 20 }]}
@@ -1694,211 +1702,188 @@ const EditRepairOrder = ({
                         >
                             Select Part
                         </Text>
-                        {isLoadingPartList == true ? (
-                            <View style={{ flex: 1, justifyContent: "center" }}>
-                                <ActivityIndicator></ActivityIndicator>
-                            </View>
-                        ) : (
-                            <View style={{ marginTop: 20, flex: 1 }}>
-                                {/* Search Bar */}
-                                <View>
-                                    <View
-                                        style={{
-                                            marginBottom: 15,
-                                            flexDirection: "row",
-                                        }}
-                                    >
-                                        <TextInput
-                                            mode={"flat"}
-                                            placeholder="Search here..."
-                                            onChangeText={(text) =>
-                                                setSearchQueryForParts(text)
-                                            }
-                                            value={searchQueryForParts}
-                                            activeUnderlineColor={
-                                                colors.transparent
-                                            }
-                                            selectionColor="black"
-                                            underlineColor={colors.transparent}
-                                            style={{
-                                                elevation: 4,
-                                                height: 50,
-                                                backgroundColor: colors.white,
-                                                flex: 1,
-                                                borderTopRightRadius: 0,
-                                                borderBottomRightRadius: 0,
-                                                borderTopLeftRadius: 5,
-                                                borderBottomLeftRadius: 5,
-                                            }}
-                                            right={
-                                                searchQueryForParts != null &&
-                                                searchQueryForParts != "" && (
-                                                    <TextInput.Icon
-                                                        icon="close"
-                                                        color={
-                                                            colors.light_gray
-                                                        }
-                                                        onPress={() =>
-                                                            onPartRefresh()
-                                                        }
-                                                    />
-                                                )
-                                            }
-                                        />
-                                        <TouchableOpacity
-                                            onPress={() =>
-                                                searchFilterForParts()
-                                            }
-                                            style={{
-                                                elevation: 4,
-                                                borderTopRightRadius: 5,
-                                                borderBottomRightRadius: 5,
-                                                paddingRight: 25,
-                                                paddingLeft: 25,
-                                                zIndex: 2,
-                                                backgroundColor: colors.primary,
-                                                justifyContent: "center",
-                                                alignItems: "center",
-                                            }}
-                                        >
-                                            <IconX
-                                                name={"search"}
-                                                size={17}
-                                                color={colors.white}
-                                            />
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                                {filteredPartData?.length > 0 ? (
-                                    <FlatList
-                                        showsVerticalScrollIndicator={false}
-                                        ItemSeparatorComponent={() => (
-                                            <>
-                                                <Divider />
-                                                <Divider />
-                                            </>
-                                        )}
-                                        data={filteredPartData}
-                                        style={{
-                                            borderColor: "#0000000a",
-                                            borderWidth: 1,
-                                            flex: 1,
-                                        }}
-                                        onEndReached={loadMoreParts ? getPartList : null}
-                                        onEndReachedThreshold={0.5}
-                                        refreshControl={
-                                            <RefreshControl
-                                                refreshing={partRefreshing}
-                                                onRefresh={onPartRefresh}
-                                                colors={["green"]}
-                                            />
-                                        }
-                                        ListFooterComponent={loadMoreParts ? renderPartFooter : null}
-                                        keyExtractor={(item) => item.id}
-                                        renderItem={({ item }) => (
-                                            <>
-                                                <List.Item
-                                                    title={
-                                                        <View
-                                                            style={{
-                                                                flexDirection:
-                                                                    "row",
-                                                                display: "flex",
-                                                                flexWrap:
-                                                                    "wrap",
-                                                            }}
-                                                        >
-                                                            <Text
-                                                                style={{
-                                                                    fontSize: 16,
-                                                                    color: colors.black,
-                                                                }}
-                                                            >
-                                                                {item.name}
-                                                            </Text>
-                                                        </View>
-                                                    }
-                                                    key={item.id}
-                                                    onPress={() => {
-                                                        setIsPartName(
-                                                            item.name
-                                                        );
-                                                        setIsPart(item.id);
-                                                        let parameter = {
-                                                            parts_id: item.id,
-                                                            partName: item.name,
-                                                        };
-                                                        handlePartAdd(
-                                                            parameter
-                                                        );
-
-                                                        setPartError("");
-                                                        setPartListModal(false);
-                                                        setSearchQueryForParts(
-                                                            ""
-                                                        );
-                                                        searchFilterForParts();
-                                                    }}
-                                                />
-                                            </>
-                                        )}
-                                    />
-                                ) : (
-                                    <View
-                                        style={{
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            marginVertical: 50,
-                                            flex: 1,
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                color: colors.black,
-                                                textAlign: "center",
-                                            }}
-                                        >
-                                            No such part is associated!
-                                        </Text>
-                                    </View>
-                                )}
+                        <View style={{ marginTop: 20, flex: 1 }}>
+                            {/* Search Bar */}
+                            <View>
                                 <View
                                     style={{
-                                        justifyContent: "flex-end",
+                                        marginBottom: 15,
                                         flexDirection: "row",
                                     }}
                                 >
-                                    <TouchableOpacity
+                                    <TextInput
+                                        mode={"flat"}
+                                        placeholder="Search here..."
+                                        onChangeText={(text) =>
+                                            setSearchQueryForParts(text)
+                                        }
+                                        value={searchQueryForParts}
+                                        activeUnderlineColor={
+                                            colors.transparent
+                                        }
+                                        selectionColor="black"
+                                        underlineColor={colors.transparent}
                                         style={{
-                                            flexDirection: "row",
+                                            elevation: 4,
+                                            height: 50,
+                                            backgroundColor: colors.white,
+                                            flex: 1,
+                                            borderTopRightRadius: 0,
+                                            borderBottomRightRadius: 0,
+                                            borderTopLeftRadius: 5,
+                                            borderBottomLeftRadius: 5,
+                                        }}
+                                        right={
+                                            searchQueryForParts != null &&
+                                            searchQueryForParts != "" && (
+                                                <TextInput.Icon
+                                                    icon="close"
+                                                    color={
+                                                        colors.light_gray
+                                                    }
+                                                    onPress={() =>
+                                                        onPartRefresh()
+                                                    }
+                                                />
+                                            )
+                                        }
+                                    />
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            searchFilterForParts()
+                                        }
+                                        style={{
+                                            elevation: 4,
+                                            borderTopRightRadius: 5,
+                                            borderBottomRightRadius: 5,
+                                            paddingRight: 25,
+                                            paddingLeft: 25,
+                                            zIndex: 2,
+                                            backgroundColor: colors.primary,
                                             justifyContent: "center",
                                             alignItems: "center",
-                                            backgroundColor: colors.primary,
-                                            marginTop: 7,
-                                            paddingVertical: 3,
-                                            paddingHorizontal: 10,
-                                            borderRadius: 4,
-                                        }}
-                                        onPress={() => {
-                                            setAddNewPartModal(true);
-                                            setPartListModal(false);
                                         }}
                                     >
-                                        <Icon
-                                            style={{
-                                                color: colors.white,
-                                                marginRight: 4,
-                                            }}
-                                            name="plus"
-                                            size={16}
+                                        <IconX
+                                            name={"search"}
+                                            size={17}
+                                            color={colors.white}
                                         />
-                                        <Text style={{ color: colors.white }}>
-                                            Add Part
-                                        </Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
-                        )}
+                            <FlatList
+                                showsVerticalScrollIndicator={false}
+                                ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                                data={filteredPartData}
+                                style={{
+                                    borderColor: "#0000000a",
+                                    borderWidth: 1,
+                                    flex: 1,
+                                }}
+                                onEndReached={loadMoreParts ? getPartList : null}
+                                onEndReachedThreshold={0.5}
+                                contentContainerStyle={{ flexGrow: 1 }}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={partRefreshing}
+                                        onRefresh={onPartRefresh}
+                                        colors={["green"]}
+                                    />
+                                }
+                                ListFooterComponent={loadMoreParts ? renderPartFooter : null}
+                                ListEmptyComponent={() => (
+                                    !isLoading && (
+                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                            <Text style={{ color: colors.black }}>
+                                                No part found!
+                                            </Text>
+                                        </View>
+                                ))}
+                                keyExtractor={(item) => item.id}
+                                renderItem={({ item }) => (
+                                    !isLoading &&
+                                        <List.Item
+                                            title={
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                        display: "flex",
+                                                        flexWrap:
+                                                            "wrap",
+                                                    }}
+                                                >
+                                                    <Text
+                                                        style={{
+                                                            fontSize: 16,
+                                                            color: colors.black,
+                                                        }}
+                                                    >
+                                                        {item.name}
+                                                    </Text>
+                                                </View>
+                                            }
+                                            key={item.id}
+                                            onPress={() => {
+                                                setIsPartName(
+                                                    item.name
+                                                );
+                                                setIsPart(item.id);
+                                                let parameter = {
+                                                    parts_id: item.id,
+                                                    partName: item.name,
+                                                };
+                                                handlePartAdd(
+                                                    parameter
+                                                );
+
+                                                setPartError("");
+                                                setPartListModal(false);
+                                                setSearchQueryForParts(
+                                                    ""
+                                                );
+                                                searchFilterForParts();
+                                            }}
+                                        />
+                                )}
+                            />
+                            <View
+                                style={{
+                                    justifyContent: "flex-end",
+                                    flexDirection: "row",
+                                }}
+                            >
+                                <TouchableOpacity
+                                    style={{
+                                        flexDirection: "row",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        backgroundColor: colors.primary,
+                                        marginTop: 7,
+                                        paddingVertical: 3,
+                                        paddingHorizontal: 10,
+                                        borderRadius: 4,
+                                    }}
+                                    onPress={() => {
+                                        setAddNewPartModal(true);
+                                        setPartListModal(false);
+                                    }}
+                                >
+                                    <Icon
+                                        style={{
+                                            color: colors.white,
+                                            marginRight: 4,
+                                        }}
+                                        name="plus"
+                                        size={16}
+                                    />
+                                    <Text style={{ color: colors.white }}>
+                                        Add Part
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
                     </Modal>
 
                     {/* Services List Modal */}
@@ -1944,216 +1929,192 @@ const EditRepairOrder = ({
                         >
                             Select Service
                         </Text>
-                        {isLoadingServiceList == true ? (
-                            <View style={{ flex: 1, justifyContent: "center" }}>
-                                {" "}
-                                ? <ActivityIndicator></ActivityIndicator>
-                            </View>
-                        ) : (
-                            <View style={{ marginTop: 20, flex: 1 }}>
-                                {/* Search Bar */}
-                                <View>
-                                    <View
-                                        style={{
-                                            marginBottom: 15,
-                                            flexDirection: "row",
-                                        }}
-                                    >
-                                        <TextInput
-                                            mode={"flat"}
-                                            placeholder="Search here..."
-                                            onChangeText={(text) =>
-                                                setSearchQueryForServices(text)
-                                            }
-                                            value={searchQueryForServices}
-                                            activeUnderlineColor={
-                                                colors.transparent
-                                            }
-                                            selectionColor="black"
-                                            underlineColor={colors.transparent}
-                                            style={{
-                                                elevation: 4,
-                                                height: 50,
-                                                backgroundColor: colors.white,
-                                                flex: 1,
-                                                borderTopRightRadius: 0,
-                                                borderBottomRightRadius: 0,
-                                                borderTopLeftRadius: 5,
-                                                borderBottomLeftRadius: 5,
-                                            }}
-                                            right={
-                                                searchQueryForServices !=
-                                                    null &&
-                                                searchQueryForServices !=
-                                                    "" && (
-                                                    <TextInput.Icon
-                                                        icon="close"
-                                                        color={
-                                                            colors.light_gray
-                                                        }
-                                                        onPress={() =>
-                                                            onServiceRefresh()
-                                                        }
-                                                    />
-                                                )
-                                            }
-                                        />
-                                        <TouchableOpacity
-                                            onPress={() =>
-                                                searchFilterForServices()
-                                            }
-                                            style={{
-                                                elevation: 4,
-                                                borderTopRightRadius: 5,
-                                                borderBottomRightRadius: 5,
-                                                paddingRight: 25,
-                                                paddingLeft: 25,
-                                                zIndex: 2,
-                                                backgroundColor: colors.primary,
-                                                justifyContent: "center",
-                                                alignItems: "center",
-                                            }}
-                                        >
-                                            <IconX
-                                                name={"search"}
-                                                size={17}
-                                                color={colors.white}
-                                            />
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                                {filteredServiceData?.length > 0 ? (
-                                    <FlatList
-                                        showsVerticalScrollIndicator={false}
-                                        ItemSeparatorComponent={() => (
-                                            <>
-                                                <Divider />
-                                                <Divider />
-                                            </>
-                                        )}
-                                        data={filteredServiceData}
-                                        style={{
-                                            borderColor: "#0000000a",
-                                            borderWidth: 1,
-                                            flex: 1,
-                                        }}
-                                        onEndReached={loadMoreServices ? getServiceList : null}
-                                        onEndReachedThreshold={0.5}
-                                        refreshControl={
-                                            <RefreshControl
-                                                refreshing={serviceRefreshing}
-                                                onRefresh={onServiceRefresh}
-                                                colors={["green"]}
-                                            />
-                                        }
-                                        ListFooterComponent={loadMoreServices ? renderServiceFooter : null}
-                                        keyExtractor={(item) => item.id}
-                                        renderItem={({ item }) => (
-                                            <>
-                                                <List.Item
-                                                    title={
-                                                        <View
-                                                            style={{
-                                                                flexDirection:
-                                                                    "row",
-                                                                display: "flex",
-                                                                flexWrap:
-                                                                    "wrap",
-                                                            }}
-                                                        >
-                                                            <Text
-                                                                style={{
-                                                                    fontSize: 16,
-                                                                    color: colors.black,
-                                                                }}
-                                                            >
-                                                                {item.name}
-                                                            </Text>
-                                                        </View>
-                                                    }
-                                                    onPress={() => {
-                                                        setIsServiceName(
-                                                            item.name
-                                                        );
-                                                        setIsService(item.id);
-                                                        let parameter = {
-                                                            service_id: item.id,
-                                                            serviceName:
-                                                                item.name,
-                                                        };
-                                                        handleServiceAdd(
-                                                            parameter
-                                                        );
-
-                                                        setServiceError("");
-                                                        setServiceListModal(
-                                                            false
-                                                        );
-                                                        setSearchQueryForServices(
-                                                            ""
-                                                        );
-                                                        searchFilterForServices();
-                                                    }}
-                                                />
-                                            </>
-                                        )}
-                                    />
-                                ) : (
-                                    <View
-                                        style={{
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            marginVertical: 50,
-                                            flex: 1,
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                color: colors.black,
-                                                textAlign: "center",
-                                            }}
-                                        >
-                                            No such service is associated!
-                                        </Text>
-                                    </View>
-                                )}
+                        <View style={{ marginTop: 20, flex: 1 }}>
+                            {/* Search Bar */}
+                            <View>
                                 <View
                                     style={{
-                                        justifyContent: "flex-end",
+                                        marginBottom: 15,
                                         flexDirection: "row",
                                     }}
                                 >
-                                    <TouchableOpacity
+                                    <TextInput
+                                        mode={"flat"}
+                                        placeholder="Search here..."
+                                        onChangeText={(text) =>
+                                            setSearchQueryForServices(text)
+                                        }
+                                        value={searchQueryForServices}
+                                        activeUnderlineColor={
+                                            colors.transparent
+                                        }
+                                        selectionColor="black"
+                                        underlineColor={colors.transparent}
                                         style={{
-                                            flexDirection: "row",
+                                            elevation: 4,
+                                            height: 50,
+                                            backgroundColor: colors.white,
+                                            flex: 1,
+                                            borderTopRightRadius: 0,
+                                            borderBottomRightRadius: 0,
+                                            borderTopLeftRadius: 5,
+                                            borderBottomLeftRadius: 5,
+                                        }}
+                                        right={
+                                            searchQueryForServices !=
+                                                null &&
+                                            searchQueryForServices !=
+                                                "" && (
+                                                <TextInput.Icon
+                                                    icon="close"
+                                                    color={
+                                                        colors.light_gray
+                                                    }
+                                                    onPress={() =>
+                                                        onServiceRefresh()
+                                                    }
+                                                />
+                                            )
+                                        }
+                                    />
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            searchFilterForServices()
+                                        }
+                                        style={{
+                                            elevation: 4,
+                                            borderTopRightRadius: 5,
+                                            borderBottomRightRadius: 5,
+                                            paddingRight: 25,
+                                            paddingLeft: 25,
+                                            zIndex: 2,
+                                            backgroundColor: colors.primary,
                                             justifyContent: "center",
                                             alignItems: "center",
-                                            backgroundColor: colors.primary,
-                                            marginTop: 7,
-                                            paddingVertical: 3,
-                                            paddingHorizontal: 10,
-                                            borderRadius: 4,
-                                        }}
-                                        onPress={() => {
-                                            setAddNewServiceModal(true);
-                                            setServiceListModal(false);
                                         }}
                                     >
-                                        <Icon
-                                            style={{
-                                                color: colors.white,
-                                                marginRight: 4,
-                                            }}
-                                            name="plus"
-                                            size={16}
+                                        <IconX
+                                            name={"search"}
+                                            size={17}
+                                            color={colors.white}
                                         />
-                                        <Text style={{ color: colors.white }}>
-                                            Add Service
-                                        </Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
-                        )}
+                            <FlatList
+                                showsVerticalScrollIndicator={false}
+                                ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                                data={filteredServiceData}
+                                style={{
+                                    borderColor: "#0000000a",
+                                    borderWidth: 1,
+                                    flex: 1,
+                                }}
+                                onEndReached={loadMoreServices ? getServiceList : null}
+                                onEndReachedThreshold={0.5}
+                                contentContainerStyle={{ flexGrow: 1 }}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={serviceRefreshing}
+                                        onRefresh={onServiceRefresh}
+                                        colors={["green"]}
+                                    />
+                                }
+                                ListFooterComponent={loadMoreServices ? renderServiceFooter : null}
+                                ListEmptyComponent={() => (
+                                    !isLoading && (
+                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                            <Text style={{ color: colors.black }}>
+                                                No service found!
+                                            </Text>
+                                        </View>
+                                ))}
+                                keyExtractor={(item) => item.id}
+                                renderItem={({ item }) => (
+                                    !isLoading &&
+                                        <List.Item
+                                            title={
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                        display: "flex",
+                                                        flexWrap:
+                                                            "wrap",
+                                                    }}
+                                                >
+                                                    <Text
+                                                        style={{
+                                                            fontSize: 16,
+                                                            color: colors.black,
+                                                        }}
+                                                    >
+                                                        {item.name}
+                                                    </Text>
+                                                </View>
+                                            }
+                                            onPress={() => {
+                                                setIsServiceName(
+                                                    item.name
+                                                );
+                                                setIsService(item.id);
+                                                let parameter = {
+                                                    service_id: item.id,
+                                                    serviceName:
+                                                        item.name,
+                                                };
+                                                handleServiceAdd(
+                                                    parameter
+                                                );
+
+                                                setServiceError("");
+                                                setServiceListModal(
+                                                    false
+                                                );
+                                                setSearchQueryForServices(
+                                                    ""
+                                                );
+                                                searchFilterForServices();
+                                            }}
+                                        />
+                                )}
+                            />
+                            <View
+                                style={{
+                                    justifyContent: "flex-end",
+                                    flexDirection: "row",
+                                }}
+                            >
+                                <TouchableOpacity
+                                    style={{
+                                        flexDirection: "row",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        backgroundColor: colors.primary,
+                                        marginTop: 7,
+                                        paddingVertical: 3,
+                                        paddingHorizontal: 10,
+                                        borderRadius: 4,
+                                    }}
+                                    onPress={() => {
+                                        setAddNewServiceModal(true);
+                                        setServiceListModal(false);
+                                    }}
+                                >
+                                    <Icon
+                                        style={{
+                                            color: colors.white,
+                                            marginRight: 4,
+                                        }}
+                                        name="plus"
+                                        size={16}
+                                    />
+                                    <Text style={{ color: colors.white }}>
+                                        Add Service
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
                     </Modal>
 
                     <Modal

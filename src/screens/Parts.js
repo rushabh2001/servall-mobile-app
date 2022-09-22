@@ -57,7 +57,7 @@ const Parts = ({
     const [garageRefreshing, setGarageRefreshing] = useState(false);
     
     const getGarageList = async () => {
-    if(garagePage == 1) setIsLoadingGarageList(true)
+    if(garagePage == 1) setIsLoading(true)
         if(garagePage != 1) setIsGarageScrollLoading(true)
         try {
             const res = await fetch(
@@ -84,7 +84,7 @@ const Parts = ({
                     ...filteredGarageData,
                     ...json.garage_list.data,
                 ]);
-                setIsLoadingGarageList(false);
+                setIsLoading(false);
                 if(garagePage != 1) setIsGarageScrollLoading(false)
                 {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
                 {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(garagePage + 1) : null}
@@ -95,6 +95,7 @@ const Parts = ({
     };
 
     const searchFilterForGarages = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_owner_garages`, {
                 method: "POST",
@@ -115,10 +116,8 @@ const Parts = ({
                 setFilteredGarageData(json.garage_list.data);
                 {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
                 {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(2) : null}
-               
                 setGarageRefreshing(false);
-            } else {
-                setGarageRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
@@ -147,12 +146,11 @@ const Parts = ({
                 setFilteredGarageData(json.garage_list.data);
                 {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
                 {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(2) : null}
+                setGarageRefreshing(false);
+                setIsLoadingGarageList(false);
             }
         } catch (error) {
             console.error(error);
-        } finally {
-            setGarageRefreshing(false);
-            setIsLoadingGarageList(false);
         }
     };
 
@@ -230,13 +228,12 @@ const Parts = ({
                 setFilteredPartData(json.data.data);
                 {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
                 {json.data.current_page != json.data.last_page ? setPage(2) : setPage(1)}
+                setIsLoading(false);
+                setRefreshing(false);
             }
-          
         } catch (error) {
             console.error(error);
         }
-        setIsLoading(false);
-        setRefreshing(false);
     };
 
     const pullRefresh = async () => {
@@ -263,12 +260,11 @@ const Parts = ({
                 {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
                 {json.data.current_page != json.data.last_page ? setPage(2) : setPage(1)}
                 // console.log('setPartList', json.data.data);
+                setRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
-        } finally {
-            setRefreshing(false);
-            setIsLoading(false);
         }
     };
 
@@ -292,7 +288,10 @@ const Parts = ({
     useEffect(() => {
         setIsLoading(true);
         pullGarageRefresh();
-        console.log('1');
+        if(isGarageId) {
+            pullRefresh();
+        }
+        // console.log('1');
     }, [isFocused]);
 
     useEffect(() => {
@@ -303,7 +302,7 @@ const Parts = ({
     }, [garageList]);
 
     useEffect(() => {
-            console.log('4', isGarageId);
+            // console.log('4', isGarageId);
         if(isGarageId) {
             setIsLoading(true);
             pullRefresh();
@@ -427,12 +426,7 @@ const Parts = ({
                                     />
                                     <FlatList
                                         showsVerticalScrollIndicator={false}
-                                        ItemSeparatorComponent={() => (
-                                            <>
-                                                <Divider />
-                                                <Divider />
-                                            </>
-                                        )}
+                                        ItemSeparatorComponent={() => (<Divider />)}
                                         data={filteredPartData}
                                         onEndReached={loadMoreParts ? getPartList : null}
                                         onEndReachedThreshold={0.5}
@@ -638,90 +632,73 @@ const Parts = ({
                                         </TouchableOpacity>
                                     </View>
                                 </View>
-                                {filteredGarageData?.length > 0 ? (
-                                    <FlatList
-                                        showsVerticalScrollIndicator={false}
-                                        ItemSeparatorComponent={() => (
-                                            <>
-                                                <Divider />
-                                                <Divider />
-                                            </>
-                                        )}
-                                        data={filteredGarageData}
-                                        style={{
-                                            borderColor: "#0000000a",
-                                            borderWidth: 1,
-                                            flex: 1,
-                                        }}
-                                        onEndReached={loadMoreGarages ? getGarageList : null}
-                                        onEndReachedThreshold={0.5}
-                                        refreshControl={
-                                            <RefreshControl
-                                                refreshing={garageRefreshing}
-                                                onRefresh={onGarageRefresh}
-                                                colors={["green"]}
-                                            />
-                                        }
-                                        ListFooterComponent={loadMoreGarages ? renderGarageFooter : null}
-                                        keyExtractor={(item) => item.id}
-                                        renderItem={({ item }) => (
-                                            <>
-                                                <List.Item
-                                                    title={
-                                                        <View
+                                <FlatList
+                                    showsVerticalScrollIndicator={false}
+                                    ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                                    data={filteredGarageData}
+                                    style={{
+                                        borderColor: "#0000000a",
+                                        borderWidth: 1,
+                                        flex: 1,
+                                    }}
+                                    onEndReached={loadMoreGarages ? getGarageList : null}
+                                    onEndReachedThreshold={0.5}
+                                    contentContainerStyle={{ flexGrow: 1 }}
+                                    refreshControl={
+                                        <RefreshControl
+                                            refreshing={garageRefreshing}
+                                            onRefresh={onGarageRefresh}
+                                            colors={["green"]}
+                                        />
+                                    }
+                                    ListFooterComponent={loadMoreGarages ? renderGarageFooter : null}
+                                    ListEmptyComponent={() => (
+                                        !isLoading && (
+                                            <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                                <Text style={{ color: colors.black }}>
+                                                    No garage found!
+                                                </Text>
+                                            </View>
+                                    ))}
+                                    keyExtractor={(item) => item.id}
+                                    renderItem={({ item }) => (
+                                        !isLoading && 
+                                            <List.Item
+                                                title={
+                                                    <View
+                                                        style={{
+                                                            flexDirection:
+                                                                "row",
+                                                            display: "flex",
+                                                            flexWrap:
+                                                                "wrap",
+                                                        }}
+                                                    >
+                                                        <Text
                                                             style={{
-                                                                flexDirection:
-                                                                    "row",
-                                                                display: "flex",
-                                                                flexWrap:
-                                                                    "wrap",
+                                                                fontSize: 16,
+                                                                color: colors.black,
                                                             }}
                                                         >
-                                                            <Text
-                                                                style={{
-                                                                    fontSize: 16,
-                                                                    color: colors.black,
-                                                                }}
-                                                            >
-                                                                {
-                                                                    item.garage_name
-                                                                }
-                                                            </Text>
-                                                        </View>
-                                                    }
-                                                    onPress={() => {
-                                                        setIsGarageName(
-                                                            item.garage_name
-                                                        );
-                                                        setIsGarageId(item.id);
-                                                        setGarageError("");
-                                                        setGarageListModal(
-                                                            false
-                                                        );
-                                                    }}
-                                                />
-                                            </>
-                                        )}
-                                    />
-                                ) : (
-                                    <View
-                                        style={{
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            marginVertical: 50,
-                                            flex: 1,
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                color: colors.black,
-                                                textAlign: "center",
-                                            }}
-                                        >
-                                            No such garage found!
-                                        </Text>
-                                    </View>
-                                )}
+                                                            {
+                                                                item.garage_name
+                                                            }
+                                                        </Text>
+                                                    </View>
+                                                }
+                                                onPress={() => {
+                                                    setIsGarageName(
+                                                        item.garage_name
+                                                    );
+                                                    setIsGarageId(item.id);
+                                                    setGarageError("");
+                                                    setGarageListModal(
+                                                        false
+                                                    );
+                                                }}
+                                            />
+                                    )}
+                                />
                             </View>
                         )}
                     </Modal>

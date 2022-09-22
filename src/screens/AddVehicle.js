@@ -87,7 +87,6 @@ const AddVehicle = ({
     const [isBrandName, setIsBrandName] = useState();
     const [brandList, setBrandList] = useState([]);
     const [brandListModal, setBrandListModal] = useState(false);
-    const [isLoadingBrandList, setIsLoadingBrandList] = useState(true);
     const [filteredBrandData, setFilteredBrandData] = useState([]);
     const [searchQueryForBrands, setSearchQueryForBrands] = useState();
     const [brandError, setBrandError] = useState(""); // Error State
@@ -102,7 +101,6 @@ const AddVehicle = ({
     const [isModelName, setIsModelName] = useState();
     const [modelList, setModelList] = useState([]);
     const [modelListModal, setModelListModal] = useState(false);
-    const [isLoadingModelList, setIsLoadingModelList] = useState(true);
     const [filteredModelData, setFilteredModelData] = useState([]);
     const [searchQueryForModels, setSearchQueryForModels] = useState();
     const [modelError, setModelError] = useState(""); // Error State
@@ -117,8 +115,6 @@ const AddVehicle = ({
     const [isInsuranceProviderName, setIsInsuranceProviderName] = useState("");
     const [insuranceProviderList, setInsuranceProviderList] = useState([]);
     const [insuranceProviderListModal, setInsuranceProviderListModal] =
-        useState(false);
-    const [isLoadingInsuranceProviderList, setIsLoadingInsuranceProviderList] =
         useState(false);
     const [filteredInsuranceProviderData, setFilteredInsuranceProviderData] =
         useState([]);
@@ -409,12 +405,8 @@ const AddVehicle = ({
     };
 
     const getBrandList = async () => {
-        {
-            brandPage == 1 && setIsLoadingBrandList(true);
-        }
-        {
-            brandPage != 1 && setIsBrandScrollLoading(true);
-        }
+        if(brandPage == 1) setIsLoading(true)
+        if(brandPage != 1) setIsBrandScrollLoading(true)
         try {
             const res = await fetch(`${API_URL}fetch_brand?page=${brandPage}`, {
                 method: "POST",
@@ -434,10 +426,8 @@ const AddVehicle = ({
                     ...filteredBrandData,
                     ...json.brand_list.data,
                 ]);
-                setIsLoadingBrandList(false);
-                {
-                    brandPage != 1 && setIsBrandScrollLoading(false);
-                }
+                setIsLoading(false);
+                if(brandPage != 1) setIsBrandScrollLoading(false);
                 {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
                 {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(brandPage + 1) : null}
             }
@@ -447,6 +437,7 @@ const AddVehicle = ({
     };
 
     const searchFilterForBrands = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_brand`, {
                 method: "POST",
@@ -465,8 +456,7 @@ const AddVehicle = ({
                 setFilteredBrandData(json.brand_list.data);
                 {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
                 {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(2) : null}
-                setBrandRefreshing(false);
-            } else {
+                setIsLoading(false);
                 setBrandRefreshing(false);
             }
         } catch (error) {
@@ -494,11 +484,11 @@ const AddVehicle = ({
                 setFilteredBrandData(json.brand_list.data);
                 {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
                 {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(2) : null}
+                setBrandRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
-        } finally {
-            setBrandRefreshing(false);
         }
     };
 
@@ -520,12 +510,8 @@ const AddVehicle = ({
     };
 
     const getModelList = async () => {
-        {
-            modelPage == 1 && setIsLoadingModelList(true);
-        }
-        {
-            modelPage != 1 && setIsModelScrollLoading(true);
-        }
+        if(modelPage == 1) setIsLoading(true)
+        if(modelPage != 1) setIsModelScrollLoading(true)
         try {
             const res = await fetch(
                 `${API_URL}fetch_vehicle_model?page=${modelPage}`,
@@ -550,10 +536,8 @@ const AddVehicle = ({
                     ...filteredModelData,
                     ...json.vehicle_model_list.data,
                 ]);
-                setIsLoadingModelList(false);
-                {
-                    modelPage != 1 && setIsModelScrollLoading(false);
-                }
+                setIsLoading(false);
+                if(modelPage != 1) setIsModelScrollLoading(false)
                 {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
                 {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(modelPage + 1) : null}
             }
@@ -563,6 +547,7 @@ const AddVehicle = ({
     };
 
     const searchFilterForModels = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_vehicle_model`, {
                 method: "POST",
@@ -582,8 +567,7 @@ const AddVehicle = ({
                 setFilteredModelData(json.vehicle_model_list.data);
                 {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
                 {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(2) : null}
-                setModelRefreshing(false);
-            } else {
+                setIsLoading(false);
                 setModelRefreshing(false);
             }
         } catch (error) {
@@ -612,12 +596,11 @@ const AddVehicle = ({
                 setFilteredModelData(json.vehicle_model_list.data);
                 {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
                 {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(2) : null}
+                setModelRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
-        } finally {
-            setModelRefreshing(false);
-            setIsLoadingModelList(false);
         }
     };
 
@@ -686,7 +669,7 @@ const AddVehicle = ({
     };
 
     const getInsuranceProviderList = async () => {
-        setIsLoadingInsuranceProviderList(true);
+        setIsLoading(true);
         try {
             const res = await fetch(`${API_URL}fetch_insurance_provider`, {
                 method: "GET",
@@ -700,11 +683,10 @@ const AddVehicle = ({
             if (json !== undefined) {
                 setInsuranceProviderList(json.insurance_provider_list);
                 setFilteredInsuranceProviderData(json.insurance_provider_list);
+                setIsLoading(false);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            setIsLoadingInsuranceProviderList(false);
         }
     };
 
@@ -715,7 +697,7 @@ const AddVehicle = ({
 
     useEffect(() => {
         if (isBrand != undefined) {
-            setIsLoadingModelList(true);
+            setIsLoading(true);
             pullModelRefresh();
             setIsModel();
             setIsModelName("");
@@ -1265,151 +1247,126 @@ const AddVehicle = ({
                         >
                             Select Insurance Provider
                         </Text>
-                        {isLoadingInsuranceProviderList == true ? (
-                            <View style={{ flex: 1, justifyContent: "center" }}>
-                                <ActivityIndicator></ActivityIndicator>
-                            </View>
-                        ) : (
-                            <View
+                        <View
+                            style={{
+                                marginTop: 20,
+                                marginBottom: 10,
+                                flex: 1,
+                            }}
+                        >
+                            <Searchbar
+                                placeholder="Search here..."
+                                onChangeText={(text) => {
+                                    if (text != null)
+                                        searchFilterForInsuranceProviders(
+                                            text
+                                        );
+                                }}
+                                value={searchQueryForInsuranceProviders}
+                                elevation={0}
+                                style={{ elevation: 0.8, marginBottom: 10 }}
+                            />
+                            <FlatList
+                                showsVerticalScrollIndicator={false}
+                                ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                                data={filteredInsuranceProviderData}
+                                contentContainerStyle={{ flexGrow: 1 }}
                                 style={{
-                                    marginTop: 20,
-                                    marginBottom: 10,
+                                    borderColor: "#0000000a",
+                                    borderWidth: 1,
                                     flex: 1,
                                 }}
-                            >
-                                <Searchbar
-                                    placeholder="Search here..."
-                                    onChangeText={(text) => {
-                                        if (text != null)
-                                            searchFilterForInsuranceProviders(
-                                                text
-                                            );
-                                    }}
-                                    value={searchQueryForInsuranceProviders}
-                                    elevation={0}
-                                    style={{ elevation: 0.8, marginBottom: 10 }}
-                                />
-                                {filteredInsuranceProviderData?.length > 0 ? (
-                                    <FlatList
-                                            showsVerticalScrollIndicator={false}
-                                        ItemSeparatorComponent={() => (
-                                            <>
-                                                <Divider />
-                                                <Divider />
-                                            </>
-                                        )}
-                                        data={filteredInsuranceProviderData}
-                                        // onEndReachedThreshold={1}
-                                        style={{
-                                            borderColor: "#0000000a",
-                                            borderWidth: 1,
-                                            flex: 1,
-                                        }}
-                                        keyExtractor={(item) => item.id}
-                                        renderItem={({ item }) => (
-                                            <>
-                                                <List.Item
-                                                    title={
-                                                        // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setInsuranceProviderListModal(false);  setAddInsuranceProviderModal(true); }}>
-                                                        <View
-                                                            style={{
-                                                                flexDirection:
-                                                                    "row",
-                                                                display: "flex",
-                                                                flexWrap:
-                                                                    "wrap",
-                                                            }}
-                                                        >
-                                                            <Text
-                                                                style={{
-                                                                    fontSize: 16,
-                                                                    color: colors.black,
-                                                                }}
-                                                            >
-                                                                {item.name}
-                                                            </Text>
-                                                        </View>
-                                                        // </TouchableOpacity>
-                                                    }
-                                                    onPress={() => {
-                                                        setIsInsuranceProviderName(
-                                                            item.name
-                                                        );
-                                                        setIsInsuranceProvider(
-                                                            item.id
-                                                        );
-                                                        setInsuranceProviderError(
-                                                            ""
-                                                        );
-                                                        setInsuranceProviderListModal(
-                                                            false
-                                                        );
+                                keyExtractor={(item) => item.id}
+                                ListEmptyComponent={() => (
+                                    !isLoading && (
+                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                            <Text style={{ color: colors.black }}>
+                                                No insurance company found!
+                                            </Text>
+                                        </View>
+                                ))}
+                                renderItem={({ item }) => (
+                                    !isLoading && 
+                                        <List.Item
+                                            title={
+                                                // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setInsuranceProviderListModal(false);  setAddInsuranceProviderModal(true); }}>
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                        display: "flex",
+                                                        flexWrap:
+                                                            "wrap",
                                                     }}
-                                                />
-                                            </>
-                                        )}
-                                    />
-                                ) : (
-                                    <View
-                                        style={{
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            marginVertical: 50,
-                                            flex: 1,
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                color: colors.black,
-                                                textAlign: "center",
+                                                >
+                                                    <Text
+                                                        style={{
+                                                            fontSize: 16,
+                                                            color: colors.black,
+                                                        }}
+                                                    >
+                                                        {item.name}
+                                                    </Text>
+                                                </View>
+                                                // </TouchableOpacity>
+                                            }
+                                            onPress={() => {
+                                                setIsInsuranceProviderName(
+                                                    item.name
+                                                );
+                                                setIsInsuranceProvider(
+                                                    item.id
+                                                );
+                                                setInsuranceProviderError(
+                                                    ""
+                                                );
+                                                setInsuranceProviderListModal(
+                                                    false
+                                                );
                                             }}
-                                        >
-                                            No such insurance provider is
-                                            associated!
-                                        </Text>
-                                    </View>
+                                        />
                                 )}
-                                <View
+                            />
+                            <View
+                                style={{
+                                    justifyContent: "flex-end",
+                                    flexDirection: "row",
+                                }}
+                            >
+                                <TouchableOpacity
                                     style={{
-                                        justifyContent: "flex-end",
                                         flexDirection: "row",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        backgroundColor: colors.primary,
+                                        marginTop: 7,
+                                        paddingVertical: 3,
+                                        paddingHorizontal: 10,
+                                        borderRadius: 4,
+                                    }}
+                                    onPress={() => {
+                                        setAddNewInsuranceProviderModal(
+                                            true
+                                        );
+                                        setInsuranceProviderListModal(
+                                            false
+                                        );
                                     }}
                                 >
-                                    <TouchableOpacity
+                                    <Icon
                                         style={{
-                                            flexDirection: "row",
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                            backgroundColor: colors.primary,
-                                            marginTop: 7,
-                                            paddingVertical: 3,
-                                            paddingHorizontal: 10,
-                                            borderRadius: 4,
+                                            color: colors.white,
+                                            marginRight: 4,
                                         }}
-                                        onPress={() => {
-                                            setAddNewInsuranceProviderModal(
-                                                true
-                                            );
-                                            setInsuranceProviderListModal(
-                                                false
-                                            );
-                                        }}
-                                    >
-                                        <Icon
-                                            style={{
-                                                color: colors.white,
-                                                marginRight: 4,
-                                            }}
-                                            name="plus"
-                                            size={16}
-                                        />
-                                        <Text style={{ color: colors.white }}>
-                                            Add Insurance Provider
-                                        </Text>
-                                    </TouchableOpacity>
-                                </View>
+                                        name="plus"
+                                        size={16}
+                                    />
+                                    <Text style={{ color: colors.white }}>
+                                        Add Insurance Provider
+                                    </Text>
+                                </TouchableOpacity>
                             </View>
-                        )}
+                        </View>
                     </Modal>
 
                     <Modal
@@ -1545,199 +1502,178 @@ const AddVehicle = ({
                         >
                             Select Brand
                         </Text>
-                        {isLoadingBrandList == true ? (
-                            <View style={{ flex: 1, justifyContent: "center" }}>
-                                <ActivityIndicator></ActivityIndicator>
-                            </View>
-                        ) : (
-                            <View
-                                style={{
-                                    marginTop: 20,
-                                    marginBottom: 10,
-                                    flex: 1,
-                                }}
-                            >
-                                {/* Search Bar */}
-                                <View>
-                                    <View
-                                        style={{
-                                            marginBottom: 15,
-                                            flexDirection: "row",
-                                        }}
-                                    >
-                                        <TextInput
-                                            mode={"flat"}
-                                            placeholder="Search here..."
-                                            onChangeText={(text) =>
-                                                setSearchQueryForBrands(text)
-                                            }
-                                            value={searchQueryForBrands}
-                                            activeUnderlineColor={
-                                                colors.transparent
-                                            }
-                                            selectionColor="black"
-                                            underlineColor={colors.transparent}
-                                            style={{
-                                                elevation: 4,
-                                                height: 50,
-                                                backgroundColor: colors.white,
-                                                flex: 1,
-                                                borderTopRightRadius: 0,
-                                                borderBottomRightRadius: 0,
-                                                borderTopLeftRadius: 5,
-                                                borderBottomLeftRadius: 5,
-                                            }}
-                                            right={
-                                                searchQueryForBrands != null &&
-                                                searchQueryForBrands != "" && (
-                                                    <TextInput.Icon
-                                                        icon="close"
-                                                        color={
-                                                            colors.light_gray
-                                                        }
-                                                        onPress={() =>
-                                                            onBrandRefresh()
-                                                        }
-                                                    />
-                                                )
-                                            }
-                                        />
-                                        <TouchableOpacity
-                                            onPress={() =>
-                                                searchFilterForBrands()
-                                            }
-                                            style={{
-                                                elevation: 4,
-                                                borderTopRightRadius: 5,
-                                                borderBottomRightRadius: 5,
-                                                paddingRight: 25,
-                                                paddingLeft: 25,
-                                                zIndex: 2,
-                                                backgroundColor: colors.primary,
-                                                justifyContent: "center",
-                                                alignItems: "center",
-                                            }}
-                                        >
-                                            <IconX
-                                                name={"search"}
-                                                size={17}
-                                                color={colors.white}
-                                            />
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                                {filteredBrandData?.length > 0 ? (
-                                    <FlatList
-                                            showsVerticalScrollIndicator={false}
-                                        ItemSeparatorComponent={() => (
-                                            <>
-                                                <Divider />
-                                                <Divider />
-                                            </>
-                                        )}
-                                        data={filteredBrandData}
-                                        onEndReached={loadMoreBrands ? getBrandList : null}
-                                        onEndReachedThreshold={0.5}
-                                        refreshControl={
-                                            <RefreshControl
-                                                refreshing={brandRefreshing}
-                                                onRefresh={onBrandRefresh}
-                                                colors={["green"]}
-                                            />
-                                        }
-                                        ListFooterComponent={loadMoreBrands ? renderBrandFooter : null}
-                                        style={{
-                                            borderColor: "#0000000a",
-                                            borderWidth: 1,
-                                            flex: 1,
-                                        }}
-                                        keyExtractor={(item) => item.id}
-                                        renderItem={({ item }) => (
-                                            <List.Item
-                                                title={
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                            display: "flex",
-                                                            flexWrap: "wrap",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={{
-                                                                fontSize: 16,
-                                                                color: colors.black,
-                                                            }}
-                                                        >
-                                                            {item.name}
-                                                        </Text>
-                                                    </View>
-                                                }
-                                                onPress={() => {
-                                                    setIsBrandName(item.name);
-                                                    setIsBrand(item.id);
-                                                    setBrandError("");
-                                                    setBrandListModal(false);
-                                                }}
-                                            />
-                                        )}
-                                    />
-                                ) : (
-                                    <View
-                                        style={{
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            marginVertical: 50,
-                                            flex: 1,
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                color: colors.black,
-                                                textAlign: "center",
-                                            }}
-                                        >
-                                            No such brand found!
-                                        </Text>
-                                    </View>
-                                )}
+                        <View
+                            style={{
+                                marginTop: 20,
+                                marginBottom: 10,
+                                flex: 1,
+                            }}
+                        >
+                            {/* Search Bar */}
+                            <View>
                                 <View
                                     style={{
-                                        justifyContent: "flex-end",
+                                        marginBottom: 15,
                                         flexDirection: "row",
                                     }}
                                 >
-                                    <TouchableOpacity
+                                    <TextInput
+                                        mode={"flat"}
+                                        placeholder="Search here..."
+                                        onChangeText={(text) =>
+                                            setSearchQueryForBrands(text)
+                                        }
+                                        value={searchQueryForBrands}
+                                        activeUnderlineColor={
+                                            colors.transparent
+                                        }
+                                        selectionColor="black"
+                                        underlineColor={colors.transparent}
                                         style={{
-                                            flexDirection: "row",
+                                            elevation: 4,
+                                            height: 50,
+                                            backgroundColor: colors.white,
+                                            flex: 1,
+                                            borderTopRightRadius: 0,
+                                            borderBottomRightRadius: 0,
+                                            borderTopLeftRadius: 5,
+                                            borderBottomLeftRadius: 5,
+                                        }}
+                                        right={
+                                            searchQueryForBrands != null &&
+                                            searchQueryForBrands != "" && (
+                                                <TextInput.Icon
+                                                    icon="close"
+                                                    color={
+                                                        colors.light_gray
+                                                    }
+                                                    onPress={() =>
+                                                        onBrandRefresh()
+                                                    }
+                                                />
+                                            )
+                                        }
+                                    />
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            searchFilterForBrands()
+                                        }
+                                        style={{
+                                            elevation: 4,
+                                            borderTopRightRadius: 5,
+                                            borderBottomRightRadius: 5,
+                                            paddingRight: 25,
+                                            paddingLeft: 25,
+                                            zIndex: 2,
+                                            backgroundColor: colors.primary,
                                             justifyContent: "center",
                                             alignItems: "center",
-                                            backgroundColor: colors.primary,
-                                            marginTop: 7,
-                                            paddingVertical: 3,
-                                            paddingHorizontal: 10,
-                                            borderRadius: 4,
-                                        }}
-                                        onPress={() => {
-                                            setAddBrandModal(true);
-                                            setBrandListModal(false);
                                         }}
                                     >
-                                        <Icon
-                                            style={{
-                                                color: colors.white,
-                                                marginRight: 4,
-                                            }}
-                                            name="plus"
-                                            size={16}
+                                        <IconX
+                                            name={"search"}
+                                            size={17}
+                                            color={colors.white}
                                         />
-                                        <Text style={{ color: colors.white }}>
-                                            Add Brand
-                                        </Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
-                        )}
+                            <FlatList
+                                showsVerticalScrollIndicator={false}
+                                ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                                data={filteredBrandData}
+                                onEndReached={loadMoreBrands ? getBrandList : null}
+                                onEndReachedThreshold={0.5}
+                                contentContainerStyle={{ flexGrow: 1 }}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={brandRefreshing}
+                                        onRefresh={onBrandRefresh}
+                                        colors={["green"]}
+                                    />
+                                }
+                                ListFooterComponent={loadMoreBrands ? renderBrandFooter : null}
+                                ListEmptyComponent={() => (
+                                    !isLoading && (
+                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                            <Text style={{ color: colors.black }}>
+                                                No brand found!
+                                            </Text>
+                                        </View>
+                                ))}
+                                style={{
+                                    borderColor: "#0000000a",
+                                    borderWidth: 1,
+                                    flex: 1,
+                                }}
+                                keyExtractor={(item) => item.id}
+                                renderItem={({ item }) => (
+                                    !isLoading && 
+                                        <List.Item
+                                            title={
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                        display: "flex",
+                                                        flexWrap: "wrap",
+                                                    }}
+                                                >
+                                                    <Text
+                                                        style={{
+                                                            fontSize: 16,
+                                                            color: colors.black,
+                                                        }}
+                                                    >
+                                                        {item.name}
+                                                    </Text>
+                                                </View>
+                                            }
+                                            onPress={() => {
+                                                setIsBrandName(item.name);
+                                                setIsBrand(item.id);
+                                                setBrandError("");
+                                                setBrandListModal(false);
+                                            }}
+                                        />
+                                )}
+                            />
+                            <View
+                                style={{
+                                    justifyContent: "flex-end",
+                                    flexDirection: "row",
+                                }}
+                            >
+                                <TouchableOpacity
+                                    style={{
+                                        flexDirection: "row",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        backgroundColor: colors.primary,
+                                        marginTop: 7,
+                                        paddingVertical: 3,
+                                        paddingHorizontal: 10,
+                                        borderRadius: 4,
+                                    }}
+                                    onPress={() => {
+                                        setAddBrandModal(true);
+                                        setBrandListModal(false);
+                                    }}
+                                >
+                                    <Icon
+                                        style={{
+                                            color: colors.white,
+                                            marginRight: 4,
+                                        }}
+                                        name="plus"
+                                        size={16}
+                                    />
+                                    <Text style={{ color: colors.white }}>
+                                        Add Brand
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
                     </Modal>
 
                     {/* Vehicle Model List Modal */}
@@ -1783,201 +1719,180 @@ const AddVehicle = ({
                         >
                             Select Model
                         </Text>
-                        {isLoadingModelList == true ? (
-                            <View style={{ flex: 1, justifyContent: "center" }}>
-                                <ActivityIndicator></ActivityIndicator>
-                            </View>
-                        ) : (
-                            <View
-                                style={{
-                                    marginTop: 20,
-                                    marginBottom: 10,
-                                    flex: 1,
-                                }}
-                            >
-                                {/* Search Bar */}
-                                <View>
-                                    <View
-                                        style={{
-                                            marginBottom: 15,
-                                            flexDirection: "row",
-                                        }}
-                                    >
-                                        <TextInput
-                                            mode={"flat"}
-                                            placeholder="Search here..."
-                                            onChangeText={(text) =>
-                                                setSearchQueryForModels(text)
-                                            }
-                                            value={searchQueryForModels}
-                                            activeUnderlineColor={
-                                                colors.transparent
-                                            }
-                                            selectionColor="black"
-                                            underlineColor={colors.transparent}
-                                            style={{
-                                                elevation: 4,
-                                                height: 50,
-                                                backgroundColor: colors.white,
-                                                flex: 1,
-                                                borderTopRightRadius: 0,
-                                                borderBottomRightRadius: 0,
-                                                borderTopLeftRadius: 5,
-                                                borderBottomLeftRadius: 5,
-                                            }}
-                                            right={
-                                                searchQueryForModels != null &&
-                                                searchQueryForModels != "" && (
-                                                    <TextInput.Icon
-                                                        icon="close"
-                                                        color={
-                                                            colors.light_gray
-                                                        }
-                                                        onPress={() =>
-                                                            onModelRefresh()
-                                                        }
-                                                    />
-                                                )
-                                            }
-                                        />
-                                        <TouchableOpacity
-                                            onPress={() =>
-                                                searchFilterForModels()
-                                            }
-                                            style={{
-                                                elevation: 4,
-                                                borderTopRightRadius: 5,
-                                                borderBottomRightRadius: 5,
-                                                paddingRight: 25,
-                                                paddingLeft: 25,
-                                                zIndex: 2,
-                                                backgroundColor: colors.primary,
-                                                justifyContent: "center",
-                                                alignItems: "center",
-                                            }}
-                                        >
-                                            <IconX
-                                                name={"search"}
-                                                size={17}
-                                                color={colors.white}
-                                            />
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                                {filteredModelData?.length > 0 ? (
-                                    <FlatList
-                                            showsVerticalScrollIndicator={false}
-                                        ItemSeparatorComponent={() => (
-                                            <>
-                                                <Divider />
-                                                <Divider />
-                                            </>
-                                        )}
-                                        data={filteredModelData}
-                                        onEndReached={loadMoreModels ? getModelList : null}
-                                        onEndReachedThreshold={0.5}
-                                        refreshControl={
-                                            <RefreshControl
-                                                refreshing={modelRefreshing}
-                                                onRefresh={onModelRefresh}
-                                                colors={["green"]}
-                                            />
-                                        }
-                                        ListFooterComponent={loadMoreModels ? renderModelFooter : null}
-                                        style={{
-                                            borderColor: "#0000000a",
-                                            borderWidth: 1,
-                                            flex: 1,
-                                        }}
-                                        keyExtractor={(item) => item.id}
-                                        renderItem={({ item }) => (
-                                            <List.Item
-                                                title={
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                            display: "flex",
-                                                            flexWrap: "wrap",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={{
-                                                                fontSize: 16,
-                                                                color: colors.black,
-                                                            }}
-                                                        >
-                                                            {item.model_name}
-                                                        </Text>
-                                                    </View>
-                                                }
-                                                onPress={() => {
-                                                    setIsModelName(
-                                                        item.model_name
-                                                    );
-                                                    setIsModel(item.id);
-                                                    setModelError("");
-                                                    setModelListModal(false);
-                                                }}
-                                            />
-                                        )}
-                                    />
-                                ) : (
-                                    <View
-                                        style={{
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            marginVertical: 50,
-                                            flex: 1,
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                color: colors.black,
-                                                textAlign: "center",
-                                            }}
-                                        >
-                                            No such vehicle model found!
-                                        </Text>
-                                    </View>
-                                )}
+                        <View
+                            style={{
+                                marginTop: 20,
+                                marginBottom: 10,
+                                flex: 1,
+                            }}
+                        >
+                            {/* Search Bar */}
+                            <View>
                                 <View
                                     style={{
-                                        justifyContent: "flex-end",
+                                        marginBottom: 15,
                                         flexDirection: "row",
                                     }}
                                 >
-                                    <TouchableOpacity
+                                    <TextInput
+                                        mode={"flat"}
+                                        placeholder="Search here..."
+                                        onChangeText={(text) =>
+                                            setSearchQueryForModels(text)
+                                        }
+                                        value={searchQueryForModels}
+                                        activeUnderlineColor={
+                                            colors.transparent
+                                        }
+                                        selectionColor="black"
+                                        underlineColor={colors.transparent}
                                         style={{
-                                            flexDirection: "row",
+                                            elevation: 4,
+                                            height: 50,
+                                            backgroundColor: colors.white,
+                                            flex: 1,
+                                            borderTopRightRadius: 0,
+                                            borderBottomRightRadius: 0,
+                                            borderTopLeftRadius: 5,
+                                            borderBottomLeftRadius: 5,
+                                        }}
+                                        right={
+                                            searchQueryForModels != null &&
+                                            searchQueryForModels != "" && (
+                                                <TextInput.Icon
+                                                    icon="close"
+                                                    color={
+                                                        colors.light_gray
+                                                    }
+                                                    onPress={() =>
+                                                        onModelRefresh()
+                                                    }
+                                                />
+                                            )
+                                        }
+                                    />
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            searchFilterForModels()
+                                        }
+                                        style={{
+                                            elevation: 4,
+                                            borderTopRightRadius: 5,
+                                            borderBottomRightRadius: 5,
+                                            paddingRight: 25,
+                                            paddingLeft: 25,
+                                            zIndex: 2,
+                                            backgroundColor: colors.primary,
                                             justifyContent: "center",
                                             alignItems: "center",
-                                            backgroundColor: colors.primary,
-                                            marginTop: 7,
-                                            paddingVertical: 3,
-                                            paddingHorizontal: 10,
-                                            borderRadius: 4,
-                                        }}
-                                        onPress={() => {
-                                            setAddModelModal(true);
-                                            setModelListModal(false);
                                         }}
                                     >
-                                        <Icon
-                                            style={{
-                                                color: colors.white,
-                                                marginRight: 4,
-                                            }}
-                                            name="plus"
-                                            size={16}
+                                        <IconX
+                                            name={"search"}
+                                            size={17}
+                                            color={colors.white}
                                         />
-                                        <Text style={{ color: colors.white }}>
-                                            Add Model
-                                        </Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
-                        )}
+                            <FlatList
+                                showsVerticalScrollIndicator={false}
+                                ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                                data={filteredModelData}
+                                onEndReached={loadMoreModels ? getModelList : null}
+                                onEndReachedThreshold={0.5}
+                                contentContainerStyle={{ flexGrow: 1 }}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={modelRefreshing}
+                                        onRefresh={onModelRefresh}
+                                        colors={["green"]}
+                                    />
+                                }
+                                ListFooterComponent={loadMoreModels ? renderModelFooter : null}
+                                ListEmptyComponent={() => (
+                                    !isLoading && (
+                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                            <Text style={{ color: colors.black }}>
+                                                No vehicle model found!
+                                            </Text>
+                                        </View>
+                                ))}
+                                style={{
+                                    borderColor: "#0000000a",
+                                    borderWidth: 1,
+                                    flex: 1,
+                                }}
+                                keyExtractor={(item) => item.id}
+                                renderItem={({ item }) => (
+                                    !isLoading && 
+                                        <List.Item
+                                            title={
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                        display: "flex",
+                                                        flexWrap: "wrap",
+                                                    }}
+                                                >
+                                                    <Text
+                                                        style={{
+                                                            fontSize: 16,
+                                                            color: colors.black,
+                                                        }}
+                                                    >
+                                                        {item.model_name}
+                                                    </Text>
+                                                </View>
+                                            }
+                                            onPress={() => {
+                                                setIsModelName(
+                                                    item.model_name
+                                                );
+                                                setIsModel(item.id);
+                                                setModelError("");
+                                                setModelListModal(false);
+                                            }}
+                                        />
+                                )}
+                            />
+                            <View
+                                style={{
+                                    justifyContent: "flex-end",
+                                    flexDirection: "row",
+                                }}
+                            >
+                                <TouchableOpacity
+                                    style={{
+                                        flexDirection: "row",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        backgroundColor: colors.primary,
+                                        marginTop: 7,
+                                        paddingVertical: 3,
+                                        paddingHorizontal: 10,
+                                        borderRadius: 4,
+                                    }}
+                                    onPress={() => {
+                                        setAddModelModal(true);
+                                        setModelListModal(false);
+                                    }}
+                                >
+                                    <Icon
+                                        style={{
+                                            color: colors.white,
+                                            marginRight: 4,
+                                        }}
+                                        name="plus"
+                                        size={16}
+                                    />
+                                    <Text style={{ color: colors.white }}>
+                                        Add Model
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
                     </Modal>
                 </Portal>
                 {isLoading &&

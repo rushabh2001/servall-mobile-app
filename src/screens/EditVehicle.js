@@ -32,7 +32,6 @@ import DocumentPicker from "react-native-document-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Lightbox from "react-native-lightbox-v2";
 import Spinner from "react-native-loading-spinner-overlay";
-import { useIsFocused } from "@react-navigation/native";
 
 const EditVehicle = ({
     navigation,
@@ -115,7 +114,6 @@ const EditVehicle = ({
     const [isBrandName, setIsBrandName] = useState();
     const [brandList, setBrandList] = useState([]);
     const [brandListModal, setBrandListModal] = useState(false);
-    const [isLoadingBrandList, setIsLoadingBrandList] = useState(true);
     const [filteredBrandData, setFilteredBrandData] = useState([]);
     const [searchQueryForBrands, setSearchQueryForBrands] = useState();
     const [brandError, setBrandError] = useState(""); // Error State
@@ -130,7 +128,6 @@ const EditVehicle = ({
     const [isModelName, setIsModelName] = useState();
     const [modelList, setModelList] = useState([]);
     const [modelListModal, setModelListModal] = useState(false);
-    const [isLoadingModelList, setIsLoadingModelList] = useState(true);
     const [filteredModelData, setFilteredModelData] = useState([]);
     const [searchQueryForModels, setSearchQueryForModels] = useState();
     const [modelError, setModelError] = useState(""); // Error State
@@ -144,10 +141,7 @@ const EditVehicle = ({
     const [isInsuranceProvider, setIsInsuranceProvider] = useState("");
     const [isInsuranceProviderName, setIsInsuranceProviderName] = useState("");
     const [insuranceProviderList, setInsuranceProviderList] = useState([]);
-    const [insuranceProviderListModal, setInsuranceProviderListModal] =
-        useState(false);
-    const [isLoadingInsuranceProviderList, setIsLoadingInsuranceProviderList] =
-        useState(false);
+    const [insuranceProviderListModal, setInsuranceProviderListModal] =useState(false);
     const [filteredInsuranceProviderData, setFilteredInsuranceProviderData] =
         useState([]);
     const [
@@ -164,7 +158,6 @@ const EditVehicle = ({
 
     const [resizeImage, setResizeImage] = useState("cover");
 
-    const isFocused = useIsFocused();
     const scroll1Ref = useRef();
 
     const getVehicleDetails = async (option) => {
@@ -184,12 +177,11 @@ const EditVehicle = ({
             const json = await res.json();
             if (json !== undefined) {
                 setSelectedVehicleData(json.vehicle_details);
+                setIsLoading(false);
             }
         } catch (e) {
             console.log(e);
             return alert(e);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -320,12 +312,11 @@ const EditVehicle = ({
                 setIsRegistrationCertificateImg(
                     json.vehicle_details.registration_certificate_img
                 );
+                setIsRegistrationCrtImgLoading(false);
             }
         } catch (e) {
             console.log(e);
             return alert(e);
-        } finally {
-            setIsRegistrationCrtImgLoading(false);
         }
     };
 
@@ -368,8 +359,7 @@ const EditVehicle = ({
             let responseJson = await res.json();
             if (responseJson.message == true) {
                 fetchInsurancePolicyImage();
-            } else {
-            }
+            } 
         } else {
             console.log("Please Select File first");
         }
@@ -391,12 +381,11 @@ const EditVehicle = ({
             const json = await res.json();
             if (json !== undefined) {
                 setIsInsuranceImg(json.vehicle_details.insurance_img);
+                setIsInsurancePolicyImgLoading(false);
             }
         } catch (e) {
             console.log(e);
             return alert(e);
-        } finally {
-            setIsInsurancePolicyImgLoading(false);
         }
     };
 
@@ -537,20 +526,21 @@ const EditVehicle = ({
                     setIsLoading(false);
                     // console.log(JSON.stringify(res));
                     if (res.statusCode == 400) {
-                        {
-                            res.data.message.brand_id &&
-                                setBrandError(res.data.message.brand_id);
-                        }
-                        {
-                            res.data.message.model_id &&
-                                setModelError(res.data.message.model_id);
-                        }
-                        {
-                            res.data.message.vehicle_registration_number &&
-                                setVehicleRegistrationNumberError(
-                                    res.data.message.vehicle_registration_number
-                                );
-                        }
+                        alert(Object.values(res.data.message));
+                        // {
+                        //     res.data.message.brand_id &&
+                        //         setBrandError(res.data.message.brand_id);
+                        // }
+                        // {
+                        //     res.data.message.model_id &&
+                        //         setModelError(res.data.message.model_id);
+                        // }
+                        // {
+                        //     res.data.message.vehicle_registration_number &&
+                        //         setVehicleRegistrationNumberError(
+                        //             res.data.message.vehicle_registration_number
+                        //         );
+                        // }
                         return;
                     } else if (res.statusCode == 200) {
                         // console.log("Vehicle Updated SuccessFully");
@@ -580,21 +570,16 @@ const EditVehicle = ({
             const json = await res.json();
             if (json !== undefined) {
                 setVehicleList(json.user_vehicles.vehicles);
+                setIsLoading(false);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            setIsLoading(false);
         }
     };
 
     const getBrandList = async () => {
-        {
-            brandPage == 1 && setIsLoadingBrandList(true);
-        }
-        {
-            brandPage != 1 && setIsBrandScrollLoading(true);
-        }
+        if(brandPage == 1) setIsLoading(true)
+        if(brandPage != 1) setIsBrandScrollLoading(true)
         try {
             const res = await fetch(`${API_URL}fetch_brand?page=${brandPage}`, {
                 method: "POST",
@@ -614,10 +599,8 @@ const EditVehicle = ({
                     ...filteredBrandData,
                     ...json.brand_list.data,
                 ]);
-                setIsLoadingBrandList(false);
-                {
-                    brandPage != 1 && setIsBrandScrollLoading(false);
-                }
+                setIsLoading(false);
+                if(brandPage != 1) setIsBrandScrollLoading(false)
                 {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
                 {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(brandPage + 1) : null}
             }
@@ -627,6 +610,7 @@ const EditVehicle = ({
     };
 
     const searchFilterForBrands = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_brand`, {
                 method: "POST",
@@ -645,8 +629,7 @@ const EditVehicle = ({
                 setFilteredBrandData(json.brand_list.data);
                 {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
                 {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(2) : null}
-                setBrandRefreshing(false);
-            } else {
+                setIsLoading(false);
                 setBrandRefreshing(false);
             }
         } catch (error) {
@@ -674,11 +657,11 @@ const EditVehicle = ({
                 setFilteredBrandData(json.brand_list.data);
                 {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
                 {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(2) : null}
+                setBrandRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
-        } finally {
-            setBrandRefreshing(false);
         }
     };
 
@@ -700,12 +683,8 @@ const EditVehicle = ({
     };
 
     const getModelList = async () => {
-        {
-            modelPage == 1 && setIsLoadingModelList(true);
-        }
-        {
-            modelPage != 1 && setIsModelScrollLoading(true);
-        }
+        if(modelPage == 1) setIsLoading(true)
+        if(modelPage != 1) setIsModelScrollLoading(true)
         try {
             const res = await fetch(
                 `${API_URL}fetch_vehicle_model?page=${modelPage}`,
@@ -723,17 +702,15 @@ const EditVehicle = ({
                 }
             );
             const json = await res.json();
-            console.log("model_json", json);
+            // console.log("model_json", json);
             if (json !== undefined) {
                 setModelList([...modelList, ...json.vehicle_model_list.data]);
                 setFilteredModelData([
                     ...filteredModelData,
                     ...json.vehicle_model_list.data,
                 ]);
-                setIsLoadingModelList(false);
-                {
-                    modelPage != 1 && setIsModelScrollLoading(false);
-                }
+                setIsLoading(false);
+                if(modelPage != 1) setIsModelScrollLoading(false)
                 {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
                 {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(modelPage + 1) : null}
             }
@@ -743,6 +720,7 @@ const EditVehicle = ({
     };
 
     const searchFilterForModels = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_vehicle_model`, {
                 method: "POST",
@@ -762,8 +740,7 @@ const EditVehicle = ({
                 setFilteredModelData(json.vehicle_model_list.data);
                 {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
                 {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(2) : null}
-                setModelRefreshing(false);
-            } else {
+                setIsLoading(false);
                 setModelRefreshing(false);
             }
         } catch (error) {
@@ -792,12 +769,11 @@ const EditVehicle = ({
                 setFilteredModelData(json.vehicle_model_list.data);
                 {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
                 {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(2) : null}
+                setModelRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
-        } finally {
-            setModelRefreshing(false);
-            setIsLoadingModelList(false);
         }
     };
 
@@ -869,7 +845,7 @@ const EditVehicle = ({
     };
 
     const getInsuranceProviderList = async () => {
-        setIsLoadingInsuranceProviderList(true);
+        setIsLoading(true);
         try {
             const res = await fetch(`${API_URL}fetch_insurance_provider`, {
                 method: "GET",
@@ -885,32 +861,12 @@ const EditVehicle = ({
                 // console.log('setInsuranceProviderList', json.data);
                 setInsuranceProviderList(json.insurance_provider_list);
                 setFilteredInsuranceProviderData(json.insurance_provider_list);
+                setIsLoading(false);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            // setIsLoading2(false);
-            setIsLoadingInsuranceProviderList(false);
         }
     };
-    // const getInsuranceProviderList = async () => {
-    //     try {
-    //         const res = await fetch(`${API_URL}fetch_insurance_provider`, {
-    //             method: 'GET',
-    //             headers: {
-    //                 'Accept': 'application/json',
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': 'Bearer ' + userToken
-    //             },
-    //         });
-    //         const json = await res.json();
-    //         if (json !== undefined) {
-    //             setInsuranceProviderList(json.insurance_provider_list);
-    //         }
-    //     } catch (e) {
-    //         console.log(e);
-    //     }
-    // };
 
     useEffect(() => {
         if (selectedVehicleData != 0) {
@@ -997,11 +953,12 @@ const EditVehicle = ({
         getVehicleList();
         getBrandList();
         getInsuranceProviderList();
+        console.log('editVehicle Screen');
     }, []);
 
     useEffect(() => {
         if (isBrand != undefined && selectedVehicleData != undefined) {
-            setIsLoadingModelList(true);
+            setIsLoading(true);
             pullModelRefresh();
             setModelFieldToggle(true);
         }
@@ -1071,585 +1028,514 @@ const EditVehicle = ({
                                     </Picker>
                                 </View>
 
-                                <View>
-                                    <Text style={[styles.headingStyle]}>
-                                        Vehicle Details:
-                                    </Text>
+                                {selectedVehicle != 0 &&
+                                    <View>
+                                        <Text style={[styles.headingStyle]}>
+                                            Vehicle Details:
+                                        </Text>
 
-                                    <View style={{marginTop: 20}}>
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                setBrandListModal(true);
-                                            }}
-                                        >
-                                            <TextInput
-                                                mode="outlined"
-                                                label="Brand"
-                                                style={{
-                                                    backgroundColor: "#f1f1f1",
-                                                    width: "100%",
-                                                }}
-                                                placeholder="Select Brand"
-                                                editable={false}
-                                                value={isBrandName}
-                                                right={
-                                                    <TextInput.Icon name="menu-down" />
-                                                }
-                                            />
-                                        </TouchableOpacity>
-                                        {brandError?.length > 0 && (
-                                            <Text style={styles.errorTextStyle}>
-                                                {brandError}
-                                            </Text>
-                                        )}
-                                    </View>
-
-                                    {modelFieldToggle == true && (
                                         <View style={{marginTop: 20}}>
                                             <TouchableOpacity
                                                 onPress={() => {
-                                                    setModelListModal(true);
+                                                    setBrandListModal(true);
                                                 }}
                                             >
                                                 <TextInput
                                                     mode="outlined"
-                                                    label="Vehicle Model"
+                                                    label="Brand"
                                                     style={{
                                                         backgroundColor: "#f1f1f1",
                                                         width: "100%",
                                                     }}
-                                                    placeholder="Select Vehicle Model"
+                                                    placeholder="Select Brand"
                                                     editable={false}
-                                                    value={isModelName}
+                                                    value={isBrandName}
                                                     right={
                                                         <TextInput.Icon name="menu-down" />
                                                     }
                                                 />
                                             </TouchableOpacity>
-                                            {modelError?.length > 0 && (
+                                            {brandError?.length > 0 && (
                                                 <Text style={styles.errorTextStyle}>
-                                                    {modelError}
+                                                    {brandError}
                                                 </Text>
                                             )}
                                         </View>
-                                    )}
 
-                                    {/*  <View style={styles.dropDownContainer}>
-                                                <Picker
-                                                    selectedValue={isBrand}
-                                                    onValueChange={(option) => {setIsBrand(option); if(option == "new_brand") setAddBrandModal(true) }}
-                                                    style={styles.dropDownField}
-                                                    itemStyle={{padding: 0}}
+                                        {modelFieldToggle == true && (
+                                            <View style={{marginTop: 20}}>
+                                                <TouchableOpacity
+                                                    onPress={() => {
+                                                        setModelListModal(true);
+                                                    }}
                                                 >
-                                                    <Picker.Item label="Select Brand" value="0" />
-                                                    {brandList.map((brandList, i) => {
-                                                        return (
-                                                            <Picker.Item
-                                                                key={i}
-                                                                label={brandList.name}
-                                                                value={brandList.id}
-                                                            />
-                                                        );
-                                                    })}
-                                                    <Picker.Item label="Add New Brand" value="new_brand" />
-                                                </Picker>
+                                                    <TextInput
+                                                        mode="outlined"
+                                                        label="Vehicle Model"
+                                                        style={{
+                                                            backgroundColor: "#f1f1f1",
+                                                            width: "100%",
+                                                        }}
+                                                        placeholder="Select Vehicle Model"
+                                                        editable={false}
+                                                        value={isModelName}
+                                                        right={
+                                                            <TextInput.Icon name="menu-down" />
+                                                        }
+                                                    />
+                                                </TouchableOpacity>
+                                                {modelError?.length > 0 && (
+                                                    <Text style={styles.errorTextStyle}>
+                                                        {modelError}
+                                                    </Text>
+                                                )}
                                             </View>
-                                            {brandError?.length > 0 &&
-                                                <Text style={styles.errorTextStyle}>{brandError}</Text>
-                                            }
+                                        )}
 
-                                            <View style={styles.dropDownContainer}>
-                                                <Picker
-                                                    selectedValue={isModel}
-                                                    onValueChange={(option) => { setIsModel(option); if(option == "new_model") setAddModelModal(true) }}
-                                                    style={styles.dropDownField}
-                                                    itemStyle={{padding: 0}}
-                                                    enabled={modelFieldToggle}
-                                                >
-                                                    <Picker.Item label="Select Vehicle Model" value="0" />
-                                                    {modelList.map((modelList, i) => {
-                                                        return (
-                                                            <Picker.Item
-                                                                key={i}
-                                                                label={modelList.model_name}
-                                                                value={modelList.id}
-                                                            />
-                                                        );
-                                                    })}
-                                                    <Picker.Item label="Add New Model" value="new_model" />
-                                                </Picker>
-                                            </View>
-                                            {modelError?.length > 0 &&
-                                                <Text style={styles.errorTextStyle}>{modelError}</Text>
-                                            } */}
-
-                                    <TextInput
-                                        mode="outlined"
-                                        label="Vehicle Registration Number"
-                                        style={styles.input}
-                                        placeholder="Vehicle Registration Number"
-                                        value={isVehicleRegistrationNumber}
-                                        onChangeText={(text) =>
-                                            setIsVehicleRegistrationNumber(text)
-                                        }
-                                    />
-                                    {vehicleRegistrationNumberError?.length >
-                                        0 && (
-                                        <Text style={styles.errorTextStyle}>
-                                            {vehicleRegistrationNumberError}
-                                        </Text>
-                                    )}
-
-                                    <TouchableOpacity
-                                        style={{ flex: 1, marginTop: 20 }}
-                                        onPress={() =>
-                                            setDisplayPurchaseCalender(true)
-                                        }
-                                    >
                                         <TextInput
                                             mode="outlined"
-                                            label="Purchase Date"
-                                            placeholder="Purchase Date"
-                                            value={datePurchase}
-                                            editable={false}
-                                            right={
-                                                <TextInput.Icon name="calendar-month" />
+                                            label="Vehicle Registration Number"
+                                            style={styles.input}
+                                            placeholder="Vehicle Registration Number"
+                                            value={isVehicleRegistrationNumber}
+                                            onChangeText={(text) =>
+                                                setIsVehicleRegistrationNumber(text)
                                             }
                                         />
-                                        {displayPurchaseCalender ==
-                                            true && (
-                                            <DateTimePicker
-                                                value={
-                                                    isPurchaseDate
-                                                        ? isPurchaseDate
-                                                        : new Date()
-                                                }
-                                                mode="date"
-                                                maximumDate={new Date()}
-                                                onChange={
-                                                    changePurchaseSelectedDate
-                                                }
-                                                display="spinner"
-                                            />
+                                        {vehicleRegistrationNumberError?.length >
+                                            0 && (
+                                            <Text style={styles.errorTextStyle}>
+                                                {vehicleRegistrationNumberError}
+                                            </Text>
                                         )}
-                                    </TouchableOpacity>
-                                    {purchaseDateError?.length > 0 && (
-                                        <Text style={styles.errorTextStyle}>
-                                            {purchaseDateError}
-                                        </Text>
-                                    )}
 
-                                    <TouchableOpacity
-                                        style={{ flex: 1, marginTop: 20 }}
-                                        onPress={() =>
-                                            setDisplayManufacturingCalender(true)
-                                        }
-                                    >
-                                        <TextInput
-                                            mode="outlined"
-                                            label="Manufacturing Date"
-                                            placeholder="Manufacturing Date"
-                                            value={dateManufacturing}
-                                            editable={false}
-                                            right={
-                                                <TextInput.Icon name="calendar-month" />
-                                            }
-                                        />
-                                        {displayManufacturingCalender ==
-                                            true && (
-                                            <DateTimePicker
-                                                value={
-                                                    isManufacturingDate
-                                                        ? isManufacturingDate
-                                                        : new Date()
-                                                }
-                                                mode="date"
-                                                maximumDate={new Date()}
-                                                onChange={
-                                                    changeManufacturingSelectedDate
-                                                }
-                                                display="spinner"
-                                            />
-                                        )}
-                                    </TouchableOpacity>
-                                    {manufacturingDateError?.length > 0 && (
-                                        <Text style={styles.errorTextStyle}>
-                                            {manufacturingDateError}
-                                        </Text>
-                                    )}
-
-                                    <TextInput
-                                        mode="outlined"
-                                        label="Engine Number"
-                                        style={styles.input}
-                                        placeholder="Engine Number"
-                                        value={isEngineNumber}
-                                        onChangeText={(text) =>
-                                            setIsEngineNumber(text)
-                                        }
-                                    />
-                                    {engineNumberError?.length > 0 && (
-                                        <Text style={styles.errorTextStyle}>
-                                            {engineNumberError}
-                                        </Text>
-                                    )}
-
-                                    <TextInput
-                                        mode="outlined"
-                                        label="Chasis Number"
-                                        style={styles.input}
-                                        placeholder="Chasis Number"
-                                        value={isChasisNumber}
-                                        onChangeText={(text) =>
-                                            setIsChasisNumber(text)
-                                        }
-                                    />
-                                    {chasisNumberError?.length > 0 && (
-                                        <Text style={styles.errorTextStyle}>
-                                            {chasisNumberError}
-                                        </Text>
-                                    )}
-
-                                    <View style={{marginTop: 20}}>
                                         <TouchableOpacity
-                                            onPress={() => {
-                                                setInsuranceProviderListModal(
-                                                    true
-                                                );
-                                                setIsNewInsuranceProvider("");
-                                                setNewInsuranceProviderError(
-                                                    ""
-                                                );
-                                            }}
-                                            >
+                                            style={{ flex: 1, marginTop: 20 }}
+                                            onPress={() =>
+                                                setDisplayPurchaseCalender(true)
+                                            }
+                                        >
                                             <TextInput
                                                 mode="outlined"
-                                                label="Insurance Provider"
-                                                style={{
-                                                    backgroundColor: "#f1f1f1",
-                                                    width: "100%",
-                                                }}
-                                                placeholder="Select Insurance Provider"
-                                                value={isInsuranceProviderName}
+                                                label="Purchase Date"
+                                                placeholder="Purchase Date"
+                                                value={datePurchase}
                                                 editable={false}
                                                 right={
-                                                    <TextInput.Icon name="menu-down" />
+                                                    <TextInput.Icon name="calendar-month" />
                                                 }
                                             />
+                                            {displayPurchaseCalender ==
+                                                true && (
+                                                <DateTimePicker
+                                                    value={
+                                                        isPurchaseDate
+                                                            ? isPurchaseDate
+                                                            : new Date()
+                                                    }
+                                                    mode="date"
+                                                    maximumDate={new Date()}
+                                                    onChange={
+                                                        changePurchaseSelectedDate
+                                                    }
+                                                    display="spinner"
+                                                />
+                                            )}
                                         </TouchableOpacity>
-                                        {insuranceProviderError?.length > 0 && (
+                                        {purchaseDateError?.length > 0 && (
                                             <Text style={styles.errorTextStyle}>
-                                                {insuranceProviderError}
+                                                {purchaseDateError}
                                             </Text>
                                         )}
-                                    </View>
 
-                                    {/* <View style={styles.dropDownContainer}>
-                                                <Picker
-                                                    selectedValue={isInsuranceProvider}
-                                                    onValueChange={(option) => { setIsInsuranceProvider(option); if(option == "new_insurance_company") setAddInsuranceCompanyModal(true) }}
-                                                    style={styles.dropDownField}
-                                                    itemStyle={{padding: 0}}
-                                                >
-                                                    <Picker.Item label="Select Insurance Provider Company" value="0" />
-                                                    {insuranceProviderList.map((insuranceProviderList, i) => {
-                                                        return (
-                                                            <Picker.Item
-                                                                key={i}
-                                                                label={insuranceProviderList.name}
-                                                                value={insuranceProviderList.id}
-                                                            />
-                                                        );
-                                                    })}
-                                                        <Picker.Item label="Add New Insurance Company" value="new_insurance_company" />
-                                                </Picker>
-                                            </View>
-                                            {insuranceProviderError?.length > 0 &&
-                                                <Text style={styles.errorTextStyle}>{insuranceProviderError}</Text>
-                                            } */}
+                                        <TouchableOpacity
+                                            style={{ flex: 1, marginTop: 20 }}
+                                            onPress={() =>
+                                                setDisplayManufacturingCalender(true)
+                                            }
+                                        >
+                                            <TextInput
+                                                mode="outlined"
+                                                label="Manufacturing Date"
+                                                placeholder="Manufacturing Date"
+                                                value={dateManufacturing}
+                                                editable={false}
+                                                right={
+                                                    <TextInput.Icon name="calendar-month" />
+                                                }
+                                            />
+                                            {displayManufacturingCalender ==
+                                                true && (
+                                                <DateTimePicker
+                                                    value={
+                                                        isManufacturingDate
+                                                            ? isManufacturingDate
+                                                            : new Date()
+                                                    }
+                                                    mode="date"
+                                                    maximumDate={new Date()}
+                                                    onChange={
+                                                        changeManufacturingSelectedDate
+                                                    }
+                                                    display="spinner"
+                                                />
+                                            )}
+                                        </TouchableOpacity>
+                                        {manufacturingDateError?.length > 0 && (
+                                            <Text style={styles.errorTextStyle}>
+                                                {manufacturingDateError}
+                                            </Text>
+                                        )}
 
-                                    <TextInput
-                                        mode="outlined"
-                                        label="Insurer GSTIN"
-                                        style={styles.input}
-                                        placeholder="Insurer GSTIN"
-                                        value={isInsurerGstin}
-                                        onChangeText={(text) =>
-                                            setIsInsurerGstin(text)
-                                        }
-                                    />
-                                    {insurerGstinError?.length > 0 && (
-                                        <Text style={styles.errorTextStyle}>
-                                            {insurerGstinError}
-                                        </Text>
-                                    )}
-
-                                    <TextInput
-                                        mode="outlined"
-                                        label="Insurer Address"
-                                        style={styles.input}
-                                        placeholder="Insurer Address"
-                                        value={isInsurerAddress}
-                                        onChangeText={(text) =>
-                                            setIsInsurerAddress(text)
-                                        }
-                                    />
-                                    {insurerAddressError?.length > 0 && (
-                                        <Text style={styles.errorTextStyle}>
-                                            {insurerAddressError}
-                                        </Text>
-                                    )}
-
-                                    <TextInput
-                                        mode="outlined"
-                                        label="Policy Number"
-                                        style={styles.input}
-                                        placeholder="Policy Number"
-                                        value={isPolicyNumber}
-                                        onChangeText={(text) =>
-                                            setIsPolicyNumber(text)
-                                        }
-                                    />
-                                    {policyNumberError?.length > 0 && (
-                                        <Text style={styles.errorTextStyle}>
-                                            {policyNumberError}
-                                        </Text>
-                                    )}
-
-                                    <TouchableOpacity
-                                        style={{ flex: 1, marginTop: 20 }}
-                                        onPress={() =>
-                                            setDisplayInsuranceExpiryCalender(
-                                                true
-                                            )
-                                        }
-                                    >
                                         <TextInput
                                             mode="outlined"
-                                            label="Insurance Expiry Date"
-                                            placeholder="Insurance Expiry Date"
-                                            value={dateInsuranceExpiry}
-                                            editable={false}
-                                            right={
-                                                <TextInput.Icon name="calendar-month" />
+                                            label="Engine Number"
+                                            style={styles.input}
+                                            placeholder="Engine Number"
+                                            value={isEngineNumber}
+                                            onChangeText={(text) =>
+                                                setIsEngineNumber(text)
                                             }
                                         />
-                                        {displayInsuranceExpiryCalender ==
-                                            true && (
-                                            <DateTimePicker
-                                                value={
-                                                    isInsuranceExpiryDate
-                                                        ? isInsuranceExpiryDate
-                                                        : new Date()
-                                                }
-                                                mode="date"
-                                                minimumDate={new Date()}
-                                                onChange={
-                                                    changeInsuranceExpirySelectedDate
-                                                }
-                                                display="spinner"
-                                            />
+                                        {engineNumberError?.length > 0 && (
+                                            <Text style={styles.errorTextStyle}>
+                                                {engineNumberError}
+                                            </Text>
                                         )}
-                                    </TouchableOpacity>
-                                    {insuranceExpiryDateError?.length > 0 && (
-                                        <Text style={styles.errorTextStyle}>
-                                            {insuranceExpiryDateError}
-                                        </Text>
-                                    )}
 
-                                    <Text
-                                        style={[
-                                            styles.headingStyle,
-                                            { marginTop: 20 },
-                                        ]}
-                                    >
-                                        Registration Certificate:
-                                    </Text>
-                                    {isRegistrationCrtImgLoading == true ? (
-                                        <ActivityIndicator
-                                            style={{
-                                                flex: 1,
-                                                jusifyContent: "center",
-                                                alignItems: "center",
-                                                marginVertical: 20,
-                                            }}
-                                        ></ActivityIndicator>
-                                    ) : isRegistrationCertificateImg !==
-                                        null ? (
-                                        <View
-                                            style={{
-                                                position: "relative",
-                                                flex: 1,
-                                                marginTop: 20,
-                                                width: 150,
-                                            }}
-                                        >
-                                            <Lightbox
-                                                onOpen={() =>
-                                                    setResizeImage("contain")
-                                                }
-                                                willClose={() =>
-                                                    setResizeImage("cover")
-                                                }
-                                                activeProps={styles.activeImage}
-                                                navigator={navigator}
-                                                style={styles.lightBoxWrapper}
-                                            >
-                                                <Image
-                                                    resizeMode={resizeImage}
-                                                    style={styles.verticleImage}
-                                                    source={{
-                                                        uri:
-                                                            WEB_URL +
-                                                            "uploads/registration_certificate_img/" +
-                                                            isRegistrationCertificateImg,
-                                                    }}
-                                                />
-                                            </Lightbox>
-                                            <Icon
-                                                style={styles.iconChangeImage}
-                                                onPress={
-                                                    selectRegistrationCrtImg
-                                                }
-                                                name={"camera"}
-                                                size={16}
-                                                color={colors.white}
-                                            />
-                                        </View>
-                                    ) : (
-                                        <>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                Customer has not uploaded
-                                                Registration Certificate!
+                                        <TextInput
+                                            mode="outlined"
+                                            label="Chasis Number"
+                                            style={styles.input}
+                                            placeholder="Chasis Number"
+                                            value={isChasisNumber}
+                                            onChangeText={(text) =>
+                                                setIsChasisNumber(text)
+                                            }
+                                        />
+                                        {chasisNumberError?.length > 0 && (
+                                            <Text style={styles.errorTextStyle}>
+                                                {chasisNumberError}
                                             </Text>
-                                            {isNewRegistrationCertificateImg !=
+                                        )}
+
+                                        <View style={{marginTop: 20}}>
+                                            <TouchableOpacity
+                                                onPress={() => {
+                                                    setInsuranceProviderListModal(
+                                                        true
+                                                    );
+                                                    setIsNewInsuranceProvider("");
+                                                    setNewInsuranceProviderError(
+                                                        ""
+                                                    );
+                                                }}
+                                                >
+                                                <TextInput
+                                                    mode="outlined"
+                                                    label="Insurance Provider"
+                                                    style={{
+                                                        backgroundColor: "#f1f1f1",
+                                                        width: "100%",
+                                                    }}
+                                                    placeholder="Select Insurance Provider"
+                                                    value={isInsuranceProviderName}
+                                                    editable={false}
+                                                    right={
+                                                        <TextInput.Icon name="menu-down" />
+                                                    }
+                                                />
+                                            </TouchableOpacity>
+                                            {insuranceProviderError?.length > 0 && (
+                                                <Text style={styles.errorTextStyle}>
+                                                    {insuranceProviderError}
+                                                </Text>
+                                            )}
+                                        </View>
+
+                                        <TextInput
+                                            mode="outlined"
+                                            label="Insurer GSTIN"
+                                            style={styles.input}
+                                            placeholder="Insurer GSTIN"
+                                            value={isInsurerGstin}
+                                            onChangeText={(text) =>
+                                                setIsInsurerGstin(text)
+                                            }
+                                        />
+                                        {insurerGstinError?.length > 0 && (
+                                            <Text style={styles.errorTextStyle}>
+                                                {insurerGstinError}
+                                            </Text>
+                                        )}
+
+                                        <TextInput
+                                            mode="outlined"
+                                            label="Insurer Address"
+                                            style={styles.input}
+                                            placeholder="Insurer Address"
+                                            value={isInsurerAddress}
+                                            onChangeText={(text) =>
+                                                setIsInsurerAddress(text)
+                                            }
+                                        />
+                                        {insurerAddressError?.length > 0 && (
+                                            <Text style={styles.errorTextStyle}>
+                                                {insurerAddressError}
+                                            </Text>
+                                        )}
+
+                                        <TextInput
+                                            mode="outlined"
+                                            label="Policy Number"
+                                            style={styles.input}
+                                            placeholder="Policy Number"
+                                            value={isPolicyNumber}
+                                            onChangeText={(text) =>
+                                                setIsPolicyNumber(text)
+                                            }
+                                        />
+                                        {policyNumberError?.length > 0 && (
+                                            <Text style={styles.errorTextStyle}>
+                                                {policyNumberError}
+                                            </Text>
+                                        )}
+
+                                        <TouchableOpacity
+                                            style={{ flex: 1, marginTop: 20 }}
+                                            onPress={() =>
+                                                setDisplayInsuranceExpiryCalender(
+                                                    true
+                                                )
+                                            }
+                                        >
+                                            <TextInput
+                                                mode="outlined"
+                                                label="Insurance Expiry Date"
+                                                placeholder="Insurance Expiry Date"
+                                                value={dateInsuranceExpiry}
+                                                editable={false}
+                                                right={
+                                                    <TextInput.Icon name="calendar-month" />
+                                                }
+                                            />
+                                            {displayInsuranceExpiryCalender ==
+                                                true && (
+                                                <DateTimePicker
+                                                    value={
+                                                        isInsuranceExpiryDate
+                                                            ? isInsuranceExpiryDate
+                                                            : new Date()
+                                                    }
+                                                    mode="date"
+                                                    minimumDate={new Date()}
+                                                    onChange={
+                                                        changeInsuranceExpirySelectedDate
+                                                    }
+                                                    display="spinner"
+                                                />
+                                            )}
+                                        </TouchableOpacity>
+                                        {insuranceExpiryDateError?.length > 0 && (
+                                            <Text style={styles.errorTextStyle}>
+                                                {insuranceExpiryDateError}
+                                            </Text>
+                                        )}
+
+                                        <Text
+                                            style={[
+                                                styles.headingStyle,
+                                                { marginTop: 20 },
+                                            ]}
+                                        >
+                                            Registration Certificate:
+                                        </Text>
+                                        {isRegistrationCrtImgLoading == true ? (
+                                            <ActivityIndicator
+                                                style={{
+                                                    flex: 1,
+                                                    jusifyContent: "center",
+                                                    alignItems: "center",
+                                                    marginVertical: 20,
+                                                }}
+                                            ></ActivityIndicator>
+                                        ) : isRegistrationCertificateImg !==
                                             null ? (
-                                                <Text style={styles.textStyle}>
-                                                    File Name:{" "}
-                                                    {isNewRegistrationCertificateImg?.name
-                                                        ? isNewRegistrationCertificateImg?.name
-                                                        : null}
-                                                </Text>
-                                            ) : null}
-                                            <Pressable
-                                                onPress={
-                                                    selectRegistrationCrtImg
-                                                }
+                                            <View
+                                                style={{
+                                                    position: "relative",
+                                                    flex: 1,
+                                                    marginTop: 20,
+                                                    width: 150,
+                                                }}
                                             >
-                                                <Text style={styles.uploadBtn}>
-                                                    Upload
-                                                </Text>
-                                            </Pressable>
-                                        </>
-                                    )}
-                                    {registrationCertificateImgError?.length >
-                                        0 && (
-                                        <Text style={styles.errorTextStyle}>
-                                            {registrationCertificateImgError}
-                                        </Text>
-                                    )}
-
-                                    <Divider />
-                                    <Text
-                                        style={[
-                                            styles.headingStyle,
-                                            { marginTop: 20 },
-                                        ]}
-                                    >
-                                        Insurance Policy:
-                                    </Text>
-                                    {isInsurancePolicyImgLoading == true ? (
-                                        <ActivityIndicator
-                                            style={{
-                                                flex: 1,
-                                                jusifyContent: "center",
-                                                alignItems: "center",
-                                                marginVertical: 20,
-                                            }}
-                                        ></ActivityIndicator>
-                                    ) : isInsuranceImg !== null ? (
-                                        <View
-                                            style={{
-                                                position: "relative",
-                                                marginTop: 20,
-                                                width: 150,
-                                            }}
-                                        >
-                                            <Lightbox
-                                                onOpen={() =>
-                                                    setResizeImage("contain")
-                                                }
-                                                willClose={() =>
-                                                    setResizeImage("cover")
-                                                }
-                                                activeProps={styles.activeImage}
-                                                navigator={navigator}
-                                                style={styles.lightBoxWrapper}
-                                            >
-                                                <Image
-                                                    resizeMode={resizeImage}
-                                                    style={styles.verticleImage}
-                                                    source={{
-                                                        uri:
-                                                            WEB_URL +
-                                                            "uploads/insurance_img/" +
-                                                            isInsuranceImg,
-                                                    }}
+                                                <Lightbox
+                                                    onOpen={() =>
+                                                        setResizeImage("contain")
+                                                    }
+                                                    willClose={() =>
+                                                        setResizeImage("cover")
+                                                    }
+                                                    activeProps={styles.activeImage}
+                                                    navigator={navigator}
+                                                    style={styles.lightBoxWrapper}
+                                                >
+                                                    <Image
+                                                        resizeMode={resizeImage}
+                                                        style={styles.verticleImage}
+                                                        source={{
+                                                            uri:
+                                                                WEB_URL +
+                                                                "uploads/registration_certificate_img/" +
+                                                                isRegistrationCertificateImg,
+                                                        }}
+                                                    />
+                                                </Lightbox>
+                                                <Icon
+                                                    style={styles.iconChangeImage}
+                                                    onPress={
+                                                        selectRegistrationCrtImg
+                                                    }
+                                                    name={"camera"}
+                                                    size={16}
+                                                    color={colors.white}
                                                 />
-                                            </Lightbox>
-                                            <Icon
-                                                style={styles.iconChangeImage}
-                                                onPress={
-                                                    selectInsurancePolicyImg
-                                                }
-                                                name={"camera"}
-                                                size={16}
-                                                color={colors.white}
-                                            />
-                                        </View>
-                                    ) : (
-                                        <>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                Customer has not uploaded
-                                                Insurance Policy!
+                                            </View>
+                                        ) : (
+                                            <>
+                                                <Text
+                                                    style={styles.cardDetailsData}
+                                                >
+                                                    Customer has not uploaded
+                                                    Registration Certificate!
+                                                </Text>
+                                                {isNewRegistrationCertificateImg !=
+                                                null ? (
+                                                    <Text style={styles.textStyle}>
+                                                        File Name:{" "}
+                                                        {isNewRegistrationCertificateImg?.name
+                                                            ? isNewRegistrationCertificateImg?.name
+                                                            : null}
+                                                    </Text>
+                                                ) : null}
+                                                <Pressable
+                                                    onPress={
+                                                        selectRegistrationCrtImg
+                                                    }
+                                                >
+                                                    <Text style={styles.uploadBtn}>
+                                                        Upload
+                                                    </Text>
+                                                </Pressable>
+                                            </>
+                                        )}
+                                        {registrationCertificateImgError?.length >
+                                            0 && (
+                                            <Text style={styles.errorTextStyle}>
+                                                {registrationCertificateImgError}
                                             </Text>
-                                            {isNewInsuranceImg != null ? (
-                                                <Text style={styles.textStyle}>
-                                                    File Name:{" "}
-                                                    {isNewInsuranceImg?.name
-                                                        ? isNewInsuranceImg?.name
-                                                        : null}
-                                                </Text>
-                                            ) : null}
-                                            <Pressable
-                                                onPress={
-                                                    selectInsurancePolicyImg
-                                                }
-                                            >
-                                                <Text style={styles.uploadBtn}>
-                                                    Upload
-                                                </Text>
-                                            </Pressable>
-                                        </>
-                                    )}
-                                    {insuranceImgError?.length > 0 && (
-                                        <Text style={styles.errorTextStyle}>
-                                            {insuranceImgError}
-                                        </Text>
-                                    )}
+                                        )}
 
-                                    <Button
-                                        style={{ marginTop: 15 }}
-                                        mode={"contained"}
-                                        onPress={submit}
-                                    >
-                                        Submit
-                                    </Button>
-                                </View>
+                                        <Divider />
+                                        <Text
+                                            style={[
+                                                styles.headingStyle,
+                                                { marginTop: 20 },
+                                            ]}
+                                        >
+                                            Insurance Policy:
+                                        </Text>
+                                        {isInsurancePolicyImgLoading == true ? (
+                                            <ActivityIndicator
+                                                style={{
+                                                    flex: 1,
+                                                    jusifyContent: "center",
+                                                    alignItems: "center",
+                                                    marginVertical: 20,
+                                                }}
+                                            ></ActivityIndicator>
+                                        ) : isInsuranceImg !== null ? (
+                                            <View
+                                                style={{
+                                                    position: "relative",
+                                                    marginTop: 20,
+                                                    width: 150,
+                                                }}
+                                            >
+                                                <Lightbox
+                                                    onOpen={() =>
+                                                        setResizeImage("contain")
+                                                    }
+                                                    willClose={() =>
+                                                        setResizeImage("cover")
+                                                    }
+                                                    activeProps={styles.activeImage}
+                                                    navigator={navigator}
+                                                    style={styles.lightBoxWrapper}
+                                                >
+                                                    <Image
+                                                        resizeMode={resizeImage}
+                                                        style={styles.verticleImage}
+                                                        source={{
+                                                            uri:
+                                                                WEB_URL +
+                                                                "uploads/insurance_img/" +
+                                                                isInsuranceImg,
+                                                        }}
+                                                    />
+                                                </Lightbox>
+                                                <Icon
+                                                    style={styles.iconChangeImage}
+                                                    onPress={
+                                                        selectInsurancePolicyImg
+                                                    }
+                                                    name={"camera"}
+                                                    size={16}
+                                                    color={colors.white}
+                                                />
+                                            </View>
+                                        ) : (
+                                            <>
+                                                <Text
+                                                    style={styles.cardDetailsData}
+                                                >
+                                                    Customer has not uploaded
+                                                    Insurance Policy!
+                                                </Text>
+                                                {isNewInsuranceImg != null ? (
+                                                    <Text style={styles.textStyle}>
+                                                        File Name:{" "}
+                                                        {isNewInsuranceImg?.name
+                                                            ? isNewInsuranceImg?.name
+                                                            : null}
+                                                    </Text>
+                                                ) : null}
+                                                <Pressable
+                                                    onPress={
+                                                        selectInsurancePolicyImg
+                                                    }
+                                                >
+                                                    <Text style={styles.uploadBtn}>
+                                                        Upload
+                                                    </Text>
+                                                </Pressable>
+                                            </>
+                                        )}
+                                        {insuranceImgError?.length > 0 && (
+                                            <Text style={styles.errorTextStyle}>
+                                                {insuranceImgError}
+                                            </Text>
+                                        )}
+
+                                        <Button
+                                            style={{ marginTop: 15 }}
+                                            mode={"contained"}
+                                            onPress={submit}
+                                        >
+                                            Submit
+                                        </Button>
+                                    </View>
+                                }
                             </View>
                             <Portal>
                                 <Modal
@@ -1839,172 +1725,140 @@ const EditVehicle = ({
                                     >
                                         Select Insurance Provider
                                     </Text>
-                                    {isLoadingInsuranceProviderList == true ? (
-                                        <View
-                                            style={{
-                                                flex: 1,
-                                                justifyContent: "center",
+                                    <View
+                                        style={{
+                                            marginTop: 20,
+                                            marginBottom: 10,
+                                            flex: 1,
+                                        }}
+                                    >
+                                        <Searchbar
+                                            placeholder="Search here..."
+                                            onChangeText={(text) => {
+                                                if (text != null)
+                                                    searchFilterForInsuranceProviders(
+                                                        text
+                                                    );
                                             }}
-                                        >
-                                            <ActivityIndicator></ActivityIndicator>
-                                        </View>
-                                    ) : (
-                                        <View
+                                            value={
+                                                searchQueryForInsuranceProviders
+                                            }
+                                            elevation={0}
                                             style={{
-                                                marginTop: 20,
+                                                elevation: 0.8,
                                                 marginBottom: 10,
+                                            }}
+                                        />
+                                        <FlatList
+                                            showsVerticalScrollIndicator={false}
+                                            ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                                            data={
+                                                filteredInsuranceProviderData
+                                            }
+                                            contentContainerStyle={{ flexGrow: 1 }}
+                                            style={{
+                                                borderColor: "#0000000a",
+                                                borderWidth: 1,
                                                 flex: 1,
                                             }}
-                                        >
-                                            <Searchbar
-                                                placeholder="Search here..."
-                                                onChangeText={(text) => {
-                                                    if (text != null)
-                                                        searchFilterForInsuranceProviders(
-                                                            text
-                                                        );
-                                                }}
-                                                value={
-                                                    searchQueryForInsuranceProviders
-                                                }
-                                                elevation={0}
-                                                style={{
-                                                    elevation: 0.8,
-                                                    marginBottom: 10,
-                                                }}
-                                            />
-                                            {filteredInsuranceProviderData?.length >
-                                            0 ? (
-                                                <FlatList
-                                                    showsVerticalScrollIndicator={false}
-                                                    ItemSeparatorComponent={() => (
-                                                        <>
-                                                            <Divider />
-                                                            <Divider />
-                                                        </>
-                                                    )}
-                                                    data={
-                                                        filteredInsuranceProviderData
-                                                    }
-                                                    // onEndReachedThreshold={1}
-                                                    style={{
-                                                        borderColor: "#0000000a",
-                                                        borderWidth: 1,
-                                                        flex: 1,
-                                                    }}
-                                                    keyExtractor={(item) => item.id}
-                                                    renderItem={({ item }) => (
-                                                        <>
-                                                            <List.Item
-                                                                title={
-                                                                    // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setInsuranceProviderListModal(false);  setAddInsuranceProviderModal(true); }}>
-                                                                    <View
-                                                                        style={{
-                                                                            flexDirection:
-                                                                                "row",
-                                                                            display:
-                                                                                "flex",
-                                                                            flexWrap:
-                                                                                "wrap",
-                                                                        }}
-                                                                    >
-                                                                        <Text
-                                                                            style={{
-                                                                                fontSize: 16,
-                                                                                color: colors.black,
-                                                                            }}
-                                                                        >
-                                                                            {
-                                                                                item.name
-                                                                            }
-                                                                        </Text>
-                                                                    </View>
-                                                                    // </TouchableOpacity>
-                                                                }
-                                                                onPress={() => {
-                                                                    setIsInsuranceProviderName(
-                                                                        item.name
-                                                                    );
-                                                                    setIsInsuranceProvider(
-                                                                        item.id
-                                                                    );
-                                                                    setInsuranceProviderError(
-                                                                        ""
-                                                                    );
-                                                                    setInsuranceProviderListModal(
-                                                                        false
-                                                                    );
+                                            keyExtractor={(item) => item.id}
+                                            ListEmptyComponent={() => (
+                                                !isLoading && (
+                                                    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                                        <Text style={{ color: colors.black }}>
+                                                            No insurance company found!
+                                                        </Text>
+                                                    </View>
+                                            ))}
+                                            renderItem={({ item }) => (
+                                                !isLoading && 
+                                                    <List.Item
+                                                        title={
+                                                            <View
+                                                                style={{
+                                                                    flexDirection:
+                                                                        "row",
+                                                                    display:
+                                                                        "flex",
+                                                                    flexWrap:
+                                                                        "wrap",
                                                                 }}
-                                                            />
-                                                        </>
-                                                    )}
-                                                />
-                                            ) : (
-                                                <View
-                                                    style={{
-                                                        alignItems: "center",
-                                                        justifyContent: "center",
-                                                        marginVertical: 50,
-                                                        flex: 1,
-                                                    }}
-                                                >
-                                                    <Text
-                                                        style={{
-                                                            color: colors.black,
-                                                            textAlign: "center",
+                                                            >
+                                                                <Text
+                                                                    style={{
+                                                                        fontSize: 16,
+                                                                        color: colors.black,
+                                                                    }}
+                                                                >
+                                                                    {
+                                                                        item.name
+                                                                    }
+                                                                </Text>
+                                                            </View>
+                                                            // </TouchableOpacity>
+                                                        }
+                                                        onPress={() => {
+                                                            setIsInsuranceProviderName(
+                                                                item.name
+                                                            );
+                                                            setIsInsuranceProvider(
+                                                                item.id
+                                                            );
+                                                            setInsuranceProviderError(
+                                                                ""
+                                                            );
+                                                            setInsuranceProviderListModal(
+                                                                false
+                                                            );
                                                         }}
-                                                    >
-                                                        No such insurance provider
-                                                        is associated!
-                                                    </Text>
-                                                </View>
+                                                    />
                                             )}
-                                            <View
+                                        />
+                                        <View
+                                            style={{
+                                                justifyContent: "flex-end",
+                                                flexDirection: "row",
+                                            }}
+                                        >
+                                            <TouchableOpacity
                                                 style={{
-                                                    justifyContent: "flex-end",
                                                     flexDirection: "row",
+                                                    justifyContent: "center",
+                                                    alignItems: "center",
+                                                    backgroundColor:
+                                                        colors.primary,
+                                                    marginTop: 7,
+                                                    paddingVertical: 3,
+                                                    paddingHorizontal: 10,
+                                                    borderRadius: 4,
+                                                }}
+                                                onPress={() => {
+                                                    setAddNewInsuranceProviderModal(
+                                                        true
+                                                    );
+                                                    setInsuranceProviderListModal(
+                                                        false
+                                                    );
                                                 }}
                                             >
-                                                <TouchableOpacity
+                                                <Icon
                                                     style={{
-                                                        flexDirection: "row",
-                                                        justifyContent: "center",
-                                                        alignItems: "center",
-                                                        backgroundColor:
-                                                            colors.primary,
-                                                        marginTop: 7,
-                                                        paddingVertical: 3,
-                                                        paddingHorizontal: 10,
-                                                        borderRadius: 4,
+                                                        color: colors.white,
+                                                        marginRight: 4,
                                                     }}
-                                                    onPress={() => {
-                                                        setAddNewInsuranceProviderModal(
-                                                            true
-                                                        );
-                                                        setInsuranceProviderListModal(
-                                                            false
-                                                        );
+                                                    name="plus"
+                                                    size={16}
+                                                />
+                                                <Text
+                                                    style={{
+                                                        color: colors.white,
                                                     }}
                                                 >
-                                                    <Icon
-                                                        style={{
-                                                            color: colors.white,
-                                                            marginRight: 4,
-                                                        }}
-                                                        name="plus"
-                                                        size={16}
-                                                    />
-                                                    <Text
-                                                        style={{
-                                                            color: colors.white,
-                                                        }}
-                                                    >
-                                                        Add Insurance Provider
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            </View>
+                                                    Add Insurance Provider
+                                                </Text>
+                                            </TouchableOpacity>
                                         </View>
-                                    )}
+                                    </View>
                                 </Modal>
 
                                 <Modal
@@ -2151,230 +2005,204 @@ const EditVehicle = ({
                                     >
                                         Select Brand
                                     </Text>
-                                    {isLoadingBrandList == true ? (
-                                        <View
-                                            style={{
-                                                flex: 1,
-                                                justifyContent: "center",
-                                            }}
-                                        >
-                                            <ActivityIndicator></ActivityIndicator>
-                                        </View>
-                                    ) : (
-                                        <View
-                                            style={{
-                                                marginTop: 20,
-                                                marginBottom: 10,
-                                                flex: 1,
-                                            }}
-                                        >
-                                            {/* Search Bar */}
-                                            <View>
-                                                <View
-                                                    style={{
-                                                        marginBottom: 15,
-                                                        flexDirection: "row",
-                                                    }}
-                                                >
-                                                    <TextInput
-                                                        mode={"flat"}
-                                                        placeholder="Search here..."
-                                                        onChangeText={(text) =>
-                                                            setSearchQueryForBrands(
-                                                                text
-                                                            )
-                                                        }
-                                                        value={searchQueryForBrands}
-                                                        activeUnderlineColor={
-                                                            colors.transparent
-                                                        }
-                                                        selectionColor="black"
-                                                        underlineColor={
-                                                            colors.transparent
-                                                        }
-                                                        style={{
-                                                            elevation: 4,
-                                                            height: 50,
-                                                            backgroundColor:
-                                                                colors.white,
-                                                            flex: 1,
-                                                            borderTopRightRadius: 0,
-                                                            borderBottomRightRadius: 0,
-                                                            borderTopLeftRadius: 5,
-                                                            borderBottomLeftRadius: 5,
-                                                        }}
-                                                        right={
-                                                            searchQueryForBrands !=
-                                                                null &&
-                                                            searchQueryForBrands !=
-                                                                "" && (
-                                                                <TextInput.Icon
-                                                                    icon="close"
-                                                                    color={
-                                                                        colors.light_gray
-                                                                    }
-                                                                    onPress={() =>
-                                                                        onBrandRefresh()
-                                                                    }
-                                                                />
-                                                            )
-                                                        }
-                                                    />
-                                                    <TouchableOpacity
-                                                        onPress={() =>
-                                                            searchFilterForBrands()
-                                                        }
-                                                        style={{
-                                                            elevation: 4,
-                                                            borderTopRightRadius: 5,
-                                                            borderBottomRightRadius: 5,
-                                                            paddingRight: 25,
-                                                            paddingLeft: 25,
-                                                            zIndex: 2,
-                                                            backgroundColor:
-                                                                colors.primary,
-                                                            justifyContent:
-                                                                "center",
-                                                            alignItems: "center",
-                                                        }}
-                                                    >
-                                                        <IconX
-                                                            name={"search"}
-                                                            size={17}
-                                                            color={colors.white}
-                                                        />
-                                                    </TouchableOpacity>
-                                                </View>
-                                            </View>
-                                            {filteredBrandData?.length > 0 ? (
-                                                <FlatList
-                                                    showsVerticalScrollIndicator={false}
-                                                    ItemSeparatorComponent={() => (
-                                                        <>
-                                                            <Divider />
-                                                            <Divider />
-                                                        </>
-                                                    )}
-                                                    data={filteredBrandData}
-                                                    onEndReached={loadMoreBrands ? getBrandList : null}
-                                                    onEndReachedThreshold={0.5}
-                                                    refreshControl={
-                                                        <RefreshControl
-                                                            refreshing={
-                                                                brandRefreshing
-                                                            }
-                                                            onRefresh={
-                                                                onBrandRefresh
-                                                            }
-                                                            colors={["green"]}
-                                                        />
-                                                    }
-                                                    ListFooterComponent={loadMoreBrands ? renderBrandFooter : null}
-                                                    style={{
-                                                        borderColor: "#0000000a",
-                                                        borderWidth: 1,
-                                                        flex: 1,
-                                                    }}
-                                                    keyExtractor={(item) => item.id}
-                                                    renderItem={({ item }) => (
-                                                        <List.Item
-                                                            title={
-                                                                <View
-                                                                    style={{
-                                                                        flexDirection:
-                                                                            "row",
-                                                                        display:
-                                                                            "flex",
-                                                                        flexWrap:
-                                                                            "wrap",
-                                                                    }}
-                                                                >
-                                                                    <Text
-                                                                        style={{
-                                                                            fontSize: 16,
-                                                                            color: colors.black,
-                                                                        }}
-                                                                    >
-                                                                        {item.name}
-                                                                    </Text>
-                                                                </View>
-                                                            }
-                                                            onPress={() => {
-                                                                setIsBrandName(
-                                                                    item.name
-                                                                );
-                                                                setIsBrand(item.id);
-                                                                setBrandError("");
-                                                                setBrandListModal(
-                                                                    false
-                                                                );
-                                                                setIsModel();
-                                                                setIsModelName("");
-                                                            }}
-                                                        />
-                                                    )}
-                                                />
-                                            ) : (
-                                                <View
-                                                    style={{
-                                                        alignItems: "center",
-                                                        justifyContent: "center",
-                                                        marginVertical: 50,
-                                                        flex: 1,
-                                                    }}
-                                                >
-                                                    <Text
-                                                        style={{
-                                                            color: colors.black,
-                                                            textAlign: "center",
-                                                        }}
-                                                    >
-                                                        No such brand found!
-                                                    </Text>
-                                                </View>
-                                            )}
+                                    <View
+                                        style={{
+                                            marginTop: 20,
+                                            marginBottom: 10,
+                                            flex: 1,
+                                        }}
+                                    >
+                                        {/* Search Bar */}
+                                        <View>
                                             <View
                                                 style={{
-                                                    justifyContent: "flex-end",
+                                                    marginBottom: 15,
                                                     flexDirection: "row",
                                                 }}
                                             >
-                                                <TouchableOpacity
+                                                <TextInput
+                                                    mode={"flat"}
+                                                    placeholder="Search here..."
+                                                    onChangeText={(text) =>
+                                                        setSearchQueryForBrands(
+                                                            text
+                                                        )
+                                                    }
+                                                    value={searchQueryForBrands}
+                                                    activeUnderlineColor={
+                                                        colors.transparent
+                                                    }
+                                                    selectionColor="black"
+                                                    underlineColor={
+                                                        colors.transparent
+                                                    }
                                                     style={{
-                                                        flexDirection: "row",
-                                                        justifyContent: "center",
-                                                        alignItems: "center",
+                                                        elevation: 4,
+                                                        height: 50,
+                                                        backgroundColor:
+                                                            colors.white,
+                                                        flex: 1,
+                                                        borderTopRightRadius: 0,
+                                                        borderBottomRightRadius: 0,
+                                                        borderTopLeftRadius: 5,
+                                                        borderBottomLeftRadius: 5,
+                                                    }}
+                                                    right={
+                                                        searchQueryForBrands !=
+                                                            null &&
+                                                        searchQueryForBrands !=
+                                                            "" && (
+                                                            <TextInput.Icon
+                                                                icon="close"
+                                                                color={
+                                                                    colors.light_gray
+                                                                }
+                                                                onPress={() =>
+                                                                    onBrandRefresh()
+                                                                }
+                                                            />
+                                                        )
+                                                    }
+                                                />
+                                                <TouchableOpacity
+                                                    onPress={() =>
+                                                        searchFilterForBrands()
+                                                    }
+                                                    style={{
+                                                        elevation: 4,
+                                                        borderTopRightRadius: 5,
+                                                        borderBottomRightRadius: 5,
+                                                        paddingRight: 25,
+                                                        paddingLeft: 25,
+                                                        zIndex: 2,
                                                         backgroundColor:
                                                             colors.primary,
-                                                        marginTop: 7,
-                                                        paddingVertical: 3,
-                                                        paddingHorizontal: 10,
-                                                        borderRadius: 4,
-                                                    }}
-                                                    onPress={() => {
-                                                        setAddBrandModal(true);
-                                                        setBrandListModal(false);
+                                                        justifyContent:
+                                                            "center",
+                                                        alignItems: "center",
                                                     }}
                                                 >
-                                                    <Icon
-                                                        style={{
-                                                            color: colors.white,
-                                                            marginRight: 4,
-                                                        }}
-                                                        name="plus"
-                                                        size={16}
+                                                    <IconX
+                                                        name={"search"}
+                                                        size={17}
+                                                        color={colors.white}
                                                     />
-                                                    <Text
-                                                        style={{
-                                                            color: colors.white,
-                                                        }}
-                                                    >
-                                                        Add Brand
-                                                    </Text>
                                                 </TouchableOpacity>
                                             </View>
                                         </View>
-                                    )}
+                                        <FlatList
+                                            showsVerticalScrollIndicator={false}
+                                            ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                                            data={filteredBrandData}
+                                            onEndReached={loadMoreBrands ? getBrandList : null}
+                                            onEndReachedThreshold={0.5}
+                                            contentContainerStyle={{ flexGrow: 1 }}
+                                            refreshControl={
+                                                <RefreshControl
+                                                    refreshing={
+                                                        brandRefreshing
+                                                    }
+                                                    onRefresh={
+                                                        onBrandRefresh
+                                                    }
+                                                    colors={["green"]}
+                                                />
+                                            }
+                                            ListFooterComponent={loadMoreBrands ? renderBrandFooter : null}
+                                            ListEmptyComponent={() => (
+                                                !isLoading && (
+                                                    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                                        <Text style={{ color: colors.black }}>
+                                                            No brand found!
+                                                        </Text>
+                                                    </View>
+                                            ))}
+                                            style={{
+                                                borderColor: "#0000000a",
+                                                borderWidth: 1,
+                                                flex: 1,
+                                            }}
+                                            keyExtractor={(item) => item.id}
+                                            renderItem={({ item }) => (
+                                                !isLoading && 
+                                                    <List.Item
+                                                        title={
+                                                            <View
+                                                                style={{
+                                                                    flexDirection:
+                                                                        "row",
+                                                                    display:
+                                                                        "flex",
+                                                                    flexWrap:
+                                                                        "wrap",
+                                                                }}
+                                                            >
+                                                                <Text
+                                                                    style={{
+                                                                        fontSize: 16,
+                                                                        color: colors.black,
+                                                                    }}
+                                                                >
+                                                                    {item.name}
+                                                                </Text>
+                                                            </View>
+                                                        }
+                                                        onPress={() => {
+                                                            setIsBrandName(
+                                                                item.name
+                                                            );
+                                                            setIsBrand(item.id);
+                                                            setBrandError("");
+                                                            setBrandListModal(
+                                                                false
+                                                            );
+                                                            setIsModel();
+                                                            setIsModelName("");
+                                                        }}
+                                                    />
+                                            )}
+                                        />
+                                        <View
+                                            style={{
+                                                justifyContent: "flex-end",
+                                                flexDirection: "row",
+                                            }}
+                                        >
+                                            <TouchableOpacity
+                                                style={{
+                                                    flexDirection: "row",
+                                                    justifyContent: "center",
+                                                    alignItems: "center",
+                                                    backgroundColor:
+                                                        colors.primary,
+                                                    marginTop: 7,
+                                                    paddingVertical: 3,
+                                                    paddingHorizontal: 10,
+                                                    borderRadius: 4,
+                                                }}
+                                                onPress={() => {
+                                                    setAddBrandModal(true);
+                                                    setBrandListModal(false);
+                                                }}
+                                            >
+                                                <Icon
+                                                    style={{
+                                                        color: colors.white,
+                                                        marginRight: 4,
+                                                    }}
+                                                    name="plus"
+                                                    size={16}
+                                                />
+                                                <Text
+                                                    style={{
+                                                        color: colors.white,
+                                                    }}
+                                                >
+                                                    Add Brand
+                                                </Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
                                 </Modal>
 
                                 {/* Vehicle Model List Modal */}
@@ -2420,230 +2248,204 @@ const EditVehicle = ({
                                     >
                                         Select Model
                                     </Text>
-                                    {isLoadingModelList == true ? (
-                                        <View
-                                            style={{
-                                                flex: 1,
-                                                justifyContent: "center",
-                                            }}
-                                        >
-                                            <ActivityIndicator></ActivityIndicator>
-                                        </View>
-                                    ) : (
-                                        <View
-                                            style={{
-                                                marginTop: 20,
-                                                marginBottom: 10,
-                                                flex: 1,
-                                            }}
-                                        >
-                                            {/* Search Bar */}
-                                            <View>
-                                                <View
-                                                    style={{
-                                                        marginBottom: 15,
-                                                        flexDirection: "row",
-                                                    }}
-                                                >
-                                                    <TextInput
-                                                        mode={"flat"}
-                                                        placeholder="Search here..."
-                                                        onChangeText={(text) =>
-                                                            setSearchQueryForModels(
-                                                                text
-                                                            )
-                                                        }
-                                                        value={searchQueryForModels}
-                                                        activeUnderlineColor={
-                                                            colors.transparent
-                                                        }
-                                                        selectionColor="black"
-                                                        underlineColor={
-                                                            colors.transparent
-                                                        }
-                                                        style={{
-                                                            elevation: 4,
-                                                            height: 50,
-                                                            backgroundColor:
-                                                                colors.white,
-                                                            flex: 1,
-                                                            borderTopRightRadius: 0,
-                                                            borderBottomRightRadius: 0,
-                                                            borderTopLeftRadius: 5,
-                                                            borderBottomLeftRadius: 5,
-                                                        }}
-                                                        right={
-                                                            searchQueryForModels !=
-                                                                null &&
-                                                            searchQueryForModels !=
-                                                                "" && (
-                                                                <TextInput.Icon
-                                                                    icon="close"
-                                                                    color={
-                                                                        colors.light_gray
-                                                                    }
-                                                                    onPress={() =>
-                                                                        onModelRefresh()
-                                                                    }
-                                                                />
-                                                            )
-                                                        }
-                                                    />
-                                                    <TouchableOpacity
-                                                        onPress={() =>
-                                                            searchFilterForModels()
-                                                        }
-                                                        style={{
-                                                            elevation: 4,
-                                                            borderTopRightRadius: 5,
-                                                            borderBottomRightRadius: 5,
-                                                            paddingRight: 25,
-                                                            paddingLeft: 25,
-                                                            zIndex: 2,
-                                                            backgroundColor:
-                                                                colors.primary,
-                                                            justifyContent:
-                                                                "center",
-                                                            alignItems: "center",
-                                                        }}
-                                                    >
-                                                        <IconX
-                                                            name={"search"}
-                                                            size={17}
-                                                            color={colors.white}
-                                                        />
-                                                    </TouchableOpacity>
-                                                </View>
-                                            </View>
-                                            {filteredModelData?.length > 0 ? (
-                                                <FlatList
-                                                    showsVerticalScrollIndicator={false}
-                                                    ItemSeparatorComponent={() => (
-                                                        <>
-                                                            <Divider />
-                                                            <Divider />
-                                                        </>
-                                                    )}
-                                                    data={filteredModelData}
-                                                    onEndReached={loadMoreModels ? getModelList : null}
-                                                    onEndReachedThreshold={0.5}
-                                                    refreshControl={
-                                                        <RefreshControl
-                                                            refreshing={
-                                                                modelRefreshing
-                                                            }
-                                                            onRefresh={
-                                                                onModelRefresh
-                                                            }
-                                                            colors={["green"]}
-                                                        />
-                                                    }
-                                                    ListFooterComponent={loadMoreModels ? renderModelFooter : null}
-                                                    style={{
-                                                        borderColor: "#0000000a",
-                                                        borderWidth: 1,
-                                                        flex: 1,
-                                                    }}
-                                                    keyExtractor={(item) => item.id}
-                                                    renderItem={({ item }) => (
-                                                        <List.Item
-                                                            title={
-                                                                <View
-                                                                    style={{
-                                                                        flexDirection:
-                                                                            "row",
-                                                                        display:
-                                                                            "flex",
-                                                                        flexWrap:
-                                                                            "wrap",
-                                                                    }}
-                                                                >
-                                                                    <Text
-                                                                        style={{
-                                                                            fontSize: 16,
-                                                                            color: colors.black,
-                                                                        }}
-                                                                    >
-                                                                        {
-                                                                            item.model_name
-                                                                        }
-                                                                    </Text>
-                                                                </View>
-                                                            }
-                                                            onPress={() => {
-                                                                setIsModelName(
-                                                                    item.model_name
-                                                                );
-                                                                setIsModel(item.id);
-                                                                setModelError("");
-                                                                setModelListModal(
-                                                                    false
-                                                                );
-                                                            }}
-                                                        />
-                                                    )}
-                                                />
-                                            ) : (
-                                                <View
-                                                    style={{
-                                                        alignItems: "center",
-                                                        justifyContent: "center",
-                                                        marginVertical: 50,
-                                                        flex: 1,
-                                                    }}
-                                                >
-                                                    <Text
-                                                        style={{
-                                                            color: colors.black,
-                                                            textAlign: "center",
-                                                        }}
-                                                    >
-                                                        No such vehicle model found!
-                                                    </Text>
-                                                </View>
-                                            )}
+                                    <View
+                                        style={{
+                                            marginTop: 20,
+                                            marginBottom: 10,
+                                            flex: 1,
+                                        }}
+                                    >
+                                        {/* Search Bar */}
+                                        <View>
                                             <View
                                                 style={{
-                                                    justifyContent: "flex-end",
+                                                    marginBottom: 15,
                                                     flexDirection: "row",
                                                 }}
                                             >
-                                                <TouchableOpacity
+                                                <TextInput
+                                                    mode={"flat"}
+                                                    placeholder="Search here..."
+                                                    onChangeText={(text) =>
+                                                        setSearchQueryForModels(
+                                                            text
+                                                        )
+                                                    }
+                                                    value={searchQueryForModels}
+                                                    activeUnderlineColor={
+                                                        colors.transparent
+                                                    }
+                                                    selectionColor="black"
+                                                    underlineColor={
+                                                        colors.transparent
+                                                    }
                                                     style={{
-                                                        flexDirection: "row",
-                                                        justifyContent: "center",
-                                                        alignItems: "center",
+                                                        elevation: 4,
+                                                        height: 50,
+                                                        backgroundColor:
+                                                            colors.white,
+                                                        flex: 1,
+                                                        borderTopRightRadius: 0,
+                                                        borderBottomRightRadius: 0,
+                                                        borderTopLeftRadius: 5,
+                                                        borderBottomLeftRadius: 5,
+                                                    }}
+                                                    right={
+                                                        searchQueryForModels !=
+                                                            null &&
+                                                        searchQueryForModels !=
+                                                            "" && (
+                                                            <TextInput.Icon
+                                                                icon="close"
+                                                                color={
+                                                                    colors.light_gray
+                                                                }
+                                                                onPress={() =>
+                                                                    onModelRefresh()
+                                                                }
+                                                            />
+                                                        )
+                                                    }
+                                                />
+                                                <TouchableOpacity
+                                                    onPress={() =>
+                                                        searchFilterForModels()
+                                                    }
+                                                    style={{
+                                                        elevation: 4,
+                                                        borderTopRightRadius: 5,
+                                                        borderBottomRightRadius: 5,
+                                                        paddingRight: 25,
+                                                        paddingLeft: 25,
+                                                        zIndex: 2,
                                                         backgroundColor:
                                                             colors.primary,
-                                                        marginTop: 7,
-                                                        paddingVertical: 3,
-                                                        paddingHorizontal: 10,
-                                                        borderRadius: 4,
-                                                    }}
-                                                    onPress={() => {
-                                                        setAddModelModal(true);
-                                                        setModelListModal(false);
+                                                        justifyContent:
+                                                            "center",
+                                                        alignItems: "center",
                                                     }}
                                                 >
-                                                    <Icon
-                                                        style={{
-                                                            color: colors.white,
-                                                            marginRight: 4,
-                                                        }}
-                                                        name="plus"
-                                                        size={16}
+                                                    <IconX
+                                                        name={"search"}
+                                                        size={17}
+                                                        color={colors.white}
                                                     />
-                                                    <Text
-                                                        style={{
-                                                            color: colors.white,
-                                                        }}
-                                                    >
-                                                        Add Model
-                                                    </Text>
                                                 </TouchableOpacity>
                                             </View>
                                         </View>
-                                    )}
+                                        <FlatList
+                                            showsVerticalScrollIndicator={false}
+                                            ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                                            data={filteredModelData}
+                                            onEndReached={loadMoreModels ? getModelList : null}
+                                            onEndReachedThreshold={0.5}
+                                            contentContainerStyle={{ flexGrow: 1 }}
+                                            refreshControl={
+                                                <RefreshControl
+                                                    refreshing={
+                                                        modelRefreshing
+                                                    }
+                                                    onRefresh={
+                                                        onModelRefresh
+                                                    }
+                                                    colors={["green"]}
+                                                />
+                                            }
+                                            ListFooterComponent={loadMoreModels ? renderModelFooter : null}
+                                            ListEmptyComponent={() => (
+                                                !isLoading && (
+                                                    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                                        <Text style={{ color: colors.black }}>
+                                                            No vehicle model found!
+                                                        </Text>
+                                                    </View>
+                                            ))}
+                                            style={{
+                                                borderColor: "#0000000a",
+                                                borderWidth: 1,
+                                                flex: 1,
+                                            }}
+                                            keyExtractor={(item) => item.id}
+                                            renderItem={({ item }) => (
+                                                !isLoading && 
+                                                    <List.Item
+                                                        title={
+                                                            <View
+                                                                style={{
+                                                                    flexDirection:
+                                                                        "row",
+                                                                    display:
+                                                                        "flex",
+                                                                    flexWrap:
+                                                                        "wrap",
+                                                                }}
+                                                            >
+                                                                <Text
+                                                                    style={{
+                                                                        fontSize: 16,
+                                                                        color: colors.black,
+                                                                    }}
+                                                                >
+                                                                    {
+                                                                        item.model_name
+                                                                    }
+                                                                </Text>
+                                                            </View>
+                                                        }
+                                                        onPress={() => {
+                                                            setIsModelName(
+                                                                item.model_name
+                                                            );
+                                                            setIsModel(item.id);
+                                                            setModelError("");
+                                                            setModelListModal(
+                                                                false
+                                                            );
+                                                        }}
+                                                    />
+                                            )}
+                                        />
+                                        <View
+                                            style={{
+                                                justifyContent: "flex-end",
+                                                flexDirection: "row",
+                                            }}
+                                        >
+                                            <TouchableOpacity
+                                                style={{
+                                                    flexDirection: "row",
+                                                    justifyContent: "center",
+                                                    alignItems: "center",
+                                                    backgroundColor:
+                                                        colors.primary,
+                                                    marginTop: 7,
+                                                    paddingVertical: 3,
+                                                    paddingHorizontal: 10,
+                                                    borderRadius: 4,
+                                                }}
+                                                onPress={() => {
+                                                    setAddModelModal(true);
+                                                    setModelListModal(false);
+                                                }}
+                                            >
+                                                <Icon
+                                                    style={{
+                                                        color: colors.white,
+                                                        marginRight: 4,
+                                                    }}
+                                                    name="plus"
+                                                    size={16}
+                                                />
+                                                <Text
+                                                    style={{
+                                                        color: colors.white,
+                                                    }}
+                                                >
+                                                    Add Model
+                                                </Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
                                 </Modal>
                             </Portal>
                         </InputScrollView>

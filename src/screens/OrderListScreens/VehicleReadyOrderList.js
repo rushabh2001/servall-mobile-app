@@ -39,12 +39,8 @@ const VehicleReadyOrderList = ({
     const [loadMoreOrders, setLoadMoreOrders] = useState(true);
 
     const getOrderList = async () => {
-        {
-            page == 1 && setIsLoading(true);
-        }
-        {
-            page != 1 && setIsScrollLoading(true);
-        }
+        if(page == 1) setIsLoading(true)
+        if(page != 1) setIsScrollLoading(true)
         try {
             const res = await fetch(
                 `${API_URL}fetch_garage_order/status/${isGarageId}?page=${page}`,
@@ -101,13 +97,11 @@ const VehicleReadyOrderList = ({
                 {json.data.current_page != json.data.last_page ? setLoadMoreOrders(true) : setLoadMoreOrders(false)}
                 {json.data.current_page != json.data.last_page ? setPage(2) : null}
                 setRefreshing(false);
-            } else {
-                setRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
         }
-        setIsLoading(false);
     };
 
     const pullRefresh = async () => {
@@ -134,12 +128,11 @@ const VehicleReadyOrderList = ({
                 setFilteredData(json.data.data);
                 {json.data.current_page != json.data.last_page ? setLoadMoreOrders(true) : setLoadMoreOrders(false)}
                 {json.data.current_page != json.data.last_page ? setPage(2) : null}
+                setRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
-        } finally {
-            setRefreshing(false);
-            setIsLoading(false);
         }
     };
 

@@ -46,7 +46,6 @@ const CustomerInfo = ({
     const [isStateName, setIsStateName] = useState("");
     const [stateList, setStateList] = useState([]);
     const [stateListModal, setStateListModal] = useState(false);
-    const [isLoadingStateList, setIsLoadingStateList] = useState(false);
     const [filteredStateData, setFilteredStateData] = useState([]);
     const [searchQueryForStates, setSearchQueryForStates] = useState();
     const [stateError, setStateError] = useState();
@@ -56,7 +55,6 @@ const CustomerInfo = ({
     const [isCityName, setIsCityName] = useState("");
     const [cityList, setCityList] = useState([]);
     const [cityListModal, setCityListModal] = useState(false);
-    const [isLoadingCityList, setIsLoadingCityList] = useState(false);
     const [filteredCityData, setFilteredCityData] = useState([]);
     const [searchQueryForCity, setSearchQueryForCity] = useState();
     const [cityError, setCityError] = useState();
@@ -179,7 +177,7 @@ const CustomerInfo = ({
     };
 
     const getStateList = async () => {
-        setIsLoadingStateList(true);
+        setIsLoading(true);
         try {
             const res = await fetch(`${API_URL}fetch_states`, {
                 method: "GET",
@@ -193,11 +191,10 @@ const CustomerInfo = ({
             if (json !== undefined) {
                 setStateList(json.states);
                 setFilteredStateData(json.states);
+                setIsLoading(false);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            setIsLoadingStateList(false);
         }
     };
 
@@ -220,7 +217,7 @@ const CustomerInfo = ({
     };
 
     const getCityList = async () => {
-        setIsLoadingCityList(true);
+        setIsLoading(true);
         try {
             const res = await fetch(
                 `${API_URL}fetch_cities?state_id=${isState}`,
@@ -238,11 +235,10 @@ const CustomerInfo = ({
                 setCityList(json.cities);
                 setFilteredCityData(json.cities);
                 setCityFieldToggle(true);
+                setIsLoading(false);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            setIsLoadingCityList(false);
         }
     };
 
@@ -272,11 +268,10 @@ const CustomerInfo = ({
                     setIsCity(parseInt(json?.user_details?.city));
                     setIsCityName(json?.user_details?.cities.name);
                 }, 200);
+                setIsLoading(false);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -449,8 +444,6 @@ const CustomerInfo = ({
                     visible={stateListModal}
                     onDismiss={() => {
                         setStateListModal(false);
-                        setIsState();
-                        setIsStateName("");
                         setStateError("");
                         setSearchQueryForStates("");
                         searchFilterForStates();
@@ -475,12 +468,9 @@ const CustomerInfo = ({
                         }}
                         onPress={() => {
                             setStateListModal(false);
-                            setIsState();
-                            setIsStateName("");
                             setStateError("");
                             setSearchQueryForStates("");
                             searchFilterForStates();
-                            setCityFieldToggle(false);
                             setIsCity();
                             setIsCityName("");
                         }}
@@ -493,91 +483,70 @@ const CustomerInfo = ({
                     >
                         Select State
                     </Text>
-                    {isLoadingStateList == true ? (
-                        <View style={{ flex: 1, justifyContent: "center" }}>
-                            <ActivityIndicator></ActivityIndicator>
-                        </View>
-                    ) : (
-                        <View
-                            style={{ marginTop: 20, marginBottom: 10, flex: 1 }}
-                        >
-                            <Searchbar
-                                placeholder="Search here..."
-                                onChangeText={(text) => {
-                                    if (text != null)
-                                        searchFilterForStates(text);
-                                }}
-                                value={searchQueryForStates}
-                                elevation={0}
-                                style={{ elevation: 0.8, marginBottom: 10 }}
-                            />
-                            {filteredStateData?.length > 0 ? (
-                                <FlatList
-                                    showsVerticalScrollIndicator={false}
-                                    ItemSeparatorComponent={() => (
-                                        <>
-                                            <Divider />
-                                            <Divider />
-                                        </>
-                                    )}
-                                    data={filteredStateData}
-                                    // onEndReachedThreshold={1}
-                                    style={{
-                                        borderColor: "#0000000a",
-                                        borderWidth: 1,
-                                        flex: 1,
-                                    }}
-                                    keyExtractor={(item) => item.id}
-                                    renderItem={({ item }) => (
-                                        <List.Item
-                                            title={
-                                                <View
+                    <View
+                        style={{ marginTop: 20, marginBottom: 10, flex: 1 }}
+                    >
+                        <Searchbar
+                            placeholder="Search here..."
+                            onChangeText={(text) => {
+                                if (text != null)
+                                    searchFilterForStates(text);
+                            }}
+                            value={searchQueryForStates}
+                            elevation={0}
+                            style={{ elevation: 0.8, marginBottom: 10 }}
+                        />
+                        <FlatList
+                            showsVerticalScrollIndicator={false}
+                            ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                            data={filteredStateData}
+                            // onEndReachedThreshold={1}
+                            style={{
+                                borderColor: "#0000000a",
+                                borderWidth: 1,
+                                flex: 1,
+                            }}
+                            keyExtractor={(item) => item.id}
+                            contentContainerStyle={{ flexGrow: 1 }}
+                            ListEmptyComponent={() => (
+                                !isLoading && (
+                                    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                        <Text style={{ color: colors.black }}>
+                                            No state found!
+                                        </Text>
+                                    </View>
+                            ))}
+                            renderItem={({ item }) => (
+                                !isLoading &&
+                                    <List.Item
+                                        title={
+                                            <View
+                                                style={{
+                                                    flexDirection: "row",
+                                                    display: "flex",
+                                                    flexWrap: "wrap",
+                                                }}
+                                            >
+                                                <Text
                                                     style={{
-                                                        flexDirection: "row",
-                                                        display: "flex",
-                                                        flexWrap: "wrap",
+                                                        fontSize: 16,
+                                                        color: colors.black,
                                                     }}
                                                 >
-                                                    <Text
-                                                        style={{
-                                                            fontSize: 16,
-                                                            color: colors.black,
-                                                        }}
-                                                    >
-                                                        {item.name}
-                                                    </Text>
-                                                </View>
-                                            }
-                                            onPress={() => {
-                                                setIsStateName(item.name);
-                                                setIsState(item.id);
-                                                setStateError("");
-                                                setStateListModal(false);
-                                            }}
-                                        />
-                                    )}
-                                />
-                            ) : (
-                                <View
-                                    style={{
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        marginVertical: 50,
-                                        flex: 1,
-                                    }}
-                                >
-                                    <Text
-                                        style={{
-                                            color: colors.black,
-                                            textAlign: "center",
+                                                    {item.name}
+                                                </Text>
+                                            </View>
+                                        }
+                                        onPress={() => {
+                                            setIsStateName(item.name);
+                                            setIsState(item.id);
+                                            setStateError("");
+                                            setStateListModal(false);
                                         }}
-                                    >
-                                        No such state is associated!
-                                    </Text>
-                                </View>
+                                    />
                             )}
-                        </View>
-                    )}
+                        />
+                    </View>
                 </Modal>
 
                 {/* City List Modal */}
@@ -585,8 +554,6 @@ const CustomerInfo = ({
                     visible={cityListModal}
                     onDismiss={() => {
                         setCityListModal(false);
-                        setIsCity(0);
-                        setIsCityName("");
                         setCityError("");
                         setSearchQueryForCity("");
                         searchFilterForCity();
@@ -608,8 +575,6 @@ const CustomerInfo = ({
                         }}
                         onPress={() => {
                             setCityListModal(false);
-                            setIsCity(0);
-                            setIsCityName("");
                             setCityError("");
                             setSearchQueryForCity("");
                             searchFilterForCity();
@@ -623,93 +588,70 @@ const CustomerInfo = ({
                     >
                         Select City
                     </Text>
-                    {isLoadingCityList == true ? (
-                        <View style={{ flex: 1, justifyContent: "center" }}>
-                            <ActivityIndicator></ActivityIndicator>
-                        </View>
-                    ) : (
-                        <View
-                            style={{ marginTop: 20, marginBottom: 10, flex: 1 }}
-                        >
-                            <Searchbar
-                                placeholder="Search here..."
-                                onChangeText={(text) => {
-                                    if (text != null) searchFilterForCity(text);
-                                }}
-                                value={searchQueryForCity}
-                                elevation={0}
-                                style={{ elevation: 0.8, marginBottom: 10 }}
-                            />
-                            {filteredCityData?.length > 0 ? (
-                                <FlatList
-                                        showsVerticalScrollIndicator={false}
-                                    ItemSeparatorComponent={() => (
-                                        <>
-                                            <Divider />
-                                            <Divider />
-                                        </>
-                                    )}
-                                    data={filteredCityData}
-                                    // onEndReachedThreshold={1}
-                                    style={{
-                                        borderColor: "#0000000a",
-                                        borderWidth: 1,
-                                        flex: 1,
-                                    }}
-                                    keyExtractor={(item) => item.id}
-                                    renderItem={({ item }) => (
-                                        <>
-                                            <List.Item
-                                                title={
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                            display: "flex",
-                                                            flexWrap: "wrap",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={{
-                                                                fontSize: 16,
-                                                                color: colors.black,
-                                                            }}
-                                                        >
-                                                            {item.name}
-                                                        </Text>
-                                                    </View>
-                                                }
-                                                onPress={() => {
-                                                    setIsCityName(item.name);
-                                                    setIsCity(item.id);
-                                                    setCityError("");
-                                                    setCityListModal(false);
+                    <View
+                        style={{ marginTop: 20, marginBottom: 10, flex: 1 }}
+                    >
+                        <Searchbar
+                            placeholder="Search here..."
+                            onChangeText={(text) => {
+                                if (text != null) searchFilterForCity(text);
+                            }}
+                            value={searchQueryForCity}
+                            elevation={0}
+                            style={{ elevation: 0.8, marginBottom: 10 }}
+                        />
+                        <FlatList
+                            showsVerticalScrollIndicator={false}
+                            ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                            data={filteredCityData}
+                            // onEndReachedThreshold={1}
+                            contentContainerStyle={{ flexGrow: 1 }}
+                            style={{
+                                borderColor: "#0000000a",
+                                borderWidth: 1,
+                                flex: 1,
+                            }}
+                            ListEmptyComponent={() => (
+                                !isLoading && (
+                                    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                        <Text style={{ color: colors.black }}>
+                                            No city found!
+                                        </Text>
+                                    </View>
+                            ))}
+                            keyExtractor={(item) => item.id}
+                            renderItem={({ item }) => (
+                                !isLoading &&
+                                    <List.Item
+                                        title={
+                                            <View
+                                                style={{
+                                                    flexDirection:
+                                                        "row",
+                                                    display: "flex",
+                                                    flexWrap: "wrap",
                                                 }}
-                                            />
-                                        </>
-                                    )}
-                                />
-                            ) : (
-                                <View
-                                    style={{
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        marginVertical: 50,
-                                        flex: 1,
-                                    }}
-                                >
-                                    <Text
-                                        style={{
-                                            color: colors.black,
-                                            textAlign: "center",
+                                            >
+                                                <Text
+                                                    style={{
+                                                        fontSize: 16,
+                                                        color: colors.black,
+                                                    }}
+                                                >
+                                                    {item.name}
+                                                </Text>
+                                            </View>
+                                        }
+                                        onPress={() => {
+                                            setIsCityName(item.name);
+                                            setIsCity(item.id);
+                                            setCityError("");
+                                            setCityListModal(false);
                                         }}
-                                    >
-                                        No such city is associated!
-                                    </Text>
-                                </View>
+                                    />
                             )}
-                        </View>
-                    )}
+                        />
+                    </View>
                 </Modal>
             </Portal>
             {isLoading &&

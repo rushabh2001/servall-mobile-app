@@ -101,7 +101,6 @@ const AddRepairOrderStep2 = ({
     );
     const [garageList, setGarageList] = useState([]);
     const [garageListModal, setGarageListModal] = useState(false);
-    const [isLoadingGarageList, setIsLoadingGarageList] = useState(true);
     const [filteredGarageData, setFilteredGarageData] = useState([]);
     const [searchQueryForGarages, setSearchQueryForGarages] = useState();
     const [garageError, setGarageError] = useState(""); // Error State
@@ -141,7 +140,6 @@ const AddRepairOrderStep2 = ({
     const [isBrandName, setIsBrandName] = useState();
     const [brandList, setBrandList] = useState([]);
     const [brandListModal, setBrandListModal] = useState(false);
-    const [isLoadingBrandList, setIsLoadingBrandList] = useState(true);
     const [filteredBrandData, setFilteredBrandData] = useState([]);
     const [searchQueryForBrands, setSearchQueryForBrands] = useState();
     const [brandError, setBrandError] = useState(""); // Error State
@@ -156,7 +154,6 @@ const AddRepairOrderStep2 = ({
     const [isModelName, setIsModelName] = useState();
     const [modelList, setModelList] = useState([]);
     const [modelListModal, setModelListModal] = useState(false);
-    const [isLoadingModelList, setIsLoadingModelList] = useState(true);
     const [filteredModelData, setFilteredModelData] = useState([]);
     const [searchQueryForModels, setSearchQueryForModels] = useState();
     const [modelError, setModelError] = useState(""); // Error State
@@ -171,8 +168,6 @@ const AddRepairOrderStep2 = ({
     const [isInsuranceProviderName, setIsInsuranceProviderName] = useState("");
     const [insuranceProviderList, setInsuranceProviderList] = useState([]);
     const [insuranceProviderListModal, setInsuranceProviderListModal] =
-        useState(false);
-    const [isLoadingInsuranceProviderList, setIsLoadingInsuranceProviderList] =
         useState(false);
     const [filteredInsuranceProviderData, setFilteredInsuranceProviderData] =
         useState([]);
@@ -193,7 +188,6 @@ const AddRepairOrderStep2 = ({
     const [isStateName, setIsStateName] = useState("");
     const [stateList, setStateList] = useState([]);
     const [stateListModal, setStateListModal] = useState(false);
-    const [isLoadingStateList, setIsLoadingStateList] = useState(false);
     const [filteredStateData, setFilteredStateData] = useState([]);
     const [searchQueryForStates, setSearchQueryForStates] = useState();
     const [stateError, setStateError] = useState();
@@ -203,7 +197,6 @@ const AddRepairOrderStep2 = ({
     const [isCityName, setIsCityName] = useState("");
     const [cityList, setCityList] = useState([]);
     const [cityListModal, setCityListModal] = useState(false);
-    const [isLoadingCityList, setIsLoadingCityList] = useState(false);
     const [filteredCityData, setFilteredCityData] = useState([]);
     const [searchQueryForCity, setSearchQueryForCity] = useState();
     const [cityError, setCityError] = useState();
@@ -592,12 +585,11 @@ const AddRepairOrderStep2 = ({
                 });
         } catch (e) {
             console.log(e);
-        } finally {
-            setIsLoading(false);
         }
     };
 
     const addVehicle = async (data) => {
+        setIsLoading(true);
         try {
             await fetch(`${API_URL}add_new_vehicle_user`, {
                 method: "POST",
@@ -622,6 +614,7 @@ const AddRepairOrderStep2 = ({
                         res.statusCode == 200 ||
                         res.message == true
                     ) {
+                        setIsLoading(false);
                         const jsonData = {
                             user_id: res.data.user_id,
                             vehicle_id: res.data.vehicle_id,
@@ -658,8 +651,6 @@ const AddRepairOrderStep2 = ({
                 });
         } catch (e) {
             console.log(e);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -685,7 +676,7 @@ const AddRepairOrderStep2 = ({
     };
 
     const getStateList = async () => {
-        setIsLoadingStateList(true);
+        setIsLoading(true);
         try {
             const res = await fetch(`${API_URL}fetch_states`, {
                 method: "GET",
@@ -701,12 +692,10 @@ const AddRepairOrderStep2 = ({
                 // console.log('setStateList', json.data);
                 setStateList(json.states);
                 setFilteredStateData(json.states);
+                setIsLoading(false);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            // setIsLoading2(false);
-            setIsLoadingStateList(false);
         }
     };
 
@@ -729,7 +718,7 @@ const AddRepairOrderStep2 = ({
     };
 
     const getCityList = async () => {
-        setIsLoadingCityList(true);
+        setIsLoading(true);
         try {
             const res = await fetch(
                 `${API_URL}fetch_cities?state_id=${isState}`,
@@ -746,22 +735,17 @@ const AddRepairOrderStep2 = ({
             if (json !== undefined) {
                 setCityList(json.cities);
                 setFilteredCityData(json.cities);
+                setIsLoading(false);
                 setCityFieldToggle(true);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            setIsLoadingCityList(false);
         }
     };
 
     const getBrandList = async () => {
-        {
-            brandPage == 1 && setIsLoadingBrandList(true);
-        }
-        {
-            brandPage != 1 && setIsBrandScrollLoading(true);
-        }
+        if(brandPage == 1) setIsLoading(true)
+        if(brandPage != 1) setIsBrandScrollLoading(true)
         try {
             const res = await fetch(`${API_URL}fetch_brand?page=${brandPage}`, {
                 method: "POST",
@@ -781,10 +765,8 @@ const AddRepairOrderStep2 = ({
                     ...filteredBrandData,
                     ...json.brand_list.data,
                 ]);
-                setIsLoadingBrandList(false);
-                {
-                    brandPage != 1 && setIsBrandScrollLoading(false);
-                }
+                setIsLoading(false);
+                if(brandPage != 1) setIsBrandScrollLoading(false)
                 {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
                 {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(brandPage + 1) : null}
             }
@@ -794,6 +776,7 @@ const AddRepairOrderStep2 = ({
     };
 
     const searchFilterForBrands = async () => {
+        setIsLoading(true)
         try {
             const response = await fetch(`${API_URL}fetch_brand`, {
                 method: "POST",
@@ -813,8 +796,7 @@ const AddRepairOrderStep2 = ({
                 {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
                 {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(2) : null}
                 setBrandRefreshing(false);
-            } else {
-                setBrandRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
@@ -841,12 +823,11 @@ const AddRepairOrderStep2 = ({
                 setFilteredBrandData(json.brand_list.data);
                 {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
                 {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(2) : null}
+                setBrandRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
-        } finally {
-            setBrandRefreshing(false);
-            setIsLoadingBrandList(false);
         }
     };
 
@@ -868,12 +849,8 @@ const AddRepairOrderStep2 = ({
     };
 
     const getModelList = async () => {
-        {
-            modelPage == 1 && setIsLoadingModelList(true);
-        }
-        {
-            modelPage != 1 && setIsModelScrollLoading(true);
-        }
+        if(modelPage == 1) setIsLoading(true)
+        if(modelPage != 1) setIsModelScrollLoading(true)
         try {
             const res = await fetch(
                 `${API_URL}fetch_vehicle_model?page=${modelPage}`,
@@ -898,10 +875,8 @@ const AddRepairOrderStep2 = ({
                     ...filteredModelData,
                     ...json.vehicle_model_list.data,
                 ]);
-                setIsLoadingModelList(false);
-                {
-                    modelPage != 1 && setIsModelScrollLoading(false);
-                }
+                setIsLoading(false);
+                if(modelPage != 1) setIsModelScrollLoading(false)
                 {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
                 {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(modelPage + 1) : null}
                 // setModelPage(modelPage + 1);
@@ -913,6 +888,7 @@ const AddRepairOrderStep2 = ({
     };
 
     const searchFilterForModels = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_vehicle_model`, {
                 method: "POST",
@@ -932,8 +908,7 @@ const AddRepairOrderStep2 = ({
                 setFilteredModelData(json.vehicle_model_list.data);
                 {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
                 {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(2) : null}
-                setModelRefreshing(false);
-            } else {
+                setIsLoading(false);
                 setModelRefreshing(false);
             }
         } catch (error) {
@@ -962,12 +937,10 @@ const AddRepairOrderStep2 = ({
                 setFilteredModelData(json.vehicle_model_list.data);
                 {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
                 {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(2) : null}
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
-        } finally {
-            setModelRefreshing(false);
-            setIsLoadingModelList(false);
         }
     };
 
@@ -987,46 +960,6 @@ const AddRepairOrderStep2 = ({
         setModelRefreshing(true);
         pullModelRefresh();
     };
-
-    // const getBrandList = async () => {
-    //     try {
-    //         const res = await fetch(`${API_URL}fetch_brand`, {
-    //             method: 'GET',
-    //             headers: {
-    //                 'Accept': 'application/json',
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': 'Bearer ' + userToken
-    //             },
-    //         });
-    //         const json = await res.json();
-    //         if (json !== undefined) {
-    //             setBrandList(json.brand_list);
-    //         }
-    //     } catch (e) {
-    //         console.log(e);
-    //     }
-    // };
-
-    // const getModelList = async () => {
-    //     try {
-    //         const res = await fetch(`${API_URL}fetch_vehicle_model?brand_id=${isBrand}`, {
-    //             method: 'GET',
-    //             headers: {
-    //                 'Accept': 'application/json',
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': 'Bearer ' + userToken
-    //             },
-    //         });
-    //         const json = await res.json();
-    //         if (json !== undefined) {
-    //             setModelList(json.vehicle_model_list);
-    //             setModelFieldToggle(true);
-    //         }
-    //     } catch (e) {
-    //         console.log(e);
-    //         return alert(e);
-    //     }
-    // };
 
     // Functions Dropdown for Insurance Provider
     const addNewInsuranceProvider = async () => {
@@ -1076,7 +1009,7 @@ const AddRepairOrderStep2 = ({
     };
 
     const getInsuranceProviderList = async () => {
-        setIsLoadingInsuranceProviderList(true);
+        setIsLoading(true);
         try {
             const res = await fetch(`${API_URL}fetch_insurance_provider`, {
                 method: "GET",
@@ -1090,16 +1023,15 @@ const AddRepairOrderStep2 = ({
             if (json !== undefined) {
                 setInsuranceProviderList(json.insurance_provider_list);
                 setFilteredInsuranceProviderData(json.insurance_provider_list);
+                setIsLoading(false);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            setIsLoadingInsuranceProviderList(false);
         }
     };
 
     const getGarageList = async () => {
-    if(garagePage == 1) setIsLoadingGarageList(true)
+        if(garagePage == 1) setIsLoading(true)
         if(garagePage != 1) setIsGarageScrollLoading(true)
         try {
             const res = await fetch(
@@ -1126,7 +1058,7 @@ const AddRepairOrderStep2 = ({
                     ...filteredGarageData,
                     ...json.garage_list.data,
                 ]);
-                setIsLoadingGarageList(false);
+                setIsLoading(false);
                 if(garagePage != 1) setIsGarageScrollLoading(false)
                 {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
                 {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(garagePage + 1) : null}
@@ -1138,6 +1070,7 @@ const AddRepairOrderStep2 = ({
     };
 
     const searchFilterForGarages = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_owner_garages`, {
                 method: "POST",
@@ -1159,8 +1092,7 @@ const AddRepairOrderStep2 = ({
                 {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
                 {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(2) : null}
                 setGarageRefreshing(false);
-            } else {
-                setGarageRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
@@ -1189,11 +1121,11 @@ const AddRepairOrderStep2 = ({
                 setFilteredGarageData(json.garage_list.data);
                 {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
                 {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(2) : null}
+                setGarageRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
-        } finally {
-            setGarageRefreshing(false);
         }
     };
 
@@ -1215,7 +1147,7 @@ const AddRepairOrderStep2 = ({
     };
 
     const getUserList = async () => {
-        if(userPage == 1) setIsLoadingUserList(true)
+        if(userPage == 1) setIsLoading(true)
         if(userPage != 1) setIsUserScrollLoading(true)
         // setIsLoadingUserList(true);
         try {
@@ -1241,7 +1173,7 @@ const AddRepairOrderStep2 = ({
                     ...filteredUserData,
                     ...json.user_list.data,
                 ]);
-                setIsLoadingUserList(false);
+                setIsLoading(false);
                 if(userPage != 1) setIsUserScrollLoading(false)
                 {json.user_list.current_page != json.user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
                 {json.user_list.current_page != json.user_list.last_page ? setUserPage(userPage + 1) : null}
@@ -1252,6 +1184,7 @@ const AddRepairOrderStep2 = ({
     };
 
     const searchFilterForUsers = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(
                 `${API_URL}fetch_my_garage_customers`,
@@ -1275,8 +1208,7 @@ const AddRepairOrderStep2 = ({
                 {json.user_list.current_page != json.user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
                 {json.user_list.current_page != json.user_list.last_page ? setUserPage(2) : null}
                 setUserRefreshing(false);
-            } else {
-                setUserRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
@@ -1307,12 +1239,11 @@ const AddRepairOrderStep2 = ({
                 setFilteredUserData(json.user_list.data);
                 {json.user_list.current_page != json.user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
                 {json.user_list.current_page != json.user_list.last_page ? setUserPage(2) : null}
+                setUserRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
-        } finally {
-            setUserRefreshing(false);
-            setIsLoadingUserList(false);
         }
     };
 
@@ -1351,7 +1282,7 @@ const AddRepairOrderStep2 = ({
 
     useEffect(() => {
         if (isBrand != undefined) {
-            setIsLoadingModelList(true);
+            setIsLoading(true);
             pullModelRefresh();
             setIsModel();
             setIsModelName("");
@@ -2207,155 +2138,130 @@ const AddRepairOrderStep2 = ({
                                 searchFilterForInsuranceProviders();
                             }}
                         />
-                        {isLoadingInsuranceProviderList == true ? (
-                            <View style={{ flex: 1, justifyContent: "center" }}>
-                                <ActivityIndicator></ActivityIndicator>
-                            </View>
-                        ) : (
-                            <View
+                        <View
+                            style={{
+                                marginTop: 20,
+                                marginBottom: 10,
+                                flex: 1,
+                            }}
+                        >
+                            <Searchbar
+                                placeholder="Search here..."
+                                onChangeText={(text) => {
+                                    if (text != null)
+                                        searchFilterForInsuranceProviders(
+                                            text
+                                        );
+                                }}
+                                value={searchQueryForInsuranceProviders}
+                                elevation={0}
+                                style={{ elevation: 0.8, marginBottom: 10 }}
+                            />
+                            <FlatList
+                                ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                                data={filteredInsuranceProviderData}
+                                showsVerticalScrollIndicator={false}
                                 style={{
-                                    marginTop: 20,
-                                    marginBottom: 10,
+                                    borderColor: "#0000000a",
+                                    borderWidth: 1,
                                     flex: 1,
                                 }}
-                            >
-                                <Searchbar
-                                    placeholder="Search here..."
-                                    onChangeText={(text) => {
-                                        if (text != null)
-                                            searchFilterForInsuranceProviders(
-                                                text
-                                            );
-                                    }}
-                                    value={searchQueryForInsuranceProviders}
-                                    elevation={0}
-                                    style={{ elevation: 0.8, marginBottom: 10 }}
-                                />
-                                {filteredInsuranceProviderData?.length > 0 ? (
-                                    <FlatList
-                                        ItemSeparatorComponent={() => (
-                                            <>
-                                                <Divider />
-                                                <Divider />
-                                            </>
-                                        )}
-                                        data={filteredInsuranceProviderData}
-                                        showsVerticalScrollIndicator={false}
-                                        // onEndReachedThreshold={1}
-                                        style={{
-                                            borderColor: "#0000000a",
-                                            borderWidth: 1,
-                                            flex: 1,
-                                        }}
-                                        keyExtractor={(item) => item.id}
-                                        renderItem={({ item }) => (
-                                            <>
-                                                <List.Item
-                                                    title={
-                                                        // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setInsuranceProviderListModal(false);  setAddInsuranceProviderModal(true); }}>
-                                                        <View
-                                                            style={{
-                                                                flexDirection:
-                                                                    "row",
-                                                                display: "flex",
-                                                                flexWrap:
-                                                                    "wrap",
-                                                            }}
-                                                        >
-                                                            <Text
-                                                                style={{
-                                                                    fontSize: 16,
-                                                                    color: colors.black,
-                                                                }}
-                                                            >
-                                                                {item.name}
-                                                            </Text>
-                                                        </View>
-                                                        // </TouchableOpacity>
-                                                    }
-                                                    onPress={() => {
-                                                        setIsInsuranceProviderName(
-                                                            item.name
-                                                        );
-                                                        setIsInsuranceProvider(
-                                                            item.id
-                                                        );
-                                                        setInsuranceProviderError(
-                                                            ""
-                                                        );
-                                                        setInsuranceProviderListModal(
-                                                            false
-                                                        );
-                                                        setSearchQueryForInsuranceProviders(
-                                                            ""
-                                                        );
-                                                        searchFilterForInsuranceProviders();
+                                keyExtractor={(item) => item.id}
+                                contentContainerStyle={{ flexGrow: 1 }}
+                                ListEmptyComponent={() => (
+                                    !isLoading && (
+                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                            <Text style={{ color: colors.black }}>
+                                                No insurance company found!
+                                            </Text>
+                                        </View>
+                                ))}
+                                renderItem={({ item }) => (
+                                    !isLoading &&
+                                        <List.Item
+                                            title={
+                                                // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setInsuranceProviderListModal(false);  setAddInsuranceProviderModal(true); }}>
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                        display: "flex",
+                                                        flexWrap:
+                                                            "wrap",
                                                     }}
-                                                />
-                                            </>
-                                        )}
-                                    />
-                                ) : (
-                                    <View
-                                        style={{
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            marginVertical: 50,
-                                            flex: 1,
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                color: colors.black,
-                                                textAlign: "center",
+                                                >
+                                                    <Text
+                                                        style={{
+                                                            fontSize: 16,
+                                                            color: colors.black,
+                                                        }}
+                                                    >
+                                                        {item.name}
+                                                    </Text>
+                                                </View>
+                                                // </TouchableOpacity>
+                                            }
+                                            onPress={() => {
+                                                setIsInsuranceProviderName(
+                                                    item.name
+                                                );
+                                                setIsInsuranceProvider(
+                                                    item.id
+                                                );
+                                                setInsuranceProviderError(
+                                                    ""
+                                                );
+                                                setInsuranceProviderListModal(
+                                                    false
+                                                );
+                                                setSearchQueryForInsuranceProviders(
+                                                    ""
+                                                );
+                                                searchFilterForInsuranceProviders();
                                             }}
-                                        >
-                                            No such insurance provider is
-                                            associated!
-                                        </Text>
-                                    </View>
+                                        />
                                 )}
-                                <View
+                            />
+                            <View
+                                style={{
+                                    justifyContent: "flex-end",
+                                    flexDirection: "row",
+                                }}
+                            >
+                                <TouchableOpacity
                                     style={{
-                                        justifyContent: "flex-end",
                                         flexDirection: "row",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        backgroundColor: colors.primary,
+                                        marginTop: 7,
+                                        paddingVertical: 3,
+                                        paddingHorizontal: 10,
+                                        borderRadius: 4,
+                                    }}
+                                    onPress={() => {
+                                        setAddNewInsuranceProviderModal(
+                                            true
+                                        );
+                                        setInsuranceProviderListModal(
+                                            false
+                                        );
                                     }}
                                 >
-                                    <TouchableOpacity
+                                    <Icon
                                         style={{
-                                            flexDirection: "row",
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                            backgroundColor: colors.primary,
-                                            marginTop: 7,
-                                            paddingVertical: 3,
-                                            paddingHorizontal: 10,
-                                            borderRadius: 4,
+                                            color: colors.white,
+                                            marginRight: 4,
                                         }}
-                                        onPress={() => {
-                                            setAddNewInsuranceProviderModal(
-                                                true
-                                            );
-                                            setInsuranceProviderListModal(
-                                                false
-                                            );
-                                        }}
-                                    >
-                                        <Icon
-                                            style={{
-                                                color: colors.white,
-                                                marginRight: 4,
-                                            }}
-                                            name="plus"
-                                            size={16}
-                                        />
-                                        <Text style={{ color: colors.white }}>
-                                            Add Insurance Provider
-                                        </Text>
-                                    </TouchableOpacity>
-                                </View>
+                                        name="plus"
+                                        size={16}
+                                    />
+                                    <Text style={{ color: colors.white }}>
+                                        Add Insurance Provider
+                                    </Text>
+                                </TouchableOpacity>
                             </View>
-                        )}
+                        </View>
                     </Modal>
 
                     <Modal
@@ -2482,180 +2388,156 @@ const AddRepairOrderStep2 = ({
                             }}
                             onPress={() => {
                                 setUserListModal(false);
-                                // setIsUser();
-                                // setIsName("");
-                                // setUserError("");
                                 onUserRefresh();
                                 setSearchQueryForUsers("");
                                 searchFilterForUsers();
                             }}
                         />
-                        {isLoadingUserList == true ? (
-                            <View style={{ flex: 1, justifyContent: "center" }}>
-                                <ActivityIndicator></ActivityIndicator>
+                        <View
+                            style={{
+                                marginTop: 20,
+                                marginBottom: 10,
+                                flex: 1,
+                            }}
+                        >
+                            <View>
+                                <View
+                                    style={{
+                                        marginBottom: 15,
+                                        flexDirection: "row",
+                                    }}
+                                >
+                                    <TextInput
+                                        mode={"flat"}
+                                        placeholder="Search here..."
+                                        onChangeText={(text) =>
+                                            setSearchQueryForUsers(text)
+                                        }
+                                        value={searchQueryForUsers}
+                                        activeUnderlineColor={
+                                            colors.transparent
+                                        }
+                                        selectionColor="black"
+                                        underlineColor={colors.transparent}
+                                        style={{
+                                            elevation: 4,
+                                            height: 50,
+                                            backgroundColor: colors.white,
+                                            flex: 1,
+                                            borderTopRightRadius: 0,
+                                            borderBottomRightRadius: 0,
+                                            borderTopLeftRadius: 5,
+                                            borderBottomLeftRadius: 5,
+                                        }}
+                                        right={
+                                            searchQueryForUsers != null &&
+                                            searchQueryForUsers != "" && (
+                                                <TextInput.Icon
+                                                    icon="close"
+                                                    color={
+                                                        colors.light_gray
+                                                    }
+                                                    onPress={() => {
+                                                        setSearchQueryForUsers !=
+                                                            "";
+                                                        searchFilterForUsers(
+                                                            ""
+                                                        );
+                                                    }}
+                                                />
+                                            )
+                                        }
+                                    />
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            searchFilterForUsers(
+                                                searchQueryForUsers
+                                            )
+                                        }
+                                        style={{
+                                            elevation: 4,
+                                            borderTopRightRadius: 5,
+                                            borderBottomRightRadius: 5,
+                                            paddingRight: 25,
+                                            paddingLeft: 25,
+                                            zIndex: 2,
+                                            backgroundColor: colors.primary,
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                        }}
+                                    >
+                                        <IconX
+                                            name={"search"}
+                                            size={17}
+                                            color={colors.white}
+                                        />
+                                    </TouchableOpacity>
+                                </View>
                             </View>
-                        ) : (
-                            <View
+                            <FlatList
+                                ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                                data={filteredUserData}
+                                onEndReached={loadMoreUsers ? getUserList : null}
+                                onEndReachedThreshold={0.5}
+                                contentContainerStyle={{ flexGrow: 1 }}
+                                showsVerticalScrollIndicator={false}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={userRefreshing}
+                                        onRefresh={onUserRefresh}
+                                        colors={["green"]}
+                                    />
+                                }
+                                ListFooterComponent={loadMoreUsers ? renderUserFooter : null}
+                                ListEmptyComponent={() => (
+                                    !isLoading && (
+                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                            <Text style={{ color: colors.black }}>
+                                                No user found!
+                                            </Text>
+                                        </View>
+                                ))}
                                 style={{
-                                    marginTop: 20,
-                                    marginBottom: 10,
+                                    borderColor: "#0000000a",
+                                    borderWidth: 1,
                                     flex: 1,
                                 }}
-                            >
-                                <View>
-                                    <View
-                                        style={{
-                                            marginBottom: 15,
-                                            flexDirection: "row",
-                                        }}
-                                    >
-                                        <TextInput
-                                            mode={"flat"}
-                                            placeholder="Search here..."
-                                            onChangeText={(text) =>
-                                                setSearchQueryForUsers(text)
-                                            }
-                                            value={searchQueryForUsers}
-                                            activeUnderlineColor={
-                                                colors.transparent
-                                            }
-                                            selectionColor="black"
-                                            underlineColor={colors.transparent}
-                                            style={{
-                                                elevation: 4,
-                                                height: 50,
-                                                backgroundColor: colors.white,
-                                                flex: 1,
-                                                borderTopRightRadius: 0,
-                                                borderBottomRightRadius: 0,
-                                                borderTopLeftRadius: 5,
-                                                borderBottomLeftRadius: 5,
-                                            }}
-                                            right={
-                                                searchQueryForUsers != null &&
-                                                searchQueryForUsers != "" && (
-                                                    <TextInput.Icon
-                                                        icon="close"
-                                                        color={
-                                                            colors.light_gray
-                                                        }
-                                                        onPress={() => {
-                                                            setSearchQueryForUsers !=
-                                                                "";
-                                                            searchFilterForUsers(
-                                                                ""
-                                                            );
-                                                        }}
-                                                    />
-                                                )
-                                            }
-                                        />
-                                        <TouchableOpacity
-                                            onPress={() =>
-                                                searchFilterForUsers(
-                                                    searchQueryForUsers
-                                                )
-                                            }
-                                            style={{
-                                                elevation: 4,
-                                                borderTopRightRadius: 5,
-                                                borderBottomRightRadius: 5,
-                                                paddingRight: 25,
-                                                paddingLeft: 25,
-                                                zIndex: 2,
-                                                backgroundColor: colors.primary,
-                                                justifyContent: "center",
-                                                alignItems: "center",
-                                            }}
-                                        >
-                                            <IconX
-                                                name={"search"}
-                                                size={17}
-                                                color={colors.white}
-                                            />
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                                {filteredUserData?.length > 0 ? (
-                                    <FlatList
-                                        ItemSeparatorComponent={() => (
-                                            <>
-                                                <Divider />
-                                                <Divider />
-                                            </>
-                                        )}
-                                        data={filteredUserData}
-                                        onEndReached={loadMoreUsers ? getUserList : null}
-                                        onEndReachedThreshold={0.5}
-                                        showsVerticalScrollIndicator={false}
-                                        refreshControl={
-                                            <RefreshControl
-                                                refreshing={userRefreshing}
-                                                onRefresh={onUserRefresh}
-                                                colors={["green"]}
-                                            />
-                                        }
-                                        ListFooterComponent={loadMoreUsers ? renderUserFooter : null}
-                                        style={{
-                                            borderColor: "#0000000a",
-                                            borderWidth: 1,
-                                            flex: 1,
-                                        }}
-                                        keyExtractor={(item) =>
-                                            `user-${item.id}`
-                                        }
-                                        renderItem={({ item }) => (
-                                            <List.Item
-                                                title={
-                                                    <View
+                                keyExtractor={(item) =>
+                                    `user-${item.id}`
+                                }
+                                renderItem={({ item }) => (
+                                    !isLoading &&
+                                        <List.Item
+                                            title={
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                        display: "flex",
+                                                    }}
+                                                >
+                                                    <Text
                                                         style={{
-                                                            flexDirection:
-                                                                "row",
-                                                            display: "flex",
+                                                            fontSize: 16,
+                                                            color: colors.black,
                                                         }}
                                                     >
-                                                        <Text
-                                                            style={{
-                                                                fontSize: 16,
-                                                                color: colors.black,
-                                                            }}
-                                                        >
-                                                            {item.name}
-                                                        </Text>
-                                                    </View>
-                                                }
-                                                onPress={() => {
-                                                    setIsName(item.name);
-                                                    setIsUser(item.id);
-                                                    setUserError("");
-                                                    setUserListModal(false);
-                                                    onUserRefresh();
-                                                    // searchFilterForUsers('');
-                                                }}
-                                            />
-                                        )}
-                                    />
-                                ) : (
-                                    <View
-                                        style={{
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            marginVertical: 50,
-                                            flex: 1,
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                color: colors.black,
-                                                textAlign: "center",
+                                                        {item.name}
+                                                    </Text>
+                                                </View>
+                                            }
+                                            onPress={() => {
+                                                setIsName(item.name);
+                                                setIsUser(item.id);
+                                                setUserError("");
+                                                setUserListModal(false);
+                                                onUserRefresh();
+                                                // searchFilterForUsers('');
                                             }}
-                                        >
-                                            No such user is associated!
-                                        </Text>
-                                    </View>
+                                        />
                                 )}
-                            </View>
-                        )}
+                            />
+                        </View>
                     </Modal>
 
                     {/* Garage List Modal */}
@@ -2700,168 +2582,148 @@ const AddRepairOrderStep2 = ({
                                 onGarageRefresh();
                             }}
                         />
-                        {isLoadingGarageList == true ? (
-                            <View style={{ flex: 1, justifyContent: "center" }}>
-                                <ActivityIndicator></ActivityIndicator>
+                        <View
+                            style={{
+                                marginTop: 20,
+                                marginBottom: 10,
+                                flex: 1,
+                            }}
+                        >
+                            {/* Search Bar */}
+                            <View>
+                                <View
+                                    style={{
+                                        marginBottom: 15,
+                                        flexDirection: "row",
+                                    }}
+                                >
+                                    <TextInput
+                                        mode={"flat"}
+                                        placeholder="Search here..."
+                                        onChangeText={(text) =>
+                                            setSearchQueryForGarages(text)
+                                        }
+                                        value={searchQueryForGarages}
+                                        activeUnderlineColor={
+                                            colors.transparent
+                                        }
+                                        selectionColor="black"
+                                        underlineColor={colors.transparent}
+                                        style={{
+                                            elevation: 4,
+                                            height: 50,
+                                            backgroundColor: colors.white,
+                                            flex: 1,
+                                            borderTopRightRadius: 0,
+                                            borderBottomRightRadius: 0,
+                                            borderTopLeftRadius: 5,
+                                            borderBottomLeftRadius: 5,
+                                        }}
+                                        right={
+                                            searchQueryForGarages != null &&
+                                            searchQueryForGarages != "" && (
+                                                <TextInput.Icon
+                                                    icon="close"
+                                                    color={
+                                                        colors.light_gray
+                                                    }
+                                                    onPress={() =>
+                                                        onGarageRefresh()
+                                                    }
+                                                />
+                                            )
+                                        }
+                                    />
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            searchFilterForGarages()
+                                        }
+                                        style={{
+                                            elevation: 4,
+                                            borderTopRightRadius: 5,
+                                            borderBottomRightRadius: 5,
+                                            paddingRight: 25,
+                                            paddingLeft: 25,
+                                            zIndex: 2,
+                                            backgroundColor: colors.primary,
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                        }}
+                                    >
+                                        <IconX
+                                            name={"search"}
+                                            size={17}
+                                            color={colors.white}
+                                        />
+                                    </TouchableOpacity>
+                                </View>
                             </View>
-                        ) : (
-                            <View
+                            <FlatList
+                                ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                                data={filteredGarageData}
+                                onEndReached={loadMoreGarages ? getGarageList : null}
+                                showsVerticalScrollIndicator={false}
+                                onEndReachedThreshold={0.5}
+                                contentContainerStyle={{ flexGrow: 1 }}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={garageRefreshing}
+                                        onRefresh={onGarageRefresh}
+                                        colors={["green"]}
+                                    />
+                                }
+                                ListFooterComponent={loadMoreGarages ? renderGarageFooter : null}
+                                ListEmptyComponent={() => (
+                                    !isLoading && (
+                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                            <Text style={{ color: colors.black }}>
+                                                No garage found!
+                                            </Text>
+                                        </View>
+                                ))}
                                 style={{
-                                    marginTop: 20,
-                                    marginBottom: 10,
+                                    borderColor: "#0000000a",
+                                    borderWidth: 1,
                                     flex: 1,
                                 }}
-                            >
-                                {/* Search Bar */}
-                                <View>
-                                    <View
-                                        style={{
-                                            marginBottom: 15,
-                                            flexDirection: "row",
-                                        }}
-                                    >
-                                        <TextInput
-                                            mode={"flat"}
-                                            placeholder="Search here..."
-                                            onChangeText={(text) =>
-                                                setSearchQueryForGarages(text)
-                                            }
-                                            value={searchQueryForGarages}
-                                            activeUnderlineColor={
-                                                colors.transparent
-                                            }
-                                            selectionColor="black"
-                                            underlineColor={colors.transparent}
-                                            style={{
-                                                elevation: 4,
-                                                height: 50,
-                                                backgroundColor: colors.white,
-                                                flex: 1,
-                                                borderTopRightRadius: 0,
-                                                borderBottomRightRadius: 0,
-                                                borderTopLeftRadius: 5,
-                                                borderBottomLeftRadius: 5,
-                                            }}
-                                            right={
-                                                searchQueryForGarages != null &&
-                                                searchQueryForGarages != "" && (
-                                                    <TextInput.Icon
-                                                        icon="close"
-                                                        color={
-                                                            colors.light_gray
-                                                        }
-                                                        onPress={() =>
-                                                            onGarageRefresh()
-                                                        }
-                                                    />
-                                                )
-                                            }
-                                        />
-                                        <TouchableOpacity
-                                            onPress={() =>
-                                                searchFilterForGarages()
-                                            }
-                                            style={{
-                                                elevation: 4,
-                                                borderTopRightRadius: 5,
-                                                borderBottomRightRadius: 5,
-                                                paddingRight: 25,
-                                                paddingLeft: 25,
-                                                zIndex: 2,
-                                                backgroundColor: colors.primary,
-                                                justifyContent: "center",
-                                                alignItems: "center",
-                                            }}
-                                        >
-                                            <IconX
-                                                name={"search"}
-                                                size={17}
-                                                color={colors.white}
-                                            />
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                                {filteredGarageData?.length > 0 ? (
-                                    <FlatList
-                                        ItemSeparatorComponent={() => (
-                                            <>
-                                                <Divider />
-                                                <Divider />
-                                            </>
-                                        )}
-                                        data={filteredGarageData}
-                                        onEndReached={loadMoreGarages ? getGarageList : null}
-                                        showsVerticalScrollIndicator={false}
-                                        onEndReachedThreshold={0.5}
-                                        refreshControl={
-                                            <RefreshControl
-                                                refreshing={garageRefreshing}
-                                                onRefresh={onGarageRefresh}
-                                                colors={["green"]}
-                                            />
-                                        }
-                                        ListFooterComponent={loadMoreGarages ? renderGarageFooter : null}
-                                        style={{
-                                            borderColor: "#0000000a",
-                                            borderWidth: 1,
-                                            flex: 1,
-                                        }}
-                                        keyExtractor={(item) => item.id}
-                                        renderItem={({ item }) => (
-                                            <List.Item
-                                                title={
-                                                    <View
+                                keyExtractor={(item) => item.id}
+                                renderItem={({ item }) => (
+                                    !isLoading && 
+                                        <List.Item
+                                            title={
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                        display: "flex",
+                                                        flexWrap: "wrap",
+                                                    }}
+                                                >
+                                                    <Text
                                                         style={{
-                                                            flexDirection:
-                                                                "row",
-                                                            display: "flex",
-                                                            flexWrap: "wrap",
+                                                            fontSize: 16,
+                                                            color: colors.black,
                                                         }}
                                                     >
-                                                        <Text
-                                                            style={{
-                                                                fontSize: 16,
-                                                                color: colors.black,
-                                                            }}
-                                                        >
-                                                            {item.garage_name}
-                                                        </Text>
-                                                    </View>
-                                                }
-                                                onPress={() => {
-                                                    setIsGarageName(
-                                                        item.garage_name
-                                                    );
-                                                    setIsGarageId(item.id);
-                                                    setGarageError("");
-                                                    setGarageIdError("");
-                                                    onGarageRefresh();
-                                                    setGarageListModal(false);
-                                                }}
-                                            />
-                                        )}
-                                    />
-                                ) : (
-                                    <View
-                                        style={{
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            marginVertical: 50,
-                                            flex: 1,
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                color: colors.black,
-                                                textAlign: "center",
+                                                        {item.garage_name}
+                                                    </Text>
+                                                </View>
+                                            }
+                                            onPress={() => {
+                                                setIsGarageName(
+                                                    item.garage_name
+                                                );
+                                                setIsGarageId(item.id);
+                                                setGarageError("");
+                                                setGarageIdError("");
+                                                onGarageRefresh();
+                                                setGarageListModal(false);
                                             }}
-                                        >
-                                            No such garage found!
-                                        </Text>
-                                    </View>
-                                )}
-                            </View>
-                        )}
+                                        />
+                                    )
+                                }
+                            />
+                        </View>
                     </Modal>
 
                     {/* Brand List Modal */}
@@ -2869,13 +2731,9 @@ const AddRepairOrderStep2 = ({
                         visible={brandListModal}
                         onDismiss={() => {
                             setBrandListModal(false);
-                            // setIsBrand();
-                            // setIsBrandName("");
-                            // setBrandError("");
                             setSearchQueryForBrands("");
                             searchFilterForBrands();
                             onBrandRefresh();
-                            // setModelFieldToggle(false);
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -2894,13 +2752,9 @@ const AddRepairOrderStep2 = ({
                             }}
                             onPress={() => {
                                 setBrandListModal(false);
-                                // setIsBrand();
-                                // setIsBrandName("");
-                                // setBrandError("");
                                 setSearchQueryForBrands("");
                                 searchFilterForBrands();
                                 onBrandRefresh();
-                                // setModelFieldToggle(false);
                             }}
                         />
                         <Text
@@ -2911,200 +2765,179 @@ const AddRepairOrderStep2 = ({
                         >
                             Select Brand
                         </Text>
-                        {isLoadingBrandList == true ? (
-                            <View style={{ flex: 1, justifyContent: "center" }}>
-                                <ActivityIndicator></ActivityIndicator>
-                            </View>
-                        ) : (
-                            <View
-                                style={{
-                                    marginTop: 20,
-                                    marginBottom: 10,
-                                    flex: 1,
-                                }}
-                            >
-                                {/* Search Bar */}
-                                <View>
-                                    <View
-                                        style={{
-                                            marginBottom: 15,
-                                            flexDirection: "row",
-                                        }}
-                                    >
-                                        <TextInput
-                                            mode={"flat"}
-                                            placeholder="Search here..."
-                                            onChangeText={(text) =>
-                                                setSearchQueryForBrands(text)
-                                            }
-                                            value={searchQueryForBrands}
-                                            activeUnderlineColor={
-                                                colors.transparent
-                                            }
-                                            selectionColor="black"
-                                            underlineColor={colors.transparent}
-                                            style={{
-                                                elevation: 4,
-                                                height: 50,
-                                                backgroundColor: colors.white,
-                                                flex: 1,
-                                                borderTopRightRadius: 0,
-                                                borderBottomRightRadius: 0,
-                                                borderTopLeftRadius: 5,
-                                                borderBottomLeftRadius: 5,
-                                            }}
-                                            right={
-                                                searchQueryForBrands != null &&
-                                                searchQueryForBrands != "" && (
-                                                    <TextInput.Icon
-                                                        icon="close"
-                                                        color={
-                                                            colors.light_gray
-                                                        }
-                                                        onPress={() =>
-                                                            onBrandRefresh()
-                                                        }
-                                                    />
-                                                )
-                                            }
-                                        />
-                                        <TouchableOpacity
-                                            onPress={() =>
-                                                searchFilterForBrands()
-                                            }
-                                            style={{
-                                                elevation: 4,
-                                                borderTopRightRadius: 5,
-                                                borderBottomRightRadius: 5,
-                                                paddingRight: 25,
-                                                paddingLeft: 25,
-                                                zIndex: 2,
-                                                backgroundColor: colors.primary,
-                                                justifyContent: "center",
-                                                alignItems: "center",
-                                            }}
-                                        >
-                                            <IconX
-                                                name={"search"}
-                                                size={17}
-                                                color={colors.white}
-                                            />
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                                {filteredBrandData?.length > 0 ? (
-                                    <FlatList
-                                        ItemSeparatorComponent={() => (
-                                            <>
-                                                <Divider />
-                                                <Divider />
-                                            </>
-                                        )}
-                                        data={filteredBrandData}
-                                        onEndReached={loadMoreBrands ? getBrandList : null}
-                                        showsVerticalScrollIndicator={false}
-                                        onEndReachedThreshold={0.5}
-                                        refreshControl={
-                                            <RefreshControl
-                                                refreshing={brandRefreshing}
-                                                onRefresh={onBrandRefresh}
-                                                colors={["green"]}
-                                            />
-                                        }
-                                        ListFooterComponent={loadMoreBrands ? renderBrandFooter : null}
-                                        style={{
-                                            borderColor: "#0000000a",
-                                            borderWidth: 1,
-                                            flex: 1,
-                                        }}
-                                        keyExtractor={(item) => item.id}
-                                        renderItem={({ item }) => (
-                                            <List.Item
-                                                title={
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                            display: "flex",
-                                                            flexWrap: "wrap",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={{
-                                                                fontSize: 16,
-                                                                color: colors.black,
-                                                            }}
-                                                        >
-                                                            {item.name}
-                                                        </Text>
-                                                    </View>
-                                                }
-                                                onPress={() => {
-                                                    setIsBrandName(item.name);
-                                                    setIsBrand(item.id);
-                                                    setBrandError("");
-                                                    onBrandRefresh();
-                                                    setBrandListModal(false);
-                                                }}
-                                            />
-                                        )}
-                                    />
-                                ) : (
-                                    <View
-                                        style={{
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            marginVertical: 50,
-                                            flex: 1,
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                color: colors.black,
-                                                textAlign: "center",
-                                            }}
-                                        >
-                                            No such brand found!
-                                        </Text>
-                                    </View>
-                                )}
+                        <View
+                            style={{
+                                marginTop: 20,
+                                marginBottom: 10,
+                                flex: 1,
+                            }}
+                        >
+                            {/* Search Bar */}
+                            <View>
                                 <View
                                     style={{
-                                        justifyContent: "flex-end",
+                                        marginBottom: 15,
                                         flexDirection: "row",
                                     }}
                                 >
-                                    <TouchableOpacity
+                                    <TextInput
+                                        mode={"flat"}
+                                        placeholder="Search here..."
+                                        onChangeText={(text) =>
+                                            setSearchQueryForBrands(text)
+                                        }
+                                        value={searchQueryForBrands}
+                                        activeUnderlineColor={
+                                            colors.transparent
+                                        }
+                                        selectionColor="black"
+                                        underlineColor={colors.transparent}
                                         style={{
-                                            flexDirection: "row",
+                                            elevation: 4,
+                                            height: 50,
+                                            backgroundColor: colors.white,
+                                            flex: 1,
+                                            borderTopRightRadius: 0,
+                                            borderBottomRightRadius: 0,
+                                            borderTopLeftRadius: 5,
+                                            borderBottomLeftRadius: 5,
+                                        }}
+                                        right={
+                                            searchQueryForBrands != null &&
+                                            searchQueryForBrands != "" && (
+                                                <TextInput.Icon
+                                                    icon="close"
+                                                    color={
+                                                        colors.light_gray
+                                                    }
+                                                    onPress={() =>
+                                                        onBrandRefresh()
+                                                    }
+                                                />
+                                            )
+                                        }
+                                    />
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            searchFilterForBrands()
+                                        }
+                                        style={{
+                                            elevation: 4,
+                                            borderTopRightRadius: 5,
+                                            borderBottomRightRadius: 5,
+                                            paddingRight: 25,
+                                            paddingLeft: 25,
+                                            zIndex: 2,
+                                            backgroundColor: colors.primary,
                                             justifyContent: "center",
                                             alignItems: "center",
-                                            backgroundColor: colors.primary,
-                                            marginTop: 7,
-                                            paddingVertical: 3,
-                                            paddingHorizontal: 10,
-                                            borderRadius: 4,
-                                        }}
-                                        onPress={() => {
-                                            setAddBrandModal(true);
-                                            setBrandListModal(false);
                                         }}
                                     >
-                                        <Icon
-                                            style={{
-                                                color: colors.white,
-                                                marginRight: 4,
-                                            }}
-                                            name="plus"
-                                            size={16}
+                                        <IconX
+                                            name={"search"}
+                                            size={17}
+                                            color={colors.white}
                                         />
-                                        <Text style={{ color: colors.white }}>
-                                            Add Brand
-                                        </Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
-                        )}
+                            <FlatList
+                                ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                                data={filteredBrandData}
+                                onEndReached={loadMoreBrands ? getBrandList : null}
+                                showsVerticalScrollIndicator={false}
+                                onEndReachedThreshold={0.5}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={brandRefreshing}
+                                        onRefresh={onBrandRefresh}
+                                        colors={["green"]}
+                                    />
+                                }
+                                ListFooterComponent={loadMoreBrands ? renderBrandFooter : null}
+                                ListEmptyComponent={() => (
+                                    !isLoading && (
+                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                            <Text style={{ color: colors.black }}>
+                                                No brand found!
+                                            </Text>
+                                        </View>
+                                ))}
+                                contentContainerStyle={{ flexGrow: 1 }}
+                                style={{
+                                    borderColor: "#0000000a",
+                                    borderWidth: 1,
+                                    flex: 1,
+                                }}
+                                keyExtractor={(item) => item.id}
+                                renderItem={({ item }) => (
+                                    !isLoading && 
+                                        <List.Item
+                                            title={
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                        display: "flex",
+                                                        flexWrap: "wrap",
+                                                    }}
+                                                >
+                                                    <Text
+                                                        style={{
+                                                            fontSize: 16,
+                                                            color: colors.black,
+                                                        }}
+                                                    >
+                                                        {item.name}
+                                                    </Text>
+                                                </View>
+                                            }
+                                            onPress={() => {
+                                                setIsBrandName(item.name);
+                                                setIsBrand(item.id);
+                                                setBrandError("");
+                                                onBrandRefresh();
+                                                setBrandListModal(false);
+                                            }}
+                                        />
+                                )}
+                            />
+                            <View
+                                style={{
+                                    justifyContent: "flex-end",
+                                    flexDirection: "row",
+                                }}
+                            >
+                                <TouchableOpacity
+                                    style={{
+                                        flexDirection: "row",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        backgroundColor: colors.primary,
+                                        marginTop: 7,
+                                        paddingVertical: 3,
+                                        paddingHorizontal: 10,
+                                        borderRadius: 4,
+                                    }}
+                                    onPress={() => {
+                                        setAddBrandModal(true);
+                                        setBrandListModal(false);
+                                    }}
+                                >
+                                    <Icon
+                                        style={{
+                                            color: colors.white,
+                                            marginRight: 4,
+                                        }}
+                                        name="plus"
+                                        size={16}
+                                    />
+                                    <Text style={{ color: colors.white }}>
+                                        Add Brand
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
                     </Modal>
 
                     {/* Vehicle Model List Modal */}
@@ -3112,9 +2945,6 @@ const AddRepairOrderStep2 = ({
                         visible={modelListModal}
                         onDismiss={() => {
                             setModelListModal(false);
-                            // setIsModel(0);
-                            // setIsModelName("");
-                            // setModelError("");
                             onModelRefresh();
                             setSearchQueryForModels("");
                             searchFilterForModels();
@@ -3144,210 +2974,186 @@ const AddRepairOrderStep2 = ({
                             }}
                             onPress={() => {
                                 setModelListModal(false);
-                                // setIsModel(0);
-                                // setIsModelName("");
-                                // setModelError("");
                                 onModelRefresh();
                                 setSearchQueryForModels("");
                                 searchFilterForModels();
                             }}
                         />
-                        {isLoadingModelList == true ? (
-                            <View style={{ flex: 1, justifyContent: "center" }}>
-                                <ActivityIndicator></ActivityIndicator>
-                            </View>
-                        ) : (
-                            <View
-                                style={{
-                                    marginTop: 20,
-                                    marginBottom: 10,
-                                    flex: 1,
-                                }}
-                            >
-                                {/* Search Bar */}
-                                <View>
-                                    <View
-                                        style={{
-                                            marginBottom: 15,
-                                            flexDirection: "row",
-                                        }}
-                                    >
-                                        <TextInput
-                                            mode={"flat"}
-                                            placeholder="Search here..."
-                                            onChangeText={(text) =>
-                                                setSearchQueryForModels(text)
-                                            }
-                                            value={searchQueryForModels}
-                                            activeUnderlineColor={
-                                                colors.transparent
-                                            }
-                                            selectionColor="black"
-                                            underlineColor={colors.transparent}
-                                            style={{
-                                                elevation: 4,
-                                                height: 50,
-                                                backgroundColor: colors.white,
-                                                flex: 1,
-                                                borderTopRightRadius: 0,
-                                                borderBottomRightRadius: 0,
-                                                borderTopLeftRadius: 5,
-                                                borderBottomLeftRadius: 5,
-                                            }}
-                                            right={
-                                                searchQueryForModels != null &&
-                                                searchQueryForModels != "" && (
-                                                    <TextInput.Icon
-                                                        icon="close"
-                                                        color={
-                                                            colors.light_gray
-                                                        }
-                                                        onPress={() =>
-                                                            onModelRefresh()
-                                                        }
-                                                    />
-                                                )
-                                            }
-                                        />
-                                        <TouchableOpacity
-                                            onPress={() =>
-                                                searchFilterForModels()
-                                            }
-                                            style={{
-                                                elevation: 4,
-                                                borderTopRightRadius: 5,
-                                                borderBottomRightRadius: 5,
-                                                paddingRight: 25,
-                                                paddingLeft: 25,
-                                                zIndex: 2,
-                                                backgroundColor: colors.primary,
-                                                justifyContent: "center",
-                                                alignItems: "center",
-                                            }}
-                                        >
-                                            <IconX
-                                                name={"search"}
-                                                size={17}
-                                                color={colors.white}
-                                            />
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                                {filteredModelData?.length > 0 ? (
-                                    <FlatList
-                                        ItemSeparatorComponent={() => (
-                                            <>
-                                                <Divider />
-                                                <Divider />
-                                            </>
-                                        )}
-                                        data={filteredModelData}
-                                        onEndReached={loadMoreModels ? getModelList : null}
-                                        showsVerticalScrollIndicator={false}
-                                        onEndReachedThreshold={0.5}
-                                        refreshControl={
-                                            <RefreshControl
-                                                refreshing={modelRefreshing}
-                                                onRefresh={onModelRefresh}
-                                                colors={["green"]}
-                                            />
-                                        }
-                                        ListFooterComponent={loadMoreModels ? renderModelFooter : null}
-                                        style={{
-                                            borderColor: "#0000000a",
-                                            borderWidth: 1,
-                                            flex: 1,
-                                        }}
-                                        keyExtractor={(item) => item.id}
-                                        renderItem={({ item }) => (
-                                            <List.Item
-                                                title={
-                                                    <View
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                            display: "flex",
-                                                            flexWrap: "wrap",
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={{
-                                                                fontSize: 16,
-                                                                color: colors.black,
-                                                            }}
-                                                        >
-                                                            {item.model_name}
-                                                        </Text>
-                                                    </View>
-                                                }
-                                                onPress={() => {
-                                                    setIsModelName(
-                                                        item.model_name
-                                                    );
-                                                    setIsModel(item.id);
-                                                    setModelError("");
-                                                    onModelRefresh();
-                                                    setModelListModal(false);
-                                                }}
-                                            />
-                                        )}
-                                    />
-                                ) : (
-                                    <View
-                                        style={{
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            marginVertical: 50,
-                                            flex: 1,
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                color: colors.black,
-                                                textAlign: "center",
-                                            }}
-                                        >
-                                            No such vehicle model found!
-                                        </Text>
-                                    </View>
-                                )}
+                        <View
+                            style={{
+                                marginTop: 20,
+                                marginBottom: 10,
+                                flex: 1,
+                            }}
+                        >
+                            {/* Search Bar */}
+                            <View>
                                 <View
                                     style={{
-                                        justifyContent: "flex-end",
+                                        marginBottom: 15,
                                         flexDirection: "row",
                                     }}
                                 >
-                                    <TouchableOpacity
+                                    <TextInput
+                                        mode={"flat"}
+                                        placeholder="Search here..."
+                                        onChangeText={(text) =>
+                                            setSearchQueryForModels(text)
+                                        }
+                                        value={searchQueryForModels}
+                                        activeUnderlineColor={
+                                            colors.transparent
+                                        }
+                                        selectionColor="black"
+                                        underlineColor={colors.transparent}
                                         style={{
-                                            flexDirection: "row",
+                                            elevation: 4,
+                                            height: 50,
+                                            backgroundColor: colors.white,
+                                            flex: 1,
+                                            borderTopRightRadius: 0,
+                                            borderBottomRightRadius: 0,
+                                            borderTopLeftRadius: 5,
+                                            borderBottomLeftRadius: 5,
+                                        }}
+                                        right={
+                                            searchQueryForModels != null &&
+                                            searchQueryForModels != "" && (
+                                                <TextInput.Icon
+                                                    icon="close"
+                                                    color={
+                                                        colors.light_gray
+                                                    }
+                                                    onPress={() =>
+                                                        onModelRefresh()
+                                                    }
+                                                />
+                                            )
+                                        }
+                                    />
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            searchFilterForModels()
+                                        }
+                                        style={{
+                                            elevation: 4,
+                                            borderTopRightRadius: 5,
+                                            borderBottomRightRadius: 5,
+                                            paddingRight: 25,
+                                            paddingLeft: 25,
+                                            zIndex: 2,
+                                            backgroundColor: colors.primary,
                                             justifyContent: "center",
                                             alignItems: "center",
-                                            backgroundColor: colors.primary,
-                                            marginTop: 7,
-                                            paddingVertical: 3,
-                                            paddingHorizontal: 10,
-                                            borderRadius: 4,
-                                        }}
-                                        onPress={() => {
-                                            setAddModelModal(true);
-                                            setModelListModal(false);
                                         }}
                                     >
-                                        <Icon
-                                            style={{
-                                                color: colors.white,
-                                                marginRight: 4,
-                                            }}
-                                            name="plus"
-                                            size={16}
+                                        <IconX
+                                            name={"search"}
+                                            size={17}
+                                            color={colors.white}
                                         />
-                                        <Text style={{ color: colors.white }}>
-                                            Add Model
-                                        </Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
-                        )}
+                            <FlatList
+                                ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                                data={filteredModelData}
+                                onEndReached={loadMoreModels ? getModelList : null}
+                                showsVerticalScrollIndicator={false}
+                                onEndReachedThreshold={0.5}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={modelRefreshing}
+                                        onRefresh={onModelRefresh}
+                                        colors={["green"]}
+                                    />
+                                }
+                                ListFooterComponent={loadMoreModels ? renderModelFooter : null}
+                                ListEmptyComponent={() => (
+                                    !isLoading && (
+                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                            <Text style={{ color: colors.black }}>
+                                                No vehicle model found!
+                                            </Text>
+                                        </View>
+                                ))}
+                                contentContainerStyle={{ flexGrow: 1 }}
+                                style={{
+                                    borderColor: "#0000000a",
+                                    borderWidth: 1,
+                                    flex: 1,
+                                }}
+                                keyExtractor={(item) => item.id}
+                                renderItem={({ item }) => (
+                                    !isLoading && 
+                                        <List.Item
+                                            title={
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                        display: "flex",
+                                                        flexWrap: "wrap",
+                                                    }}
+                                                >
+                                                    <Text
+                                                        style={{
+                                                            fontSize: 16,
+                                                            color: colors.black,
+                                                        }}
+                                                    >
+                                                        {item.model_name}
+                                                    </Text>
+                                                </View>
+                                            }
+                                            onPress={() => {
+                                                setIsModelName(
+                                                    item.model_name
+                                                );
+                                                setIsModel(item.id);
+                                                setModelError("");
+                                                onModelRefresh();
+                                                setModelListModal(false);
+                                            }}
+                                        />
+                                )}
+                            />
+                            <View
+                                style={{
+                                    justifyContent: "flex-end",
+                                    flexDirection: "row",
+                                }}
+                            >
+                                <TouchableOpacity
+                                    style={{
+                                        flexDirection: "row",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        backgroundColor: colors.primary,
+                                        marginTop: 7,
+                                        paddingVertical: 3,
+                                        paddingHorizontal: 10,
+                                        borderRadius: 4,
+                                    }}
+                                    onPress={() => {
+                                        setAddModelModal(true);
+                                        setModelListModal(false);
+                                    }}
+                                >
+                                    <Icon
+                                        style={{
+                                            color: colors.white,
+                                            marginRight: 4,
+                                        }}
+                                        name="plus"
+                                        size={16}
+                                    />
+                                    <Text style={{ color: colors.white }}>
+                                        Add Model
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
                     </Modal>
 
                     {/* States List Modal */}
@@ -3355,9 +3161,6 @@ const AddRepairOrderStep2 = ({
                         visible={stateListModal}
                         onDismiss={() => {
                             setStateListModal(false);
-                            // setIsState();
-                            // setIsStateName("");
-                            // setStateError("");
                             setSearchQueryForStates("");
                             searchFilterForStates();
                             setIsCity();
@@ -3389,9 +3192,6 @@ const AddRepairOrderStep2 = ({
                             }}
                             onPress={() => {
                                 setStateListModal(false);
-                                // setIsState();
-                                // setIsStateName("");
-                                // setStateError("");
                                 setSearchQueryForStates("");
                                 searchFilterForStates();
                                 setIsCity();
@@ -3399,97 +3199,76 @@ const AddRepairOrderStep2 = ({
                                 setCityFieldToggle(false);
                             }}
                         />
-                        {isLoadingStateList == true ? (
-                            <View style={{ flex: 1, justifyContent: "center" }}>
-                                <ActivityIndicator></ActivityIndicator>
-                            </View>
-                        ) : (
-                            <View
+                        <View
+                            style={{
+                                marginTop: 20,
+                                marginBottom: 10,
+                                flex: 1,
+                            }}
+                        >
+                            <Searchbar
+                                placeholder="Search here..."
+                                onChangeText={(text) => {
+                                    if (text != null)
+                                        searchFilterForStates(text);
+                                }}
+                                value={searchQueryForStates}
+                                elevation={0}
+                                style={{ elevation: 0.8, marginBottom: 10 }}
+                            />
+                            <FlatList
+                                ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                                showsVerticalScrollIndicator={false}
+                                data={filteredStateData}
                                 style={{
-                                    marginTop: 20,
-                                    marginBottom: 10,
+                                    borderColor: "#0000000a",
+                                    borderWidth: 1,
                                     flex: 1,
                                 }}
-                            >
-                                <Searchbar
-                                    placeholder="Search here..."
-                                    onChangeText={(text) => {
-                                        if (text != null)
-                                            searchFilterForStates(text);
-                                    }}
-                                    value={searchQueryForStates}
-                                    elevation={0}
-                                    style={{ elevation: 0.8, marginBottom: 10 }}
-                                />
-                                {filteredStateData?.length > 0 ? (
-                                    <FlatList
-                                        ItemSeparatorComponent={() => (
-                                            <>
-                                                <Divider />
-                                                <Divider />
-                                            </>
-                                        )}
-                                        showsVerticalScrollIndicator={false}
-                                        data={filteredStateData}
-                                        style={{
-                                            borderColor: "#0000000a",
-                                            borderWidth: 1,
-                                            flex: 1,
-                                        }}
-                                        keyExtractor={(item) => item.id}
-                                        renderItem={({ item }) => (
-                                            <List.Item
-                                                title={
-                                                    <View
+                                keyExtractor={(item) => item.id}
+                                contentContainerStyle={{ flexGrow: 1 }}
+                                ListEmptyComponent={() => (
+                                    !isLoading && (
+                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                            <Text style={{ color: colors.black }}>
+                                                No state found!
+                                            </Text>
+                                        </View>
+                                ))}
+                                renderItem={({ item }) => (
+                                    !isLoading &&
+                                        <List.Item
+                                            title={
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                        display: "flex",
+                                                        flexWrap: "wrap",
+                                                    }}
+                                                >
+                                                    <Text
                                                         style={{
-                                                            flexDirection:
-                                                                "row",
-                                                            display: "flex",
-                                                            flexWrap: "wrap",
+                                                            fontSize: 16,
+                                                            color: colors.black,
                                                         }}
                                                     >
-                                                        <Text
-                                                            style={{
-                                                                fontSize: 16,
-                                                                color: colors.black,
-                                                            }}
-                                                        >
-                                                            {item.name}
-                                                        </Text>
-                                                    </View>
-                                                }
-                                                onPress={() => {
-                                                    setIsStateName(item.name);
-                                                    setIsState(item.id);
-                                                    setStateError("");
-                                                    setSearchQueryForStates("");
-                                                    searchFilterForStates();
-                                                    setStateListModal(false);
-                                                }}
-                                            />
-                                        )}
-                                    />
-                                ) : (
-                                    <View
-                                        style={{
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            marginVertical: 50,
-                                            flex: 1,
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                color: colors.black,
-                                                textAlign: "center",
+                                                        {item.name}
+                                                    </Text>
+                                                </View>
+                                            }
+                                            onPress={() => {
+                                                setIsStateName(item.name);
+                                                setIsState(item.id);
+                                                setStateError("");
+                                                setSearchQueryForStates("");
+                                                searchFilterForStates();
+                                                setStateListModal(false);
                                             }}
-                                        >
-                                            No such state is associated!
-                                        </Text>
-                                    </View>
+                                        />
                                 )}
-                            </View>
-                        )}
+                            />
+                        </View>
                     </Modal>
 
                     {/* City List Modal */}
@@ -3497,9 +3276,6 @@ const AddRepairOrderStep2 = ({
                         visible={cityListModal}
                         onDismiss={() => {
                             setCityListModal(false);
-                            // setIsCity();
-                            // setIsCityName("");
-                            // setCityError("");
                             setSearchQueryForCity("");
                             searchFilterForCity();
                         }}
@@ -3528,111 +3304,83 @@ const AddRepairOrderStep2 = ({
                             }}
                             onPress={() => {
                                 setCityListModal(false);
-                                // setIsCity();
-                                // setIsCityName("");
-                                // setCityError("");
                                 setSearchQueryForCity("");
                                 searchFilterForCity();
                             }}
                         />
-                        {isLoadingCityList == true ? (
-                            <View style={{ flex: 1, justifyContent: "center" }}>
-                                <ActivityIndicator></ActivityIndicator>
-                            </View>
-                        ) : (
-                            <View
+                        <View
+                            style={{
+                                marginTop: 20,
+                                marginBottom: 10,
+                                flex: 1,
+                            }}
+                        >
+                            <Searchbar
+                                placeholder="Search here..."
+                                onChangeText={(text) => {
+                                    if (text != null)
+                                        searchFilterForCity(text);
+                                }}
+                                value={searchQueryForCity}
+                                elevation={0}
+                                style={{ elevation: 0.8, marginBottom: 10 }}
+                            />
+                            <FlatList
+                                ItemSeparatorComponent={() => (!isLoading && <Divider />)}
+                                showsVerticalScrollIndicator={false}
+                                data={filteredCityData}
                                 style={{
-                                    marginTop: 20,
-                                    marginBottom: 10,
+                                    borderColor: "#0000000a",
+                                    borderWidth: 1,
                                     flex: 1,
                                 }}
-                            >
-                                <Searchbar
-                                    placeholder="Search here..."
-                                    onChangeText={(text) => {
-                                        if (text != null)
-                                            searchFilterForCity(text);
-                                    }}
-                                    value={searchQueryForCity}
-                                    elevation={0}
-                                    style={{ elevation: 0.8, marginBottom: 10 }}
-                                />
-                                {filteredCityData?.length > 0 ? (
-                                    <FlatList
-                                        ItemSeparatorComponent={() => (
-                                            <>
-                                                <Divider />
-                                                <Divider />
-                                            </>
-                                        )}
-                                        showsVerticalScrollIndicator={false}
-                                        data={filteredCityData}
-                                        style={{
-                                            borderColor: "#0000000a",
-                                            borderWidth: 1,
-                                            flex: 1,
-                                        }}
-                                        keyExtractor={(item) => item.id}
-                                        renderItem={({ item }) => (
-                                            <>
-                                                <List.Item
-                                                    title={
-                                                        <View
-                                                            style={{
-                                                                flexDirection:
-                                                                    "row",
-                                                                display: "flex",
-                                                                flexWrap:
-                                                                    "wrap",
-                                                            }}
-                                                        >
-                                                            <Text
-                                                                style={{
-                                                                    fontSize: 16,
-                                                                    color: colors.black,
-                                                                }}
-                                                            >
-                                                                {item.name}
-                                                            </Text>
-                                                        </View>
-                                                    }
-                                                    onPress={() => {
-                                                        setIsCityName(
-                                                            item.name
-                                                        );
-                                                        setIsCity(item.id);
-                                                        setCityError("");
-                                                        setSearchQueryForCity(
-                                                            ""
-                                                        );
-                                                        searchFilterForCity();
-                                                        setCityListModal(false);
+                                keyExtractor={(item) => item.id}
+                                contentContainerStyle={{ flexGrow: 1 }}
+                                ListEmptyComponent={() => (
+                                    !isLoading && (
+                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                            <Text style={{ color: colors.black }}>
+                                                No city found!
+                                            </Text>
+                                        </View>
+                                ))}
+                                renderItem={({ item }) => (
+                                    !isLoading &&
+                                        <List.Item
+                                            title={
+                                                <View
+                                                    style={{
+                                                        flexDirection:
+                                                            "row",
+                                                        display: "flex",
+                                                        flexWrap:
+                                                            "wrap",
                                                     }}
-                                                />
-                                            </>
-                                        )}
-                                    />
-                                ) : (
-                                    <View
-                                        style={{
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            marginVertical: 50,
-                                            flex: 1,
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                color: colors.black,
-                                                textAlign: "center",
+                                                >
+                                                    <Text
+                                                        style={{
+                                                            fontSize: 16,
+                                                            color: colors.black,
+                                                        }}
+                                                    >
+                                                        {item.name}
+                                                    </Text>
+                                                </View>
+                                            }
+                                            onPress={() => {
+                                                setIsCityName(
+                                                    item.name
+                                                );
+                                                setIsCity(item.id);
+                                                setCityError("");
+                                                setSearchQueryForCity("");
+                                                searchFilterForCity();
+                                                setCityListModal(false);
                                             }}
-                                        >
-                                            No such city is associated!
-                                        </Text>
-                                    </View>
+                                        />
                                 )}
-                            </View>
-                        )}
+                            />
+                        </View>
                     </Modal>
                 </Portal>
                 {isLoading &&

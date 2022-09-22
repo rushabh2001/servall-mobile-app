@@ -52,12 +52,8 @@ const InvoicePreviewSelectOrder = ({
     const [loadMoreOrders, setLoadMoreOrders] = useState(true);
 
     const getOrderList = async () => {
-        {
-            page == 1 && setIsLoading(true);
-        }
-        {
-            page != 1 && setIsScrollLoading(true);
-        }
+        if(page == 1) setIsLoading(true)
+        if(page != 1) setIsScrollLoading(true)
         try {
             const res = await fetch(
                 `${API_URL}fetch_payments_order/status/${selectedGarageId}?page=${page}`,
@@ -112,14 +108,12 @@ const InvoicePreviewSelectOrder = ({
                 setFilteredData(json.data.data);
                 {json.data.current_page != json.data.last_page ? setLoadMoreOrders(true) : setLoadMoreOrders(false)}
                 {json.data.current_page != json.data.last_page ? setPage(2) : null}
-                setRefreshing(false);
-            } else {
+                setIsLoading(false);
                 setRefreshing(false);
             }
         } catch (error) {
             console.error(error);
         }
-        setIsLoading(false);
     };
 
     const getOrderDetails = async (orderId) => {
@@ -135,11 +129,10 @@ const InvoicePreviewSelectOrder = ({
             const json = await res.json();
             if (json !== undefined) {
                 setOrderData(json.data);
+                setOrderDataLoading(false);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            setOrderDataLoading(false);
         }
     };
 
@@ -167,12 +160,11 @@ const InvoicePreviewSelectOrder = ({
                 setFilteredData(json.data.data);
                 {json.data.current_page != json.data.last_page ? setLoadMoreOrders(true) : setLoadMoreOrders(false)}
                 {json.data.current_page != json.data.last_page ? setPage(2) : null}
+                setRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
-        } finally {
-            setRefreshing(false);
-            setIsLoading(false);
         }
     };
 
@@ -272,6 +264,7 @@ const InvoicePreviewSelectOrder = ({
                             data={filteredData}
                             onEndReached={loadMoreOrders ? getOrderList : null}
                             onEndReachedThreshold={0.5}
+                            contentContainerStyle={{ flexGrow: 1 }}
                             refreshControl={
                                 <RefreshControl
                                     refreshing={refreshing}
