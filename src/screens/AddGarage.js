@@ -102,56 +102,137 @@ const AddGarage = ({
         { label: "Existing User", value: "existing_user" },
     ];
 
-    const scroll1Ref = useRef();
+    const isGarageContactNumberRef = useRef();
+    const isNameRef = useRef();
+    const isEmailRef = useRef();
+    const isPhoneRef = useRef();
+    const isLocationRef = useRef();
+    const scrollViewRef = useRef();
 
-    const submit = () => {
-        setIsLoading(true);
-        Keyboard.dismiss();
-        if (isGarageName.length == 0) {
-            setGarageNameError("Garage Name is required");
-        }
-        if (isGarageContactNumber.length == 0) {
-            setGarageContactNumberError("Garage Contact Number is required");
-        }
-        if (isCity == 0 || isCity == undefined) {
-            setCityError("City is required");
-        }
-        if (isState == 0 || isState == undefined) {
-            setStateError("State is required");
-        }
-        if (isLocation.length == 0) {
-            setLocationError("Location is required");
-        }
-        if (ownerOption == "new_user") {
-           
-            if (isName.length == 0) {
-                setNameError("Owner Name is required");
-            }
-            if (isPhoneNumber.length == 0) {
-                setPhoneNumberError("Phone Number is required");
-            } else if (isPhoneNumber.length < 9) {
-                setPhoneNumberError(
-                    "Phone Number should be minimum 10 characters"
+    const validate = (show = false) => {
+        if (!show) {
+            if (ownerOption == "new_user") {
+                return !(
+                    !isGarageName ||
+                    isGarageName?.trim().length === 0 ||
+                    !isGarageContactNumber ||
+                    isGarageContactNumber?.trim().length === 0 ||
+                    !isCity ||
+                    isCity === 0 ||
+                    !isState ||
+                    isState === 0 ||
+                    !isLocation ||
+                    isLocation?.trim().length === 0 ||
+                    !isName ||
+                    isName?.trim().length === 0 ||
+                    !isPhoneNumber ||
+                    isPhoneNumber?.trim().length === 0 ||
+                    !isEmail ||
+                    isEmail?.trim().length === 0 ||
+                    isEmail?.trim().length < 6 ||
+                    isEmail?.indexOf("@") < 0 ||
+                    isEmail?.indexOf(" ") >= 0
+                );
+            } else if (ownerOption == "existing_user") {
+                return !(
+                    !ownerId ||
+                    ownerId === 0
                 );
             }
-            if (isEmail.length == 0) {
-                setEmailError("Email is required");
-            } else if (isEmail.length < 6) {
-                setEmailError("Email should be minimum 6 characters");
-            } else if (isEmail?.indexOf(" ") >= 0) {
-                setEmailError("Email cannot contain spaces");
-            } else if (isEmail?.indexOf("@") < 0) {
-                setEmailError("Invalid Email Format");
-            } else {
-                setEmailError("");
-                setPhoneNumberError("");
+        } else {
+            if (ownerOption == "new_user") {
+                if (!isGarageName ||
+                    isGarageName?.trim().length === 0) {
+                    scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true })
+                    return false;
+                }
+                if (!isGarageContactNumber ||
+                    isGarageContactNumber?.trim().length === 0) {
+                    isGarageContactNumberRef.current.focus();
+                    return false;
+                }
+                if (!isState ||
+                    isState === 0) {
+                    isGarageContactNumberRef.current.focus();
+                    return false;
+                }
+                if (!isCity ||
+                    isCity === 0) {
+                    isGarageContactNumberRef.current.focus();
+                    return false;
+                }
+                if (!isLocation ||
+                    isLocation?.trim().length === 0) {
+                    isLocationRef.current.focus();
+                    return false;
+                }
+                if (!isName ||
+                    isName?.trim().length === 0) {
+                    isNameRef.current.focus();
+                    return false;
+                }
+                if (isEmail?.trim().length === 0 || isEmail?.trim().length < 6 || isEmail?.indexOf("@") < 0 || isEmail?.indexOf(" ") >= 0) {
+                    isEmailRef.current.focus();
+                    return false;
+                }
+                if (!isPhoneNumber ||
+                    isPhoneNumber?.trim().length === 0) {
+                    isPhoneRef.current.focus();
+                    return false;
+                }
             }
-        } else if (ownerOption == "existing_user") {
-            if (ownerId == 0) {
-                setUserError("User is required");
-            } else {
-                setUserError("");
+        }
+    };
+
+    const submit = () => {
+        Keyboard.dismiss();
+
+        if (!validate(true)) {
+            if (isGarageName.length == 0) {
+                setGarageNameError("Garage Name is required");
+            } else { setGarageNameError(""); }
+            if (isGarageContactNumber.length == 0) {
+                setGarageContactNumberError("Garage Contact Number is required");
+            } else { setGarageContactNumberError(""); }
+            if (isCity == 0 || isCity == undefined) {
+                setCityError("City is required");
+            } else { setCityError(""); }
+            if (isState == 0 || isState == undefined) {
+                setStateError("State is required");
+            } else { setStateError(""); }
+            if (isLocation.length == 0) {
+                setLocationError("Location is required");
+            } else { setLocationError(""); }
+            if (ownerOption == "new_user") {
+                if (isName.length == 0) {
+                    setNameError("Owner Name is required");
+                } else { setNameError(""); }
+                if (isPhoneNumber.length == 0) {
+                    setPhoneNumberError("Phone Number is required");
+                } else if (isPhoneNumber.length < 9) {
+                    setPhoneNumberError(
+                        "Phone Number should be minimum 10 characters"
+                    );
+                } else { setPhoneNumberError(""); }
+                if (isEmail.length == 0) {
+                    setEmailError("Email is required");
+                } else if (isEmail.length < 6) {
+                    setEmailError("Email should be minimum 6 characters");
+                } else if (isEmail?.indexOf(" ") >= 0) {
+                    setEmailError("Email cannot contain spaces");
+                } else if (isEmail?.indexOf("@") < 0) {
+                    setEmailError("Invalid Email Format");
+                } else {
+                    setEmailError("");
+                }
+            } else if (ownerOption == "existing_user") {
+                if (ownerId == 0) {
+                    setUserError("User is required");
+                } else {
+                    setUserError("");
+                }
             }
+            return;
         }
 
         const data = new FormData();
@@ -273,7 +354,7 @@ const AddGarage = ({
             }
         } catch (e) {
             console.log(e);
-        } 
+        }
     };
 
     // City Functionalities
@@ -321,8 +402,8 @@ const AddGarage = ({
     };
 
     const getAdminList = async () => {
-        if(userPage == 1) setIsLoading(true)
-        if(userPage != 1) setIsUserScrollLoading(true)
+        if (userPage == 1) setIsLoading(true)
+        if (userPage != 1) setIsUserScrollLoading(true)
         try {
             const res = await fetch(
                 `${API_URL}fetch_admin_list?page=${userPage}`,
@@ -346,9 +427,9 @@ const AddGarage = ({
                     ...json.admin_user_list.data,
                 ]);
                 setIsLoading(false);
-                if(userPage != 1) setIsUserScrollLoading(false)
-                {json.admin_user_list.current_page != json.admin_user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
-                {json.admin_user_list.current_page != json.admin_user_list.last_page ? setUserPage(userPage + 1) : null}
+                if (userPage != 1) setIsUserScrollLoading(false)
+                { json.admin_user_list.current_page != json.admin_user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false) }
+                { json.admin_user_list.current_page != json.admin_user_list.last_page ? setUserPage(userPage + 1) : null }
             }
         } catch (e) {
             console.log(e);
@@ -373,8 +454,8 @@ const AddGarage = ({
             if (response.status == "200") {
                 setAdminList(json.admin_user_list.data);
                 setFilteredUserData(json.admin_user_list.data);
-                {json.admin_user_list.current_page != json.admin_user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
-                {json.admin_user_list.current_page != json.admin_user_list.last_page ? setUserPage(2) : null}
+                { json.admin_user_list.current_page != json.admin_user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false) }
+                { json.admin_user_list.current_page != json.admin_user_list.last_page ? setUserPage(2) : null }
                 setIsLoading(false);
                 setUserRefreshing(false);
             }
@@ -401,8 +482,8 @@ const AddGarage = ({
                 setSearchQueryForUsers("");
                 setAdminList(json.admin_user_list.data);
                 setFilteredUserData(json.admin_user_list.data);
-                {json.admin_user_list.current_page != json.admin_user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
-                {json.admin_user_list.current_page != json.admin_user_list.last_page ? setUserPage(2) : null}
+                { json.admin_user_list.current_page != json.admin_user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false) }
+                { json.admin_user_list.current_page != json.admin_user_list.last_page ? setUserPage(2) : null }
                 setIsLoading(false);
                 setUserRefreshing(false);
             }
@@ -475,7 +556,7 @@ const AddGarage = ({
             </View>
             <View style={styles.pageContainer}>
                 <InputScrollView
-                    ref={scroll1Ref}
+                    ref={scrollViewRef}
                     contentContainerStyle={{
                         flexGrow: 1,
                         justifyContent: "center",
@@ -510,6 +591,7 @@ const AddGarage = ({
                         <TextInput
                             mode="outlined"
                             label="Garage Contact Number"
+                            ref={isGarageContactNumberRef}
                             style={styles.input}
                             placeholder="Garage Contact Number"
                             value={isGarageContactNumber}
@@ -524,7 +606,7 @@ const AddGarage = ({
                             </Text>
                         )}
 
-                        <View style={{marginTop: 20}}>
+                        <View style={{ marginTop: 20 }}>
                             <TouchableOpacity
                                 onPress={() => {
                                     setStateListModal(true);
@@ -553,7 +635,7 @@ const AddGarage = ({
                         </View>
 
                         {cityFieldToggle == true && (
-                            <View style={{marginTop: 20}}>
+                            <View style={{ marginTop: 20 }}>
                                 <TouchableOpacity
                                     onPress={() => {
                                         setCityListModal(true);
@@ -585,6 +667,7 @@ const AddGarage = ({
                         <TextInput
                             mode="outlined"
                             label="Location"
+                            ref={isLocationRef}
                             style={styles.input}
                             placeholder="Location"
                             value={isLocation}
@@ -614,7 +697,7 @@ const AddGarage = ({
                         </View>
 
                         {ownerOption == "existing_user" ? (
-                            <View style={{marginTop: 20}}>
+                            <View style={{ marginTop: 20 }}>
                                 <TouchableOpacity
                                     onPress={() => {
                                         setUserListModal(true);
@@ -654,6 +737,7 @@ const AddGarage = ({
                                 <TextInput
                                     mode="outlined"
                                     label="Owner Name"
+                                    ref={isNameRef}
                                     style={styles.input}
                                     placeholder="Owner Name"
                                     value={isName}
@@ -672,6 +756,7 @@ const AddGarage = ({
                                 <TextInput
                                     mode="outlined"
                                     label="Email Address"
+                                    ref={isEmailRef}
                                     style={styles.input}
                                     placeholder="Email Address"
                                     value={isEmail}
@@ -690,6 +775,7 @@ const AddGarage = ({
                                 <TextInput
                                     mode="outlined"
                                     label="Phone Number"
+                                    ref={isPhoneRef}
                                     style={styles.input}
                                     placeholder="Phone Number"
                                     value={isPhoneNumber}
@@ -895,7 +981,7 @@ const AddGarage = ({
                                             No user found!
                                         </Text>
                                     </View>
-                            ))}
+                                ))}
                             style={{
                                 borderColor: "#0000000a",
                                 borderWidth: 1,
@@ -904,35 +990,35 @@ const AddGarage = ({
                             keyExtractor={(item) => item.id}
                             renderItem={({ item }) => (
                                 !isLoading &&
-                                    <List.Item
-                                        title={
-                                            // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setUserListModal(false);  setAddUserModal(true); }}>
-                                            <View
+                                <List.Item
+                                    title={
+                                        // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setUserListModal(false);  setAddUserModal(true); }}>
+                                        <View
+                                            style={{
+                                                flexDirection:
+                                                    "row",
+                                                display: "flex",
+                                                flexWrap: "wrap",
+                                            }}
+                                        >
+                                            <Text
                                                 style={{
-                                                    flexDirection:
-                                                        "row",
-                                                    display: "flex",
-                                                    flexWrap: "wrap",
+                                                    fontSize: 16,
+                                                    color: colors.black,
                                                 }}
                                             >
-                                                <Text
-                                                    style={{
-                                                        fontSize: 16,
-                                                        color: colors.black,
-                                                    }}
-                                                >
-                                                    {item.name}
-                                                </Text>
-                                            </View>
-                                            // </TouchableOpacity>
-                                        }
-                                        onPress={() => {
-                                            setIsName(item.name);
-                                            setOwnerId(item.id);
-                                            setUserError("");
-                                            setUserListModal(false);
-                                        }}
-                                    />
+                                                {item.name}
+                                            </Text>
+                                        </View>
+                                        // </TouchableOpacity>
+                                    }
+                                    onPress={() => {
+                                        setIsName(item.name);
+                                        setOwnerId(item.id);
+                                        setUserError("");
+                                        setUserListModal(false);
+                                    }}
+                                />
                             )}
                         />
                     </View>
@@ -1012,36 +1098,36 @@ const AddGarage = ({
                                             No state found!
                                         </Text>
                                     </View>
-                            ))}
+                                ))}
                             keyExtractor={(item) => item.id}
                             renderItem={({ item }) => (
-                                !isLoading && 
-                                    <List.Item
-                                        title={
-                                            <View
+                                !isLoading &&
+                                <List.Item
+                                    title={
+                                        <View
+                                            style={{
+                                                flexDirection: "row",
+                                                display: "flex",
+                                                flexWrap: "wrap",
+                                            }}
+                                        >
+                                            <Text
                                                 style={{
-                                                    flexDirection: "row",
-                                                    display: "flex",
-                                                    flexWrap: "wrap",
+                                                    fontSize: 16,
+                                                    color: colors.black,
                                                 }}
                                             >
-                                                <Text
-                                                    style={{
-                                                        fontSize: 16,
-                                                        color: colors.black,
-                                                    }}
-                                                >
-                                                    {item.name}
-                                                </Text>
-                                            </View>
-                                        }
-                                        onPress={() => {
-                                            setIsStateName(item.name);
-                                            setIsState(item.id);
-                                            setStateError("");
-                                            setStateListModal(false);
-                                        }}
-                                    />
+                                                {item.name}
+                                            </Text>
+                                        </View>
+                                    }
+                                    onPress={() => {
+                                        setIsStateName(item.name);
+                                        setIsState(item.id);
+                                        setStateError("");
+                                        setStateListModal(false);
+                                    }}
+                                />
                             )}
                         />
                     </View>
@@ -1114,36 +1200,36 @@ const AddGarage = ({
                                             No city found!
                                         </Text>
                                     </View>
-                            ))}
+                                ))}
                             renderItem={({ item }) => (
-                                !isLoading && 
-                                    <List.Item
-                                        title={
-                                            <View
+                                !isLoading &&
+                                <List.Item
+                                    title={
+                                        <View
+                                            style={{
+                                                flexDirection:
+                                                    "row",
+                                                display: "flex",
+                                                flexWrap: "wrap",
+                                            }}
+                                        >
+                                            <Text
                                                 style={{
-                                                    flexDirection:
-                                                        "row",
-                                                    display: "flex",
-                                                    flexWrap: "wrap",
+                                                    fontSize: 16,
+                                                    color: colors.black,
                                                 }}
                                             >
-                                                <Text
-                                                    style={{
-                                                        fontSize: 16,
-                                                        color: colors.black,
-                                                    }}
-                                                >
-                                                    {item.name}
-                                                </Text>
-                                            </View>
-                                        }
-                                        onPress={() => {
-                                            setIsCityName(item.name);
-                                            setIsCity(item.id);
-                                            setCityError("");
-                                            setCityListModal(false);
-                                        }}
-                                    />
+                                                {item.name}
+                                            </Text>
+                                        </View>
+                                    }
+                                    onPress={() => {
+                                        setIsCityName(item.name);
+                                        setIsCity(item.id);
+                                        setCityError("");
+                                        setCityListModal(false);
+                                    }}
+                                />
                             )}
                         />
                     </View>

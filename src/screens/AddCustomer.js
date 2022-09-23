@@ -192,7 +192,12 @@ const AddCustomer = ({
 
     const [isLoading, setIsLoading] = useState(false);
 
-    const scroll1Ref = useRef();
+    const isNameRef = useRef();
+    const isEmailRef = useRef();
+    const isPhoneRef = useRef();
+    const isVehicalNumRef = useRef();
+    const isAddressRef = useRef();
+    const scrollViewRef = useRef();
 
     const addNewBrand = async () => {
         let data = { name: newBrandName };
@@ -341,36 +346,83 @@ const AddCustomer = ({
         }
     };
 
-    const validate = () => {
-        return !(
-            !isName ||
-            isName?.trim().length === 0 ||
-            !isPhoneNumber ||
-            isPhoneNumber?.trim().length === 0 ||
-            !isEmail ||
-            isEmail?.trim().length === 0 ||
-            isEmail?.trim().length < 6 ||
-            isEmail?.indexOf("@") < 0 ||
-            isEmail?.indexOf(" ") >= 0 ||
-            !isCity ||
-            isCity === 0 ||
-            !isState ||
-            isState === 0 ||
-            !isBrand ||
-            isBrand === 0 ||
-            !isModel ||
-            isModel === 0 ||
-            !isGarageId ||
-            isGarageId === 0 ||
-            !isVehicleRegistrationNumber ||
-            isVehicleRegistrationNumber?.trim().length === 0
-        );
+    const validate = (show = false) => {
+        if (!show) {
+            return !(
+                !isName ||
+                isName?.trim().length === 0 ||
+                !isPhoneNumber ||
+                isPhoneNumber?.trim().length === 0 ||
+                !isEmail ||
+                isEmail?.trim().length === 0 ||
+                isEmail?.trim().length < 6 ||
+                isEmail?.indexOf("@") < 0 ||
+                isEmail?.indexOf(" ") >= 0 ||
+                !isCity ||
+                isCity === 0 ||
+                !isState ||
+                isState === 0 ||
+                !isBrand ||
+                isBrand === 0 ||
+                !isModel ||
+                isModel === 0 ||
+                !isGarageId ||
+                isGarageId === 0 ||
+                !isVehicleRegistrationNumber ||
+                isVehicleRegistrationNumber?.trim().length === 0
+            );
+        } else {
+            if (!isName ||
+                isName?.trim().length === 0) {
+                isNameRef.current.focus();
+                return false;
+            }
+            if (isEmail?.trim().length === 0 || isEmail?.trim().length < 6 || isEmail?.indexOf("@") < 0 || isEmail?.indexOf(" ") >= 0) {
+                isEmailRef.current.focus();
+                return false;
+            }
+            if (!isPhoneNumber ||
+                isPhoneNumber?.trim().length === 0) {
+                isPhoneRef.current.focus();
+                return false;
+            }
+            if (!isState ||
+                isState === 0) {
+                isPhoneRef.current.focus();
+                return false;
+            }
+            if (!isCity ||
+                isCity === 0) {
+                isPhoneRef.current.focus();
+                return false;
+            }
+            if (!isGarageId ||
+                isGarageId === 0) {
+                isAddressRef.current.focus();
+                return false;
+            }
+            if (!isBrand ||
+                isBrand === 0) {
+                isAddressRef.current.focus();
+                return false;
+            }
+            if (!isModel ||
+                isModel === 0) {
+                isAddressRef.current.focus();
+                return false;
+            }
+            if (!isVehicleRegistrationNumber ||
+                isVehicleRegistrationNumber?.trim().length === 0) {
+                isVehicalNumRef.current.focus();
+                return false;
+            }
+        }
     };
 
     const submit = () => {
         Keyboard.dismiss();
 
-        if (!validate()) {
+        if (!validate(true)) {
             if (!isName) setIsName("");
             if (!isEmail) setIsEmail("");
             if (!isPhoneNumber) setIsPhoneNumber("");
@@ -1054,7 +1106,7 @@ const AddCustomer = ({
             </View>
             <View style={styles.pageContainer}>
                 <InputScrollView
-                    ref={scroll1Ref}
+                    ref={scrollViewRef}
                     contentContainerStyle={{
                         flexGrow: 1,
                         justifyContent: "center",
@@ -1073,6 +1125,7 @@ const AddCustomer = ({
                         <TextInput
                             mode="outlined"
                             label="Customer Name"
+                            ref={isNameRef}
                             style={styles.input}
                             placeholder="Customer Name"
                             value={isName}
@@ -1087,6 +1140,7 @@ const AddCustomer = ({
                         <TextInput
                             mode="outlined"
                             label="Email Address"
+                            ref={isEmailRef}
                             style={styles.input}
                             placeholder="Email Address"
                             value={isEmail}
@@ -1109,6 +1163,7 @@ const AddCustomer = ({
                         <TextInput
                             mode="outlined"
                             label="Phone Number"
+                            ref={isPhoneRef}
                             style={styles.input}
                             placeholder="Phone Number"
                             maxLength={10}
@@ -1184,6 +1239,7 @@ const AddCustomer = ({
                         <TextInput
                             mode="outlined"
                             label="Address"
+                            ref={isAddressRef}
                             style={styles.input}
                             placeholder="Address"
                             value={isAddress}
@@ -1288,6 +1344,7 @@ const AddCustomer = ({
                         <TextInput
                             mode="outlined"
                             label="Vehicle Registration Number"
+                            ref={isVehicalNumRef}
                             style={styles.input}
                             placeholder="Vehicle Registration Number"
                             value={isVehicleRegistrationNumber}

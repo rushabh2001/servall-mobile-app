@@ -134,23 +134,42 @@ const AddVehicle = ({
 
     const [isLoading, setIsLoading] = useState(false);
 
-    const scroll1Ref = useRef();
+    const isVehicalNumRef = useRef();
+    const scrollViewRef = useRef();
 
-    const validate = () => {
-        return !(
-            !isBrand ||
-            isBrand === 0 ||
-            !isModel ||
-            isModel === 0 ||
-            !isVehicleRegistrationNumber ||
-            isVehicleRegistrationNumber?.trim().length === 0
-        );
+    const validate = (show = false) => {
+        if (!show) {
+            return !(
+                !isBrand ||
+                isBrand === 0 ||
+                !isModel ||
+                isModel === 0 ||
+                !isVehicleRegistrationNumber ||
+                isVehicleRegistrationNumber?.trim().length === 0
+            );
+        } else {
+            if (!isBrand ||
+                isBrand === 0) {
+                scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true })
+                return false;
+            }
+            if (!isModel ||
+                isModel === 0) {
+                scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true })
+                return false;
+            }
+            if (!isVehicleRegistrationNumber ||
+                isVehicleRegistrationNumber?.trim().length === 0) {
+                isVehicalNumRef.current.focus();
+                return false;
+            }
+        }
     };
 
     const submit = () => {
         Keyboard.dismiss();
 
-        if (!validate()) {
+        if (!validate(true)) {
             if (!isBrand || isBrand === 0) setBrandError("Brand is required");
             if (!isModel || isModel === 0) setModelError("Model is required");
             if (
@@ -736,7 +755,7 @@ const AddVehicle = ({
             </View>
             <View style={styles.pageContainer}>
                 <InputScrollView
-                    ref={scroll1Ref}
+                    ref={scrollViewRef}
                     contentContainerStyle={{
                         flexGrow: 1,
                         justifyContent: "center",
@@ -813,6 +832,7 @@ const AddVehicle = ({
                         <TextInput
                             mode="outlined"
                             label="Vehicle Registration Number"
+                            ref={isVehicalNumRef}
                             style={styles.input}
                             placeholder="Vehicle Registration Number"
                             value={isVehicleRegistrationNumber}

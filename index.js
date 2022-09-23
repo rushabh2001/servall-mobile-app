@@ -17,7 +17,8 @@ LogBox.ignoreLogs([
    "Looks like you're passing an inline function for 'component' prop for the screen 'CustomerNotifications' (e.g. component={() => <SomeComponent />}). Passing an inline function will cause the component state to be lost on re-render and cause perf issues since it's re-created every render. You can pass the function as children to 'Screen' instead to achieve the desired behaviour.",
    "Require cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.",
    "Warning: Failed prop type: Invalid prop `textStyle` of type `array` supplied to `Cell`, expected `object`.",
-   'Warning: Each child in a list should have a unique "key" prop.'
+   'Warning: Each child in a list should have a unique "key" prop.',
+   "Warning: Failed prop type: Invalid prop `value` of type `number` supplied to `ForwardRef(TextInput)`, expected `string`."
 ]);
 
 AppRegistry.registerComponent(appName, () => App);

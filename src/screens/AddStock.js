@@ -101,37 +101,51 @@ const AddStock = ({
     const [loadMoreGarages, setLoadMoreGarages] = useState(true);
 
     const [isLoading, setIsLoading] = useState(false);
-    const scroll1Ref = useRef();
+
+    const scrollViewRef = useRef();
 
     const [garagePage, setGaragePage] = useState(1);
     const [isGarageScrollLoading, setIsGarageScrollLoading] = useState(false);
     const [garageRefreshing, setGarageRefreshing] = useState(false);
 
-    const validate = () => {
-        return !(
-            !isPart ||
-            isPart === 0 ||
-            !isPrice ||
-            isPrice?.trim().length === 0 ||
-            !isCurrentStock ||
-            isCurrentStock?.trim().length === 0 ||
-            !isMRP ||
-            isMRP?.trim().length === 0 ||
-            !isRackId ||
-            isRackId?.trim().length === 0 ||
-            !isMinStock ||
-            isMinStock?.trim().length === 0 ||
-            !isMaxStock ||
-            isMaxStock?.trim().length === 0 ||
-            // !isVendor || isVendor === 0 ||
-            !isGarageId ||
-            isGarageId === 0
-        );
+    const validate = (show = false) => {
+        if (!show) {
+            return !(
+                !isPart ||
+                isPart === 0 ||
+                !isPrice ||
+                isPrice?.trim().length === 0 ||
+                !isCurrentStock ||
+                isCurrentStock?.trim().length === 0 ||
+                !isMRP ||
+                isMRP?.trim().length === 0 ||
+                !isRackId ||
+                isRackId?.trim().length === 0 ||
+                !isMinStock ||
+                isMinStock?.trim().length === 0 ||
+                !isMaxStock ||
+                isMaxStock?.trim().length === 0 ||
+                // !isVendor || isVendor === 0 ||
+                !isGarageId ||
+                isGarageId === 0
+            );
+        } else {
+            if (!isPart ||
+                isPart === 0) {
+                scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true })
+                return false;
+            }
+            if (!isGarageId ||
+                isGarageId === 0) {
+                scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true })
+                return false;
+            }
+        }
     };
 
     const submit = () => {
         Keyboard.dismiss();
-        if (!validate()) {
+        if (!validate(true)) {
             if (!isPart) setPartError("Part is required");
             else setPartError("");
             if (!isPrice) setIsPrice("");
@@ -543,7 +557,7 @@ const AddStock = ({
             </View>
             <View style={styles.pageContainer}>
                 <InputScrollView
-                    ref={scroll1Ref}
+                    ref={scrollViewRef}
                     contentContainerStyle={{
                         flexGrow: 1,
                         justifyContent: "flex-start",

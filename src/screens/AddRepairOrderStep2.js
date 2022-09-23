@@ -31,6 +31,8 @@ import DocumentPicker from "react-native-document-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import RadioForm from "react-native-simple-radio-button";
 import Spinner from "react-native-loading-spinner-overlay";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import FontAwesome from "react-native-vector-icons/FontAwesome";
 
 const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 const phoneReg = /^[0-9]{10}$/;
@@ -203,7 +205,14 @@ const AddRepairOrderStep2 = ({
     const [searchQueryForCity, setSearchQueryForCity] = useState();
     const [cityError, setCityError] = useState();
 
-    const scroll1Ref = useRef();
+    const [value, setValue] = useState('new_user');
+
+    const isNameRef = useRef();
+    const isEmailRef = useRef();
+    const isPhoneRef = useRef();
+    const isVehicalNumRef = useRef();
+    const isAddressRef = useRef();
+    const scrollViewRef = useRef();
 
     var radio_props = [
         { label: "New User", value: "new_user" },
@@ -356,49 +365,129 @@ const AddRepairOrderStep2 = ({
         }
     };
 
-    const validate = () => {
-        if (userOption == "new_user") {
-            return !(
-                !isName ||
-                isName?.trim().length === 0 ||
-                !isPhoneNumber ||
-                isPhoneNumber?.trim().length === 0 ||
-                !isEmail ||
-                isEmail?.trim().length === 0 ||
-                isEmail?.trim().length < 6 ||
-                isEmail?.indexOf("@") < 0 ||
-                isEmail?.indexOf(" ") >= 0 ||
-                !isCity ||
-                isCity === 0 ||
-                !isState ||
-                isState === 0 ||
-                !isBrand ||
-                isBrand === 0 ||
-                !isModel ||
-                isModel === 0 ||
-                !isGarageId ||
-                isGarageId === 0 ||
-                !isVehicleRegistrationNumber ||
-                isVehicleRegistrationNumber?.trim().length === 0
-            );
-        } else if (userOption == "existing_user") {
-            return !(
-                !isBrand ||
-                isBrand === 0 ||
-                !isModel ||
-                isModel === 0 ||
-                !isGarageId ||
-                isGarageId === 0 ||
-                !isVehicleRegistrationNumber ||
-                isVehicleRegistrationNumber?.trim().length === 0
-            );
+    const validate = (show = false) => {
+        if (!show) {
+            if (userOption == "new_user") {
+                return !(
+                    !isName ||
+                    isName?.trim().length === 0 ||
+                    !isPhoneNumber ||
+                    isPhoneNumber?.trim().length === 0 ||
+                    !isEmail ||
+                    isEmail?.trim().length === 0 ||
+                    isEmail?.trim().length < 6 ||
+                    isEmail?.indexOf("@") < 0 ||
+                    isEmail?.indexOf(" ") >= 0 ||
+                    !isCity ||
+                    isCity === 0 ||
+                    !isState ||
+                    isState === 0 ||
+                    !isBrand ||
+                    isBrand === 0 ||
+                    !isModel ||
+                    isModel === 0 ||
+                    !isGarageId ||
+                    isGarageId === 0 ||
+                    !isVehicleRegistrationNumber ||
+                    isVehicleRegistrationNumber?.trim().length === 0
+                );
+            } else if (userOption == "existing_user") {
+                return !(
+                    !isBrand ||
+                    isBrand === 0 ||
+                    !isModel ||
+                    isModel === 0 ||
+                    !isGarageId ||
+                    isGarageId === 0 ||
+                    !isVehicleRegistrationNumber ||
+                    isVehicleRegistrationNumber?.trim().length === 0
+                );
+            }
+        } else {
+            if (userOption == "new_user") {
+                if (!isGarageId ||
+                    isGarageId === 0) {
+                    scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true })
+                    return false;
+                }
+                if (!isName ||
+                    isName?.trim().length === 0) {
+                    isNameRef.current.focus();
+                    return false;
+                }
+                if (isEmail?.trim().length === 0 || isEmail?.trim().length < 6 || isEmail?.indexOf("@") < 0 || isEmail?.indexOf(" ") >= 0) {
+                    isEmailRef.current.focus();
+                    return false;
+                }
+                if (!isPhoneNumber ||
+                    isPhoneNumber?.trim().length === 0) {
+                    isPhoneRef.current.focus();
+                    return false;
+                }
+                if (!isPhoneNumber ||
+                    isPhoneNumber?.trim().length === 0) {
+                    isPhoneRef.current.focus();
+                    return false;
+                }
+                if (!isState ||
+                    isState === 0) {
+                    isPhoneRef.current.focus();
+                    return false;
+                }
+                if (!isCity ||
+                    isCity === 0) {
+                    isPhoneRef.current.focus();
+                    return false;
+                }
+                if (!isBrand ||
+                    isBrand === 0) {
+                    isAddressRef.current.focus();
+                    return false;
+                }
+                if (!isModel ||
+                    isModel === 0) {
+                    isAddressRef.current.focus();
+                    return false;
+                }
+                if (!isVehicleRegistrationNumber ||
+                    isVehicleRegistrationNumber?.trim().length === 0) {
+                    isVehicalNumRef.current.focus();
+                    return false;
+                }
+            }
+            else {
+                if (!isGarageId ||
+                    isGarageId === 0) {
+                    scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true })
+                    return false;
+                }
+                if (userError?.length > 0) {
+                    scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true })
+                    return false;
+                }
+                if (!isBrand ||
+                    isBrand === 0) {
+                    scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true })
+                    return false;
+                }
+                if (!isModel ||
+                    isModel === 0) {
+                    scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true })
+                    return false;
+                }
+                if (!isVehicleRegistrationNumber ||
+                    isVehicleRegistrationNumber?.trim().length === 0) {
+                    isVehicalNumRef.current.focus();
+                    return false;
+                }
+            }
         }
     };
 
     const submit = () => {
         Keyboard.dismiss();
 
-        if (!validate()) {
+        if (!validate(true)) {
             if (userOption == "new_user") {
                 if (!isName) setIsName("");
                 if (!isEmail) setIsEmail("");
@@ -1255,7 +1344,7 @@ const AddRepairOrderStep2 = ({
     const renderUserFooter = () => {
         return (
             <>
-                {isUserScrollLoading && (
+                {(isUserScrollLoading && !isLoading) && (
                     <View style={styles.footer}>
                         <ActivityIndicator size="large" />
                     </View>
@@ -1324,6 +1413,7 @@ const AddRepairOrderStep2 = ({
             <View style={styles.pageContainer}>
 
                 <InputScrollView
+                    ref={scrollViewRef}
                     keyboardOffset={200}
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
                     keyboardShouldPersistTaps={"always"}
@@ -1363,22 +1453,25 @@ const AddRepairOrderStep2 = ({
 
                         <Divider style={{ marginTop: 20 }} />
 
-                        <View style={{ marginTop: 15 }}>
-                            <RadioForm
-                                radio_props={radio_props}
-                                initial={0}
-                                onPress={(value) => {
-                                    setUserOption(value);
-                                    setIsName();
-                                    setIsUser();
-                                }}
-                                animation={false}
-                                formHorizontal={true}
-                                labelHorizontal={true}
-                                buttonWrapStyle={{ marginLeft: 10 }}
-                                labelStyle={{ marginRight: 40 }}
-                            />
+                        <View style={{ marginTop: 15, flex: 1 }}>
+                            <View style={{ flexDirection: 'row', }}>
+                                <TouchableOpacity onPress={() => setUserOption('new_user')}>
+                                    {userOption == 'new_user' ?
+                                        <Ionicons name="checkmark-circle" size={35} color='#E31E24'></Ionicons>
+                                        : <FontAwesome name="circle-thin" size={35} color='gray'></FontAwesome>
+                                    }
+                                </TouchableOpacity>
+                                <Text style={{ paddingRight: 30, paddingLeft: 5, alignSelf: 'center', color: 'black' }}>New User</Text>
+                                <TouchableOpacity onPress={() => setUserOption('existing_user')}>
+                                    {userOption !== 'new_user' ?
+                                        <Ionicons name="checkmark-circle" size={35} color='#E31E24'></Ionicons>
+                                        : <FontAwesome name="circle-thin" size={35} color='gray'></FontAwesome>
+                                    }
+                                </TouchableOpacity>
+                                <Text style={{ alignSelf: 'center', paddingLeft: 5, color: 'black' }}>Existing User</Text>
+                            </View>
                         </View>
+
                         {userOption == "existing_user" ? (
                             <View style={{marginTop: 20}}>
                                 <TouchableOpacity
@@ -1421,6 +1514,7 @@ const AddRepairOrderStep2 = ({
                                 <TextInput
                                     mode="outlined"
                                     label="Customer Name"
+                                    ref={isNameRef}
                                     style={styles.input}
                                     placeholder="Customer Name"
                                     value={isName}
@@ -1436,6 +1530,7 @@ const AddRepairOrderStep2 = ({
                                 <TextInput
                                     mode="outlined"
                                     label="Email Address"
+                                    ref={isEmailRef}
                                     style={styles.input}
                                     placeholder="Email Address"
                                     value={isEmail}
@@ -1468,6 +1563,7 @@ const AddRepairOrderStep2 = ({
                                 <TextInput
                                     mode="outlined"
                                     label="Phone Number"
+                                    ref={isPhoneRef}
                                     style={styles.input}
                                     placeholder="Phone Number"
                                     maxLength={10}
@@ -1556,6 +1652,7 @@ const AddRepairOrderStep2 = ({
                                     mode="outlined"
                                     label="Address"
                                     style={styles.input}
+                                    ref={isAddressRef}
                                     placeholder="Address"
                                     value={isAddress}
                                     onChangeText={(text) =>
@@ -1688,6 +1785,7 @@ const AddRepairOrderStep2 = ({
                             mode="outlined"
                             label="Vehicle Registration Number"
                             style={styles.input}
+                            ref={isVehicalNumRef}
                             placeholder="Vehicle Registration Number"
                             value={isVehicleRegistrationNumber}
                             onChangeText={(text) =>
@@ -3388,14 +3486,14 @@ const AddRepairOrderStep2 = ({
                         </View>
                     </Modal>
                 </Portal>
-                {isLoading &&
-                    <Spinner
-                        visible={isLoading}
-                        color="#377520"
-                        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
-                    />
-                }
             </View>
+            {isLoading &&
+                <Spinner
+                    visible={isLoading}
+                    color="#377520"
+                    style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
+                />
+            }
         </View>
     );
 };

@@ -188,10 +188,9 @@ const AddRepairOrderStep3 = ({
             if (
                 (!fieldsParts &&
                 !fieldsServices) || (fieldsServices.length === 0 && fieldsParts.length === 0)
-            )
+            ) alert("Minimum 1 service or part should be added in order!");
             if (!isOrderStatus || isOrderStatus?.trim().length === 0)
             setOrderStatusError("Order Status is required");
-            alert("Minimum 1 service or part should be added in order!");
             return;
         }
 

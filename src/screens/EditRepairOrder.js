@@ -423,11 +423,11 @@ const EditRepairOrder = ({
             if (
                 (!fieldsParts &&
                 !fieldsServices) || (fieldsServices.length === 0 && fieldsParts.length === 0)
-            )
+            )  alert("Minimum 1 service or part should be added in order!");
             if (!isOdometerKMs)
                 setOdometerKMsError("Odometer Kilometer is required");
             else setOdometerKMsError("");
-            alert("Minimum 1 service or part should be added in order!");
+           
             return;
         }
 
