@@ -470,231 +470,261 @@ const VehicleList = ({
                                                           ?.model_name
                                                     : null}
                                             </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Purchase Date:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {VehicleData?.purchase_date
-                                                    ? moment(
-                                                          VehicleData?.purchase_date,
-                                                          "YYYY MMMM D"
-                                                      ).format("DD-MM-YYYY")
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Manufacturing Date:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {VehicleData?.manufacturing_date
-                                                    ? moment(
-                                                          VehicleData?.manufacturing_date,
-                                                          "YYYY MMMM D"
-                                                      ).format("DD-MM-YYYY")
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Engine Number:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {VehicleData?.engine_number
-                                                    ? VehicleData?.engine_number
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Chasis Number:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {VehicleData?.chasis_number
-                                                    ? VehicleData?.chasis_number
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Insurance Provider Company:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {VehicleData?.insurance_provider
-                                                    ?.name
-                                                    ? VehicleData
-                                                          ?.insurance_provider
-                                                          ?.name
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Insurer GSTIN:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {VehicleData?.insurer_gstin
-                                                    ? VehicleData?.insurer_gstin
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Insurer Address:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {VehicleData?.insurer_address
-                                                    ? VehicleData?.insurer_address
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Policy Number:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {VehicleData?.policy_number
-                                                    ? VehicleData?.policy_number
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Insurance Expiry Date:
-                                            </Text>
-                                            <Text
-                                                style={styles.cardDetailsData}
-                                            >
-                                                {VehicleData?.insurance_expiry_date
-                                                    ? moment(
-                                                          VehicleData?.insurance_expiry_date,
-                                                          "YYYY MMMM D"
-                                                      ).format("DD-MM-YYYY")
-                                                    : null}
-                                            </Text>
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Registration Certificate:
-                                            </Text>
-                                            {VehicleData?.registration_certificate_img !==
-                                            null ? (
-                                                <Lightbox
-                                                    navigator={navigator}
-                                                    style={
-                                                        styles.lightBoxWrapper
-                                                    }
-                                                >
-                                                    <Image
-                                                        resizeMode={"cover"}
+                                            {VehicleData?.purchase_date &&
+                                                <>
+                                                    <Divider />
+                                                    <Text
                                                         style={
-                                                            styles.verticleImage
+                                                            styles.cardDetailsHeading
                                                         }
-                                                        source={{
-                                                            uri:
-                                                                WEB_URL +
-                                                                "uploads/registration_certificate_img/" +
-                                                                VehicleData?.registration_certificate_img,
-                                                        }}
-                                                    />
-                                                </Lightbox>
-                                            ) : (
-                                                <Text
-                                                    style={
-                                                        styles.cardDetailsData
-                                                    }
-                                                >
-                                                    Not Uploaded Registration
-                                                    Certificate
-                                                </Text>
-                                            )}
-                                            <Divider />
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsHeading
-                                                }
-                                            >
-                                                Insurance Policy:
-                                            </Text>
-                                            {VehicleData?.insurance_img !==
-                                            null ? (
-                                                <Lightbox
-                                                    navigator={navigator}
-                                                    style={
-                                                        styles.lightBoxWrapper
-                                                    }
-                                                >
-                                                    <Image
-                                                        resizeMode={"cover"}
+                                                    >
+                                                        Purchase Date:
+                                                    </Text>
+                                                    <Text
+                                                        style={styles.cardDetailsData}
+                                                    >
+                                                        {VehicleData?.purchase_date
+                                                            ? moment(
+                                                                VehicleData?.purchase_date,
+                                                                "YYYY MMMM D"
+                                                            ).format("DD-MM-YYYY")
+                                                            : null}
+                                                    </Text>
+                                                </>
+                                            }
+
+                                            {VehicleData?.manufacturing_date &&
+                                                <>
+                                                    <Divider />
+                                                    <Text
                                                         style={
-                                                            styles.verticleImage
+                                                            styles.cardDetailsHeading
                                                         }
-                                                        source={{
-                                                            uri:
-                                                                WEB_URL +
-                                                                "uploads/insurance_img/" +
-                                                                VehicleData?.insurance_img,
-                                                        }}
-                                                    />
-                                                </Lightbox>
-                                            ) : (
-                                                <Text
-                                                    style={
-                                                        styles.cardDetailsData
-                                                    }
-                                                >
-                                                    Not Uploaded Insurance
-                                                    Policy
-                                                </Text>
-                                            )}
+                                                    >
+                                                        Manufacturing Date:
+                                                    </Text>
+                                                    <Text
+                                                        style={styles.cardDetailsData}
+                                                    >
+                                                        {VehicleData?.manufacturing_date
+                                                            ? moment(
+                                                                VehicleData?.manufacturing_date,
+                                                                "YYYY MMMM D"
+                                                            ).format("DD-MM-YYYY")
+                                                            : null}
+                                                    </Text>
+                                                </>
+                                            }
+
+                                            {VehicleData?.engine_number &&
+                                                <>
+                                                    <Divider />
+                                                    <Text
+                                                        style={
+                                                            styles.cardDetailsHeading
+                                                        }
+                                                    >
+                                                        Engine Number:
+                                                    </Text>
+                                                    <Text
+                                                        style={styles.cardDetailsData}
+                                                    >
+                                                        {VehicleData?.engine_number
+                                                            ? VehicleData?.engine_number
+                                                            : null}
+                                                    </Text>
+                                                </>
+                                            }
+
+                                            {VehicleData?.chasis_number &&
+                                                <>
+                                                    <Divider />
+                                                    <Text
+                                                        style={
+                                                            styles.cardDetailsHeading
+                                                        }
+                                                    >
+                                                        Chasis Number:
+                                                    </Text>
+                                                    <Text
+                                                        style={styles.cardDetailsData}
+                                                    >
+                                                        {VehicleData?.chasis_number
+                                                            ? VehicleData?.chasis_number
+                                                            : null}
+                                                    </Text>
+                                                </>
+                                            }
+
+                                            {VehicleData?.insurance_provider &&
+                                                <>
+                                                    <Divider />
+                                                    <Text
+                                                        style={
+                                                            styles.cardDetailsHeading
+                                                        }
+                                                    >
+                                                        Insurance Provider Company:
+                                                    </Text>
+                                                    <Text
+                                                        style={styles.cardDetailsData}
+                                                    >
+                                                        {VehicleData?.insurance_provider
+                                                            ?.name
+                                                            ? VehicleData
+                                                                ?.insurance_provider
+                                                                ?.name
+                                                            : null}
+                                                    </Text>
+                                                </>
+                                            }
+
+                                            {VehicleData?.insurer_gstin &&
+                                                <>
+                                                    <Divider />
+                                                    <Text
+                                                        style={
+                                                            styles.cardDetailsHeading
+                                                        }
+                                                    >
+                                                        Insurer GSTIN:
+                                                    </Text>
+                                                    <Text
+                                                        style={styles.cardDetailsData}
+                                                    >
+                                                        {VehicleData?.insurer_gstin
+                                                            ? VehicleData?.insurer_gstin
+                                                            : null}
+                                                    </Text>
+                                                </>
+                                            }
+
+                                            {VehicleData?.insurer_address &&
+                                                <>
+                                                    <Divider />
+                                                    <Text
+                                                        style={
+                                                            styles.cardDetailsHeading
+                                                        }
+                                                    >
+                                                        Insurer Address:
+                                                    </Text>
+                                                    <Text
+                                                        style={styles.cardDetailsData}
+                                                    >
+                                                        {VehicleData?.insurer_address
+                                                            ? VehicleData?.insurer_address
+                                                            : null}
+                                                    </Text>
+                                                </>
+                                            }
+
+                                            {VehicleData?.policy_number &&
+                                                <>
+                                                    <Divider />
+                                                    <Text
+                                                        style={
+                                                            styles.cardDetailsHeading
+                                                        }
+                                                    >
+                                                        Policy Number:
+                                                    </Text>
+                                                    <Text
+                                                        style={styles.cardDetailsData}
+                                                    >
+                                                        {VehicleData?.policy_number
+                                                            ? VehicleData?.policy_number
+                                                            : null}
+                                                    </Text>
+                                                </>
+                                            }
+
+                                            {VehicleData?.insurance_expiry_date &&
+                                                <>
+                                                    <Divider />
+                                                    <Text
+                                                        style={
+                                                            styles.cardDetailsHeading
+                                                        }
+                                                    >
+                                                        Insurance Expiry Date:
+                                                    </Text>
+                                                    <Text
+                                                        style={styles.cardDetailsData}
+                                                    >
+                                                        {VehicleData?.insurance_expiry_date
+                                                            ? moment(
+                                                                VehicleData?.insurance_expiry_date,
+                                                                "YYYY MMMM D"
+                                                            ).format("DD-MM-YYYY")
+                                                            : null}
+                                                    </Text>
+                                                </>
+                                            }
+
+                                            {VehicleData?.registration_certificate_img &&
+                                                <>
+                                                    <Divider />
+                                                    <Text
+                                                        style={
+                                                            styles.cardDetailsHeading
+                                                        }
+                                                    >
+                                                        Registration Certificate:
+                                                    </Text>
+                                                    <Lightbox
+                                                        navigator={navigator}
+                                                        style={
+                                                            styles.lightBoxWrapper
+                                                        }
+                                                    >
+                                                        <Image
+                                                            resizeMode={"cover"}
+                                                            style={
+                                                                styles.verticleImage
+                                                            }
+                                                            source={{
+                                                                uri:
+                                                                    WEB_URL +
+                                                                    "uploads/registration_certificate_img/" +
+                                                                    VehicleData?.registration_certificate_img,
+                                                            }}
+                                                        />
+                                                    </Lightbox>
+                                                </>
+                                            }
+
+                                            {VehicleData?.insurance_img &&
+                                                <>
+                                                    <Divider />
+                                                    <Text
+                                                        style={
+                                                            styles.cardDetailsHeading
+                                                        }
+                                                    >
+                                                        Insurance Policy:
+                                                    </Text>
+                                                    <Lightbox
+                                                        navigator={navigator}
+                                                        style={
+                                                            styles.lightBoxWrapper
+                                                        }
+                                                    >
+                                                        <Image
+                                                            resizeMode={"cover"}
+                                                            style={
+                                                                styles.verticleImage
+                                                            }
+                                                            source={{
+                                                                uri:
+                                                                    WEB_URL +
+                                                                    "uploads/insurance_img/" +
+                                                                    VehicleData?.insurance_img,
+                                                            }}
+                                                        />
+                                                    </Lightbox>
+                                                </>
+                                            }
                                         </ScrollView>
                                     )}
 

@@ -7,6 +7,7 @@ import {
     ActivityIndicator,
     TouchableOpacity,
     FlatList,
+    Platform,
 } from "react-native";
 import { connect } from "react-redux";
 import { colors } from "../constants";
@@ -101,11 +102,13 @@ const CustomerInfo = ({
             name: isName,
             email: isEmail,
             phone_number: isPhoneNumber,
-            city: isCity,
-            state: isState,
-            address: isAddress,
             vehicle_option: "no_vehicle",
         };
+
+        // optional Fields
+        if(isAddress) data['address'] = isAddress
+        if(isCity) data['city'] = isCity
+        if(isState) data['state'] = isState
 
         updateUser(data);
     };

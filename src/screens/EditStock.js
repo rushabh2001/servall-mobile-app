@@ -5,6 +5,7 @@ import {
     StyleSheet,
     ActivityIndicator,
     Keyboard,
+    Platform,
 } from "react-native";
 import { Portal, Button, TextInput } from "react-native-paper";
 import { connect } from "react-redux";
@@ -131,14 +132,16 @@ const EditStock = ({
             parts_id: isPart,
             garage_id: isGarage,
             // 'vendor_id': isVendor,
-            purchase_price: isPrice?.trim(),
             mrp: isMRP?.trim(),
             rack_id: isRackId?.trim(),
             current_stock: isCurrentStock?.trim(),
-            min_stock: isMinStock?.trim(),
-            max_stock: isMaxStock?.trim(),
-            comment: isComment?.trim(),
         };
+
+        // optional Fields
+        if(isPrice) data['purchase_price'] = isPrice?.trim()
+        if(isMinStock) data['min_stock'] = isMinStock?.trim()
+        if(isMaxStock) data['max_stock'] = isMaxStock?.trim()
+        if(isComment) data['comment'] = isComment?.trim()
 
         addStock(data);
     };

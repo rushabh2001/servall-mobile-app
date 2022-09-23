@@ -33,12 +33,8 @@ const AddRepairOrder = ({
     const [loadMoreVehicles, setLoadMoreVehicles] = useState(true);
 
     const getVehicleList = async () => {
-        {
-            page == 1 && setIsLoading(true);
-        }
-        {
-            page != 1 && setIsScrollLoading(true);
-        }
+        if(page == 1) setIsLoading(true)
+        if(page != 1) setIsScrollLoading(true)
         try {
             const res = await fetch(
                 `${API_URL}fetch_all_vehicle_by_query/${isGarageId}?page=${page}`,
@@ -91,14 +87,13 @@ const AddRepairOrder = ({
                 setFilteredData(json.vehicle_list.data);
                 {json.vehicle_list.current_page != json.vehicle_list.last_page ? setLoadMoreVehicles(true) : setLoadMoreVehicles(false)}
                 {json.vehicle_list.current_page != json.vehicle_list.last_page ? setPage(2) : null}
-                setRefreshing(false);
-            } else {
+                setIsLoading(false);
                 setRefreshing(false);
             }
         } catch (error) {
             console.error(error);
         }
-        setIsLoading(false);
+       
     };
 
     const sendVehicleData = (index) => {
@@ -160,12 +155,11 @@ const AddRepairOrder = ({
                 setFilteredData(json.vehicle_list.data);
                 {json.vehicle_list.current_page != json.vehicle_list.last_page ? setLoadMoreVehicles(true) : setLoadMoreVehicles(false)}
                 {json.vehicle_list.current_page != json.vehicle_list.last_page ? setPage(2) : null}
+                setRefreshing(false);
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
-        } finally {
-            setRefreshing(false);
-            setIsLoading(false);
         }
     };
 

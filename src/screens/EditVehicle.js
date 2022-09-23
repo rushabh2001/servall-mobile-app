@@ -10,6 +10,8 @@ import {
     Image,
     RefreshControl,
     FlatList,
+    Alert,
+    Platform,
 } from "react-native";
 import { connect } from "react-redux";
 import { colors } from "../constants";
@@ -201,8 +203,8 @@ const EditVehicle = ({
             if (res.status == 200 || res.status == 201){
                 pullBrandRefresh();
                 setAddBrandModal(false);
-                setNewBrandName("");
-                setIsBrand(0);
+                setIsBrandName(json.data.name);
+                setIsBrand(json.data.id);
             } else if(res.status == 400) {
                 setNewBrandNameError(json.message.name);
             }
@@ -227,8 +229,8 @@ const EditVehicle = ({
             if (res.status == 200 || res.status == 201){
                 pullModelRefresh();
                 setAddModelModal(false);
-                setNewModelName("");
-                setIsModel(0);
+                setIsModelName(json.data.model_name);
+                setIsModel(json.data.id);
             } else if(res.status == 400) {
                 setNewModelNameError(json.message.model_name);
             }
@@ -427,11 +429,11 @@ const EditVehicle = ({
             );
             setDisplayInsuranceExpiryCalender(false);
             setDateInsuranceExpiry(formattedDate);
-            let formateDateForDatabase = moment(
-                currentDate,
-                'YYYY-MM-DD"T"hh:mm ZZ'
-            ).format("YYYY-MM-DD");
-            setIsInsuranceExpiryDate(new Date(formateDateForDatabase));
+            // let formateDateForDatabase = moment(
+            //     currentDate,
+            //     'YYYY-MM-DD"T"hh:mm ZZ'
+            // ).format("YYYY-MM-DD");
+            setIsInsuranceExpiryDate(new Date(currentDate));
             // console.log(
             //     "setIsInsuranceExpiryDate",
             //     currentDate,
@@ -473,26 +475,19 @@ const EditVehicle = ({
             brand_id: JSON.stringify(isBrand),
             model_id: JSON.stringify(isModel),
             vehicle_registration_number: isVehicleRegistrationNumber?.toUpperCase()?.trim(),
-            purchase_date: moment(
-                isPurchaseDate,
-                'YYYY-MM-DD"T"hh:mm ZZ'
-            ).format("YYYY-MM-DD"),
-            manufacturing_date: moment(
-                isManufacturingDate,
-                'YYYY-MM-DD"T"hh:mm ZZ'
-            ).format("YYYY-MM-DD"),
-            engine_number: isEngineNumber,
-            chasis_number: isChasisNumber,
-            insurance_id: isInsuranceProvider,
-            insurer_gstin: isInsurerGstin,
-            insurer_address: isInsurerAddress,
-            policy_number: isPolicyNumber,
-            insurance_expiry_date: moment(
-                isInsuranceExpiryDate,
-                'YYYY-MM-DD"T"hh:mm ZZ'
-            ).format("YYYY-MM-DD"),
             user_id: parseInt(route?.params?.userId),
         };
+
+        // optional Fields
+        if(isPurchaseDate) data['purchase_date'] = moment(isPurchaseDate, 'YYYY-MM-DD"T"hh:mm ZZ').format("YYYY-MM-DD")
+        if(isManufacturingDate) data['manufacturing_date'] = moment(isManufacturingDate, 'YYYY-MM-DD"T"hh:mm ZZ').format("YYYY-MM-DD")
+        if(isInsuranceExpiryDate) data['insurance_expiry_date'] = moment(isInsuranceExpiryDate, 'YYYY-MM-DD"T"hh:mm ZZ').format("YYYY-MM-DD")
+        if(isEngineNumber) data['engine_number'] = isEngineNumber
+        if(isChasisNumber) data['chasis_number'] = isChasisNumber
+        if(isInsuranceProvider) data['insurance_id'] = isInsuranceProvider
+        if(isInsurerGstin) data['insurer_gstin'] = isInsurerGstin
+        if(isInsurerAddress) data['insurer_address'] = isInsurerAddress
+        if(isPolicyNumber) data['policy_number'] = isPolicyNumber
 
         UpdateVehicle(data);
     };
@@ -524,27 +519,33 @@ const EditVehicle = ({
                 })
                 .then((res) => {
                     setIsLoading(false);
-                    // console.log(JSON.stringify(res));
-                    if (res.statusCode == 400) {
-                        alert(Object.values(res.data.message));
-                        // {
-                        //     res.data.message.brand_id &&
-                        //         setBrandError(res.data.message.brand_id);
-                        // }
-                        // {
-                        //     res.data.message.model_id &&
-                        //         setModelError(res.data.message.model_id);
-                        // }
-                        // {
-                        //     res.data.message.vehicle_registration_number &&
-                        //         setVehicleRegistrationNumberError(
-                        //             res.data.message.vehicle_registration_number
-                        //         );
-                        // }
-                        return;
-                    } else if (res.statusCode == 200) {
+                    console.log(JSON.stringify(res));
+                    if (res.statusCode == 200) {
                         // console.log("Vehicle Updated SuccessFully");
                         navigation.navigate("CustomerDetails", {userId: route?.params?.userId});
+                    } else if (res.statusCode == 400) {
+                        let errors_message = [];
+                        Object.entries(res.data.message).map(([key, error], i) => {
+                            error.map((item, index) => {
+                                errors_message.push(item);
+                            })
+                        });
+                        Alert.alert(
+                            "Alert.",
+                            errors_message[0],
+                            [
+                                { text: "OK", }
+                            ]
+                        );
+                        return;
+                    } else {
+                        Alert.alert(
+                            "Alert.",
+                            'Something went wrong! Please try again later.',
+                            [
+                                { text: "OK", }
+                            ]
+                        );
                     }
                 });
         } catch (e) {
@@ -811,10 +812,8 @@ const EditVehicle = ({
             if (res.status == 200 || res.status == 201){
                 // console.log("setInsuranceProviderList", json.data);
                 getInsuranceProviderList();
-                setIsInsuranceProvider(
-                    parseInt(json.insurance_provider_list.id)
-                );
-                setIsInsuranceProviderName(json.insurance_provider_list.name);
+                setIsInsuranceProvider(parseInt(json.data.id));
+                setIsInsuranceProviderName(json.data.name);
                 setAddNewInsuranceProviderModal(false);
             } else if(res.status == 400) {
                 setNewInsuranceProviderError(json.message.name);

@@ -8,6 +8,8 @@ import {
     TouchableOpacity,
     FlatList,
     RefreshControl,
+    Alert,
+    Platform,
 } from "react-native";
 import {
     Modal,
@@ -246,15 +248,7 @@ const AddRepairOrderStep3 = ({
                 .then((res) => {
                     // console.log("res", res);
                     setIsLoading(false);
-                    if (res.statusCode == 400) {
-                        {
-                            res.data.message.estimated_delivery_time &&
-                                setEstimateDeliveryDateError(
-                                    res.data.message.estimated_delivery_time
-                                );
-                        }
-                        return;
-                    } else if (res.statusCode == 201 || res.statusCode == 200) {
+                    if (res.statusCode == 201 || res.statusCode == 200) {
                         navigation.popToTop();
                         if (isOrderStatus =="Vehicle Received") {
                             navigation.navigate("OpenOrderList");
@@ -265,6 +259,29 @@ const AddRepairOrderStep3 = ({
                         } else if (isOrderStatus == "Completed Order") {
                             navigation.navigate("OrderCompletedList");
                         }
+                    } else if (res.statusCode == 400) {
+                        let errors_message = [];
+                        Object.entries(res.data.message).map(([key, error], i) => {
+                            error.map((item, index) => {
+                                errors_message.push(item);
+                            })
+                        });
+                        Alert.alert(
+                            "Alert.",
+                            errors_message[0],
+                            [
+                                { text: "OK", }
+                            ]
+                        );
+                        return;
+                    } else {
+                        Alert.alert(
+                            "Alert.",
+                            'Something went wrong! Please try again later.',
+                            [
+                                { text: "OK", }
+                            ]
+                        );
                     }
                 });
         } catch (e) {

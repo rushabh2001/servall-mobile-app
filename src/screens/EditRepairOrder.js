@@ -8,6 +8,8 @@ import {
     TouchableOpacity,
     FlatList,
     RefreshControl,
+    Alert,
+    Platform,
 } from "react-native";
 import {
     Modal,
@@ -393,8 +395,8 @@ const EditRepairOrder = ({
 
     const validate = () => {
         return !(
-            !isOrderStatus ||
-            isOrderStatus === 0 ||
+            // !isOrderStatus ||
+            // isOrderStatus === 0 ||
             !isOdometerKMs ||
             isOdometerKMs?.trim().length === 0 ||
             (!fieldsServices && !fieldsParts) ||
@@ -415,9 +417,9 @@ const EditRepairOrder = ({
                     "Estimate Delivery Date is required"
                 );
             else setEstimateDeliveryDateError("");
-            if (!isOrderStatus || isOrderStatus?.trim().length === 0)
-                setOrderStatusError("Order Status is required");
-            else setOrderStatusError("");
+            // if (!isOrderStatus || isOrderStatus?.trim().length === 0)
+            //     setOrderStatusError("Order Status is required");
+            // else setOrderStatusError("");
             if (
                 (!fieldsParts &&
                 !fieldsServices) || (fieldsServices.length === 0 && fieldsParts.length === 0)
@@ -443,11 +445,10 @@ const EditRepairOrder = ({
                 "YYYY-MM-DD hh:mm:ss"
             )
         );
-        data.append("status", isOrderStatus);
+        // data.append("status", isOrderStatus);
         data.append("labor_total", parseInt(servicesTotal));
         data.append("parts_total", parseInt(partsTotal));
         data.append("discount", parseInt(isApplicableDiscount));
-        data.append("status", isOrderStatus);
         // if(isVehicleImg != null) data.append("orderimage", isVehicleImg);
         data.append("total", parseInt(isTotal));
         if(isComment) data.append("comment", isComment?.trim());
@@ -478,16 +479,7 @@ const EditRepairOrder = ({
                 })
                 .then((res) => {
                     setIsLoading(false);
-                    // console.log("res", JSON.stringify(res));
-                    if (res.statusCode == 400) {
-                        {
-                            res.data.message.estimated_delivery_time &&
-                                setEstimateDeliveryDateError(
-                                    res.data.message.vehicle_registration_number
-                                );
-                        }
-                        return;
-                    } else if (res.statusCode == 201 || res.statusCode == 200) {
+                   if (res.statusCode == 201 || res.statusCode == 200) {
                         navigation.popToTop();
                         if (isOrderStatus =="Vehicle Received") {
                             navigation.navigate("OpenOrderList");
@@ -498,7 +490,30 @@ const EditRepairOrder = ({
                         } else if (isOrderStatus == "Completed Order") {
                             navigation.navigate("OrderCompletedList");
                         }
-                    } 
+                    } else if (res.statusCode == 400) {
+                        let errors_message = [];
+                        Object.entries(res.data.message).map(([key, error], i) => {
+                            error.map((item, index) => {
+                                errors_message.push(item);
+                            })
+                        });
+                        Alert.alert(
+                            "Alert.",
+                            errors_message[0],
+                            [
+                                { text: "OK", }
+                            ]
+                        );
+                        return;
+                    } else {
+                        Alert.alert(
+                            "Alert.",
+                            'Something went wrong! Please try again later.',
+                            [
+                                { text: "OK", }
+                            ]
+                        );
+                    }
                 });
         } catch (e) {
             console.log(e);
@@ -977,9 +992,8 @@ const EditRepairOrder = ({
                                                     placeholder="Rate"
                                                     keyboardType="numeric"
                                                     value={
-                                                        fieldsServices[idx][
-                                                            "rate"
-                                                        ]
+                                                        fieldsServices[idx]
+                                                            .rate
                                                     }
                                                     onChangeText={(e) => {
                                                         let parameter = {
@@ -1483,7 +1497,7 @@ const EditRepairOrder = ({
                             Additional Information:
                         </Text>
 
-                        <View
+                        {/* <View
                             style={{
                                 borderBottomWidth: 1,
                                 borderColor: colors.light_gray,
@@ -1531,7 +1545,7 @@ const EditRepairOrder = ({
                             <Text style={{ color: colors.danger }}>
                                 {orderStatusError}
                             </Text>
-                        )}
+                        )} */}
 
                         <TextInput
                             mode="outlined"

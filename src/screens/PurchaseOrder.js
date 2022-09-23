@@ -6,6 +6,7 @@ import {
     ActivityIndicator,
     TouchableOpacity,
     Image,
+    Platform,
 } from "react-native";
 import { Modal, Portal, Button, TextInput } from "react-native-paper";
 import { connect } from "react-redux";

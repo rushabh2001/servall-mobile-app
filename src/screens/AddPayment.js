@@ -6,6 +6,7 @@ import {
     ScrollView,
     TouchableOpacity,
     Keyboard,
+    Platform,
 } from "react-native";
 import { colors } from "../constants";
 import { connect } from "react-redux";

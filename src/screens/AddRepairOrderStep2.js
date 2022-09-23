@@ -8,6 +8,8 @@ import {
     TouchableOpacity,
     RefreshControl,
     FlatList,
+    Alert,
+    Platform,
 } from "react-native";
 import {
     Modal,
@@ -224,8 +226,8 @@ const AddRepairOrderStep2 = ({
             if (res.status == 200 || res.status == 201){
                 pullBrandRefresh();
                 setAddBrandModal(false);
-                setNewBrandName("");
-                setIsBrand(0);
+                setIsBrandName(json.data.name);
+                setIsBrand(json.data.id);
             } else if(res.status == 400) {
                 setNewBrandNameError(json.message.name);
             }
@@ -250,10 +252,10 @@ const AddRepairOrderStep2 = ({
             if (res.status == 200 || res.status == 201){
                 pullModelRefresh();
                 setAddModelModal(false);
-                setNewModelName("");
-                setIsModel(0);
+                setIsModelName(json.data.model_name);
+                setIsModel(json.data.id);
             } else if(res.status == 400) {
-                setNewBrandNameError(json.message.model_name);
+                setNewModelNameError(json.message.model_name);
             }
         } catch (e) {
             console.log(e);
@@ -537,25 +539,7 @@ const AddRepairOrderStep2 = ({
                 })
                 .then((res) => {
                     setIsLoading(false);
-                    if (res.statusCode == 400) {
-                        {
-                            res.data.message.email &&
-                                setEmailError(res.data.message.email);
-                        }
-                        {
-                            res.data.message.phone_number &&
-                                setPhoneNumberError(
-                                    res.data.message.phone_number
-                                );
-                        }
-                        {
-                            res.data.message.vehicle_registration_number &&
-                                setVehicleRegistrationNumberError(
-                                    res.data.message.vehicle_registration_number
-                                );
-                        }
-                        return;
-                    } else {
+                    if (res.statusCode == 201 || res.statusCode == 200) {
                         // console.log('res', res);
                         const jsonData = {
                             user_id: res.data.user_id,
@@ -581,6 +565,29 @@ const AddRepairOrderStep2 = ({
                         navigation.navigate("AddRepairOrderStep3", {
                             userVehicleDetails: jsonData,
                         });
+                    } else if (res.statusCode == 400) {
+                        let errors_message = [];
+                        Object.entries(res.data.message).map(([key, error], i) => {
+                            error.map((item, index) => {
+                                errors_message.push(item);
+                            })
+                        });
+                        Alert.alert(
+                            "Alert.",
+                            errors_message[0],
+                            [
+                                { text: "OK", }
+                            ]
+                        );
+                        return;
+                    } else {
+                        Alert.alert(
+                            "Alert.",
+                            'Something went wrong! Please try again later.',
+                            [
+                                { text: "OK", }
+                            ]
+                        );
                     }
                 });
         } catch (e) {
@@ -978,10 +985,8 @@ const AddRepairOrderStep2 = ({
             if (res.status == 200 || res.status == 201){
                 // console.log("setInsuranceProviderList", json.data);
                 getInsuranceProviderList();
-                setIsInsuranceProvider(
-                    parseInt(json.insurance_provider_list.id)
-                );
-                setIsInsuranceProviderName(json.insurance_provider_list.name);
+                setIsInsuranceProvider(parseInt(json.data.id));
+                setIsInsuranceProviderName(json.data.name);
                 setAddNewInsuranceProviderModal(false);
             } else if(res.status == 400) {
                 setNewInsuranceProviderError(json.message.name);

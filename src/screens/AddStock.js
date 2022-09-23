@@ -8,6 +8,8 @@ import {
     TouchableOpacity,
     FlatList,
     Keyboard,
+    Alert,
+    Platform,
 } from "react-native";
 import {
     Modal,
@@ -188,9 +190,32 @@ const AddStock = ({
             });
             const json = await res.json();
             // console.log('add_inventory', json);
-            if (json !== undefined) {
+            if (res.status == 200 || res.status == 201) {
                 setIsLoading(false);
                 navigation.navigate("Parts");
+            } else if (res.status == 400) {
+                let errors_message = [];
+                Object.entries(res.data.message).map(([key, error], i) => {
+                    error.map((item, index) => {
+                        errors_message.push(item);
+                    })
+                });
+                Alert.alert(
+                    "Alert.",
+                    errors_message[0],
+                    [
+                        { text: "OK", }
+                    ]
+                );
+                return;
+            } else {
+                Alert.alert(
+                    "Alert.",
+                    'Something went wrong! Please try again later.',
+                    [
+                        { text: "OK", }
+                    ]
+                );
             }
         } catch (e) {
             console.log(e);
@@ -1195,14 +1220,14 @@ const AddStock = ({
                         </View>
                     </Modal>
                 </Portal>
-                {isLoading &&
-                    <Spinner
-                        visible={isLoading}
-                        color="#377520"
-                        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
-                    />
-                }
             </View>
+            {isLoading &&
+                <Spinner
+                    visible={isLoading}
+                    color="#377520"
+                    style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
+                />
+            }
         </View>
     );
 };

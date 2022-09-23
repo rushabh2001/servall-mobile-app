@@ -762,45 +762,57 @@ const AddPaymentSelectOrder = ({
                                         >
                                             {orderData.user.email}
                                         </Text>
-                                        <Divider />
-                                        <Text
-                                            style={
-                                                styles.cardDetailsHeading
-                                            }
-                                        >
-                                            Address:
-                                        </Text>
-                                        <Text
-                                            style={styles.cardDetailsData}
-                                        >
-                                            {orderData.user.address}
-                                        </Text>
-                                        <Divider />
-                                        <Text
-                                            style={
-                                                styles.cardDetailsHeading
-                                            }
-                                        >
-                                            State:
-                                        </Text>
-                                        <Text
-                                            style={styles.cardDetailsData}
-                                        >
-                                            {orderData.user.state}
-                                        </Text>
-                                        <Divider />
-                                        <Text
-                                            style={
-                                                styles.cardDetailsHeading
-                                            }
-                                        >
-                                            City:
-                                        </Text>
-                                        <Text
-                                            style={styles.cardDetailsData}
-                                        >
-                                            {orderData.user.city}
-                                        </Text>
+                                        {orderData?.user?.address && 
+                                            <>
+                                                <Divider />
+                                                <Text
+                                                    style={
+                                                        styles.cardDetailsHeading
+                                                    }
+                                                >
+                                                    Address:
+                                                </Text>
+                                                <Text
+                                                    style={styles.cardDetailsData}
+                                                >
+                                                    {orderData.user.address}
+                                                </Text>
+                                            </>
+                                        }
+                                        {orderData?.user?.state && 
+                                            <>
+                                                <Divider />
+                                                <Text
+                                                    style={
+                                                        styles.cardDetailsHeading
+                                                    }
+                                                >
+                                                    State:
+                                                </Text>
+                                                <Text
+                                                    style={styles.cardDetailsData}
+                                                >
+                                                    {orderData.user.state}
+                                                </Text>
+                                            </>
+                                        }
+                                        {orderData?.user?.city && 
+                                            <>
+                                                <Divider />
+                                                <Text
+                                                    style={
+                                                        styles.cardDetailsHeading
+                                                    }
+                                                >
+                                                    City:
+                                                </Text>
+                                                <Text
+                                                    style={styles.cardDetailsData}
+                                                >
+                                                    {orderData.user.city}
+                                                </Text>
+                                            </>
+                                        }
                                         {/* <Divider /> */}
 
                                         <Text
@@ -871,252 +883,271 @@ const AddPaymentSelectOrder = ({
                                                         ?.model_name
                                                 : null}
                                         </Text>
-                                        <Divider />
-                                        <Text
-                                            style={
-                                                styles.cardDetailsHeading
-                                            }
-                                        >
-                                            Purchase Date:
-                                        </Text>
-                                        <Text
-                                            style={styles.cardDetailsData}
-                                        >
-                                            {orderData.vehicle
-                                                ?.purchase_date
-                                                ? moment(
-                                                        orderData.vehicle
-                                                            ?.purchase_date,
-                                                        "YYYY MMMM D"
-                                                    ).format("DD-MM-YYYY")
-                                                : null}
-                                        </Text>
-                                        <Divider />
-                                        <Text
-                                            style={
-                                                styles.cardDetailsHeading
-                                            }
-                                        >
-                                            Manufacturing Date:
-                                        </Text>
-                                        <Text
-                                            style={styles.cardDetailsData}
-                                        >
-                                            {orderData.vehicle
-                                                ?.manufacturing_date
-                                                ? moment(
-                                                        orderData.vehicle
-                                                            ?.manufacturing_date,
-                                                        "YYYY MMMM D"
-                                                    ).format("DD-MM-YYYY")
-                                                : null}
-                                        </Text>
-                                        <Divider />
-                                        <Text
-                                            style={
-                                                styles.cardDetailsHeading
-                                            }
-                                        >
-                                            Engine Number:
-                                        </Text>
-                                        <Text
-                                            style={styles.cardDetailsData}
-                                        >
-                                            {orderData.vehicle
-                                                ?.engine_number
-                                                ? orderData.vehicle
+                                        {orderData?.vehicle?.purchase_date && 
+                                            <>
+                                                <Divider />
+                                                <Text
+                                                    style={
+                                                        styles.cardDetailsHeading
+                                                    }
+                                                >
+                                                    Purchase Date:
+                                                </Text>
+                                                <Text
+                                                    style={styles.cardDetailsData}
+                                                >
+                                                    {orderData.vehicle
+                                                        ?.purchase_date
+                                                        ? moment(
+                                                                orderData.vehicle
+                                                                    ?.purchase_date,
+                                                                "YYYY MMMM D"
+                                                            ).format("DD-MM-YYYY")
+                                                        : null}
+                                                </Text>
+                                            </>
+                                        }
+                                        {orderData?.vehicle?.manufacturing_date && 
+                                            <>
+                                                <Divider />
+                                                <Text
+                                                    style={
+                                                        styles.cardDetailsHeading
+                                                    }
+                                                >
+                                                    Manufacturing Date:
+                                                </Text>
+                                                <Text
+                                                    style={styles.cardDetailsData}
+                                                >
+                                                    {orderData.vehicle
+                                                        ?.manufacturing_date
+                                                        ? moment(
+                                                                orderData.vehicle
+                                                                    ?.manufacturing_date,
+                                                                "YYYY MMMM D"
+                                                            ).format("DD-MM-YYYY")
+                                                        : null}
+                                                </Text>
+                                            </>
+                                        }
+                                        {orderData?.vehicle?.engine_number && 
+                                            <>
+                                                <Divider />
+                                                <Text
+                                                    style={
+                                                        styles.cardDetailsHeading
+                                                    }
+                                                >
+                                                    Engine Number:
+                                                </Text>
+                                                <Text
+                                                    style={styles.cardDetailsData}
+                                                >
+                                                    {orderData.vehicle
                                                         ?.engine_number
-                                                : null}
-                                        </Text>
-                                        <Divider />
-                                        <Text
-                                            style={
-                                                styles.cardDetailsHeading
-                                            }
-                                        >
-                                            Chasis Number:
-                                        </Text>
-                                        <Text
-                                            style={styles.cardDetailsData}
-                                        >
-                                            {orderData.vehicle
-                                                ?.chasis_number
-                                                ? orderData.vehicle
+                                                        ? orderData.vehicle
+                                                                ?.engine_number
+                                                        : null}
+                                                </Text>
+                                            </>
+                                        }
+                                        {orderData?.vehicle?.chasis_number && 
+                                            <>
+                                                <Divider />
+                                                <Text
+                                                    style={
+                                                        styles.cardDetailsHeading
+                                                    }
+                                                >
+                                                    Chasis Number:
+                                                </Text>
+                                                <Text
+                                                    style={styles.cardDetailsData}
+                                                >
+                                                    {orderData.vehicle
                                                         ?.chasis_number
-                                                : null}
-                                        </Text>
-                                        <Divider />
-                                        <Text
-                                            style={
-                                                styles.cardDetailsHeading
-                                            }
-                                        >
-                                            Insurance Provider Company:
-                                        </Text>
-                                        <Text
-                                            style={styles.cardDetailsData}
-                                        >
-                                            {orderData.vehicle
-                                                ?.insurance_provider?.name
-                                                ? orderData.vehicle
-                                                        ?.insurance_provider
-                                                        ?.name
-                                                : null}
-                                        </Text>
-                                        <Divider />
-                                        <Text
-                                            style={
-                                                styles.cardDetailsHeading
-                                            }
-                                        >
-                                            Insurer GSTIN:
-                                        </Text>
-                                        <Text
-                                            style={styles.cardDetailsData}
-                                        >
-                                            {orderData.vehicle
-                                                ?.insurer_gstin
-                                                ? orderData.vehicle
+                                                        ? orderData.vehicle
+                                                                ?.chasis_number
+                                                        : null}
+                                                </Text>
+                                            </>
+                                        }
+                                        {orderData?.vehicle?.insurance_provider?.name && 
+                                            <>
+                                                <Divider />
+                                                <Text
+                                                    style={
+                                                        styles.cardDetailsHeading
+                                                    }
+                                                >
+                                                    Insurance Provider Company:
+                                                </Text>
+                                                <Text
+                                                    style={styles.cardDetailsData}
+                                                >
+                                                    {orderData.vehicle
+                                                        ?.insurance_provider?.name
+                                                        ? orderData.vehicle
+                                                                ?.insurance_provider
+                                                                ?.name
+                                                        : null}
+                                                </Text>
+                                            </>
+                                        }
+                                        {orderData?.vehicle?.insurer_gstin && 
+                                            <>
+                                                <Divider />
+                                                <Text
+                                                    style={
+                                                        styles.cardDetailsHeading
+                                                    }
+                                                >
+                                                    Insurer GSTIN:
+                                                </Text>
+                                                <Text
+                                                    style={styles.cardDetailsData}
+                                                >
+                                                    {orderData.vehicle
                                                         ?.insurer_gstin
-                                                : null}
-                                        </Text>
-                                        <Divider />
-                                        <Text
-                                            style={
-                                                styles.cardDetailsHeading
-                                            }
-                                        >
-                                            Insurer Address:
-                                        </Text>
-                                        <Text
-                                            style={styles.cardDetailsData}
-                                        >
-                                            {orderData.vehicle
-                                                ?.insurer_address
-                                                ? orderData.vehicle
+                                                        ? orderData.vehicle
+                                                                ?.insurer_gstin
+                                                        : null}
+                                                </Text>
+                                            </>
+                                        }
+                                        {orderData?.vehicle?.insurer_address && 
+                                            <>
+                                                <Divider />
+                                                <Text
+                                                    style={
+                                                        styles.cardDetailsHeading
+                                                    }
+                                                >
+                                                    Insurer Address:
+                                                </Text>
+                                                <Text
+                                                    style={styles.cardDetailsData}
+                                                >
+                                                    {orderData.vehicle
                                                         ?.insurer_address
-                                                : null}
-                                        </Text>
-                                        <Divider />
-                                        <Text
-                                            style={
-                                                styles.cardDetailsHeading
-                                            }
-                                        >
-                                            Policy Number:
-                                        </Text>
-                                        <Text
-                                            style={styles.cardDetailsData}
-                                        >
-                                            {orderData.vehicle
-                                                ?.policy_number
-                                                ? orderData.vehicle
+                                                        ? orderData.vehicle
+                                                                ?.insurer_address
+                                                        : null}
+                                                </Text>
+                                            </>
+                                        }
+                                        {orderData?.vehicle?.policy_number && 
+                                            <>
+                                                <Divider />
+                                                <Text
+                                                    style={
+                                                        styles.cardDetailsHeading
+                                                    }
+                                                >
+                                                    Policy Number:
+                                                </Text>
+                                                <Text
+                                                    style={styles.cardDetailsData}
+                                                >
+                                                    {orderData.vehicle
                                                         ?.policy_number
-                                                : null}
-                                        </Text>
-                                        <Divider />
-                                        <Text
-                                            style={
-                                                styles.cardDetailsHeading
-                                            }
-                                        >
-                                            Insurance Expiry Date:
-                                        </Text>
-                                        <Text
-                                            style={styles.cardDetailsData}
-                                        >
-                                            {orderData.vehicle
-                                                ?.insurance_expiry_date
-                                                ? moment(
-                                                        orderData.vehicle
-                                                            ?.insurance_expiry_date,
-                                                        "YYYY MMMM D"
-                                                    ).format("DD-MM-YYYY")
-                                                : null}
-                                        </Text>
-                                        <Divider />
-                                        <Text
-                                            style={
-                                                styles.cardDetailsHeading
-                                            }
-                                        >
-                                            Registration Certificate:
-                                        </Text>
-                                        {orderData.vehicle
-                                            ?.registration_certificate_img !==
-                                        null ? (
-                                            <Lightbox
-                                                navigator={navigator}
-                                                style={
-                                                    styles.lightBoxWrapper
-                                                }
-                                            >
-                                                <Image
-                                                    resizeMode={"cover"}
+                                                        ? orderData.vehicle
+                                                                ?.policy_number
+                                                        : null}
+                                                </Text>
+                                            </>
+                                        }
+                                        {orderData?.vehicle?.insurance_expiry_date && 
+                                            <>
+                                                <Divider />
+                                                <Text
                                                     style={
-                                                        styles.verticleImage
+                                                        styles.cardDetailsHeading
                                                     }
-                                                    source={{
-                                                        uri:
-                                                            WEB_URL +
-                                                            "uploads/registration_certificate_img/" +
-                                                            orderData
-                                                                .vehicle
-                                                                ?.registration_certificate_img,
-                                                    }}
-                                                />
-                                            </Lightbox>
-                                        ) : (
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsData
-                                                }
-                                            >
-                                                Not Uploaded Registration
-                                                Certificate
-                                            </Text>
-                                        )}
-                                        <Divider />
-                                        <Text
-                                            style={
-                                                styles.cardDetailsHeading
-                                            }
-                                        >
-                                            Insurance Policy:
-                                        </Text>
-                                        {orderData.vehicle
-                                            ?.insurance_img !== null ? (
-                                            <Lightbox
-                                                navigator={navigator}
-                                                style={
-                                                    styles.lightBoxWrapper
-                                                }
-                                            >
-                                                <Image
-                                                    resizeMode={"cover"}
+                                                >
+                                                    Insurance Expiry Date:
+                                                </Text>
+                                                <Text
+                                                    style={styles.cardDetailsData}
+                                                >
+                                                    {orderData.vehicle
+                                                        ?.insurance_expiry_date
+                                                        ? moment(
+                                                                orderData.vehicle
+                                                                    ?.insurance_expiry_date,
+                                                                "YYYY MMMM D"
+                                                            ).format("DD-MM-YYYY")
+                                                        : null}
+                                                </Text>
+                                            </>
+                                        }
+                                        {orderData?.vehicle?.registration_certificate_img && 
+                                            <>
+                                                <Divider />
+                                                <Text
                                                     style={
-                                                        styles.verticleImage
+                                                        styles.cardDetailsHeading
                                                     }
-                                                    source={{
-                                                        uri:
-                                                            WEB_URL +
-                                                            "uploads/insurance_img/" +
-                                                            orderData
-                                                                .vehicle
-                                                                ?.insurance_img,
-                                                    }}
-                                                />
-                                            </Lightbox>
-                                        ) : (
-                                            <Text
-                                                style={
-                                                    styles.cardDetailsData
-                                                }
-                                            >
-                                                Not Uploaded Insurance
-                                                Policy
-                                            </Text>
-                                        )}
+                                                >
+                                                    Registration Certificate:
+                                                </Text>
+                                                <Lightbox
+                                                    navigator={navigator}
+                                                    style={
+                                                        styles.lightBoxWrapper
+                                                    }
+                                                >
+                                                    <Image
+                                                        resizeMode={"cover"}
+                                                        style={
+                                                            styles.verticleImage
+                                                        }
+                                                        source={{
+                                                            uri:
+                                                                WEB_URL +
+                                                                "uploads/registration_certificate_img/" +
+                                                                orderData
+                                                                    .vehicle
+                                                                    ?.registration_certificate_img,
+                                                        }}
+                                                    />
+                                                </Lightbox>
+                                            </>
+                                        }
+                                        {orderData?.vehicle?.insurance_img && 
+                                            <>
+                                                <Divider />
+                                                <Text
+                                                    style={
+                                                        styles.cardDetailsHeading
+                                                    }
+                                                >
+                                                    Insurance Policy:
+                                                </Text>
+                                                <Lightbox
+                                                    navigator={navigator}
+                                                    style={
+                                                        styles.lightBoxWrapper
+                                                    }
+                                                >
+                                                    <Image
+                                                        resizeMode={"cover"}
+                                                        style={
+                                                            styles.verticleImage
+                                                        }
+                                                        source={{
+                                                            uri:
+                                                                WEB_URL +
+                                                                "uploads/insurance_img/" +
+                                                                orderData
+                                                                    .vehicle
+                                                                    ?.insurance_img,
+                                                        }}
+                                                    />
+                                                </Lightbox>
+                                            </>
+                                        }
                                     </ScrollView>
                                 )}
                                 <View style={{ flexDirection: "row" }}>

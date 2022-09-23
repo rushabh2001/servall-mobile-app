@@ -8,6 +8,8 @@ import {
     TouchableOpacity,
     RefreshControl,
     FlatList,
+    Alert,
+    Platform,
 } from "react-native";
 import {
     Modal,
@@ -229,8 +231,8 @@ const AddVehicle = ({
             if (res.status == 200 || res.status == 201){
                 pullBrandRefresh();
                 setAddBrandModal(false);
-                setNewBrandName("");
-                setIsBrand(0);
+                setIsBrandName(json.data.name);
+                setIsBrand(json.data.id);
             } else if(res.status == 400) {
                 setNewBrandNameError(json.message.name);
             }
@@ -255,8 +257,8 @@ const AddVehicle = ({
             if (res.status == 200 || res.status == 201){
                 pullModelRefresh();
                 setAddModelModal(false);
-                setNewModelName("");
-                setIsModel(0);
+                setIsModelName(json.data.model_name);
+                setIsModel(json.data.id);
             } else if(res.status == 400) {
                 setNewModelNameError(json.message.model_name);
             }
@@ -390,13 +392,28 @@ const AddVehicle = ({
                             userId: route.params.userId,
                         });
                     } else if (res.statusCode == 400) {
-                        {
-                            res.data.message.vehicle_registration_number &&
-                                setVehicleRegistrationNumberError(
-                                    res.data.message.vehicle_registration_number
-                                );
-                        }
+                        let errors_message = [];
+                        Object.entries(res.data.message).map(([key, error], i) => {
+                            error.map((item, index) => {
+                                errors_message.push(item);
+                            })
+                        });
+                        Alert.alert(
+                            "Alert.",
+                            errors_message[0],
+                            [
+                                { text: "OK", }
+                            ]
+                        );
                         return;
+                    } else {
+                        Alert.alert(
+                            "Alert.",
+                            'Something went wrong! Please try again later.',
+                            [
+                                { text: "OK", }
+                            ]
+                        );
                     }
                 });
         } catch (e) {
@@ -638,10 +655,8 @@ const AddVehicle = ({
             if (res.status == 200 || res.status == 201){
                 // console.log("setInsuranceProviderList", json.data);
                 getInsuranceProviderList();
-                setIsInsuranceProvider(
-                    parseInt(json.insurance_provider_list.id)
-                );
-                setIsInsuranceProviderName(json.insurance_provider_list.name);
+                setIsInsuranceProvider(parseInt(json.data.id));
+                setIsInsuranceProviderName(json.data.name);
                 setAddNewInsuranceProviderModal(false);
             } else if(res.status == 400) {
                 setNewInsuranceProviderError(json.message.name);
@@ -1895,14 +1910,14 @@ const AddVehicle = ({
                         </View>
                     </Modal>
                 </Portal>
-                {isLoading &&
-                    <Spinner
-                        visible={isLoading}
-                        color="#377520"
-                        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
-                    />
-                }
             </View>
+            {isLoading &&
+                <Spinner
+                    visible={isLoading}
+                    color="#377520"
+                    style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
+                />
+            }
         </View>
     );
 };

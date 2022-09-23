@@ -8,6 +8,8 @@ import {
     TouchableOpacity,
     FlatList,
     RefreshControl,
+    Alert,
+    Platform,
 } from "react-native";
 import {
     Modal,
@@ -199,27 +201,32 @@ const AddGarage = ({
                 })
                 .then((res) => {
                     setIsLoading(false);
-                    if (res.statusCode == 400 || res.statusCode == 401) {
-                        {
-                            res?.data?.message?.email &&
-                                setEmailError(res.data.message.email);
-                        }
-                        {
-                            res?.data?.message?.phone_number &&
-                                setPhoneNumberError(
-                                    res.data.message.phone_number
-                                );
-                        }
-                        {
-                            res?.data?.message?.garage_name &&
-                                setGarageNameError(
-                                    res.data.message.garage_name
-                                );
-                        }
-                        return;
-                    } else if (res.statusCode == 201) {
+                    if (res.statusCode == 201) {
                         navigation.popToTop();
                         navigation.navigate("ChooseGarage");
+                    } else if (res.statusCode == 400) {
+                        let errors_message = [];
+                        Object.entries(res.data.message).map(([key, error], i) => {
+                            error.map((item, index) => {
+                                errors_message.push(item);
+                            })
+                        });
+                        Alert.alert(
+                            "Alert.",
+                            errors_message[0],
+                            [
+                                { text: "OK", }
+                            ]
+                        );
+                        return;
+                    } else {
+                        Alert.alert(
+                            "Alert.",
+                            'Something went wrong! Please try again later.',
+                            [
+                                { text: "OK", }
+                            ]
+                        );
                     }
                 });
         } catch (e) {
