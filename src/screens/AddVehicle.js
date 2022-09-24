@@ -1106,8 +1106,9 @@ const AddVehicle = ({
                         visible={addBrandModal}
                         onDismiss={() => {
                             setAddBrandModal(false);
-                            setNewBrandName("");
-                            setIsBrand();
+                            setNewBrandName();
+                            setNewBrandNameError();
+                            setBrandListModal(true);
                         }}
                         contentContainerStyle={styles.modalContainerStyle}
                     >
@@ -1123,8 +1124,9 @@ const AddVehicle = ({
                             }}
                             onPress={() => {
                                 setAddBrandModal(false);
-                                setNewBrandName("");
-                                setIsBrand();
+                                setNewBrandName();
+                                setNewBrandNameError();
+                                setBrandListModal(true);
                             }}
                         />
                         <Text
@@ -1176,7 +1178,8 @@ const AddVehicle = ({
                         onDismiss={() => {
                             setAddModelModal(false);
                             setNewModelName("");
-                            setIsModel(0);
+                            setNewModelNameError();
+                            setModelListModal(true);
                         }}
                         contentContainerStyle={styles.modalContainerStyle}
                     >
@@ -1193,7 +1196,8 @@ const AddVehicle = ({
                             onPress={() => {
                                 setAddModelModal(false);
                                 setNewModelName("");
-                                setIsModel(0);
+                                setNewModelNameError();
+                                setModelListModal(true);
                             }}
                         />
                         <Text
@@ -1244,9 +1248,6 @@ const AddVehicle = ({
                         visible={insuranceProviderListModal}
                         onDismiss={() => {
                             setInsuranceProviderListModal(false);
-                            setIsInsuranceProvider(0);
-                            setIsInsuranceProviderName("");
-                            setInsuranceProviderError("");
                             setSearchQueryForInsuranceProviders("");
                             searchFilterForInsuranceProviders();
                         }}
@@ -1267,9 +1268,6 @@ const AddVehicle = ({
                             }}
                             onPress={() => {
                                 setInsuranceProviderListModal(false);
-                                setIsInsuranceProvider(0);
-                                setIsInsuranceProviderName("");
-                                setInsuranceProviderError("");
                                 setSearchQueryForInsuranceProviders("");
                                 searchFilterForInsuranceProviders();
                             }}
@@ -1358,6 +1356,8 @@ const AddVehicle = ({
                                                 setInsuranceProviderListModal(
                                                     false
                                                 );
+                                                setSearchQueryForInsuranceProviders("");
+                                                searchFilterForInsuranceProviders();
                                             }}
                                         />
                                 )}
@@ -1409,7 +1409,7 @@ const AddVehicle = ({
                         onDismiss={() => {
                             setAddNewInsuranceProviderModal(false);
                             setInsuranceProviderListModal(true);
-                            setIsNewInsuranceProvider(0);
+                            setIsNewInsuranceProvider();
                             setNewInsuranceProviderError("");
                         }}
                         contentContainerStyle={styles.modalContainerStyle}
@@ -1427,7 +1427,7 @@ const AddVehicle = ({
                             onPress={() => {
                                 setAddNewInsuranceProviderModal(false);
                                 setInsuranceProviderListModal(true);
-                                setIsNewInsuranceProvider(0);
+                                setIsNewInsuranceProvider();
                                 setNewInsuranceProviderError("");
                             }}
                         />
@@ -1497,12 +1497,8 @@ const AddVehicle = ({
                         visible={brandListModal}
                         onDismiss={() => {
                             setBrandListModal(false);
-                            setIsBrand(0);
-                            setIsBrandName("");
-                            setBrandError("");
                             setSearchQueryForBrands("");
-                            searchFilterForBrands();
-                            setModelFieldToggle(false);
+                            onBrandRefresh();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -1521,12 +1517,8 @@ const AddVehicle = ({
                             }}
                             onPress={() => {
                                 setBrandListModal(false);
-                                setIsBrand(0);
-                                setIsBrandName("");
-                                setBrandError("");
                                 setSearchQueryForBrands("");
-                                searchFilterForBrands();
-                                setModelFieldToggle(false);
+                                onBrandRefresh();
                             }}
                         />
                         <Text
@@ -1669,6 +1661,8 @@ const AddVehicle = ({
                                                 setIsBrand(item.id);
                                                 setBrandError("");
                                                 setBrandListModal(false);
+                                                setSearchQueryForBrands("");
+                                                onBrandRefresh();
                                             }}
                                         />
                                 )}
@@ -1716,11 +1710,8 @@ const AddVehicle = ({
                         visible={modelListModal}
                         onDismiss={() => {
                             setModelListModal(false);
-                            setIsModel(0);
-                            setIsModelName("");
-                            setModelError("");
                             setSearchQueryForModels("");
-                            searchFilterForModels();
+                            onModelRefresh();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -1739,11 +1730,8 @@ const AddVehicle = ({
                             }}
                             onPress={() => {
                                 setModelListModal(false);
-                                setIsModel(0);
-                                setIsModelName("");
-                                setModelError("");
                                 setSearchQueryForModels("");
-                                searchFilterForModels();
+                                onModelRefresh();
                             }}
                         />
                         <Text
@@ -1888,6 +1876,8 @@ const AddVehicle = ({
                                                 setIsModel(item.id);
                                                 setModelError("");
                                                 setModelListModal(false);
+                                                setSearchQueryForModels("");
+                                                onModelRefresh();
                                             }}
                                         />
                                 )}

@@ -754,11 +754,8 @@ const AddStock = ({
                         visible={partListModal}
                         onDismiss={() => {
                             setPartListModal(false);
-                            setIsPart(0);
-                            setIsPartName("");
-                            setPartError("");
                             setSearchQueryForParts("");
-                            searchFilterForParts();
+                            onPartRefresh();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -785,11 +782,8 @@ const AddStock = ({
                             }}
                             onPress={() => {
                                 setPartListModal(false);
-                                setIsPart(0);
-                                setIsPartName("");
-                                setPartError("");
                                 setSearchQueryForParts("");
-                                searchFilterForParts();
+                                onPartRefresh();
                             }}
                         />
                         <View style={{ marginTop: 20, flex: 1 }}>
@@ -921,6 +915,8 @@ const AddStock = ({
                                                 setIsPart(item.id);
                                                 setPartError("");
                                                 setPartListModal(false);
+                                                setSearchQueryForParts("");
+                                                onPartRefresh();
                                             }}
                                         />
                                     )
@@ -1056,11 +1052,8 @@ const AddStock = ({
                         visible={garageListModal}
                         onDismiss={() => {
                             setGarageListModal(false);
-                            setIsGarageId(0);
-                            setIsGarageName("");
-                            setGarageError("");
                             setSearchQueryForGarages("");
-                            searchFilterForGarages();
+                            onGarageRefresh();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -1087,11 +1080,8 @@ const AddStock = ({
                             }}
                             onPress={() => {
                                 setGarageListModal(false);
-                                setIsGarageId(0);
-                                setIsGarageName("");
-                                setGarageError("");
                                 setSearchQueryForGarages("");
-                                searchFilterForGarages();
+                                onGarageRefresh();
                             }}
                         />
                         <View style={{ marginTop: 20, flex: 1 }}>
@@ -1227,6 +1217,8 @@ const AddStock = ({
                                                 setGarageListModal(
                                                     false
                                                 );
+                                                setSearchQueryForGarages("");
+                                                onGarageRefresh();
                                             }}
                                         />
                                 )}

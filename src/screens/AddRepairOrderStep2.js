@@ -29,7 +29,6 @@ import InputScrollView from "react-native-input-scroll-view";
 import moment from "moment";
 import DocumentPicker from "react-native-document-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import RadioForm from "react-native-simple-radio-button";
 import Spinner from "react-native-loading-spinner-overlay";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
@@ -205,8 +204,6 @@ const AddRepairOrderStep2 = ({
     const [searchQueryForCity, setSearchQueryForCity] = useState();
     const [cityError, setCityError] = useState();
 
-    const [value, setValue] = useState('new_user');
-
     const isNameRef = useRef();
     const isEmailRef = useRef();
     const isPhoneRef = useRef();
@@ -214,10 +211,10 @@ const AddRepairOrderStep2 = ({
     const isAddressRef = useRef();
     const scrollViewRef = useRef();
 
-    var radio_props = [
-        { label: "New User", value: "new_user" },
-        { label: "Existing User", value: "existing_user" },
-    ];
+    // var radio_props = [
+    //     { label: "New User", value: "new_user" },
+    //     { label: "Existing User", value: "existing_user" },
+    // ];
 
     const addNewBrand = async () => {
         let data = { name: newBrandName };
@@ -2065,8 +2062,9 @@ const AddRepairOrderStep2 = ({
                         visible={addBrandModal}
                         onDismiss={() => {
                             setAddBrandModal(false);
-                            setNewBrandName("");
-                            setIsBrand();
+                            setNewBrandName();
+                            setNewBrandNameError();
+                            setBrandListModal(true);
                         }}
                         contentContainerStyle={styles.modalContainerStyle}
                     >
@@ -2090,8 +2088,9 @@ const AddRepairOrderStep2 = ({
                             }}
                             onPress={() => {
                                 setAddBrandModal(false);
-                                setNewBrandName("");
-                                setIsBrand();
+                                setNewBrandName();
+                                setNewBrandNameError();
+                                setBrandListModal(true);
                             }}
                         />
                         <TextInput
@@ -2134,7 +2133,8 @@ const AddRepairOrderStep2 = ({
                         onDismiss={() => {
                             setAddModelModal(false);
                             setNewModelName("");
-                            setIsModel();
+                            setNewModelNameError();
+                            setModelListModal(true);
                         }}
                         contentContainerStyle={styles.modalContainerStyle}
                     >
@@ -2159,7 +2159,8 @@ const AddRepairOrderStep2 = ({
                             onPress={() => {
                                 setAddModelModal(false);
                                 setNewModelName("");
-                                setIsModel();
+                                setNewModelNameError();
+                                setModelListModal(true);
                             }}
                         />
                         <TextInput
@@ -2203,9 +2204,6 @@ const AddRepairOrderStep2 = ({
                         visible={insuranceProviderListModal}
                         onDismiss={() => {
                             setInsuranceProviderListModal(false);
-                            setIsInsuranceProvider();
-                            setIsInsuranceProviderName("");
-                            setInsuranceProviderError("");
                             setSearchQueryForInsuranceProviders("");
                             searchFilterForInsuranceProviders();
                         }}
@@ -2234,9 +2232,6 @@ const AddRepairOrderStep2 = ({
                             }}
                             onPress={() => {
                                 setInsuranceProviderListModal(false);
-                                setIsInsuranceProvider();
-                                setIsInsuranceProviderName("");
-                                setInsuranceProviderError("");
                                 setSearchQueryForInsuranceProviders("");
                                 searchFilterForInsuranceProviders();
                             }}
@@ -2372,7 +2367,7 @@ const AddRepairOrderStep2 = ({
                         onDismiss={() => {
                             setAddNewInsuranceProviderModal(false);
                             setInsuranceProviderListModal(true);
-                            setIsNewInsuranceProvider(0);
+                            setIsNewInsuranceProvider();
                             setNewInsuranceProviderError("");
                         }}
                         contentContainerStyle={styles.modalContainerStyle}
@@ -2398,7 +2393,7 @@ const AddRepairOrderStep2 = ({
                             onPress={() => {
                                 setAddNewInsuranceProviderModal(false);
                                 setInsuranceProviderListModal(true);
-                                setIsNewInsuranceProvider(0);
+                                setIsNewInsuranceProvider();
                                 setNewInsuranceProviderError("");
                             }}
                         />
@@ -2459,9 +2454,6 @@ const AddRepairOrderStep2 = ({
                         visible={userListModal}
                         onDismiss={() => {
                             setUserListModal(false);
-                            // setIsUser();
-                            // setIsName("");
-                            // setUserError("");
                             onUserRefresh();
                             setSearchQueryForUsers("");
                             searchFilterForUsers();
@@ -2634,8 +2626,8 @@ const AddRepairOrderStep2 = ({
                                                 setIsUser(item.id);
                                                 setUserError("");
                                                 setUserListModal(false);
-                                                onUserRefresh();
-                                                // searchFilterForUsers('');
+                                                setSearchQueryForUsers("");
+                                                searchFilterForUsers();
                                             }}
                                         />
                                 )}
@@ -2648,12 +2640,8 @@ const AddRepairOrderStep2 = ({
                         visible={garageListModal}
                         onDismiss={() => {
                             setGarageListModal(false);
-                            // setIsGarageId(0);
-                            // setIsGarageName("");
-                            // setGarageError("");
                             onGarageRefresh();
                             setSearchQueryForGarages("");
-                            searchFilterForGarages();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -2681,7 +2669,6 @@ const AddRepairOrderStep2 = ({
                             onPress={() => {
                                 setGarageListModal(false);
                                 setSearchQueryForGarages("");
-                                searchFilterForGarages();
                                 onGarageRefresh();
                             }}
                         />
@@ -2820,6 +2807,7 @@ const AddRepairOrderStep2 = ({
                                                 setGarageError("");
                                                 setGarageIdError("");
                                                 onGarageRefresh();
+                                                setSearchQueryForGarages("");
                                                 setGarageListModal(false);
                                             }}
                                         />
@@ -2835,7 +2823,6 @@ const AddRepairOrderStep2 = ({
                         onDismiss={() => {
                             setBrandListModal(false);
                             setSearchQueryForBrands("");
-                            searchFilterForBrands();
                             onBrandRefresh();
                         }}
                         contentContainerStyle={[
@@ -2856,7 +2843,6 @@ const AddRepairOrderStep2 = ({
                             onPress={() => {
                                 setBrandListModal(false);
                                 setSearchQueryForBrands("");
-                                searchFilterForBrands();
                                 onBrandRefresh();
                             }}
                         />
@@ -2999,6 +2985,7 @@ const AddRepairOrderStep2 = ({
                                                 setIsBrandName(item.name);
                                                 setIsBrand(item.id);
                                                 setBrandError("");
+                                                setSearchQueryForBrands("");
                                                 onBrandRefresh();
                                                 setBrandListModal(false);
                                             }}
@@ -3050,7 +3037,6 @@ const AddRepairOrderStep2 = ({
                             setModelListModal(false);
                             onModelRefresh();
                             setSearchQueryForModels("");
-                            searchFilterForModels();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -3079,7 +3065,6 @@ const AddRepairOrderStep2 = ({
                                 setModelListModal(false);
                                 onModelRefresh();
                                 setSearchQueryForModels("");
-                                searchFilterForModels();
                             }}
                         />
                         <View
@@ -3216,6 +3201,7 @@ const AddRepairOrderStep2 = ({
                                                 setIsModel(item.id);
                                                 setModelError("");
                                                 onModelRefresh();
+                                                setSearchQueryForModels("");
                                                 setModelListModal(false);
                                             }}
                                         />
@@ -3266,9 +3252,6 @@ const AddRepairOrderStep2 = ({
                             setStateListModal(false);
                             setSearchQueryForStates("");
                             searchFilterForStates();
-                            setIsCity();
-                            setIsCityName("");
-                            setCityFieldToggle(false);
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -3297,9 +3280,6 @@ const AddRepairOrderStep2 = ({
                                 setStateListModal(false);
                                 setSearchQueryForStates("");
                                 searchFilterForStates();
-                                setIsCity();
-                                setIsCityName("");
-                                setCityFieldToggle(false);
                             }}
                         />
                         <View

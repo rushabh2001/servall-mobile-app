@@ -59,11 +59,9 @@ const EditRepairOrder = ({
     );
 
     // Vehicle Fields
-    const [isBrand, setIsBrand] = useState(route?.params?.data?.brand_id);
     const [isBrandName, setIsBrandName] = useState(
         route?.params?.data?.brand_name
     );
-    const [isModel, setIsModel] = useState(route?.params?.data?.model_id);
     const [isModelName, setIsModelName] = useState(
         route?.params?.data?.model_name
     );
@@ -82,15 +80,7 @@ const EditRepairOrder = ({
     );
     const [vehicleImgError, setVehicleImgError] = useState();
 
-    const [isQuantity, setIsQuantity] = useState();
-    const [isRate, setIsRate] = useState();
-    // const [isServiceName, setIsServiceName] = useState();
     const [isComment, setIsComment] = useState(route?.params?.data?.comment);
-
-    const [isPart, setIsPart] = useState("");
-    const [isPartName, setIsPartName] = useState("");
-    const [isService, setIsService] = useState("");
-    const [isServiceName, setIsServiceName] = useState("");
 
     const [isOrderStatus, setIsOrderStatus] = useState(
         route?.params?.data?.status
@@ -552,6 +542,7 @@ const EditRepairOrder = ({
     };
 
     const searchFilterForParts = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_parts`, {
                 method: "POST",
@@ -570,8 +561,7 @@ const EditRepairOrder = ({
                 setFilteredPartData(json.data.data);
                 {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
                 {json.data.current_page != json.data.last_page ? setPartPage(2) : null}
-                setPartRefreshing(false);
-            } else {
+                setIsLoading(false);
                 setPartRefreshing(false);
             }
         } catch (error) {
@@ -660,6 +650,7 @@ const EditRepairOrder = ({
     };
 
     const searchFilterForServices = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_service`, {
                 method: "POST",
@@ -747,8 +738,6 @@ const EditRepairOrder = ({
             const json = await res.json();
             if (json !== undefined) {
                 pullServiceRefresh();
-                setIsService(parseInt(json.data.id));
-                setIsServiceName(json.data.name);
                 let data = {
                     service_id: json.data.id,
                     serviceName: json.data.name,
@@ -781,8 +770,6 @@ const EditRepairOrder = ({
             if (json !== undefined) {
                 setIsLoading(true);
                 pullPartRefresh();
-                setIsPart(parseInt(json.data.id));
-                setIsPartName(json.data.name);
                 let data = {
                     parts_id: json.data.id,
                     partName: json.data.name,
@@ -1678,11 +1665,8 @@ const EditRepairOrder = ({
                         visible={partListModal}
                         onDismiss={() => {
                             setPartListModal(false);
-                            setIsPart(0);
-                            setIsPartName("");
-                            setPartError("");
                             setSearchQueryForParts("");
-                            searchFilterForParts();
+                            onPartRefresh();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -1701,11 +1685,8 @@ const EditRepairOrder = ({
                             }}
                             onPress={() => {
                                 setPartListModal(false);
-                                setIsPart(0);
-                                setIsPartName("");
-                                setPartError("");
                                 setSearchQueryForParts("");
-                                searchFilterForParts();
+                                onPartRefresh();
                             }}
                         />
                         <Text
@@ -1840,10 +1821,6 @@ const EditRepairOrder = ({
                                             }
                                             key={item.id}
                                             onPress={() => {
-                                                setIsPartName(
-                                                    item.name
-                                                );
-                                                setIsPart(item.id);
                                                 let parameter = {
                                                     parts_id: item.id,
                                                     partName: item.name,
@@ -1854,10 +1831,8 @@ const EditRepairOrder = ({
 
                                                 setPartError("");
                                                 setPartListModal(false);
-                                                setSearchQueryForParts(
-                                                    ""
-                                                );
-                                                searchFilterForParts();
+                                                setSearchQueryForParts("");
+                                                onPartRefresh();
                                             }}
                                         />
                                 )}
@@ -1905,11 +1880,8 @@ const EditRepairOrder = ({
                         visible={serviceListModal}
                         onDismiss={() => {
                             setServiceListModal(false);
-                            setIsService(0);
-                            setIsServiceName("");
-                            setServiceError("");
                             setSearchQueryForServices("");
-                            searchFilterForServices();
+                            onServiceRefresh();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -1928,11 +1900,8 @@ const EditRepairOrder = ({
                             }}
                             onPress={() => {
                                 setServiceListModal(false);
-                                setIsService(0);
-                                setIsServiceName("");
-                                setServiceError("");
                                 setSearchQueryForServices("");
-                                searchFilterForServices();
+                                onServiceRefresh();
                             }}
                         />
                         <Text
@@ -2068,10 +2037,6 @@ const EditRepairOrder = ({
                                                 </View>
                                             }
                                             onPress={() => {
-                                                setIsServiceName(
-                                                    item.name
-                                                );
-                                                setIsService(item.id);
                                                 let parameter = {
                                                     service_id: item.id,
                                                     serviceName:
@@ -2085,10 +2050,8 @@ const EditRepairOrder = ({
                                                 setServiceListModal(
                                                     false
                                                 );
-                                                setSearchQueryForServices(
-                                                    ""
-                                                );
-                                                searchFilterForServices();
+                                                setSearchQueryForServices("");
+                                                onServiceRefresh();
                                             }}
                                         />
                                 )}

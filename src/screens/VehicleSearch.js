@@ -57,12 +57,11 @@ const VehicleSearch = ({
             const json = await res.json();
             if (json !== undefined) {
                 setVehicleData(json.vehicle_details);
+                setVehicleDataLoading(false);
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            setVehicleDataLoading(false);
-        }
+        } 
     };
 
     const getVehicleList = async () => {

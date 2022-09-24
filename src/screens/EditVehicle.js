@@ -1562,7 +1562,8 @@ const EditVehicle = ({
                                     onDismiss={() => {
                                         setAddBrandModal(false);
                                         setNewBrandName("");
-                                        setIsBrand();
+                                        setNewBrandNameError();
+                                        setBrandListModal(true);
                                     }}
                                     contentContainerStyle={
                                         styles.modalContainerStyle
@@ -1581,7 +1582,8 @@ const EditVehicle = ({
                                         onPress={() => {
                                             setAddBrandModal(false);
                                             setNewBrandName("");
-                                            setIsBrand();
+                                            setNewBrandNameError();
+                                            setBrandListModal(true);
                                         }}
                                     />
                                     <Text
@@ -1634,7 +1636,8 @@ const EditVehicle = ({
                                     onDismiss={() => {
                                         setAddModelModal(false);
                                         setNewModelName("");
-                                        setIsModel(0);
+                                        setNewModelNameError();
+                                        setModelListModal(true);
                                     }}
                                     contentContainerStyle={
                                         styles.modalContainerStyle
@@ -1653,7 +1656,8 @@ const EditVehicle = ({
                                         onPress={() => {
                                             setAddModelModal(false);
                                             setNewModelName("");
-                                            setIsModel(0);
+                                            setNewModelNameError();
+                                            setModelListModal(true);
                                         }}
                                     />
                                     <Text
@@ -1706,9 +1710,6 @@ const EditVehicle = ({
                                     visible={insuranceProviderListModal}
                                     onDismiss={() => {
                                         setInsuranceProviderListModal(false);
-                                        setIsInsuranceProvider(0);
-                                        setIsInsuranceProviderName("");
-                                        setInsuranceProviderError("");
                                         setSearchQueryForInsuranceProviders("");
                                         searchFilterForInsuranceProviders();
                                     }}
@@ -1729,9 +1730,6 @@ const EditVehicle = ({
                                         }}
                                         onPress={() => {
                                             setInsuranceProviderListModal(false);
-                                            setIsInsuranceProvider(0);
-                                            setIsInsuranceProviderName("");
-                                            setInsuranceProviderError("");
                                             setSearchQueryForInsuranceProviders("");
                                             searchFilterForInsuranceProviders();
                                         }}
@@ -1829,6 +1827,8 @@ const EditVehicle = ({
                                                             setInsuranceProviderListModal(
                                                                 false
                                                             );
+                                                            setSearchQueryForInsuranceProviders("");
+                                                            searchFilterForInsuranceProviders();
                                                         }}
                                                     />
                                             )}
@@ -1885,7 +1885,7 @@ const EditVehicle = ({
                                     onDismiss={() => {
                                         setAddNewInsuranceProviderModal(false);
                                         setInsuranceProviderListModal(true);
-                                        setIsNewInsuranceProvider(0);
+                                        setIsNewInsuranceProvider();
                                         setNewInsuranceProviderError("");
                                     }}
                                     contentContainerStyle={
@@ -1905,7 +1905,7 @@ const EditVehicle = ({
                                         onPress={() => {
                                             setAddNewInsuranceProviderModal(false);
                                             setInsuranceProviderListModal(true);
-                                            setIsNewInsuranceProvider(0);
+                                            setIsNewInsuranceProvider();
                                             setNewInsuranceProviderError("");
                                         }}
                                     />
@@ -1984,12 +1984,8 @@ const EditVehicle = ({
                                     visible={brandListModal}
                                     onDismiss={() => {
                                         setBrandListModal(false);
-                                        setIsBrand(0);
-                                        setIsBrandName("");
-                                        setBrandError("");
                                         setSearchQueryForBrands("");
-                                        searchFilterForBrands();
-                                        setModelFieldToggle(false);
+                                        onBrandRefresh();
                                     }}
                                     contentContainerStyle={[
                                         styles.modalContainerStyle,
@@ -2008,12 +2004,8 @@ const EditVehicle = ({
                                         }}
                                         onPress={() => {
                                             setBrandListModal(false);
-                                            setIsBrand(0);
-                                            setIsBrandName("");
-                                            setBrandError("");
                                             setSearchQueryForBrands("");
-                                            searchFilterForBrands();
-                                            setModelFieldToggle(false);
+                                            onBrandRefresh();
                                         }}
                                     />
                                     <Text
@@ -2175,6 +2167,8 @@ const EditVehicle = ({
                                                             setBrandListModal(
                                                                 false
                                                             );
+                                                            setSearchQueryForBrands("");
+                                                            onBrandRefresh();
                                                             setIsModel();
                                                             setIsModelName("");
                                                         }}
@@ -2229,11 +2223,8 @@ const EditVehicle = ({
                                     visible={modelListModal}
                                     onDismiss={() => {
                                         setModelListModal(false);
-                                        setIsModel(0);
-                                        setIsModelName("");
-                                        setModelError("");
                                         setSearchQueryForModels("");
-                                        searchFilterForModels();
+                                        onModelRefresh();
                                     }}
                                     contentContainerStyle={[
                                         styles.modalContainerStyle,
@@ -2252,11 +2243,8 @@ const EditVehicle = ({
                                         }}
                                         onPress={() => {
                                             setModelListModal(false);
-                                            setIsModel(0);
-                                            setIsModelName("");
-                                            setModelError("");
                                             setSearchQueryForModels("");
-                                            searchFilterForModels();
+                                            onModelRefresh();
                                         }}
                                     />
                                     <Text
@@ -2420,6 +2408,8 @@ const EditVehicle = ({
                                                             setModelListModal(
                                                                 false
                                                             );
+                                                            setSearchQueryForModels("");
+                                                            onModelRefresh();
                                                         }}
                                                     />
                                             )}

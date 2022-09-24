@@ -519,11 +519,8 @@ const Parts = ({
                         visible={garageListModal}
                         onDismiss={() => {
                             setGarageListModal(false);
-                            setIsGarageId(0);
-                            setIsGarageName("");
-                            setGarageError("");
                             setSearchQueryForGarages("");
-                            searchFilterForGarages();
+                            onGarageRefresh();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -550,11 +547,8 @@ const Parts = ({
                             }}
                             onPress={() => {
                                 setGarageListModal(false);
-                                setIsGarageId(0);
-                                setIsGarageName("");
-                                setGarageError("");
                                 setSearchQueryForGarages("");
-                                searchFilterForGarages();
+                                onGarageRefresh();
                             }}
                         />
                         {isLoadingGarageList == true ? (
@@ -695,6 +689,8 @@ const Parts = ({
                                                     setGarageListModal(
                                                         false
                                                     );
+                                                    setSearchQueryForGarages("");
+                                                    onGarageRefresh();
                                                 }}
                                             />
                                     )}

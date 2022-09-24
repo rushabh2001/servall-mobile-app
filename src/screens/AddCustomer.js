@@ -1620,7 +1620,8 @@ const AddCustomer = ({
                         onDismiss={() => {
                             setAddBrandModal(false);
                             setNewBrandName();
-                            setIsBrand(0);
+                            setNewBrandNameError();
+                            setBrandListModal(true);
                         }}
                         contentContainerStyle={styles.modalContainerStyle}
                     >
@@ -1644,8 +1645,9 @@ const AddCustomer = ({
                             }}
                             onPress={() => {
                                 setAddBrandModal(false);
-                                setNewBrandName("");
-                                setIsBrand(0);
+                                setNewBrandName();
+                                setNewBrandNameError();
+                                setBrandListModal(true);
                             }}
                         />
                         <TextInput
@@ -1688,7 +1690,8 @@ const AddCustomer = ({
                         onDismiss={() => {
                             setAddModelModal(false);
                             setNewModelName("");
-                            setIsModel(0);
+                            setNewModelNameError();
+                            setModelListModal(true);
                         }}
                         contentContainerStyle={styles.modalContainerStyle}
                     >
@@ -1713,7 +1716,8 @@ const AddCustomer = ({
                             onPress={() => {
                                 setAddModelModal(false);
                                 setNewModelName("");
-                                setIsModel(0);
+                                setNewModelNameError();
+                                setModelListModal(true);
                             }}
                         />
                         <TextInput
@@ -1757,8 +1761,6 @@ const AddCustomer = ({
                         visible={insuranceProviderListModal}
                         onDismiss={() => {
                             setInsuranceProviderListModal(false);
-                            setIsInsuranceProvider(0);
-                            setIsInsuranceProviderName("");
                             setSearchQueryForInsuranceProviders("");
                             searchFilterForInsuranceProviders();
                         }}
@@ -1787,8 +1789,6 @@ const AddCustomer = ({
                             }}
                             onPress={() => {
                                 setInsuranceProviderListModal(false);
-                                setIsInsuranceProvider(0);
-                                setIsInsuranceProviderName("");
                                 setSearchQueryForInsuranceProviders("");
                                 searchFilterForInsuranceProviders();
                             }}
@@ -1869,6 +1869,8 @@ const AddCustomer = ({
                                                 setInsuranceProviderListModal(
                                                     false
                                                 );
+                                                setSearchQueryForInsuranceProviders("");
+                                                searchFilterForInsuranceProviders();
                                             }}
                                         />
                                 )}
@@ -1919,7 +1921,7 @@ const AddCustomer = ({
                         onDismiss={() => {
                             setAddNewInsuranceProviderModal(false);
                             setInsuranceProviderListModal(true);
-                            setIsNewInsuranceProvider(0);
+                            setIsNewInsuranceProvider();
                             setNewInsuranceProviderError("");
                         }}
                         contentContainerStyle={styles.modalContainerStyle}
@@ -2006,11 +2008,8 @@ const AddCustomer = ({
                         visible={garageListModal}
                         onDismiss={() => {
                             setGarageListModal(false);
-                            setIsGarageId(0);
-                            setIsGarageName("");
-                            setGarageError("");
+                            onGarageRefresh();
                             setSearchQueryForGarages("");
-                            searchFilterForGarages();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -2037,11 +2036,8 @@ const AddCustomer = ({
                             }}
                             onPress={() => {
                                 setGarageListModal(false);
-                                setIsGarageId(0);
-                                setIsGarageName("");
-                                setGarageError("");
+                                onGarageRefresh();
                                 setSearchQueryForGarages("");
-                                searchFilterForGarages();
                             }}
                         />
                         <View
@@ -2179,6 +2175,8 @@ const AddCustomer = ({
                                                 setGarageError("");
                                                 setGarageIdError("");
                                                 setGarageListModal(false);
+                                                onGarageRefresh();
+                                                setSearchQueryForGarages("");
                                             }}
                                         />
                                     )
@@ -2192,12 +2190,8 @@ const AddCustomer = ({
                         visible={brandListModal}
                         onDismiss={() => {
                             setBrandListModal(false);
-                            setIsBrand(0);
-                            setIsBrandName("");
-                            setBrandError("");
                             setSearchQueryForBrands("");
-                            searchFilterForBrands();
-                            setModelFieldToggle(false);
+                            onBrandRefresh();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -2224,12 +2218,8 @@ const AddCustomer = ({
                             }}
                             onPress={() => {
                                 setBrandListModal(false);
-                                setIsBrand(0);
-                                setIsBrandName("");
-                                setBrandError("");
                                 setSearchQueryForBrands("");
-                                searchFilterForBrands();
-                                setModelFieldToggle(false);
+                                onBrandRefresh();
                             }}
                         />
                         <View
@@ -2364,6 +2354,8 @@ const AddCustomer = ({
                                                 setIsBrand(item.id);
                                                 setBrandError("");
                                                 setBrandListModal(false);
+                                                setSearchQueryForBrands("");
+                                                onBrandRefresh();
                                             }}
                                         />
                                 )}
@@ -2411,11 +2403,8 @@ const AddCustomer = ({
                         visible={modelListModal}
                         onDismiss={() => {
                             setModelListModal(false);
-                            setIsModel(0);
-                            setIsModelName("");
-                            setModelError("");
+                            onModelRefresh();
                             setSearchQueryForModels("");
-                            searchFilterForModels();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -2442,11 +2431,8 @@ const AddCustomer = ({
                             }}
                             onPress={() => {
                                 setModelListModal(false);
-                                setIsModel(0);
-                                setIsModelName("");
-                                setModelError("");
+                                onModelRefresh();
                                 setSearchQueryForModels("");
-                                searchFilterForModels();
                             }}
                         />
                         <View
@@ -2583,6 +2569,8 @@ const AddCustomer = ({
                                                 setIsModel(item.id);
                                                 setModelError("");
                                                 setModelListModal(false);
+                                                onModelRefresh();
+                                                setSearchQueryForModels("");
                                             }}
                                         />
                                 )}
@@ -2630,14 +2618,8 @@ const AddCustomer = ({
                         visible={stateListModal}
                         onDismiss={() => {
                             setStateListModal(false);
-                            setIsState();
-                            setIsStateName("");
-                            setStateError("");
                             setSearchQueryForStates("");
                             searchFilterForStates();
-                            setCityFieldToggle(false);
-                            setIsCity();
-                            setIsCityName("");
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -2664,14 +2646,8 @@ const AddCustomer = ({
                             }}
                             onPress={() => {
                                 setStateListModal(false);
-                                setIsState();
-                                setIsStateName("");
-                                setStateError("");
                                 setSearchQueryForStates("");
                                 searchFilterForStates();
-                                setCityFieldToggle(false);
-                                setIsCity();
-                                setIsCityName("");
                             }}
                         />
                         <View
@@ -2738,6 +2714,8 @@ const AddCustomer = ({
                                                 setIsState(item.id);
                                                 setStateError("");
                                                 setStateListModal(false);
+                                                setSearchQueryForStates("");
+                                                searchFilterForStates();
                                             }}
                                         />
                                 )}
@@ -2750,9 +2728,6 @@ const AddCustomer = ({
                         visible={cityListModal}
                         onDismiss={() => {
                             setCityListModal(false);
-                            setIsCity(0);
-                            setIsCityName("");
-                            setCityError("");
                             setSearchQueryForCity("");
                             searchFilterForCity();
                         }}
@@ -2781,9 +2756,6 @@ const AddCustomer = ({
                             }}
                             onPress={() => {
                                 setCityListModal(false);
-                                setIsCity(0);
-                                setIsCityName("");
-                                setCityError("");
                                 setSearchQueryForCity("");
                                 searchFilterForCity();
                             }}
@@ -2854,6 +2826,8 @@ const AddCustomer = ({
                                                 setIsCity(item.id);
                                                 setCityError("");
                                                 setCityListModal(false);
+                                                setSearchQueryForCity("");
+                                                searchFilterForCity();
                                             }}
                                         />
                                 )}

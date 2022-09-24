@@ -602,7 +602,7 @@ const AddGarage = ({
                         />
                         {garageContactNumberError?.length > 0 && (
                             <Text style={{ color: colors.danger }}>
-                                {garageContactNumberError}
+                                Garage Contact Number is required
                             </Text>
                         )}
 
@@ -854,11 +854,8 @@ const AddGarage = ({
                     visible={userListModal}
                     onDismiss={() => {
                         setUserListModal(false);
-                        setOwnerId(0);
-                        setIsName("");
-                        setUserError("");
                         setSearchQueryForUsers("");
-                        searchFilterForUsers();
+                        onUserRefresh();
                     }}
                     contentContainerStyle={[
                         styles.modalContainerStyle,
@@ -885,11 +882,8 @@ const AddGarage = ({
                         }}
                         onPress={() => {
                             setUserListModal(false);
-                            setOwnerId(0);
-                            setIsName("");
-                            setUserError("");
                             setSearchQueryForUsers("");
-                            searchFilterForUsers();
+                            onUserRefresh();
                         }}
                     />
                     <View
@@ -1017,6 +1011,8 @@ const AddGarage = ({
                                         setOwnerId(item.id);
                                         setUserError("");
                                         setUserListModal(false);
+                                        setSearchQueryForUsers("");
+                                        onUserRefresh();
                                     }}
                                 />
                             )}
@@ -1031,9 +1027,6 @@ const AddGarage = ({
                         setStateListModal(false);
                         setSearchQueryForStates("");
                         searchFilterForStates();
-                        setIsCity();
-                        setIsCityName("");
-                        setCityFieldToggle(false);
                     }}
                     contentContainerStyle={[
                         styles.modalContainerStyle,
@@ -1062,9 +1055,6 @@ const AddGarage = ({
                             setStateListModal(false);
                             setSearchQueryForStates("");
                             searchFilterForStates();
-                            setIsCity();
-                            setIsCityName("");
-                            setCityFieldToggle(false);
                         }}
                     />
                     <View
@@ -1126,6 +1116,8 @@ const AddGarage = ({
                                         setIsState(item.id);
                                         setStateError("");
                                         setStateListModal(false);
+                                        setSearchQueryForStates("");
+                                        searchFilterForStates();
                                     }}
                                 />
                             )}
@@ -1228,6 +1220,8 @@ const AddGarage = ({
                                         setIsCity(item.id);
                                         setCityError("");
                                         setCityListModal(false);
+                                        setSearchQueryForCity("");
+                                        searchFilterForCity();
                                     }}
                                 />
                             )}

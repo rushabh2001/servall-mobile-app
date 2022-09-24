@@ -18,7 +18,6 @@ import {
     TextInput,
     List,
     Divider,
-    Searchbar,
 } from "react-native-paper";
 import { connect } from "react-redux";
 import { colors } from "../constants";
@@ -27,7 +26,6 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import IconX from "react-native-vector-icons/FontAwesome5";
 import InputScrollView from "react-native-input-scroll-view";
 import moment from "moment";
-import DocumentPicker from "react-native-document-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { SliderPicker } from "react-native-slider-picker";
 import { Picker } from "@react-native-picker/picker";
@@ -77,22 +75,11 @@ const AddRepairOrderStep3 = ({
     const [isOdometerKMs, setIsOdometerKMs] = useState("");
     const [odometerKMsError, setOdometerKMsError] = useState("");
     const [isFuelLevel, setIsFuelLevel] = useState(5);
-    // const [odometerKMsError, setOdometerKMsError] = useState();
-
-    // const [isOdometerKMs, setIsOdometerKMs] = useState(route?.params?.userVehicleDetails?.odometer);
-    // const [isFuelLevel, setIsFuelLevel] = useState(route?.params?.userVehicleDetails?.fuel_level);
 
     const [isOrderStatus, setIsOrderStatus] = useState("Vehicle Received");
     const [orderStatusError, setOrderStatusError] = useState();
 
-    const [isVehicleImg, setIsVehicleImg] = useState();
-
     const [isComment, setIsComment] = useState("");
-
-    const [isPart, setIsPart] = useState("");
-    const [isPartName, setIsPartName] = useState("");
-    const [isService, setIsService] = useState("");
-    const [isServiceName, setIsServiceName] = useState("");
 
     const [isNewService, setIsNewService] = useState("");
     const [newServiceError, setNewServiceError] = useState();
@@ -102,7 +89,6 @@ const AddRepairOrderStep3 = ({
     const [newPartError, setNewPartError] = useState();
     const [addNewPartModal, setAddNewPartModal] = useState(false);
 
-    // const [isEstimatedDeliveryDateTime, setIsEstimatedDeliveryDateTime] = useState(new Date());
     const [estimatedDeliveryDateTime, setEstimatedDeliveryDateTime] =
         useState("");
     const [displayDeliveryDateCalender, setDisplayDeliveryDateCalender] =
@@ -136,7 +122,6 @@ const AddRepairOrderStep3 = ({
     const [fieldsParts, setFieldsParts] = useState([]);
 
     const [partListModal, setPartListModal] = useState(false);
-    const [isLoadingPartList, setIsLoadingPartList] = useState(true);
     const [partList, setPartList] = useState([]);
     const [filteredPartData, setFilteredPartData] = useState([]);
     const [searchQueryForParts, setSearchQueryForParts] = useState();
@@ -144,7 +129,6 @@ const AddRepairOrderStep3 = ({
     const [searchQueryForServices, setSearchQueryForServices] = useState();
     const [filteredServiceData, setFilteredServiceData] = useState([]);
     const [serviceListModal, setServiceListModal] = useState(false);
-    const [isLoadingServiceList, setIsLoadingServiceList] = useState(true);
 
     const [partPage, setPartPage] = useState(1);
     const [isPartScrollLoading, setIsPartScrollLoading] = useState(false);
@@ -672,7 +656,7 @@ const AddRepairOrderStep3 = ({
                 method: "POST",
                 headers: {
                     Accept: "application/json",
-                    "Content-Type": "application/json",
+                    "Content-Type": "application/json"  ,
                     Authorization: "Bearer " + userToken,
                 },
                 body: JSON.stringify({
@@ -727,8 +711,6 @@ const AddRepairOrderStep3 = ({
             if (json !== undefined) {
                 setIsLoading(true);
                 pullServiceRefresh();
-                setIsService(parseInt(json.data.id));
-                setIsServiceName(json.data.name);
                 let data = {
                     service_id: json.data.id,
                     serviceName: json.data.name,
@@ -757,9 +739,6 @@ const AddRepairOrderStep3 = ({
             if (json !== undefined) {
                 setIsLoading(true);
                 pullPartRefresh();
-                setIsPart(parseInt(json.data.id));
-                setIsPartName(json.data.name);
-
                 let data = {
                     parts_id: json.data.id,
                     partName: json.data.name,
@@ -1605,11 +1584,8 @@ const AddRepairOrderStep3 = ({
                         visible={partListModal}
                         onDismiss={() => {
                             setPartListModal(false);
-                            setIsPart(0);
-                            setIsPartName("");
-                            setPartError("");
                             setSearchQueryForParts("");
-                            searchFilterForParts();
+                            onPartRefresh();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -1636,11 +1612,8 @@ const AddRepairOrderStep3 = ({
                             }}
                             onPress={() => {
                                 setPartListModal(false);
-                                setIsPart(0);
-                                setIsPartName("");
-                                setPartError("");
                                 setSearchQueryForParts("");
-                                searchFilterForParts();
+                                onPartRefresh();
                             }}
                         />
                         <View style={{ marginTop: 20, flex: 1 }}>
@@ -1767,10 +1740,6 @@ const AddRepairOrderStep3 = ({
                                             }
                                             key={item.id}
                                             onPress={() => {
-                                                setIsPartName(
-                                                    item.name
-                                                );
-                                                setIsPart(item.id);
                                                 let parameter = {
                                                     parts_id: item.id,
                                                     partName: item.name,
@@ -1781,10 +1750,8 @@ const AddRepairOrderStep3 = ({
 
                                                 setPartError("");
                                                 setPartListModal(false);
-                                                setSearchQueryForParts(
-                                                    ""
-                                                );
-                                                searchFilterForParts();
+                                                setSearchQueryForParts("");
+                                                onPartRefresh();
                                             }}
                                         />
                                 )}
@@ -1832,11 +1799,8 @@ const AddRepairOrderStep3 = ({
                         visible={serviceListModal}
                         onDismiss={() => {
                             setServiceListModal(false);
-                            setIsService(0);
-                            setIsServiceName("");
-                            setServiceError("");
-                            setSearchQueryForParts("");
-                            searchFilterForParts();
+                            setSearchQueryForServices("");
+                            onServiceRefresh();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -1863,11 +1827,8 @@ const AddRepairOrderStep3 = ({
                             }}
                             onPress={() => {
                                 setServiceListModal(false);
-                                setIsService(0);
-                                setIsServiceName("");
-                                setServiceError("");
-                                setSearchQueryForParts("");
-                                searchFilterForParts();
+                                setSearchQueryForServices("");
+                                onServiceRefresh();
                             }}
                         />
                         <View style={{ marginTop: 20, flex: 1 }}>
@@ -1995,10 +1956,6 @@ const AddRepairOrderStep3 = ({
                                                 </View>
                                             }
                                             onPress={() => {
-                                                setIsServiceName(
-                                                    item.name
-                                                );
-                                                setIsService(item.id);
                                                 let parameter = {
                                                     service_id: item.id,
                                                     serviceName:
@@ -2012,10 +1969,8 @@ const AddRepairOrderStep3 = ({
                                                 setServiceListModal(
                                                     false
                                                 );
-                                                setSearchQueryForServices(
-                                                    ""
-                                                );
-                                                searchFilterForServices();
+                                                setSearchQueryForServices("");
+                                                onServiceRefresh();
                                             }}
                                         />
                                 )}

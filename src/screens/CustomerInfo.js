@@ -447,12 +447,8 @@ const CustomerInfo = ({
                     visible={stateListModal}
                     onDismiss={() => {
                         setStateListModal(false);
-                        setStateError("");
                         setSearchQueryForStates("");
                         searchFilterForStates();
-                        setCityFieldToggle(false);
-                        setIsCity();
-                        setIsCityName("");
                     }}
                     contentContainerStyle={[
                         styles.modalContainerStyle,
@@ -471,11 +467,8 @@ const CustomerInfo = ({
                         }}
                         onPress={() => {
                             setStateListModal(false);
-                            setStateError("");
                             setSearchQueryForStates("");
                             searchFilterForStates();
-                            setIsCity();
-                            setIsCityName("");
                         }}
                     />
                     <Text
@@ -557,7 +550,6 @@ const CustomerInfo = ({
                     visible={cityListModal}
                     onDismiss={() => {
                         setCityListModal(false);
-                        setCityError("");
                         setSearchQueryForCity("");
                         searchFilterForCity();
                     }}
@@ -578,7 +570,6 @@ const CustomerInfo = ({
                         }}
                         onPress={() => {
                             setCityListModal(false);
-                            setCityError("");
                             setSearchQueryForCity("");
                             searchFilterForCity();
                         }}
