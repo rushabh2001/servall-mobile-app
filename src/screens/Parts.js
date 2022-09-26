@@ -41,7 +41,7 @@ const Parts = ({
     const [filteredPartData, setFilteredPartData] = useState([]);
     const [searchQueryForParts, setSearchQueryForParts] = useState();
 
-    const [isGarageId, setIsGarageId] = useState(selectedGarageId);
+    const [isGarageId, setIsGarageId] = useState();
     const [isGarageName, setIsGarageName] = useState(!selectedGarage ? "" : selectedGarage.garage_name);
     const [garageList, setGarageList] = useState([]);
     const [garageListModal, setGarageListModal] = useState(false);
@@ -57,7 +57,7 @@ const Parts = ({
     const [garageRefreshing, setGarageRefreshing] = useState(false);
     
     const getGarageList = async () => {
-    if(garagePage == 1) setIsLoading(true)
+        if(garagePage == 1) setIsLoading(true)
         if(garagePage != 1) setIsGarageScrollLoading(true)
         try {
             const res = await fetch(
@@ -295,7 +295,7 @@ const Parts = ({
     }, [isFocused]);
 
     useEffect(() => {
-        if(selectedGarageId == 0 && garageList) {
+        if(!isGarageId && selectedGarageId == 0 && garageList) {
             setIsGarageId(garageList[0]?.id); 
             setIsGarageName(garageList[0]?.garage_name);
         } 

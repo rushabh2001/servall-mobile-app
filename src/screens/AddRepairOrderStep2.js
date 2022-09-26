@@ -63,7 +63,7 @@ const AddRepairOrderStep2 = ({
     const [isLoadingUserList, setIsLoadingUserList] = useState(false);
     const [filteredUserData, setFilteredUserData] = useState([]);
     const [searchQueryForUsers, setSearchQueryForUsers] = useState();
-    const [loadMoreUsers, setLoadMoreUsers] = useState(true);
+    const [loadMoreUsers, setLoadMoreUsers] = useState(false);
 
     const [userPage, setUserPage] = useState(1);
     const [isUserScrollLoading, setIsUserScrollLoading] = useState(false);
@@ -146,7 +146,7 @@ const AddRepairOrderStep2 = ({
     const [filteredBrandData, setFilteredBrandData] = useState([]);
     const [searchQueryForBrands, setSearchQueryForBrands] = useState();
     const [brandError, setBrandError] = useState(""); // Error State
-    const [loadMoreBrands, setLoadMoreBrands] = useState(true);
+    const [loadMoreBrands, setLoadMoreBrands] = useState(false);
 
     const [brandPage, setBrandPage] = useState(1);
     const [isBrandScrollLoading, setIsBrandScrollLoading] = useState(false);
@@ -160,7 +160,7 @@ const AddRepairOrderStep2 = ({
     const [filteredModelData, setFilteredModelData] = useState([]);
     const [searchQueryForModels, setSearchQueryForModels] = useState();
     const [modelError, setModelError] = useState(""); // Error State
-    const [loadMoreModels, setLoadMoreModels] = useState(true);
+    const [loadMoreModels, setLoadMoreModels] = useState(false);
 
     const [modelPage, setModelPage] = useState(1);
     const [isModelScrollLoading, setIsModelScrollLoading] = useState(false);
@@ -1031,6 +1031,7 @@ const AddRepairOrderStep2 = ({
                 {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
                 {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(2) : null}
                 setIsLoading(false);
+                setModelRefreshing(false);
             }
         } catch (error) {
             console.error(error);
@@ -1150,7 +1151,7 @@ const AddRepairOrderStep2 = ({
                     ...json.garage_list.data,
                 ]);
                 setIsLoading(false);
-                if(garagePage != 1) setIsGarageScrollLoading(false)
+                setIsGarageScrollLoading(false)
                 {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
                 {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(garagePage + 1) : null}
                 // setGarageList(json.garage_list);
@@ -1265,7 +1266,7 @@ const AddRepairOrderStep2 = ({
                     ...json.user_list.data,
                 ]);
                 setIsLoading(false);
-                if(userPage != 1) setIsUserScrollLoading(false)
+                setIsUserScrollLoading(false)
                 {json.user_list.current_page != json.user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
                 {json.user_list.current_page != json.user_list.last_page ? setUserPage(userPage + 1) : null}
             }
@@ -2617,7 +2618,7 @@ const AddRepairOrderStep2 = ({
                                                             color: colors.black,
                                                         }}
                                                     >
-                                                        {item.name}
+                                                        {item.name} ({item.phone_number})
                                                     </Text>
                                                 </View>
                                             }

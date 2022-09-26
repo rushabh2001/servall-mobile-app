@@ -840,11 +840,17 @@ const AddVehicle = ({
                                 setIsVehicleRegistrationNumber(text)
                             }
                         />
-                        {vehicleRegistrationNumberError?.length > 0 && (
+                        {isVehicleRegistrationNumber?.trim()?.length ===
+                        0 ? (
+                            <Text style={styles.errorTextStyle}>
+                                Vehicle Registration Number is required.
+                            </Text>
+                        ) : (vehicleRegistrationNumberError?.length > 0 ? (
                             <Text style={styles.errorTextStyle}>
                                 {vehicleRegistrationNumberError}
                             </Text>
-                        )}
+                        ) : null)}
+                        
 
                         <TouchableOpacity
                             style={{ flex: 1, marginTop: 20 }}
