@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {View, FlatList, StyleSheet, Text, ScrollView } from 'react-native';
+import { View, FlatList, StyleSheet, Text, ScrollView } from 'react-native';
 import { connect } from "react-redux";
 
 const CommonHeader = ({ selectedGarageId, selectedGarage, user }) => {
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
         flex: 1,
         left: 0,
         right: 0,
-    },   
+    },
 });
 const mapStateToProps = state => ({
     userToken: state.user.userToken,

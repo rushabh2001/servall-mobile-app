@@ -16,70 +16,72 @@ import {
 } from "react-native-paper";
 import Modal from "react-native-modal";
 import Spinner from "react-native-loading-spinner-overlay";
-const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, setError }) => {
-    const [filteredBrandData, setFilteredBrandData] = useState([]);
-    const [bradData, setBrandData] = useState([])
+const VehicalModalComponet = ({ visible, closeModal, brand, userToken, modelName, ModalId }) => {
+    const [filteredModelData, setFilteredModelData] = useState([]);
+    const [modelList, setModelList] = useState([]);
+    const [searchQueryForModels, setSearchQueryForModels] = useState();
     const [isLoading, setIsLoading] = useState(false);
-    const [modalVisible, setModalVisible] = useState(false)
-    const [searchQueryForBrands, setSearchQueryForBrands] = useState();
-    const [addBrandModal, setAddBrandModal] = useState(false);
-    const [newBrandName, setNewBrandName] = useState();
-    const [newBrandNameError, setNewBrandNameError] = useState(null);
     const search_text = useRef();
-    global.maxDeviceHeight = Math.max(Dimensions.get('window').height, Dimensions.get('screen').height);
-
-    const getBrandList = async () => {
-
-        setIsLoading(true)
+    const modal_name = useRef();
+    const [addModelModal, setAddModelModal] = useState(false);
+    const [newModelName, setNewModelName] = useState();
+    const [brandId, setBrandId] = useState();
+    const getBrand = async () => {
+        setSearchQueryForModels(null);
         try {
-            const res = await fetch(`${API_URL}fetch_brand`, {
+            const response = await fetch(`${API_URL}fetch_vehicle_model`, {
                 method: "POST",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-
+                body: JSON.stringify({
+                    brand_id: brandId,
+                    // search: null,
+                }),
             });
-            const json = await res.json();
-            if (json !== undefined) {
-                setFilteredBrandData(json.brand_list);
-                setBrandData(json.brand_list);
+            const json = await response.json();
+            if (response.status == "200") {
+                console.log('ddd', json.vehicle_model_list)
+                setModelList(json.vehicle_model_list);
+                setFilteredModelData(json.vehicle_model_list);
                 setIsLoading(false);
             }
-        } catch (e) {
-            console.log(e);
+        } catch (error) {
+            console.error(error);
         }
     };
-    const searchFilterForBrands = async () => {
-        if (searchQueryForBrands) {
-            const newData = filteredBrandData.filter(
+    const searchFilterForModels = async () => {
+        if (searchQueryForModels) {
+            const newData = filteredModelData.filter(
                 function (item) {
-                    const itemData = item.name
-                        ? item.name.toUpperCase()
+                    console.log(item)
+                    const itemData = item.model_name
+                        ? item.model_name.toUpperCase()
                         : ''.toUpperCase()
 
-                    const textData = searchQueryForBrands.toUpperCase();
+                    const textData = searchQueryForModels.toUpperCase();
                     return itemData.indexOf(textData) > -1;
                 });
             console.log('data', newData)
-            setFilteredBrandData(newData);
+            setFilteredModelData(newData);
         } else {
-            setFilteredBrandData(bradData);
+            setFilteredModelData(modelList);
         }
 
 
     };
-    const addNewBrand = async () => {
-        if (!newBrandName ||
-            newBrandName?.trim().length === 0) {
-            if (!newBrandName) setNewBrandName("");
+    const addNewModel = async () => {
+        if (!newModelName ||
+            newModelName?.trim().length === 0) {
+            if (!newModelName) setNewModelName("");
             return;
         }
         closeModal();
-        let data = { name: newBrandName };
+        let data = { model_name: newModelName, brand_id: parseInt(brandId) };
         try {
-            const res = await fetch(`${API_URL}create_brand`, {
+            const res = await fetch(`${API_URL}create_vehicle_model`, {
                 method: "POST",
                 headers: {
                     Accept: "application/json",
@@ -90,14 +92,14 @@ const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, set
             });
             const json = await res.json();
             if (res.status == 200 || res.status == 201) {
-                setAddBrandModal(false);
-                setNewBrandName();
-                brandName(json.data.name);
-                brandId(json.data.id);
-                getBrandList();
-                closeModal();
-            }
-            else if (res.status == 400) {
+                modal_name.current.clear();
+                setNewModelName()
+                setAddModelModal(false);
+                getBrand();
+                modelName(json.data.model_name);
+                ModalId(json.data.id);
+            } else if (res.status == 400) {
+                console.log('ddd', json)
                 let errors_message = [];
                 Object.entries(json.message).map(([key, error], i) => {
                     error.map((item, index) => {
@@ -125,42 +127,42 @@ const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, set
             console.log(e);
         }
     };
-
     useEffect(() => {
-        getBrandList();
-
-    }, []);
-    useEffect(() => {
-        setModalVisible(visible);
-
-    }, [visible]);
+        getBrand();
+        setBrandId(brand);
+    }, [brand])
     return (
         <View>
             <Modal
-                isVisible={modalVisible}
+                isVisible={visible}
                 style={[
                     styles.modalContainerStyle,
                     { flex: 0.9 },
                 ]}
             >
-                <IconX
-                    name="times"
-                    size={20}
-                    color={colors.black}
-                    style={{ position: "absolute", top: 10, right: 25, zIndex: 99, }}
-                    onPress={() => {
-                        setModalVisible(false)
-                        closeModal(false)
-                    }}
-                />
                 <Text
                     style={[
                         styles.headingStyle,
                         { marginTop: 0, alignSelf: "center" },
                     ]}
                 >
-                    Select Brand
+                    Select Model
                 </Text>
+                <IconX
+                    name="times"
+                    size={20}
+                    color={colors.black}
+                    style={{
+                        position: "absolute",
+                        top: 25,
+                        right: 25,
+                        zIndex: 99,
+                    }}
+                    onPress={() => {
+                        closeModal();
+
+                    }}
+                />
                 <View
                     style={{
                         marginTop: 20,
@@ -181,9 +183,9 @@ const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, set
                                 placeholder="Search here..."
                                 ref={search_text}
                                 onChangeText={(text) =>
-                                    setSearchQueryForBrands(text)
+                                    setSearchQueryForModels(text)
                                 }
-                                value={searchQueryForBrands}
+                                value={searchQueryForModels}
                                 activeUnderlineColor={
                                     colors.transparent
                                 }
@@ -200,14 +202,16 @@ const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, set
                                     borderBottomLeftRadius: 5,
                                 }}
                                 right={
-                                    searchQueryForBrands != null &&
-                                    searchQueryForBrands != "" && (
+                                    searchQueryForModels != null &&
+                                    searchQueryForModels != "" && (
                                         <TextInput.Icon
                                             icon="close"
                                             color={
                                                 colors.light_gray
                                             }
-                                            onPress={() => { search_text.current.clear(); setFilteredBrandData(bradData) }
+                                            onPress={() => {
+                                                search_text.current.clear(); setFilteredModelData(modelList)
+                                            }
                                             }
                                         />
                                     )
@@ -215,7 +219,7 @@ const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, set
                             />
                             <TouchableOpacity
                                 onPress={() =>
-                                    searchFilterForBrands()
+                                    searchFilterForModels()
                                 }
                                 style={{
                                     elevation: 4,
@@ -239,14 +243,14 @@ const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, set
                     </View>
                     <FlatList
                         ItemSeparatorComponent={() => (!isLoading && <Divider />)}
-                        data={filteredBrandData}
+                        data={filteredModelData}
                         showsVerticalScrollIndicator={false}
                         onEndReachedThreshold={0.5}
                         ListEmptyComponent={() => (
                             !isLoading && (
                                 <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
                                     <Text style={{ color: colors.black }}>
-                                        No brand found!
+                                        No vehicle model found!
                                     </Text>
                                 </View>
                             ))}
@@ -275,17 +279,17 @@ const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, set
                                                 color: colors.black,
                                             }}
                                         >
-                                            {item.name}
+                                            {item.model_name}
                                         </Text>
                                     </View>
                                 }
                                 onPress={() => {
-                                    brandName(item.name);
-                                    brandId(item.id);
-                                    setModalVisible(false)
-                                    closeModal(false)
-                                    setError("");
-                                    // setBrandListModal(false);
+                                    modelName(
+                                        item.model_name
+                                    );
+                                    ModalId(item.id);
+                                    // setModelError("");
+                                    closeModal()
                                 }}
                             />
                         )}
@@ -308,9 +312,8 @@ const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, set
                                 borderRadius: 4,
                             }}
                             onPress={() => {
-                                setAddBrandModal(true);
-                                setModalVisible(false);
-                                closeModal(false)
+                                setAddModelModal(true);
+                                closeModal()
                             }}
                         >
                             <Icon
@@ -322,7 +325,7 @@ const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, set
                                 size={16}
                             />
                             <Text style={{ color: colors.white }}>
-                                Add Brand
+                                Add Model
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -332,7 +335,7 @@ const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, set
                 <Modal
                     deviceHeight={global.maxDeviceHeight}
                     backdropOpacity={0.5}
-                    isVisible={addBrandModal}
+                    isVisible={addModelModal}
                 >
                     <View style={styles.modalView}>
                         <Text
@@ -341,7 +344,7 @@ const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, set
                                 { paddingVertical: 10, alignSelf: "center" },
                             ]}
                         >
-                            Add New Brand
+                            Add New Model
                         </Text>
                         <IconX
                             name="times"
@@ -349,22 +352,27 @@ const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, set
                             color={colors.black}
                             style={{ position: "absolute", top: 10, right: 25, zIndex: 99, }}
                             onPress={() => {
-                                setAddBrandModal(false); setNewBrandName(null)
+                                setAddModelModal(false);
+                                setNewModelName();
+                                setNewModelName(null)
+
                             }}
                         />
                         <TextInput
                             mode="outlined"
-                            label="Brand Name"
-                            // style={styles.input}
-                            placeholder="Brand Name"
-                            value={newBrandName}
-                            onChangeText={(text) => setNewBrandName(text)}
+                            label="Model Name"
+                            style={styles.input}
+                            placeholder="Model Name"
+                            value={newModelName}
+                            ref={modal_name}
+                            onChangeText={(text) => setNewModelName(text)}
                         />
-                        {newBrandName?.trim()?.length === 0 && (
+                        {newModelName?.trim()?.length === 0 && (
                             <Text style={styles.errorTextStyle}>
-                                Brand name is required.
+                                Modal Name is required.
                             </Text>
                         )}
+
                         <View style={{ flexDirection: "row" }}>
                             <Button
                                 style={{
@@ -373,14 +381,14 @@ const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, set
                                     marginRight: 10,
                                 }}
                                 mode={"contained"}
-                                onPress={addNewBrand}
+                                onPress={addNewModel}
                             >
                                 Add
                             </Button>
                             <Button
                                 style={{ marginTop: 15, flex: 1 }}
                                 mode={"contained"}
-                                onPress={() => { setAddBrandModal(false); setNewBrandName(null) }}
+                                onPress={() => { setAddModelModal(false); setNewModelName(null) }}
                             >
                                 Close
                             </Button>
@@ -388,18 +396,11 @@ const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, set
                     </View>
                 </Modal>
             </View>
-            {/* {isLoading &&
-                <Spinner
-                    visible={isLoading}
-                    color="#377520"
-                    style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}
-                />
-            } */}
         </View>
+
     )
 };
 const styles = StyleSheet.create({
-
 
     headingStyle: {
         fontSize: 20,
@@ -431,12 +432,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingHorizontal: 40
     },
-
 });
-
-
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
     userToken: state.user.userToken,
-});
+})
 
-export default connect(mapStateToProps)(BrandComponet);
+export default connect(mapStateToProps)(VehicalModalComponet)

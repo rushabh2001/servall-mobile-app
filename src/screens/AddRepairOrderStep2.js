@@ -32,6 +32,9 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import Spinner from "react-native-loading-spinner-overlay";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+import CommonHeader from "../Component/CommonHeaderComponent";
+import BrandComponent from "../Component/BrandComponent";
+import VehicalModalComponet from "../Component/VehicalModalComponet";
 
 const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 const phoneReg = /^[0-9]{10}$/;
@@ -60,7 +63,6 @@ const AddRepairOrderStep2 = ({
     const [userError, setUserError] = useState("");
     // const [isName, setIsName] = useState("");
     const [userListModal, setUserListModal] = useState(false);
-    const [isLoadingUserList, setIsLoadingUserList] = useState(false);
     const [filteredUserData, setFilteredUserData] = useState([]);
     const [searchQueryForUsers, setSearchQueryForUsers] = useState();
     const [loadMoreUsers, setLoadMoreUsers] = useState(false);
@@ -69,14 +71,8 @@ const AddRepairOrderStep2 = ({
     const [isUserScrollLoading, setIsUserScrollLoading] = useState(false);
     const [userRefreshing, setUserRefreshing] = useState(false);
 
-    // Error States
-    const [nameError, setNameError] = useState("");
-    const [emailError, setEmailError] = useState("");
-    const [phoneNumberError, setPhoneNumberError] = useState("");
-
     // Vehicle Fields
-    const [isVehicleRegistrationNumber, setIsVehicleRegistrationNumber] =
-        useState();
+    const [isVehicleRegistrationNumber, setIsVehicleRegistrationNumber] = useState();
     const [isPurchaseDate, setIsPurchaseDate] = useState();
     const [isManufacturingDate, setIsManufacturingDate] = useState();
     const [isEngineNumber, setIsEngineNumber] = useState("");
@@ -128,14 +124,6 @@ const AddRepairOrderStep2 = ({
     const [dateInsuranceExpiry, setDateInsuranceExpiry] = useState();
     const [displayInsuranceExpiryCalender, setDisplayInsuranceExpiryCalender] =
         useState(false);
-
-    const [addBrandModal, setAddBrandModal] = useState(false);
-    const [newBrandName, setNewBrandName] = useState();
-    const [newBrandNameError, setNewBrandNameError] = useState();
-    const [addModelModal, setAddModelModal] = useState(false);
-    const [newModelName, setNewModelName] = useState();
-    const [newModelNameError, setNewModelNameError] = useState();
-
     const [isLoading, setIsLoading] = useState(false);
 
     // Brand States
@@ -143,29 +131,15 @@ const AddRepairOrderStep2 = ({
     const [isBrandName, setIsBrandName] = useState();
     const [brandList, setBrandList] = useState([]);
     const [brandListModal, setBrandListModal] = useState(false);
-    const [filteredBrandData, setFilteredBrandData] = useState([]);
-    const [searchQueryForBrands, setSearchQueryForBrands] = useState();
     const [brandError, setBrandError] = useState(""); // Error State
-    const [loadMoreBrands, setLoadMoreBrands] = useState(false);
-
-    const [brandPage, setBrandPage] = useState(1);
-    const [isBrandScrollLoading, setIsBrandScrollLoading] = useState(false);
-    const [brandRefreshing, setBrandRefreshing] = useState(false);
 
     // Vehicle Model States
     const [isModel, setIsModel] = useState();
     const [isModelName, setIsModelName] = useState();
     const [modelList, setModelList] = useState([]);
     const [modelListModal, setModelListModal] = useState(false);
-    const [filteredModelData, setFilteredModelData] = useState([]);
-    const [searchQueryForModels, setSearchQueryForModels] = useState();
+    
     const [modelError, setModelError] = useState(""); // Error State
-    const [loadMoreModels, setLoadMoreModels] = useState(false);
-
-    const [modelPage, setModelPage] = useState(1);
-    const [isModelScrollLoading, setIsModelScrollLoading] = useState(false);
-    const [modelRefreshing, setModelRefreshing] = useState(false);
-
     // Insurance Provider Company for Dropdown
     const [isInsuranceProvider, setIsInsuranceProvider] = useState("");
     const [isInsuranceProviderName, setIsInsuranceProviderName] = useState("");
@@ -211,63 +185,6 @@ const AddRepairOrderStep2 = ({
     const isAddressRef = useRef();
     const scrollViewRef = useRef();
 
-    // var radio_props = [
-    //     { label: "New User", value: "new_user" },
-    //     { label: "Existing User", value: "existing_user" },
-    // ];
-
-    const addNewBrand = async () => {
-        let data = { name: newBrandName };
-        try {
-            const res = await fetch(`${API_URL}create_brand`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify(data),
-            });
-            const json = await res.json();
-            if (res.status == 200 || res.status == 201){
-                pullBrandRefresh();
-                setAddBrandModal(false);
-                setIsBrandName(json.data.name);
-                setIsBrand(json.data.id);
-            } else if(res.status == 400) {
-                setNewBrandNameError(json.message.name);
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    };
-
-    const addNewModel = async () => {
-        let data = { model_name: newModelName, brand_id: parseInt(isBrand) };
-        try {
-            const res = await fetch(`${API_URL}create_vehicle_model`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify(data),
-            });
-            const json = await res.json();
-            if (res.status == 200 || res.status == 201){
-                pullModelRefresh();
-                setAddModelModal(false);
-                setIsModelName(json.data.model_name);
-                setIsModel(json.data.id);
-            } else if(res.status == 400) {
-                setNewModelNameError(json.message.model_name);
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    };
-
     const selectRegistrationCrtImg = async () => {
         // Opening Document Picker to select one file
         try {
@@ -308,7 +225,7 @@ const AddRepairOrderStep2 = ({
     };
 
     const changePurchaseSelectedDate = (event, selectedDate) => {
-            // console.log('event', event);
+        // console.log('event', event);
         if (selectedDate != null && event.type == 'set') {
             let currentDate = selectedDate || datePurchase;
             let formattedDate = moment(currentDate, "YYYY-MM-DD", true).format(
@@ -321,7 +238,7 @@ const AddRepairOrderStep2 = ({
                 'YYYY-MM-DD"T"hh:mm ZZ'
             ).format("YYYY-MM-DD");
             setIsPurchaseDate(new Date(formateDateForDatabase));
-        } else if(event.type == 'dismissed') {
+        } else if (event.type == 'dismissed') {
             setDisplayPurchaseCalender(false);
         }
     };
@@ -339,7 +256,7 @@ const AddRepairOrderStep2 = ({
                 'YYYY-MM-DD"T"hh:mm ZZ'
             ).format("YYYY-MM-DD");
             setIsManufacturingDate(new Date(formateDateForDatabase));
-        } else if(event.type == 'dismissed') {
+        } else if (event.type == 'dismissed') {
             setDisplayManufacturingCalender(false);
         }
     };
@@ -357,7 +274,7 @@ const AddRepairOrderStep2 = ({
                 'YYYY-MM-DD"T"hh:mm ZZ'
             ).format("YYYY-MM-DD");
             setIsInsuranceExpiryDate(new Date(formateDateForDatabase));
-        } else if(event.type == 'dismissed') {
+        } else if (event.type == 'dismissed') {
             setDisplayInsuranceExpiryCalender(false);
         }
     };
@@ -835,226 +752,6 @@ const AddRepairOrderStep2 = ({
             console.log(e);
         }
     };
-
-    const getBrandList = async () => {
-        if(brandPage == 1) setIsLoading(true)
-        if(brandPage != 1) setIsBrandScrollLoading(true)
-        try {
-            const res = await fetch(`${API_URL}fetch_brand?page=${brandPage}`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    search: searchQueryForBrands,
-                }),
-            });
-            const json = await res.json();
-            if (json !== undefined) {
-                setBrandList([...brandList, ...json.brand_list.data]);
-                setFilteredBrandData([
-                    ...filteredBrandData,
-                    ...json.brand_list.data,
-                ]);
-                setIsLoading(false);
-                if(brandPage != 1) setIsBrandScrollLoading(false)
-                {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
-                {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(brandPage + 1) : null}
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    };
-
-    const searchFilterForBrands = async () => {
-        setIsLoading(true)
-        try {
-            const response = await fetch(`${API_URL}fetch_brand`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    search: searchQueryForBrands,
-                }),
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setBrandList(json.brand_list.data);
-                setFilteredBrandData(json.brand_list.data);
-                {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
-                {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(2) : null}
-                setBrandRefreshing(false);
-                setIsLoading(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const pullBrandRefresh = async () => {
-        setSearchQueryForBrands(null);
-        try {
-            const response = await fetch(`${API_URL}fetch_brand`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    search: null,
-                }),
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setBrandList(json.brand_list.data);
-                setFilteredBrandData(json.brand_list.data);
-                {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
-                {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(2) : null}
-                setBrandRefreshing(false);
-                setIsLoading(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const renderBrandFooter = () => {
-        return (
-            <>
-                {isBrandScrollLoading && (
-                    <View style={styles.footer}>
-                        <ActivityIndicator size="large" />
-                    </View>
-                )}
-            </>
-        );
-    };
-
-    const onBrandRefresh = () => {
-        setBrandRefreshing(true);
-        pullBrandRefresh();
-    };
-
-    const getModelList = async () => {
-        if(modelPage == 1) setIsLoading(true)
-        if(modelPage != 1) setIsModelScrollLoading(true)
-        try {
-            const res = await fetch(
-                `${API_URL}fetch_vehicle_model?page=${modelPage}`,
-                {
-                    method: "POST",
-                    headers: {
-                        Accept: "application/json",
-                        "Content-Type": "application/json",
-                        Authorization: "Bearer " + userToken,
-                    },
-                    body: JSON.stringify({
-                        brand_id: isBrand,
-                        search: searchQueryForModels,
-                    }),
-                }
-            );
-            const json = await res.json();
-            console.log("model_json", json);
-            if (json !== undefined) {
-                setModelList([...modelList, ...json.vehicle_model_list.data]);
-                setFilteredModelData([
-                    ...filteredModelData,
-                    ...json.vehicle_model_list.data,
-                ]);
-                setIsLoading(false);
-                if(modelPage != 1) setIsModelScrollLoading(false)
-                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
-                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(modelPage + 1) : null}
-                // setModelPage(modelPage + 1);
-                // setModelList(json.vehicle_model_list);
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    };
-
-    const searchFilterForModels = async () => {
-        setIsLoading(true);
-        try {
-            const response = await fetch(`${API_URL}fetch_vehicle_model`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    brand_id: isBrand,
-                    search: searchQueryForModels,
-                }),
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setModelList(json.vehicle_model_list.data);
-                setFilteredModelData(json.vehicle_model_list.data);
-                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
-                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(2) : null}
-                setIsLoading(false);
-                setModelRefreshing(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const pullModelRefresh = async () => {
-        setSearchQueryForModels(null);
-        try {
-            const response = await fetch(`${API_URL}fetch_vehicle_model`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    brand_id: isBrand,
-                    search: null,
-                }),
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setModelList(json.vehicle_model_list.data);
-                setFilteredModelData(json.vehicle_model_list.data);
-                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
-                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(2) : null}
-                setIsLoading(false);
-                setModelRefreshing(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const renderModelFooter = () => {
-        return (
-            <>
-                {isModelScrollLoading && (
-                    <View style={styles.footer}>
-                        <ActivityIndicator size="large" />
-                    </View>
-                )}
-            </>
-        );
-    };
-
-    const onModelRefresh = () => {
-        setModelRefreshing(true);
-        pullModelRefresh();
-    };
-
     // Functions Dropdown for Insurance Provider
     const addNewInsuranceProvider = async () => {
         let data = { name: isNewInsuranceProvider };
@@ -1069,13 +766,13 @@ const AddRepairOrderStep2 = ({
                 body: JSON.stringify(data),
             });
             const json = await res.json();
-            if (res.status == 200 || res.status == 201){
+            if (res.status == 200 || res.status == 201) {
                 // console.log("setInsuranceProviderList", json.data);
                 getInsuranceProviderList();
                 setIsInsuranceProvider(parseInt(json.data.id));
                 setIsInsuranceProviderName(json.data.name);
                 setAddNewInsuranceProviderModal(false);
-            } else if(res.status == 400) {
+            } else if (res.status == 400) {
                 setNewInsuranceProviderError(json.message.name);
             }
         } catch (e) {
@@ -1123,8 +820,8 @@ const AddRepairOrderStep2 = ({
     };
 
     const getGarageList = async () => {
-        if(garagePage == 1) setIsLoading(true)
-        if(garagePage != 1) setIsGarageScrollLoading(true)
+        if (garagePage == 1) setIsLoading(true)
+        if (garagePage != 1) setIsGarageScrollLoading(true)
         try {
             const res = await fetch(
                 `${API_URL}fetch_owner_garages?page=${garagePage}`,
@@ -1152,8 +849,8 @@ const AddRepairOrderStep2 = ({
                 ]);
                 setIsLoading(false);
                 setIsGarageScrollLoading(false)
-                {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
-                {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(garagePage + 1) : null}
+                { json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false) }
+                { json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(garagePage + 1) : null }
                 // setGarageList(json.garage_list);
             }
         } catch (e) {
@@ -1181,8 +878,8 @@ const AddRepairOrderStep2 = ({
             if (response.status == "200") {
                 setGarageList(json.garage_list.data);
                 setFilteredGarageData(json.garage_list.data);
-                {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
-                {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(2) : null}
+                { json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false) }
+                { json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(2) : null }
                 setGarageRefreshing(false);
                 setIsLoading(false);
             }
@@ -1211,8 +908,8 @@ const AddRepairOrderStep2 = ({
             if (response.status == "200") {
                 setGarageList(json.garage_list.data);
                 setFilteredGarageData(json.garage_list.data);
-                {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
-                {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(2) : null}
+                { json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false) }
+                { json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(2) : null }
                 setGarageRefreshing(false);
                 setIsLoading(false);
             }
@@ -1239,8 +936,8 @@ const AddRepairOrderStep2 = ({
     };
 
     const getUserList = async () => {
-        if(userPage == 1) setIsLoading(true)
-        if(userPage != 1) setIsUserScrollLoading(true)
+        if (userPage == 1) setIsLoading(true)
+        if (userPage != 1) setIsUserScrollLoading(true)
         // setIsLoadingUserList(true);
         try {
             const res = await fetch(
@@ -1267,8 +964,8 @@ const AddRepairOrderStep2 = ({
                 ]);
                 setIsLoading(false);
                 setIsUserScrollLoading(false)
-                {json.user_list.current_page != json.user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
-                {json.user_list.current_page != json.user_list.last_page ? setUserPage(userPage + 1) : null}
+                { json.user_list.current_page != json.user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false) }
+                { json.user_list.current_page != json.user_list.last_page ? setUserPage(userPage + 1) : null }
             }
         } catch (e) {
             console.log(e);
@@ -1297,8 +994,8 @@ const AddRepairOrderStep2 = ({
             if (response.status == "200") {
                 setUserList(json.user_list.data);
                 setFilteredUserData(json.user_list.data);
-                {json.user_list.current_page != json.user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
-                {json.user_list.current_page != json.user_list.last_page ? setUserPage(2) : null}
+                { json.user_list.current_page != json.user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false) }
+                { json.user_list.current_page != json.user_list.last_page ? setUserPage(2) : null }
                 setUserRefreshing(false);
                 setIsLoading(false);
             }
@@ -1329,8 +1026,8 @@ const AddRepairOrderStep2 = ({
             if (response.status == "200") {
                 setUserList(json.user_list.data);
                 setFilteredUserData(json.user_list.data);
-                {json.user_list.current_page != json.user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false)}
-                {json.user_list.current_page != json.user_list.last_page ? setUserPage(2) : null}
+                { json.user_list.current_page != json.user_list.last_page ? setLoadMoreUsers(true) : setLoadMoreUsers(false) }
+                { json.user_list.current_page != json.user_list.last_page ? setUserPage(2) : null }
                 setUserRefreshing(false);
                 setIsLoading(false);
             }
@@ -1358,7 +1055,6 @@ const AddRepairOrderStep2 = ({
 
     useEffect(() => {
         getStateList();
-        getBrandList();
         getGarageList();
         getUserList();
         getInsuranceProviderList();
@@ -1374,8 +1070,7 @@ const AddRepairOrderStep2 = ({
 
     useEffect(() => {
         if (isBrand != undefined) {
-            setIsLoading(true);
-            pullModelRefresh();
+            // setIsLoading(true);
             setIsModel();
             setIsModelName("");
             setModelFieldToggle(true);
@@ -1397,17 +1092,7 @@ const AddRepairOrderStep2 = ({
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={{ marginBottom: 35 }}>
-                {selectedGarageId == 0 ? (
-                    <Text style={styles.garageNameTitle}>
-                        All Garages - {user.name}
-                    </Text>
-                ) : (
-                    <Text style={styles.garageNameTitle}>
-                        {selectedGarage?.garage_name} - {user.name}
-                    </Text>
-                )}
-            </View>
+            <CommonHeader />
             <View style={styles.pageContainer}>
 
                 <InputScrollView
@@ -1420,34 +1105,34 @@ const AddRepairOrderStep2 = ({
                     <View style={{ flex: 1 }}>
                         {(userRole == "Super Admin" ||
                             garageId?.length > 1) && (
-                            <View style={{marginTop: 20}}>
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        setGarageListModal(true);
-                                    }}
-                                >
-                                    <TextInput
-                                        mode="outlined"
-                                        label="Garage"
-                                        style={{
-                                            backgroundColor: "#f1f1f1",
-                                            width: "100%",
+                                <View style={{ marginTop: 20 }}>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            setGarageListModal(true);
                                         }}
-                                        placeholder="Select Garage"
-                                        value={isGarageName}
-                                        editable={false}
-                                        right={
-                                            <TextInput.Icon name="menu-down" />
-                                        }
-                                    />
-                                </TouchableOpacity>
-                                {garageIdError?.length > 0 && (
-                                    <Text style={styles.errorTextStyle}>
-                                        {garageIdError}
-                                    </Text>
-                                )}
-                            </View>
-                        )}
+                                    >
+                                        <TextInput
+                                            mode="outlined"
+                                            label="Garage"
+                                            style={{
+                                                backgroundColor: "#f1f1f1",
+                                                width: "100%",
+                                            }}
+                                            placeholder="Select Garage"
+                                            value={isGarageName}
+                                            editable={false}
+                                            right={
+                                                <TextInput.Icon name="menu-down" />
+                                            }
+                                        />
+                                    </TouchableOpacity>
+                                    {garageIdError?.length > 0 && (
+                                        <Text style={styles.errorTextStyle}>
+                                            {garageIdError}
+                                        </Text>
+                                    )}
+                                </View>
+                            )}
 
                         <Divider style={{ marginTop: 20 }} />
 
@@ -1471,7 +1156,7 @@ const AddRepairOrderStep2 = ({
                         </View>
 
                         {userOption == "existing_user" ? (
-                            <View style={{marginTop: 20}}>
+                            <View style={{ marginTop: 20 }}>
                                 <TouchableOpacity
                                     onPress={() => {
                                         setUserListModal(true);
@@ -1588,7 +1273,7 @@ const AddRepairOrderStep2 = ({
                                     </Text>
                                 )} */}
 
-                                <View style={{marginTop: 20}}>
+                                <View style={{ marginTop: 20 }}>
                                     <TouchableOpacity
                                         onPress={() => {
                                             setStateListModal(true);
@@ -1617,7 +1302,7 @@ const AddRepairOrderStep2 = ({
                                 </View>
 
                                 {cityFieldToggle == true && (
-                                    <View style={{marginTop: 20}}>
+                                    <View style={{ marginTop: 20 }}>
                                         <TouchableOpacity
                                             onPress={() => {
                                                 setCityListModal(true);
@@ -1694,7 +1379,7 @@ const AddRepairOrderStep2 = ({
                                 {brandError}
                             </Text>
                         )} */}
-                        <View style={{marginTop: 20}}>
+                        <View style={{ marginTop: 20 }}>
                             <TouchableOpacity
                                 onPress={() => {
                                     setBrandListModal(true);
@@ -1719,11 +1404,11 @@ const AddRepairOrderStep2 = ({
                                 <Text style={styles.errorTextStyle}>
                                     {brandError}
                                 </Text>
-                            )} 
+                            )}
                         </View>
 
                         {modelFieldToggle == true && (
-                            <View style={{marginTop: 20}}>
+                            <View style={{ marginTop: 20 }}>
                                 <TouchableOpacity
                                     onPress={() => {
                                         setModelListModal(true);
@@ -1751,7 +1436,7 @@ const AddRepairOrderStep2 = ({
                                 )}
                             </View>
                         )}
-                        
+
                         {/* <TouchableOpacity
                             onPress={() => {
                                 setModelListModal(true);
@@ -1792,7 +1477,7 @@ const AddRepairOrderStep2 = ({
                         />
 
                         {isVehicleRegistrationNumber?.trim()?.length ===
-                        0 ? (
+                            0 ? (
                             <Text style={styles.errorTextStyle}>
                                 Vehicle Registration Number is required.
                             </Text>
@@ -1885,7 +1570,7 @@ const AddRepairOrderStep2 = ({
                             onChangeText={(text) => setIsChasisNumber(text)}
                         />
 
-                        <View style={{marginTop: 20}}>
+                        <View style={{ marginTop: 20 }}>
                             <TouchableOpacity
                                 onPress={() => {
                                     setInsuranceProviderListModal(true);
@@ -1912,7 +1597,7 @@ const AddRepairOrderStep2 = ({
                                 </Text>
                             )}
                         </View>
-                    
+
                         <TextInput
                             mode="outlined"
                             label="Insurer GSTIN"
@@ -2059,147 +1744,6 @@ const AddRepairOrderStep2 = ({
                     </View>
                 </InputScrollView>
                 <Portal>
-                    <Modal
-                        visible={addBrandModal}
-                        onDismiss={() => {
-                            setAddBrandModal(false);
-                            setNewBrandName();
-                            setNewBrandNameError();
-                            setBrandListModal(true);
-                        }}
-                        contentContainerStyle={styles.modalContainerStyle}
-                    >
-                        <Text
-                            style={[
-                                styles.headingStyle,
-                                { marginTop: 0, alignSelf: "center" },
-                            ]}
-                        >
-                            Add New Brand
-                        </Text>
-                        <IconX
-                            name="times"
-                            size={20}
-                            color={colors.black}
-                            style={{
-                                position: "absolute",
-                                top: 25,
-                                right: 25,
-                                zIndex: 99,
-                            }}
-                            onPress={() => {
-                                setAddBrandModal(false);
-                                setNewBrandName();
-                                setNewBrandNameError();
-                                setBrandListModal(true);
-                            }}
-                        />
-                        <TextInput
-                            mode="outlined"
-                            label="Brand Name"
-                            style={styles.input}
-                            placeholder="Brand Name"
-                            value={newBrandName}
-                            onChangeText={(text) => setNewBrandName(text)}
-                        />
-                        {newBrandNameError?.length > 0 && (
-                            <Text style={styles.errorTextStyle}>
-                                {newBrandNameError}
-                            </Text>
-                        )}
-                        <View style={{ flexDirection: "row" }}>
-                            <Button
-                                style={{
-                                    marginTop: 15,
-                                    flex: 1,
-                                    marginRight: 10,
-                                }}
-                                mode={"contained"}
-                                onPress={addNewBrand}
-                            >
-                                Add
-                            </Button>
-                            <Button
-                                style={{ marginTop: 15, flex: 1 }}
-                                mode={"contained"}
-                                onPress={() => setAddBrandModal(false)}
-                            >
-                                Close
-                            </Button>
-                        </View>
-                    </Modal>
-
-                    <Modal
-                        visible={addModelModal}
-                        onDismiss={() => {
-                            setAddModelModal(false);
-                            setNewModelName("");
-                            setNewModelNameError();
-                            setModelListModal(true);
-                        }}
-                        contentContainerStyle={styles.modalContainerStyle}
-                    >
-                        <Text
-                            style={[
-                                styles.headingStyle,
-                                { marginTop: 0, alignSelf: "center" },
-                            ]}
-                        >
-                            Add New Model
-                        </Text>
-                        <IconX
-                            name="times"
-                            size={20}
-                            color={colors.black}
-                            style={{
-                                position: "absolute",
-                                top: 25,
-                                right: 25,
-                                zIndex: 99,
-                            }}
-                            onPress={() => {
-                                setAddModelModal(false);
-                                setNewModelName("");
-                                setNewModelNameError();
-                                setModelListModal(true);
-                            }}
-                        />
-                        <TextInput
-                            mode="outlined"
-                            label="Model Name"
-                            style={styles.input}
-                            placeholder="Model Name"
-                            value={newModelName}
-                            onChangeText={(text) => setNewModelName(text)}
-                        />
-                        {newModelNameError?.length > 0 && (
-                            <Text style={styles.errorTextStyle}>
-                                {newModelNameError}
-                            </Text>
-                        )}
-
-                        <View style={{ flexDirection: "row" }}>
-                            <Button
-                                style={{
-                                    marginTop: 15,
-                                    flex: 1,
-                                    marginRight: 10,
-                                }}
-                                mode={"contained"}
-                                onPress={addNewModel}
-                            >
-                                Add
-                            </Button>
-                            <Button
-                                style={{ marginTop: 15, flex: 1 }}
-                                mode={"contained"}
-                                onPress={() => setAddModelModal(false)}
-                            >
-                                Close
-                            </Button>
-                        </View>
-                    </Modal>
-
                     {/* Insurance Providers List Modal */}
                     <Modal
                         visible={insuranceProviderListModal}
@@ -2274,51 +1818,51 @@ const AddRepairOrderStep2 = ({
                                                 No insurance company found!
                                             </Text>
                                         </View>
-                                ))}
+                                    ))}
                                 renderItem={({ item }) => (
                                     !isLoading &&
-                                        <List.Item
-                                            title={
-                                                // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setInsuranceProviderListModal(false);  setAddInsuranceProviderModal(true); }}>
-                                                <View
+                                    <List.Item
+                                        title={
+                                            // <TouchableOpacity style={{flexDirection:"column"}} onPress={() => {setInsuranceProviderListModal(false);  setAddInsuranceProviderModal(true); }}>
+                                            <View
+                                                style={{
+                                                    flexDirection:
+                                                        "row",
+                                                    display: "flex",
+                                                    flexWrap:
+                                                        "wrap",
+                                                }}
+                                            >
+                                                <Text
                                                     style={{
-                                                        flexDirection:
-                                                            "row",
-                                                        display: "flex",
-                                                        flexWrap:
-                                                            "wrap",
+                                                        fontSize: 16,
+                                                        color: colors.black,
                                                     }}
                                                 >
-                                                    <Text
-                                                        style={{
-                                                            fontSize: 16,
-                                                            color: colors.black,
-                                                        }}
-                                                    >
-                                                        {item.name}
-                                                    </Text>
-                                                </View>
-                                                // </TouchableOpacity>
-                                            }
-                                            onPress={() => {
-                                                setIsInsuranceProviderName(
-                                                    item.name
-                                                );
-                                                setIsInsuranceProvider(
-                                                    item.id
-                                                );
-                                                setInsuranceProviderError(
-                                                    ""
-                                                );
-                                                setInsuranceProviderListModal(
-                                                    false
-                                                );
-                                                setSearchQueryForInsuranceProviders(
-                                                    ""
-                                                );
-                                                searchFilterForInsuranceProviders();
-                                            }}
-                                        />
+                                                    {item.name}
+                                                </Text>
+                                            </View>
+                                            // </TouchableOpacity>
+                                        }
+                                        onPress={() => {
+                                            setIsInsuranceProviderName(
+                                                item.name
+                                            );
+                                            setIsInsuranceProvider(
+                                                item.id
+                                            );
+                                            setInsuranceProviderError(
+                                                ""
+                                            );
+                                            setInsuranceProviderListModal(
+                                                false
+                                            );
+                                            setSearchQueryForInsuranceProviders(
+                                                ""
+                                            );
+                                            searchFilterForInsuranceProviders();
+                                        }}
+                                    />
                                 )}
                             />
                             <View
@@ -2592,7 +2136,7 @@ const AddRepairOrderStep2 = ({
                                                 No user found!
                                             </Text>
                                         </View>
-                                ))}
+                                    ))}
                                 style={{
                                     borderColor: "#0000000a",
                                     borderWidth: 1,
@@ -2603,34 +2147,34 @@ const AddRepairOrderStep2 = ({
                                 }
                                 renderItem={({ item }) => (
                                     !isLoading &&
-                                        <List.Item
-                                            title={
-                                                <View
+                                    <List.Item
+                                        title={
+                                            <View
+                                                style={{
+                                                    flexDirection:
+                                                        "row",
+                                                    display: "flex",
+                                                }}
+                                            >
+                                                <Text
                                                     style={{
-                                                        flexDirection:
-                                                            "row",
-                                                        display: "flex",
+                                                        fontSize: 16,
+                                                        color: colors.black,
                                                     }}
                                                 >
-                                                    <Text
-                                                        style={{
-                                                            fontSize: 16,
-                                                            color: colors.black,
-                                                        }}
-                                                    >
-                                                        {item.name} ({item.phone_number})
-                                                    </Text>
-                                                </View>
-                                            }
-                                            onPress={() => {
-                                                setIsName(item.name);
-                                                setIsUser(item.id);
-                                                setUserError("");
-                                                setUserListModal(false);
-                                                setSearchQueryForUsers("");
-                                                searchFilterForUsers();
-                                            }}
-                                        />
+                                                    {item.name} ({item.phone_number})
+                                                </Text>
+                                            </View>
+                                        }
+                                        onPress={() => {
+                                            setIsName(item.name);
+                                            setIsUser(item.id);
+                                            setUserError("");
+                                            setUserListModal(false);
+                                            setSearchQueryForUsers("");
+                                            searchFilterForUsers();
+                                        }}
+                                    />
                                 )}
                             />
                         </View>
@@ -2771,7 +2315,7 @@ const AddRepairOrderStep2 = ({
                                                 No garage found!
                                             </Text>
                                         </View>
-                                ))}
+                                    ))}
                                 style={{
                                     borderColor: "#0000000a",
                                     borderWidth: 1,
@@ -2779,472 +2323,62 @@ const AddRepairOrderStep2 = ({
                                 }}
                                 keyExtractor={(item) => item.id}
                                 renderItem={({ item }) => (
-                                    !isLoading && 
-                                        <List.Item
-                                            title={
-                                                <View
+                                    !isLoading &&
+                                    <List.Item
+                                        title={
+                                            <View
+                                                style={{
+                                                    flexDirection:
+                                                        "row",
+                                                    display: "flex",
+                                                    flexWrap: "wrap",
+                                                }}
+                                            >
+                                                <Text
                                                     style={{
-                                                        flexDirection:
-                                                            "row",
-                                                        display: "flex",
-                                                        flexWrap: "wrap",
+                                                        fontSize: 16,
+                                                        color: colors.black,
                                                     }}
                                                 >
-                                                    <Text
-                                                        style={{
-                                                            fontSize: 16,
-                                                            color: colors.black,
-                                                        }}
-                                                    >
-                                                        {item.garage_name}
-                                                    </Text>
-                                                </View>
-                                            }
-                                            onPress={() => {
-                                                setIsGarageName(
-                                                    item.garage_name
-                                                );
-                                                setIsGarageId(item.id);
-                                                setGarageError("");
-                                                setGarageIdError("");
-                                                onGarageRefresh();
-                                                setSearchQueryForGarages("");
-                                                setGarageListModal(false);
-                                            }}
-                                        />
-                                    )
+                                                    {item.garage_name}
+                                                </Text>
+                                            </View>
+                                        }
+                                        onPress={() => {
+                                            setIsGarageName(
+                                                item.garage_name
+                                            );
+                                            setIsGarageId(item.id);
+                                            setGarageError("");
+                                            setGarageIdError("");
+                                            onGarageRefresh();
+                                            setSearchQueryForGarages("");
+                                            setGarageListModal(false);
+                                        }}
+                                    />
+                                )
                                 }
                             />
                         </View>
                     </Modal>
 
                     {/* Brand List Modal */}
-                    <Modal
-                        visible={brandListModal}
-                        onDismiss={() => {
-                            setBrandListModal(false);
-                            setSearchQueryForBrands("");
-                            onBrandRefresh();
-                        }}
-                        contentContainerStyle={[
-                            styles.modalContainerStyle,
-                            { flex: 0.9 },
-                        ]}
-                    >
-                        <IconX
-                            name="times"
-                            size={20}
-                            color={colors.black}
-                            style={{
-                                position: "absolute",
-                                top: 25,
-                                right: 25,
-                                zIndex: 99,
-                            }}
-                            onPress={() => {
-                                setBrandListModal(false);
-                                setSearchQueryForBrands("");
-                                onBrandRefresh();
-                            }}
-                        />
-                        <Text
-                            style={[
-                                styles.headingStyle,
-                                { marginTop: 0, alignSelf: "center" },
-                            ]}
-                        >
-                            Select Brand
-                        </Text>
-                        <View
-                            style={{
-                                marginTop: 20,
-                                marginBottom: 10,
-                                flex: 1,
-                            }}
-                        >
-                            {/* Search Bar */}
-                            <View>
-                                <View
-                                    style={{
-                                        marginBottom: 15,
-                                        flexDirection: "row",
-                                    }}
-                                >
-                                    <TextInput
-                                        mode={"flat"}
-                                        placeholder="Search here..."
-                                        onChangeText={(text) =>
-                                            setSearchQueryForBrands(text)
-                                        }
-                                        value={searchQueryForBrands}
-                                        activeUnderlineColor={
-                                            colors.transparent
-                                        }
-                                        selectionColor="black"
-                                        underlineColor={colors.transparent}
-                                        style={{
-                                            elevation: 4,
-                                            height: 50,
-                                            backgroundColor: colors.white,
-                                            flex: 1,
-                                            borderTopRightRadius: 0,
-                                            borderBottomRightRadius: 0,
-                                            borderTopLeftRadius: 5,
-                                            borderBottomLeftRadius: 5,
-                                        }}
-                                        right={
-                                            searchQueryForBrands != null &&
-                                            searchQueryForBrands != "" && (
-                                                <TextInput.Icon
-                                                    icon="close"
-                                                    color={
-                                                        colors.light_gray
-                                                    }
-                                                    onPress={() =>
-                                                        onBrandRefresh()
-                                                    }
-                                                />
-                                            )
-                                        }
-                                    />
-                                    <TouchableOpacity
-                                        onPress={() =>
-                                            searchFilterForBrands()
-                                        }
-                                        style={{
-                                            elevation: 4,
-                                            borderTopRightRadius: 5,
-                                            borderBottomRightRadius: 5,
-                                            paddingRight: 25,
-                                            paddingLeft: 25,
-                                            zIndex: 2,
-                                            backgroundColor: colors.primary,
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                        }}
-                                    >
-                                        <IconX
-                                            name={"search"}
-                                            size={17}
-                                            color={colors.white}
-                                        />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                            <FlatList
-                                ItemSeparatorComponent={() => (!isLoading && <Divider />)}
-                                data={filteredBrandData}
-                                onEndReached={loadMoreBrands ? getBrandList : null}
-                                showsVerticalScrollIndicator={false}
-                                onEndReachedThreshold={0.5}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={brandRefreshing}
-                                        onRefresh={onBrandRefresh}
-                                        colors={["green"]}
-                                    />
-                                }
-                                ListFooterComponent={loadMoreBrands ? renderBrandFooter : null}
-                                ListEmptyComponent={() => (
-                                    !isLoading && (
-                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
-                                            <Text style={{ color: colors.black }}>
-                                                No brand found!
-                                            </Text>
-                                        </View>
-                                ))}
-                                contentContainerStyle={{ flexGrow: 1 }}
-                                style={{
-                                    borderColor: "#0000000a",
-                                    borderWidth: 1,
-                                    flex: 1,
-                                }}
-                                keyExtractor={(item) => item.id}
-                                renderItem={({ item }) => (
-                                    !isLoading && 
-                                        <List.Item
-                                            title={
-                                                <View
-                                                    style={{
-                                                        flexDirection:
-                                                            "row",
-                                                        display: "flex",
-                                                        flexWrap: "wrap",
-                                                    }}
-                                                >
-                                                    <Text
-                                                        style={{
-                                                            fontSize: 16,
-                                                            color: colors.black,
-                                                        }}
-                                                    >
-                                                        {item.name}
-                                                    </Text>
-                                                </View>
-                                            }
-                                            onPress={() => {
-                                                setIsBrandName(item.name);
-                                                setIsBrand(item.id);
-                                                setBrandError("");
-                                                setSearchQueryForBrands("");
-                                                onBrandRefresh();
-                                                setBrandListModal(false);
-                                            }}
-                                        />
-                                )}
-                            />
-                            <View
-                                style={{
-                                    justifyContent: "flex-end",
-                                    flexDirection: "row",
-                                }}
-                            >
-                                <TouchableOpacity
-                                    style={{
-                                        flexDirection: "row",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                        backgroundColor: colors.primary,
-                                        marginTop: 7,
-                                        paddingVertical: 3,
-                                        paddingHorizontal: 10,
-                                        borderRadius: 4,
-                                    }}
-                                    onPress={() => {
-                                        setAddBrandModal(true);
-                                        setBrandListModal(false);
-                                    }}
-                                >
-                                    <Icon
-                                        style={{
-                                            color: colors.white,
-                                            marginRight: 4,
-                                        }}
-                                        name="plus"
-                                        size={16}
-                                    />
-                                    <Text style={{ color: colors.white }}>
-                                        Add Brand
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    </Modal>
+                    <BrandComponent visible={brandListModal}
+                        closeModal={(val) => setBrandListModal(val)}
+                        brandName={(val) => { setIsBrandName(val) }}
+                        brandId={(val) => { setIsBrand(val) }}
+                        setError={(val) => { setBrandError(val) }}
 
+                    />
+                    <VehicalModalComponet visible={modelListModal} brand={isBrand}
+                        closeModal={(val) => setModelListModal(val)}
+                        modelName={(val) => { setIsModelName(val) }}
+                        ModalId={(val) => { setIsModel(val) }}
+                        // setError={(val) => { setBrandError(val) }}
+
+                    />
                     {/* Vehicle Model List Modal */}
-                    <Modal
-                        visible={modelListModal}
-                        onDismiss={() => {
-                            setModelListModal(false);
-                            onModelRefresh();
-                            setSearchQueryForModels("");
-                        }}
-                        contentContainerStyle={[
-                            styles.modalContainerStyle,
-                            { flex: 0.9 },
-                        ]}
-                    >
-                        <Text
-                            style={[
-                                styles.headingStyle,
-                                { marginTop: 0, alignSelf: "center" },
-                            ]}
-                        >
-                            Select Model
-                        </Text>
-                        <IconX
-                            name="times"
-                            size={20}
-                            color={colors.black}
-                            style={{
-                                position: "absolute",
-                                top: 25,
-                                right: 25,
-                                zIndex: 99,
-                            }}
-                            onPress={() => {
-                                setModelListModal(false);
-                                onModelRefresh();
-                                setSearchQueryForModels("");
-                            }}
-                        />
-                        <View
-                            style={{
-                                marginTop: 20,
-                                marginBottom: 10,
-                                flex: 1,
-                            }}
-                        >
-                            {/* Search Bar */}
-                            <View>
-                                <View
-                                    style={{
-                                        marginBottom: 15,
-                                        flexDirection: "row",
-                                    }}
-                                >
-                                    <TextInput
-                                        mode={"flat"}
-                                        placeholder="Search here..."
-                                        onChangeText={(text) =>
-                                            setSearchQueryForModels(text)
-                                        }
-                                        value={searchQueryForModels}
-                                        activeUnderlineColor={
-                                            colors.transparent
-                                        }
-                                        selectionColor="black"
-                                        underlineColor={colors.transparent}
-                                        style={{
-                                            elevation: 4,
-                                            height: 50,
-                                            backgroundColor: colors.white,
-                                            flex: 1,
-                                            borderTopRightRadius: 0,
-                                            borderBottomRightRadius: 0,
-                                            borderTopLeftRadius: 5,
-                                            borderBottomLeftRadius: 5,
-                                        }}
-                                        right={
-                                            searchQueryForModels != null &&
-                                            searchQueryForModels != "" && (
-                                                <TextInput.Icon
-                                                    icon="close"
-                                                    color={
-                                                        colors.light_gray
-                                                    }
-                                                    onPress={() =>
-                                                        onModelRefresh()
-                                                    }
-                                                />
-                                            )
-                                        }
-                                    />
-                                    <TouchableOpacity
-                                        onPress={() =>
-                                            searchFilterForModels()
-                                        }
-                                        style={{
-                                            elevation: 4,
-                                            borderTopRightRadius: 5,
-                                            borderBottomRightRadius: 5,
-                                            paddingRight: 25,
-                                            paddingLeft: 25,
-                                            zIndex: 2,
-                                            backgroundColor: colors.primary,
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                        }}
-                                    >
-                                        <IconX
-                                            name={"search"}
-                                            size={17}
-                                            color={colors.white}
-                                        />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                            <FlatList
-                                ItemSeparatorComponent={() => (!isLoading && <Divider />)}
-                                data={filteredModelData}
-                                onEndReached={loadMoreModels ? getModelList : null}
-                                showsVerticalScrollIndicator={false}
-                                onEndReachedThreshold={0.5}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={modelRefreshing}
-                                        onRefresh={onModelRefresh}
-                                        colors={["green"]}
-                                    />
-                                }
-                                ListFooterComponent={loadMoreModels ? renderModelFooter : null}
-                                ListEmptyComponent={() => (
-                                    !isLoading && (
-                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
-                                            <Text style={{ color: colors.black }}>
-                                                No vehicle model found!
-                                            </Text>
-                                        </View>
-                                ))}
-                                contentContainerStyle={{ flexGrow: 1 }}
-                                style={{
-                                    borderColor: "#0000000a",
-                                    borderWidth: 1,
-                                    flex: 1,
-                                }}
-                                keyExtractor={(item) => item.id}
-                                renderItem={({ item }) => (
-                                    !isLoading && 
-                                        <List.Item
-                                            title={
-                                                <View
-                                                    style={{
-                                                        flexDirection:
-                                                            "row",
-                                                        display: "flex",
-                                                        flexWrap: "wrap",
-                                                    }}
-                                                >
-                                                    <Text
-                                                        style={{
-                                                            fontSize: 16,
-                                                            color: colors.black,
-                                                        }}
-                                                    >
-                                                        {item.model_name}
-                                                    </Text>
-                                                </View>
-                                            }
-                                            onPress={() => {
-                                                setIsModelName(
-                                                    item.model_name
-                                                );
-                                                setIsModel(item.id);
-                                                setModelError("");
-                                                onModelRefresh();
-                                                setSearchQueryForModels("");
-                                                setModelListModal(false);
-                                            }}
-                                        />
-                                )}
-                            />
-                            <View
-                                style={{
-                                    justifyContent: "flex-end",
-                                    flexDirection: "row",
-                                }}
-                            >
-                                <TouchableOpacity
-                                    style={{
-                                        flexDirection: "row",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                        backgroundColor: colors.primary,
-                                        marginTop: 7,
-                                        paddingVertical: 3,
-                                        paddingHorizontal: 10,
-                                        borderRadius: 4,
-                                    }}
-                                    onPress={() => {
-                                        setAddModelModal(true);
-                                        setModelListModal(false);
-                                    }}
-                                >
-                                    <Icon
-                                        style={{
-                                            color: colors.white,
-                                            marginRight: 4,
-                                        }}
-                                        name="plus"
-                                        size={16}
-                                    />
-                                    <Text style={{ color: colors.white }}>
-                                        Add Model
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    </Modal>
+                    
 
                     {/* States List Modal */}
                     <Modal
@@ -3318,38 +2452,38 @@ const AddRepairOrderStep2 = ({
                                                 No state found!
                                             </Text>
                                         </View>
-                                ))}
+                                    ))}
                                 renderItem={({ item }) => (
                                     !isLoading &&
-                                        <List.Item
-                                            title={
-                                                <View
+                                    <List.Item
+                                        title={
+                                            <View
+                                                style={{
+                                                    flexDirection:
+                                                        "row",
+                                                    display: "flex",
+                                                    flexWrap: "wrap",
+                                                }}
+                                            >
+                                                <Text
                                                     style={{
-                                                        flexDirection:
-                                                            "row",
-                                                        display: "flex",
-                                                        flexWrap: "wrap",
+                                                        fontSize: 16,
+                                                        color: colors.black,
                                                     }}
                                                 >
-                                                    <Text
-                                                        style={{
-                                                            fontSize: 16,
-                                                            color: colors.black,
-                                                        }}
-                                                    >
-                                                        {item.name}
-                                                    </Text>
-                                                </View>
-                                            }
-                                            onPress={() => {
-                                                setIsStateName(item.name);
-                                                setIsState(item.id);
-                                                setStateError("");
-                                                setSearchQueryForStates("");
-                                                searchFilterForStates();
-                                                setStateListModal(false);
-                                            }}
-                                        />
+                                                    {item.name}
+                                                </Text>
+                                            </View>
+                                        }
+                                        onPress={() => {
+                                            setIsStateName(item.name);
+                                            setIsState(item.id);
+                                            setStateError("");
+                                            setSearchQueryForStates("");
+                                            searchFilterForStates();
+                                            setStateListModal(false);
+                                        }}
+                                    />
                                 )}
                             />
                         </View>
@@ -3427,41 +2561,41 @@ const AddRepairOrderStep2 = ({
                                                 No city found!
                                             </Text>
                                         </View>
-                                ))}
+                                    ))}
                                 renderItem={({ item }) => (
                                     !isLoading &&
-                                        <List.Item
-                                            title={
-                                                <View
+                                    <List.Item
+                                        title={
+                                            <View
+                                                style={{
+                                                    flexDirection:
+                                                        "row",
+                                                    display: "flex",
+                                                    flexWrap:
+                                                        "wrap",
+                                                }}
+                                            >
+                                                <Text
                                                     style={{
-                                                        flexDirection:
-                                                            "row",
-                                                        display: "flex",
-                                                        flexWrap:
-                                                            "wrap",
+                                                        fontSize: 16,
+                                                        color: colors.black,
                                                     }}
                                                 >
-                                                    <Text
-                                                        style={{
-                                                            fontSize: 16,
-                                                            color: colors.black,
-                                                        }}
-                                                    >
-                                                        {item.name}
-                                                    </Text>
-                                                </View>
-                                            }
-                                            onPress={() => {
-                                                setIsCityName(
-                                                    item.name
-                                                );
-                                                setIsCity(item.id);
-                                                setCityError("");
-                                                setSearchQueryForCity("");
-                                                searchFilterForCity();
-                                                setCityListModal(false);
-                                            }}
-                                        />
+                                                    {item.name}
+                                                </Text>
+                                            </View>
+                                        }
+                                        onPress={() => {
+                                            setIsCityName(
+                                                item.name
+                                            );
+                                            setIsCity(item.id);
+                                            setCityError("");
+                                            setSearchQueryForCity("");
+                                            searchFilterForCity();
+                                            setCityListModal(false);
+                                        }}
+                                    />
                                 )}
                             />
                         </View>
