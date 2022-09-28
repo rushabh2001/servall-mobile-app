@@ -16,7 +16,7 @@ import {
 } from "react-native-paper";
 import Modal from "react-native-modal";
 import Spinner from "react-native-loading-spinner-overlay";
-const VehicalModalComponet = ({ visible, closeModal, brand, userToken, modelName, ModalId }) => {
+const VehicalModalComponet = ({ visible, closeModal, brand, userToken, modelName, ModalId, modelError }) => {
     const [filteredModelData, setFilteredModelData] = useState([]);
     const [modelList, setModelList] = useState([]);
     const [searchQueryForModels, setSearchQueryForModels] = useState();
@@ -96,6 +96,7 @@ const VehicalModalComponet = ({ visible, closeModal, brand, userToken, modelName
                 setNewModelName()
                 setAddModelModal(false);
                 getBrand();
+                modelError("");
                 modelName(json.data.model_name);
                 ModalId(json.data.id);
             } else if (res.status == 400) {
@@ -288,7 +289,7 @@ const VehicalModalComponet = ({ visible, closeModal, brand, userToken, modelName
                                         item.model_name
                                     );
                                     ModalId(item.id);
-                                    // setModelError("");
+                                    modelError("");
                                     closeModal()
                                 }}
                             />

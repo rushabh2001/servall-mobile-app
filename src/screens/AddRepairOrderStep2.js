@@ -2374,7 +2374,7 @@ const AddRepairOrderStep2 = ({
                         closeModal={(val) => setModelListModal(val)}
                         modelName={(val) => { setIsModelName(val) }}
                         ModalId={(val) => { setIsModel(val) }}
-                        // setError={(val) => { setBrandError(val) }}
+                        modelError={(val) => { setModelError(val) }}
 
                     />
                     {/* Vehicle Model List Modal */}
