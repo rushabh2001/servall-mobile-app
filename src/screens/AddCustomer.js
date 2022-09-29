@@ -4,9 +4,7 @@ import {
     Text,
     StyleSheet,
     Keyboard,
-    ActivityIndicator,
     TouchableOpacity,
-    RefreshControl,
     FlatList,
     Alert,
     Platform,
@@ -99,11 +97,6 @@ const AddCustomer = ({
     const [searchQueryForGarages, setSearchQueryForGarages] = useState();
     const [garageError, setGarageError] = useState(""); // Error State
     const [garageIdError, setGarageIdError] = useState();
-    const [loadMoreGarages, setLoadMoreGarages] = useState(true);
-
-    const [garagePage, setGaragePage] = useState(1);
-    const [isGarageScrollLoading, setIsGarageScrollLoading] = useState(false);
-    const [garageRefreshing, setGarageRefreshing] = useState(false);
 
     const [datePurchase, setDatePurchase] = useState();
     const [displayPurchaseCalender, setDisplayPurchaseCalender] =
@@ -132,11 +125,6 @@ const AddCustomer = ({
     const [filteredBrandData, setFilteredBrandData] = useState([]);
     const [searchQueryForBrands, setSearchQueryForBrands] = useState();
     const [brandError, setBrandError] = useState(""); // Error State
-    const [loadMoreBrands, setLoadMoreBrands] = useState(true);
-
-    const [brandPage, setBrandPage] = useState(1);
-    const [isBrandScrollLoading, setIsBrandScrollLoading] = useState(false);
-    const [brandRefreshing, setBrandRefreshing] = useState(false);
 
     // Vehicle Model States
     const [isModel, setIsModel] = useState();
@@ -146,11 +134,6 @@ const AddCustomer = ({
     const [filteredModelData, setFilteredModelData] = useState([]);
     const [searchQueryForModels, setSearchQueryForModels] = useState();
     const [modelError, setModelError] = useState(""); // Error State
-    const [loadMoreModels, setLoadMoreModels] = useState(true);
-
-    const [modelPage, setModelPage] = useState(1);
-    const [isModelScrollLoading, setIsModelScrollLoading] = useState(false);
-    const [modelRefreshing, setModelRefreshing] = useState(false);
 
     // Insurance Provider Company for Dropdown
     const [isInsuranceProvider, setIsInsuranceProvider] = useState("");
@@ -214,7 +197,7 @@ const AddCustomer = ({
             const json = await res.json();
             console.log('json', json);
             if (res.status == 200 || res.status == 201){
-                pullBrandRefresh();
+                getBrandList();
                 setAddBrandModal(false);
                 setIsBrandName(json.data.name);
                 setIsBrand(json.data.id);
@@ -241,7 +224,7 @@ const AddCustomer = ({
             });
             const json = await res.json();
             if (res.status == 200 || res.status == 201){
-                pullModelRefresh();
+                getModelList();
                 setAddModelModal(false);
                 setIsModelName(json.data.model_name);
                 setIsModel(json.data.id);
@@ -664,31 +647,21 @@ const AddCustomer = ({
     };
 
     const getBrandList = async () => {
-        if(brandPage == 1) setIsLoading(true)
-        if(brandPage != 1) setIsBrandScrollLoading(true)
+        setIsLoading(true);
         try {
-            const res = await fetch(`${API_URL}fetch_brand?page=${brandPage}`, {
-                method: "POST",
+            const res = await fetch(`${API_URL}fetch_brand`, {
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify({
-                    search: searchQueryForBrands,
-                }),
             });
             const json = await res.json();
             if (json !== undefined) {
-                setBrandList([...brandList, ...json.brand_list.data]);
-                setFilteredBrandData([
-                    ...filteredBrandData,
-                    ...json.brand_list.data,
-                ]);
+                setBrandList(json.brand_list);
+                setFilteredBrandData(json.brand_list);
                 setIsLoading(false);
-                if(brandPage != 1) setIsBrandScrollLoading(false)
-                {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
-                {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(brandPage + 1) : null}
             }
         } catch (e) {
             console.log(e);
@@ -699,106 +672,43 @@ const AddCustomer = ({
         setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_brand`, {
-                method: "POST",
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify({
-                    search: searchQueryForBrands,
-                }),
             });
             const json = await response.json();
             if (response.status == "200") {
-                setBrandList(json.brand_list.data);
-                setFilteredBrandData(json.brand_list.data);
-                {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
-                {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(2) : null}
-                setIsLoading(false);
-                setBrandRefreshing(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const pullBrandRefresh = async () => {
-        setSearchQueryForBrands(null);
-        try {
-            const response = await fetch(`${API_URL}fetch_brand`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    search: null,
-                }),
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setBrandList(json.brand_list.data);
-                setFilteredBrandData(json.brand_list.data);
-                {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
-                {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(2) : null}
-                setBrandRefreshing(false);
+                setBrandList(json.brand_list);
+                setFilteredBrandData(json.brand_list);
                 setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
         }
-    };
-
-    const renderBrandFooter = () => {
-        return (
-            <>
-                {isBrandScrollLoading && (
-                    <View style={styles.footer}>
-                        <ActivityIndicator size="large" />
-                    </View>
-                )}
-            </>
-        );
-    };
-
-    const onBrandRefresh = () => {
-        setBrandRefreshing(true);
-        pullBrandRefresh();
     };
 
     const getModelList = async () => {
-        if(modelPage == 1) setIsLoading(true)
-        if(modelPage != 1) setIsModelScrollLoading(true)
         try {
             const res = await fetch(
-                `${API_URL}fetch_vehicle_model?page=${modelPage}`,
+                `${API_URL}fetch_vehicle_model?brand_id=${isBrand}`,
                 {
-                    method: "POST",
+                    method: "GET",
                     headers: {
                         Accept: "application/json",
                         "Content-Type": "application/json",
                         Authorization: "Bearer " + userToken,
                     },
-                    body: JSON.stringify({
-                        brand_id: isBrand,
-                        search: searchQueryForModels,
-                    }),
                 }
             );
             const json = await res.json();
             console.log("model_json", json);
             if (json !== undefined) {
-                setModelList([...modelList, ...json.vehicle_model_list.data]);
-                setFilteredModelData([
-                    ...filteredModelData,
-                    ...json.vehicle_model_list.data,
-                ]);
+                setModelList(json.vehicle_model_list);
+                setFilteredModelData(json.vehicle_model_list);
                 setIsLoading(false);
-                if(modelPage != 1) setIsModelScrollLoading(false)
-                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
-                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(modelPage + 1) : null}
             }
         } catch (e) {
             console.log(e);
@@ -808,78 +718,23 @@ const AddCustomer = ({
     const searchFilterForModels = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch(`${API_URL}fetch_vehicle_model`, {
-                method: "POST",
+            const response = await fetch(`${API_URL}fetch_vehicle_model?brand_id=${isBrand}`, {
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify({
-                    brand_id: isBrand,
-                    search: searchQueryForModels,
-                }),
             });
             const json = await response.json();
             if (response.status == "200") {
-                setModelList(json.vehicle_model_list.data);
-                setFilteredModelData(json.vehicle_model_list.data);
-                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
-                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(2) : null}
-                setIsLoading(false);
-                setModelRefreshing(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const pullModelRefresh = async () => {
-        setSearchQueryForModels(null);
-        try {
-            const response = await fetch(`${API_URL}fetch_vehicle_model`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    brand_id: isBrand,
-                    search: null,
-                }),
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setModelList(json.vehicle_model_list.data);
-                setFilteredModelData(json.vehicle_model_list.data);
-                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
-                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(2) : null}
-                setModelRefreshing(false);
+                setModelList(json.vehicle_model_list);
+                setFilteredModelData(json.vehicle_model_list);
                 setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
-        } finally {
-            
         }
-    };
-
-    const renderModelFooter = () => {
-        return (
-            <>
-                {isModelScrollLoading && (
-                    <View style={styles.footer}>
-                        <ActivityIndicator size="large" />
-                    </View>
-                )}
-            </>
-        );
-    };
-
-    const onModelRefresh = () => {
-        setModelRefreshing(true);
-        pullModelRefresh();
     };
 
     // Functions Dropdown for Insurance Provider
@@ -954,26 +809,18 @@ const AddCustomer = ({
     const searchFilterForGarages = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch(`${API_URL}fetch_owner_garages`, {
-                method: "POST",
+            const response = await fetch(`${API_URL}fetch_owner_garages?user_id=${userId}&user_role=${userRole}`, {
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify({
-                    user_id: userId,
-                    user_role: userRole,
-                    search: searchQueryForGarages,
-                }),
             });
             const json = await response.json();
             if (response.status == "200") {
                 setGarageList(json.garage_list.data);
                 setFilteredGarageData(json.garage_list.data);
-                {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
-                {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(2) : null}
-                setGarageRefreshing(false);
                 setIsLoading(false);
             }
         } catch (error) {
@@ -982,88 +829,28 @@ const AddCustomer = ({
     };
 
     const getGarageList = async () => {
-        if(garagePage == 1) setIsLoading(true)
-        if(garagePage != 1) setIsGarageScrollLoading(true)
         try {
             const res = await fetch(
-                `${API_URL}fetch_owner_garages?page=${garagePage}`,
+                `${API_URL}fetch_owner_garages?user_id=${userId}&user_role=${userRole}`,
                 {
-                    method: "POST",
+                    method: "GET",
                     headers: {
                         Accept: "application/json",
                         "Content-Type": "application/json",
                         Authorization: "Bearer " + userToken,
                     },
-                    body: JSON.stringify({
-                        user_id: userId,
-                        user_role: userRole,
-                        search: searchQueryForGarages,
-                    }),
                 }
             );
             const json = await res.json();
             // console.log(json);
             if (json !== undefined) {
-                setGarageList([...garageList, ...json.garage_list.data]);
-                setFilteredGarageData([
-                    ...filteredGarageData,
-                    ...json.garage_list.data,
-                ]);
+                setGarageList(json.garage_list);
+                setFilteredGarageData(json.garage_list);
                 setIsLoading(false);
-                if(garagePage != 1) setIsGarageScrollLoading(false)
-                {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
-                {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(garagePage + 1) : null}
             }
         } catch (e) {
             console.log(e);
         }
-    };
-
-    const pullGarageRefresh = async () => {
-        setSearchQueryForGarages(null);
-        try {
-            const response = await fetch(`${API_URL}fetch_owner_garages`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    user_id: userId,
-                    user_role: userRole,
-                    search: null,
-                }),
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setGarageList(json.garage_list.data);
-                setFilteredGarageData(json.garage_list.data);
-                {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
-                {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(2) : null}
-                setGarageRefreshing(false);
-                setIsLoading(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const renderGarageFooter = () => {
-        return (
-            <>
-                {isGarageScrollLoading && (
-                    <View style={styles.footer}>
-                        <ActivityIndicator size="large" />
-                    </View>
-                )}
-            </>
-        );
-    };
-
-    const onGarageRefresh = () => {
-        setGarageRefreshing(true);
-        pullGarageRefresh();
     };
 
     useEffect(() => {
@@ -1083,8 +870,7 @@ const AddCustomer = ({
 
     useEffect(() => {
         if (isBrand != undefined) {
-            setIsLoading(true);
-            pullModelRefresh();
+            getModelList();
             setIsModel();
             setIsModelName("");
             setModelFieldToggle(true);
@@ -2008,7 +1794,7 @@ const AddCustomer = ({
                         visible={garageListModal}
                         onDismiss={() => {
                             setGarageListModal(false);
-                            onGarageRefresh();
+                            getGarageList();
                             setSearchQueryForGarages("");
                         }}
                         contentContainerStyle={[
@@ -2036,7 +1822,7 @@ const AddCustomer = ({
                             }}
                             onPress={() => {
                                 setGarageListModal(false);
-                                onGarageRefresh();
+                                getGarageList();
                                 setSearchQueryForGarages("");
                             }}
                         />
@@ -2086,7 +1872,7 @@ const AddCustomer = ({
                                                         colors.light_gray
                                                     }
                                                     onPress={() =>
-                                                        onGarageRefresh()
+                                                        getGarageList()
                                                     }
                                                 />
                                             )
@@ -2120,17 +1906,7 @@ const AddCustomer = ({
                                 showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent={() => (!isLoading && <Divider />)}
                                 data={filteredGarageData}
-                                onEndReached={loadMoreGarages ? getGarageList : null}
-                                onEndReachedThreshold={0.5}
                                 contentContainerStyle={{ flexGrow: 1 }}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={garageRefreshing}
-                                        onRefresh={onGarageRefresh}
-                                        colors={["green"]}
-                                    />
-                                }
-                                ListFooterComponent={loadMoreGarages ? renderGarageFooter : null}
                                 ListEmptyComponent={() => (
                                     !isLoading && (
                                         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
@@ -2175,7 +1951,7 @@ const AddCustomer = ({
                                                 setGarageError("");
                                                 setGarageIdError("");
                                                 setGarageListModal(false);
-                                                onGarageRefresh();
+                                                getGarageList();
                                                 setSearchQueryForGarages("");
                                             }}
                                         />
@@ -2191,7 +1967,7 @@ const AddCustomer = ({
                         onDismiss={() => {
                             setBrandListModal(false);
                             setSearchQueryForBrands("");
-                            onBrandRefresh();
+                            getBrandList();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -2219,7 +1995,7 @@ const AddCustomer = ({
                             onPress={() => {
                                 setBrandListModal(false);
                                 setSearchQueryForBrands("");
-                                onBrandRefresh();
+                                getBrandList();
                             }}
                         />
                         <View
@@ -2268,7 +2044,7 @@ const AddCustomer = ({
                                                         colors.light_gray
                                                     }
                                                     onPress={() =>
-                                                        onBrandRefresh()
+                                                        getBrandList()
                                                     }
                                                 />
                                             )
@@ -2302,17 +2078,7 @@ const AddCustomer = ({
                                 showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent={() => (!isLoading && <Divider />)}
                                 data={filteredBrandData}
-                                onEndReached={loadMoreBrands ? getBrandList : null}
-                                onEndReachedThreshold={0.5}
                                 contentContainerStyle={{ flexGrow: 1 }}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={brandRefreshing}
-                                        onRefresh={onBrandRefresh}
-                                        colors={["green"]}
-                                    />
-                                }
-                                ListFooterComponent={loadMoreBrands ? renderBrandFooter : null}
                                 ListEmptyComponent={() => (
                                     !isLoading && (
                                         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
@@ -2355,7 +2121,7 @@ const AddCustomer = ({
                                                 setBrandError("");
                                                 setBrandListModal(false);
                                                 setSearchQueryForBrands("");
-                                                onBrandRefresh();
+                                                getBrandList();
                                             }}
                                         />
                                 )}
@@ -2403,7 +2169,7 @@ const AddCustomer = ({
                         visible={modelListModal}
                         onDismiss={() => {
                             setModelListModal(false);
-                            onModelRefresh();
+                            getModelList();
                             setSearchQueryForModels("");
                         }}
                         contentContainerStyle={[
@@ -2431,7 +2197,7 @@ const AddCustomer = ({
                             }}
                             onPress={() => {
                                 setModelListModal(false);
-                                onModelRefresh();
+                                getModelList();
                                 setSearchQueryForModels("");
                             }}
                         />
@@ -2481,7 +2247,7 @@ const AddCustomer = ({
                                                         colors.light_gray
                                                     }
                                                     onPress={() =>
-                                                        onModelRefresh()
+                                                        getModelList()
                                                     }
                                                 />
                                             )
@@ -2515,17 +2281,7 @@ const AddCustomer = ({
                                 showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent={() => (!isLoading && <Divider />)}
                                 data={filteredModelData}
-                                onEndReached={loadMoreModels ? getModelList : null}
-                                onEndReachedThreshold={0.5}
                                 contentContainerStyle={{ flexGrow: 1 }}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={modelRefreshing}
-                                        onRefresh={onModelRefresh}
-                                        colors={["green"]}
-                                    />
-                                }
-                                ListFooterComponent={loadMoreModels ? renderModelFooter : null}
                                 ListEmptyComponent={() => (
                                     !isLoading && (
                                         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
@@ -2569,7 +2325,7 @@ const AddCustomer = ({
                                                 setIsModel(item.id);
                                                 setModelError("");
                                                 setModelListModal(false);
-                                                onModelRefresh();
+                                                getModelList();
                                                 setSearchQueryForModels("");
                                             }}
                                         />
@@ -2671,7 +2427,6 @@ const AddCustomer = ({
                                 showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent={() => (!isLoading && <Divider />)}
                                 data={filteredStateData}
-                                // onEndReachedThreshold={1}
                                 style={{
                                     borderColor: "#0000000a",
                                     borderWidth: 1,

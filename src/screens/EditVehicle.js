@@ -598,31 +598,21 @@ const EditVehicle = ({
     };
 
     const getBrandList = async () => {
-        if(brandPage == 1) setIsLoading(true)
-        if(brandPage != 1) setIsBrandScrollLoading(true)
+        setIsLoading(true)
         try {
-            const res = await fetch(`${API_URL}fetch_brand?page=${brandPage}`, {
-                method: "POST",
+            const res = await fetch(`${API_URL}fetch_brand`, {
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify({
-                    search: searchQueryForBrands,
-                }),
             });
             const json = await res.json();
             if (json !== undefined) {
-                setBrandList([...brandList, ...json.brand_list.data]);
-                setFilteredBrandData([
-                    ...filteredBrandData,
-                    ...json.brand_list.data,
-                ]);
+                setBrandList(json.brand_list);
+                setFilteredBrandData(json.brand_list);
                 setIsLoading(false);
-                if(brandPage != 1) setIsBrandScrollLoading(false)
-                {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
-                {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(brandPage + 1) : null}
             }
         } catch (e) {
             console.log(e);
@@ -633,83 +623,31 @@ const EditVehicle = ({
         setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_brand`, {
-                method: "POST",
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify({
-                    search: searchQueryForBrands,
-                }),
             });
             const json = await response.json();
             if (response.status == "200") {
-                setBrandList(json.brand_list.data);
-                setFilteredBrandData(json.brand_list.data);
-                {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
-                {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(2) : null}
-                setIsLoading(false);
-                setBrandRefreshing(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const pullBrandRefresh = async () => {
-        setSearchQueryForBrands(null);
-        try {
-            const response = await fetch(`${API_URL}fetch_brand`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    search: null,
-                }),
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setBrandList(json.brand_list.data);
-                setFilteredBrandData(json.brand_list.data);
-                {json.brand_list.current_page != json.brand_list.last_page ? setLoadMoreBrands(true) : setLoadMoreBrands(false)}
-                {json.brand_list.current_page != json.brand_list.last_page ? setBrandPage(2) : null}
-                setBrandRefreshing(false);
+                setBrandList(json.brand_list);
+                setFilteredBrandData(json.brand_list);
                 setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
         }
-    };
-
-    const renderBrandFooter = () => {
-        return (
-            <>
-                {isBrandScrollLoading && (
-                    <View style={styles.footer}>
-                        <ActivityIndicator size="large" />
-                    </View>
-                )}
-            </>
-        );
-    };
-
-    const onBrandRefresh = () => {
-        setBrandRefreshing(true);
-        pullBrandRefresh();
     };
 
     const getModelList = async () => {
-        if(modelPage == 1) setIsLoading(true)
-        if(modelPage != 1) setIsModelScrollLoading(true)
+        setIsLoading(true)
         try {
             const res = await fetch(
-                `${API_URL}fetch_vehicle_model?page=${modelPage}`,
+                `${API_URL}fetch_vehicle_model?brand_id=${isBrand}`,
                 {
-                    method: "POST",
+                    method: "GET",
                     headers: {
                         Accept: "application/json",
                         "Content-Type": "application/json",
@@ -724,15 +662,9 @@ const EditVehicle = ({
             const json = await res.json();
             // console.log("model_json", json);
             if (json !== undefined) {
-                setModelList([...modelList, ...json.vehicle_model_list.data]);
-                setFilteredModelData([
-                    ...filteredModelData,
-                    ...json.vehicle_model_list.data,
-                ]);
+                setModelList(json.vehicle_model_list);
+                setFilteredModelData(json.vehicle_model_list);
                 setIsLoading(false);
-                if(modelPage != 1) setIsModelScrollLoading(false)
-                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
-                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(modelPage + 1) : null}
             }
         } catch (e) {
             console.log(e);
@@ -742,76 +674,23 @@ const EditVehicle = ({
     const searchFilterForModels = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch(`${API_URL}fetch_vehicle_model`, {
-                method: "POST",
+            const response = await fetch(`${API_URL}fetch_vehicle_model?brand_id=${isBrand}`, {
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify({
-                    brand_id: isBrand,
-                    search: searchQueryForModels,
-                }),
             });
             const json = await response.json();
             if (response.status == "200") {
-                setModelList(json.vehicle_model_list.data);
-                setFilteredModelData(json.vehicle_model_list.data);
-                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
-                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(2) : null}
-                setIsLoading(false);
-                setModelRefreshing(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const pullModelRefresh = async () => {
-        setSearchQueryForModels(null);
-        try {
-            const response = await fetch(`${API_URL}fetch_vehicle_model`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    brand_id: isBrand,
-                    search: null,
-                }),
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setModelList(json.vehicle_model_list.data);
-                setFilteredModelData(json.vehicle_model_list.data);
-                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setLoadMoreModels(true) : setLoadMoreModels(false)}
-                {json.vehicle_model_list.current_page != json.vehicle_model_list.last_page ? setModelPage(2) : null}
-                setModelRefreshing(false);
+                setModelList(json.vehicle_model_list);
+                setFilteredModelData(json.vehicle_model_list);
                 setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
         }
-    };
-
-    const renderModelFooter = () => {
-        return (
-            <>
-                {isModelScrollLoading && (
-                    <View style={styles.footer}>
-                        <ActivityIndicator size="large" />
-                    </View>
-                )}
-            </>
-        );
-    };
-
-    const onModelRefresh = () => {
-        setModelRefreshing(true);
-        pullModelRefresh();
     };
 
     // Functions Dropdown for Insurance Provider

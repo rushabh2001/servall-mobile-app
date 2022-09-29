@@ -4,10 +4,8 @@ import {
     Text,
     StyleSheet,
     Keyboard,
-    ActivityIndicator,
     TouchableOpacity,
     FlatList,
-    RefreshControl,
     Alert,
     Platform,
 } from "react-native";
@@ -132,14 +130,12 @@ const EditRepairOrder = ({
     const [partsTotal, setPartsTotal] = useState(
         parseInt(route?.params?.data?.parts_total)
     );
-    const [isTotal, setIsTotal] = useState(
-        parseInt(route?.params?.data?.total)
-    );
-    const [isApplicableDiscount, setIsApplicableDiscount] = useState(
-        parseInt(route?.params?.data?.applicable_discount)
-    );
+    const [isTotal, setIsTotal] = useState(0);
+    const [isApplicableDiscount, setIsApplicableDiscount] = useState(0);
     const [isTotalServiceDiscount, setIsTotalServiceDiscount] = useState(0);
     const [isTotalPartDiscount, setIsTotalPartDiscount] = useState(0);
+    const [isTotalAfterDiscount, setIsTotalAfterDiscount] = useState(parseInt(route?.params?.data?.total));
+    const [isDiscountOnTotal, setIsDiscountOnTotal] = useState(route?.params?.data?.applicable_discount);
 
     const [fieldsServices, setFieldsServices] = useState([]);
     const [fieldsParts, setFieldsParts] = useState([]);
@@ -151,16 +147,6 @@ const EditRepairOrder = ({
     const [searchQueryForServices, setSearchQueryForServices] = useState();
     const [filteredServiceData, setFilteredServiceData] = useState([]);
     const [serviceListModal, setServiceListModal] = useState(false);
-
-    const [partPage, setPartPage] = useState(1);
-    const [isPartScrollLoading, setIsPartScrollLoading] = useState(false);
-    const [partRefreshing, setPartRefreshing] = useState(false);
-    const [loadMoreParts, setLoadMoreParts] = useState(true);
-
-    const [servicePage, setServicePage] = useState(1);
-    const [isServiceScrollLoading, setIsServiceScrollLoading] = useState(false);
-    const [serviceRefreshing, setServiceRefreshing] = useState(false);
-    const [loadMoreServices, setLoadMoreServices] = useState(true);
 
     function handleServiceChange(i, value) {
         const values = [...fieldsServices];
@@ -180,7 +166,6 @@ const EditRepairOrder = ({
             total += parseInt(item.amount);
         });
         setServicesTotal(parseInt(total));
-        setIsTotal(parseInt(total) + parseInt(partsTotal));
 
         // Calculate Total of Order
         values[i]["applicableDiscountForItem"] =
@@ -192,9 +177,12 @@ const EditRepairOrder = ({
             discountTotal += item.applicableDiscountForItem;
         });
         setIsTotalServiceDiscount(parseInt(discountTotal));
-        setIsApplicableDiscount(
-            parseInt(discountTotal) + parseInt(isTotalPartDiscount)
-        );
+        let totalDiscount = (total + partsTotal) * (isDiscountOnTotal/100);
+        setIsApplicableDiscount(parseInt(totalDiscount) + parseInt(discountTotal) + parseInt(isTotalPartDiscount));
+
+         // Calculate Total of Order
+         setIsTotal(parseInt(total) + parseInt(partsTotal));
+         setIsTotalAfterDiscount(total + partsTotal - totalDiscount);
     }
 
     function handleServiceAdd(data) {
@@ -234,7 +222,6 @@ const EditRepairOrder = ({
             total += parseInt(item.amount);
         });
         setServicesTotal(total);
-        setIsTotal(parseInt(total) + parseInt(partsTotal));
 
         // Calculate Total of Order
         let discountTotal = 0;
@@ -242,9 +229,12 @@ const EditRepairOrder = ({
             discountTotal += item.applicableDiscountForItem;
         });
         setIsTotalServiceDiscount(discountTotal);
-        setIsApplicableDiscount(
-            parseInt(discountTotal) + parseInt(isTotalPartDiscount)
-        );
+        let totalDiscount = (total + partsTotal) * (isDiscountOnTotal/100);
+        setIsApplicableDiscount(parseInt(totalDiscount) + parseInt(discountTotal) + parseInt(isTotalPartDiscount));
+
+         // Calculate Total of Order
+         setIsTotal(parseInt(total) + parseInt(partsTotal));
+         setIsTotalAfterDiscount(total + partsTotal - totalDiscount);
     }
 
     // Function for Parts Fields
@@ -269,7 +259,6 @@ const EditRepairOrder = ({
         setPartsTotal(parseInt(total));
 
         // Calculate Total of Order
-        setIsTotal(parseInt(total) + parseInt(servicesTotal));
         partValues[i]["applicableDiscountForItem"] =
             partValues[i]["rate"] *
             partValues[i]["qty"] *
@@ -279,9 +268,12 @@ const EditRepairOrder = ({
             discountTotal += item.applicableDiscountForItem;
         });
         setIsTotalPartDiscount(parseInt(discountTotal));
-        setIsApplicableDiscount(
-            parseInt(discountTotal) + parseInt(isTotalServiceDiscount)
-        );
+        let totalDiscount = (total + servicesTotal) * (parseInt(isDiscountOnTotal)/100);
+        setIsApplicableDiscount(parseInt(totalDiscount) + parseInt(discountTotal) + parseInt(isTotalServiceDiscount));
+
+         // Calculate Total of Order
+         setIsTotal(parseInt(total) + parseInt(servicesTotal));
+         setIsTotalAfterDiscount(total + servicesTotal - totalDiscount);
     }
 
     function handlePartAdd(data) {
@@ -323,15 +315,24 @@ const EditRepairOrder = ({
         setPartsTotal(parseInt(total));
 
         // Calculate Total of Order
-        setIsTotal(parseInt(total) + parseInt(servicesTotal));
         let discountTotal = 0;
         partValues.forEach((item) => {
             discountTotal += item.applicableDiscountForItem;
         });
         setIsTotalPartDiscount(discountTotal);
-        setIsApplicableDiscount(
-            parseInt(discountTotal) + parseInt(isTotalServiceDiscount)
-        );
+        let totalDiscount = (total + servicesTotal) * (isDiscountOnTotal/100);
+        setIsApplicableDiscount(parseInt(totalDiscount) + parseInt(discountTotal) + parseInt(isTotalServiceDiscount));
+
+         // Calculate Total of Order
+         setIsTotal(parseInt(total) + parseInt(servicesTotal));
+         setIsTotalAfterDiscount(total + servicesTotal - totalDiscount);
+    }
+
+    function handleDiscountOnTotal(i) {
+        setIsDiscountOnTotal(i);
+        const totalDiscount = isTotal * (i/100);
+        setIsApplicableDiscount(totalDiscount + isTotalServiceDiscount + isTotalPartDiscount);
+        setIsTotalAfterDiscount(isTotal - totalDiscount);
     }
 
     const selectVehicleImg = async () => {
@@ -435,12 +436,12 @@ const EditRepairOrder = ({
                 "YYYY-MM-DD hh:mm:ss"
             )
         );
-        // data.append("status", isOrderStatus);
+        data.append("status", isOrderStatus);
         data.append("labor_total", parseInt(servicesTotal));
         data.append("parts_total", parseInt(partsTotal));
-        data.append("discount", parseInt(isApplicableDiscount));
+        data.append("discount", parseInt(isDiscountOnTotal));
         // if(isVehicleImg != null) data.append("orderimage", isVehicleImg);
-        data.append("total", parseInt(isTotal));
+        data.append("total", parseInt(isTotalAfterDiscount));
         if(isComment) data.append("comment", isComment?.trim());
 
         editOrder(data);
@@ -511,30 +512,22 @@ const EditRepairOrder = ({
     };
 
     const getPartList = async () => {
-        if(partPage == 1) setIsLoading(true)
-        if(partPage != 1) setIsPartScrollLoading(false)
         try {
-            const res = await fetch(`${API_URL}fetch_parts?page=${partPage}`, {
+            const res = await fetch(`${API_URL}fetch_parts`, {
                 method: "POST",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify({
-                    search: searchQueryForParts,
-                }),
             });
             const json = await res.json();
             if (json !== undefined) {
                 // setPartList(json.data);
                 // setFilteredPartData(json.data);
-                setPartList([...partList, ...json.data.data]);
-                setFilteredPartData([...filteredPartData, ...json.data.data]);
+                setPartList(json.data);
+                setFilteredPartData(json.data);
                 setIsLoading(false);
-                if(partPage != 1) setIsPartScrollLoading(false)
-                {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
-                {json.data.current_page != json.data.last_page ? setPartPage(partPage + 1) : null}
             }
         } catch (e) {
             console.log(e);
@@ -551,75 +544,22 @@ const EditRepairOrder = ({
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify({
-                    search: searchQueryForParts,
-                }),
             });
             const json = await response.json();
             if (response.status == "200") {
-                setPartList(json.data.data);
-                setFilteredPartData(json.data.data);
-                {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
-                {json.data.current_page != json.data.last_page ? setPartPage(2) : null}
-                setIsLoading(false);
-                setPartRefreshing(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const pullPartRefresh = async () => {
-        setSearchQueryForParts(null);
-        try {
-            const response = await fetch(`${API_URL}fetch_parts`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    search: null,
-                }),
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setPartList(json.data.data);
-                setFilteredPartData(json.data.data);
-                {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
-                {json.data.current_page != json.data.last_page ? setPartPage(2) : null}
-                setPartRefreshing(false);
+                setPartList(json.data);
+                setFilteredPartData(json.data);
                 setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
         }
-    };
-
-    const renderPartFooter = () => {
-        return (
-            <>
-                {isPartScrollLoading && (
-                    <View style={styles.footer}>
-                        <ActivityIndicator size="large" />
-                    </View>
-                )}
-            </>
-        );
-    };
-
-    const onPartRefresh = () => {
-        setPartRefreshing(true);
-        pullPartRefresh();
     };
 
     const getServiceList = async () => {
-        if(servicePage == 1) setIsLoading(true)
-        if(servicePage != 1) setIsServiceScrollLoading(true)
         try {
             const res = await fetch(
-                `${API_URL}fetch_service?page=${servicePage}`,
+                `${API_URL}fetch_service`,
                 {
                     method: "POST",
                     headers: {
@@ -627,22 +567,13 @@ const EditRepairOrder = ({
                         "Content-Type": "application/json",
                         Authorization: "Bearer " + userToken,
                     },
-                    body: JSON.stringify({
-                        search: searchQueryForServices,
-                    }),
                 }
             );
             const json = await res.json();
             if (json !== undefined) {
-                setServiceList([...serviceList, ...json.data.data]);
-                setFilteredServiceData([
-                    ...filteredServiceData,
-                    ...json.data.data,
-                ]);
+                setServiceList(json.data);
+                setFilteredServiceData(json.data);
                 setIsLoading(false);
-                if(servicePage != 1) setIsServiceScrollLoading(false)
-                {json.data.current_page != json.data.last_page ? setLoadMoreServices(true) : setLoadMoreServices(false)}
-                {json.data.current_page != json.data.last_page ? setServicePage(servicePage + 1) : null}
             }
         } catch (e) {
             console.log(e);
@@ -659,67 +590,16 @@ const EditRepairOrder = ({
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify({
-                    search: searchQueryForServices,
-                }),
             });
             const json = await response.json();
             if (response.status == "200") {
-                setServiceList(json.data.data);
-                setFilteredServiceData(json.data.data);
-                {json.data.current_page != json.data.last_page ? setLoadMoreServices(true) : setLoadMoreServices(false)}
-                {json.data.current_page != json.data.last_page ? setServicePage(servicePage + 1) : null}
-                setIsLoading(false);
-                setServiceRefreshing(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const pullServiceRefresh = async () => {
-        setSearchQueryForServices(null);
-        try {
-            const response = await fetch(`${API_URL}fetch_service`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    search: null,
-                }),
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setServiceList(json.data.data);
-                setFilteredServiceData(json.data.data);
-                {json.data.current_page != json.data.last_page ? setLoadMoreServices(true) : setLoadMoreServices(false)}
-                {json.data.current_page != json.data.last_page ? setServicePage(servicePage + 1) : null}
-                setServiceRefreshing(false);
+                setServiceList(json.data);
+                setFilteredServiceData(json.data);
                 setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
         }
-    };
-
-    const renderServiceFooter = () => {
-        return (
-            <>
-                {isServiceScrollLoading && (
-                    <View style={styles.footer}>
-                        <ActivityIndicator size="large" />
-                    </View>
-                )}
-            </>
-        );
-    };
-
-    const onServiceRefresh = () => {
-        setServiceRefreshing(true);
-        pullServiceRefresh();
     };
 
     const addNewService = async () => {
@@ -737,7 +617,7 @@ const EditRepairOrder = ({
             });
             const json = await res.json();
             if (json !== undefined) {
-                pullServiceRefresh();
+                getServiceList();
                 let data = {
                     service_id: json.data.id,
                     serviceName: json.data.name,
@@ -769,7 +649,7 @@ const EditRepairOrder = ({
             const json = await res.json();
             if (json !== undefined) {
                 setIsLoading(true);
-                pullPartRefresh();
+                getPartList();
                 let data = {
                     parts_id: json.data.id,
                     partName: json.data.name,
@@ -816,6 +696,37 @@ const EditRepairOrder = ({
                 amount: item.amount,
             });
         });
+
+        let total = 0;
+        values.forEach((item) => {
+            total += parseInt(item.amount);
+        });
+        setServicesTotal(parseInt(total));
+
+        let total2 = 0;
+        values2.forEach((item) => {
+            total2 += parseInt(item.amount);
+        });
+        setPartsTotal(parseInt(total));
+
+        let discountTotal1 = 0;
+        route?.params?.data?.parts_list.forEach((item) => {
+            discountTotal1 += item.rate * item.qty * (item.discount / 100);
+        });
+        setIsTotalPartDiscount(parseInt(discountTotal1));
+        let discountTotal2 = 0;
+        route?.params?.data?.services_list.forEach((item) => {
+            discountTotal2 += item.rate * item.qty * (item.discount / 100)
+        });
+        setIsTotalServiceDiscount(parseInt(discountTotal2));
+        let discountTotal = discountTotal1 + discountTotal2;
+
+        let totalDiscount = (parseInt(route?.params?.data?.total) * (parseInt(route?.params?.data?.applicable_discount)/100));
+        setIsApplicableDiscount(totalDiscount + discountTotal);
+
+        let totalWithoutDiscount = parseInt(route?.params?.data?.total) + (parseInt(route?.params?.data?.total) * (parseInt(route?.params?.data?.applicable_discount)/100));
+        setIsTotal(totalWithoutDiscount);
+       
         setFieldsParts(values2);
     }, [route?.params?.data]);
 
@@ -1276,6 +1187,24 @@ const EditRepairOrder = ({
                             <View style={{ flex: 0.5 }}></View>
                         </View>
 
+                        <TextInput
+                            mode="outlined"
+                            label="Discount on Total"
+                            style={styles.input}
+                            placeholder="Discount on Total"
+                            value={isDiscountOnTotal}
+                            onChangeText={(e) => {
+                                handleDiscountOnTotal(e);
+                            }}
+                            // onChangeText={(text) => setIsDiscountOnTotal(text)}
+                            keyboardType={"numeric"}
+                        />
+                        {isDiscountOnTotal > 100 ? (
+                            <Text style={styles.errorTextStyle}>
+                                Discounted should be less then 100.
+                            </Text>
+                        ) : null}
+
                         <Text
                             style={[styles.headingStyle, { marginTop: 20 }]}
                         >
@@ -1404,7 +1333,7 @@ const EditRepairOrder = ({
                                     ]}
                                 >
                                     <Text style={styles.partNameContent}>
-                                        Total {"\n"} (Inclusive of Taxes)
+                                        Total {"\n"} after discount
                                     </Text>
                                 </View>
                                 <View
@@ -1429,7 +1358,7 @@ const EditRepairOrder = ({
                                                 color: colors.black,
                                             }}
                                         >
-                                            {isTotal}
+                                            {isTotalAfterDiscount}
                                         </Text>
                                     </View>
                                 </View>
@@ -1686,7 +1615,7 @@ const EditRepairOrder = ({
                             onPress={() => {
                                 setPartListModal(false);
                                 setSearchQueryForParts("");
-                                onPartRefresh();
+                                getPartList();
                             }}
                         />
                         <Text
@@ -1737,7 +1666,7 @@ const EditRepairOrder = ({
                                                         colors.light_gray
                                                     }
                                                     onPress={() =>
-                                                        onPartRefresh()
+                                                        getPartList()
                                                     }
                                                 />
                                             )
@@ -1776,17 +1705,7 @@ const EditRepairOrder = ({
                                     borderWidth: 1,
                                     flex: 1,
                                 }}
-                                onEndReached={loadMoreParts ? getPartList : null}
-                                onEndReachedThreshold={0.5}
                                 contentContainerStyle={{ flexGrow: 1 }}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={partRefreshing}
-                                        onRefresh={onPartRefresh}
-                                        colors={["green"]}
-                                    />
-                                }
-                                ListFooterComponent={loadMoreParts ? renderPartFooter : null}
                                 ListEmptyComponent={() => (
                                     !isLoading && (
                                         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
@@ -1832,7 +1751,7 @@ const EditRepairOrder = ({
                                                 setPartError("");
                                                 setPartListModal(false);
                                                 setSearchQueryForParts("");
-                                                onPartRefresh();
+                                                getPartList();
                                             }}
                                         />
                                 )}
@@ -1881,7 +1800,7 @@ const EditRepairOrder = ({
                         onDismiss={() => {
                             setServiceListModal(false);
                             setSearchQueryForServices("");
-                            onServiceRefresh();
+                            getServiceList();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -1901,7 +1820,7 @@ const EditRepairOrder = ({
                             onPress={() => {
                                 setServiceListModal(false);
                                 setSearchQueryForServices("");
-                                onServiceRefresh();
+                                getServiceList();
                             }}
                         />
                         <Text
@@ -1954,7 +1873,7 @@ const EditRepairOrder = ({
                                                         colors.light_gray
                                                     }
                                                     onPress={() =>
-                                                        onServiceRefresh()
+                                                        getServiceList()
                                                     }
                                                 />
                                             )
@@ -1993,17 +1912,7 @@ const EditRepairOrder = ({
                                     borderWidth: 1,
                                     flex: 1,
                                 }}
-                                onEndReached={loadMoreServices ? getServiceList : null}
-                                onEndReachedThreshold={0.5}
                                 contentContainerStyle={{ flexGrow: 1 }}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={serviceRefreshing}
-                                        onRefresh={onServiceRefresh}
-                                        colors={["green"]}
-                                    />
-                                }
-                                ListFooterComponent={loadMoreServices ? renderServiceFooter : null}
                                 ListEmptyComponent={() => (
                                     !isLoading && (
                                         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
@@ -2051,7 +1960,7 @@ const EditRepairOrder = ({
                                                     false
                                                 );
                                                 setSearchQueryForServices("");
-                                                onServiceRefresh();
+                                                getServiceList();
                                             }}
                                         />
                                 )}
