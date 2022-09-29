@@ -9,6 +9,7 @@ import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
 import moment from "moment";
 import { API_URL } from "../../constants/config";
 import Spinner from "react-native-loading-spinner-overlay";
+import CommonHeader from "../Component/CommonHeaderComponent";
 
 const OrderCompleted = ({ navigation, userRole, route, userToken, selectedGarageId, selectedGarage, user }) => {
 
@@ -86,9 +87,7 @@ const OrderCompleted = ({ navigation, userRole, route, userToken, selectedGarage
     
     return (
         <View style={{ flex: 1 }}>
-            <View style={{ marginBottom: 35 }}>
-            { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
-            </View>
+            <CommonHeader />
             <View style={styles.surfaceContainer}>
                 <ScrollView showsVerticalScrollIndicator={false}>
                     <View style={styles.upperContainer}>

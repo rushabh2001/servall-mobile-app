@@ -18,6 +18,7 @@ import moment from "moment";
 import Lightbox from "react-native-lightbox-v2";
 import { API_URL, WEB_URL } from "../constants/config";
 import Spinner from "react-native-loading-spinner-overlay";
+import CommonHeader from "../Component/CommonHeaderComponent";
 
 const VehicleList = ({
     userToken,
@@ -184,15 +185,9 @@ const VehicleList = ({
     return (
         <View style={{ flex: 1 }}>
             <View style={{ marginBottom: 35 }}>
-                {selectedGarageId == 0 ? (
-                    <Text style={styles.garageNameTitle}>
-                        All Garages - {user.name}
-                    </Text>
-                ) : (
-                    <Text style={styles.garageNameTitle}>
-                        Hello {user.name}!
-                    </Text>
-                )}
+                <Text style={styles.garageNameTitle}>
+                    Hello {user.name}!
+                </Text>
             </View>
             <View style={styles.surfaceContainer}>
                 <View>

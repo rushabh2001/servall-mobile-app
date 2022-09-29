@@ -29,6 +29,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { SliderPicker } from "react-native-slider-picker";
 import { Picker } from "@react-native-picker/picker";
 import Spinner from "react-native-loading-spinner-overlay";
+import CommonHeader from "../Component/CommonHeaderComponent";
 
 // Edit Repair Order
 const EditRepairOrder = ({
@@ -130,12 +131,14 @@ const EditRepairOrder = ({
     const [partsTotal, setPartsTotal] = useState(
         parseInt(route?.params?.data?.parts_total)
     );
-    const [isTotal, setIsTotal] = useState(0);
-    const [isApplicableDiscount, setIsApplicableDiscount] = useState(0);
+    const [isTotal, setIsTotal] = useState(
+        parseInt(route?.params?.data?.total)
+    );
+    const [isApplicableDiscount, setIsApplicableDiscount] = useState(
+        parseInt()
+    );
     const [isTotalServiceDiscount, setIsTotalServiceDiscount] = useState(0);
     const [isTotalPartDiscount, setIsTotalPartDiscount] = useState(0);
-    const [isTotalAfterDiscount, setIsTotalAfterDiscount] = useState(parseInt(route?.params?.data?.total));
-    const [isDiscountOnTotal, setIsDiscountOnTotal] = useState(route?.params?.data?.applicable_discount);
 
     const [fieldsServices, setFieldsServices] = useState([]);
     const [fieldsParts, setFieldsParts] = useState([]);
@@ -147,6 +150,16 @@ const EditRepairOrder = ({
     const [searchQueryForServices, setSearchQueryForServices] = useState();
     const [filteredServiceData, setFilteredServiceData] = useState([]);
     const [serviceListModal, setServiceListModal] = useState(false);
+
+    const [partPage, setPartPage] = useState(1);
+    const [isPartScrollLoading, setIsPartScrollLoading] = useState(false);
+    const [partRefreshing, setPartRefreshing] = useState(false);
+    const [loadMoreParts, setLoadMoreParts] = useState(true);
+
+    const [servicePage, setServicePage] = useState(1);
+    const [isServiceScrollLoading, setIsServiceScrollLoading] = useState(false);
+    const [serviceRefreshing, setServiceRefreshing] = useState(false);
+    const [loadMoreServices, setLoadMoreServices] = useState(true);
 
     function handleServiceChange(i, value) {
         const values = [...fieldsServices];
@@ -166,6 +179,7 @@ const EditRepairOrder = ({
             total += parseInt(item.amount);
         });
         setServicesTotal(parseInt(total));
+        setIsTotal(parseInt(total) + parseInt(partsTotal));
 
         // Calculate Total of Order
         values[i]["applicableDiscountForItem"] =
@@ -177,12 +191,9 @@ const EditRepairOrder = ({
             discountTotal += item.applicableDiscountForItem;
         });
         setIsTotalServiceDiscount(parseInt(discountTotal));
-        let totalDiscount = (total + partsTotal) * (isDiscountOnTotal/100);
-        setIsApplicableDiscount(parseInt(totalDiscount) + parseInt(discountTotal) + parseInt(isTotalPartDiscount));
-
-         // Calculate Total of Order
-         setIsTotal(parseInt(total) + parseInt(partsTotal));
-         setIsTotalAfterDiscount(total + partsTotal - totalDiscount);
+        setIsApplicableDiscount(
+            parseInt(discountTotal) + parseInt(isTotalPartDiscount)
+        );
     }
 
     function handleServiceAdd(data) {
@@ -222,6 +233,7 @@ const EditRepairOrder = ({
             total += parseInt(item.amount);
         });
         setServicesTotal(total);
+        setIsTotal(parseInt(total) + parseInt(partsTotal));
 
         // Calculate Total of Order
         let discountTotal = 0;
@@ -229,12 +241,9 @@ const EditRepairOrder = ({
             discountTotal += item.applicableDiscountForItem;
         });
         setIsTotalServiceDiscount(discountTotal);
-        let totalDiscount = (total + partsTotal) * (isDiscountOnTotal/100);
-        setIsApplicableDiscount(parseInt(totalDiscount) + parseInt(discountTotal) + parseInt(isTotalPartDiscount));
-
-         // Calculate Total of Order
-         setIsTotal(parseInt(total) + parseInt(partsTotal));
-         setIsTotalAfterDiscount(total + partsTotal - totalDiscount);
+        setIsApplicableDiscount(
+            parseInt(discountTotal) + parseInt(isTotalPartDiscount)
+        );
     }
 
     // Function for Parts Fields
@@ -259,6 +268,7 @@ const EditRepairOrder = ({
         setPartsTotal(parseInt(total));
 
         // Calculate Total of Order
+        setIsTotal(parseInt(total) + parseInt(servicesTotal));
         partValues[i]["applicableDiscountForItem"] =
             partValues[i]["rate"] *
             partValues[i]["qty"] *
@@ -268,12 +278,9 @@ const EditRepairOrder = ({
             discountTotal += item.applicableDiscountForItem;
         });
         setIsTotalPartDiscount(parseInt(discountTotal));
-        let totalDiscount = (total + servicesTotal) * (parseInt(isDiscountOnTotal)/100);
-        setIsApplicableDiscount(parseInt(totalDiscount) + parseInt(discountTotal) + parseInt(isTotalServiceDiscount));
-
-         // Calculate Total of Order
-         setIsTotal(parseInt(total) + parseInt(servicesTotal));
-         setIsTotalAfterDiscount(total + servicesTotal - totalDiscount);
+        setIsApplicableDiscount(
+            parseInt(discountTotal) + parseInt(isTotalServiceDiscount)
+        );
     }
 
     function handlePartAdd(data) {
@@ -315,24 +322,15 @@ const EditRepairOrder = ({
         setPartsTotal(parseInt(total));
 
         // Calculate Total of Order
+        setIsTotal(parseInt(total) + parseInt(servicesTotal));
         let discountTotal = 0;
         partValues.forEach((item) => {
             discountTotal += item.applicableDiscountForItem;
         });
         setIsTotalPartDiscount(discountTotal);
-        let totalDiscount = (total + servicesTotal) * (isDiscountOnTotal/100);
-        setIsApplicableDiscount(parseInt(totalDiscount) + parseInt(discountTotal) + parseInt(isTotalServiceDiscount));
-
-         // Calculate Total of Order
-         setIsTotal(parseInt(total) + parseInt(servicesTotal));
-         setIsTotalAfterDiscount(total + servicesTotal - totalDiscount);
-    }
-
-    function handleDiscountOnTotal(i) {
-        setIsDiscountOnTotal(i);
-        const totalDiscount = isTotal * (i/100);
-        setIsApplicableDiscount(totalDiscount + isTotalServiceDiscount + isTotalPartDiscount);
-        setIsTotalAfterDiscount(isTotal - totalDiscount);
+        setIsApplicableDiscount(
+            parseInt(discountTotal) + parseInt(isTotalServiceDiscount)
+        );
     }
 
     const selectVehicleImg = async () => {
@@ -436,12 +434,12 @@ const EditRepairOrder = ({
                 "YYYY-MM-DD hh:mm:ss"
             )
         );
-        data.append("status", isOrderStatus);
+        // data.append("status", isOrderStatus);
         data.append("labor_total", parseInt(servicesTotal));
         data.append("parts_total", parseInt(partsTotal));
-        data.append("discount", parseInt(isDiscountOnTotal));
+        data.append("discount", 0);
         // if(isVehicleImg != null) data.append("orderimage", isVehicleImg);
-        data.append("total", parseInt(isTotalAfterDiscount));
+        data.append("total", parseInt(isTotal));
         if(isComment) data.append("comment", isComment?.trim());
 
         editOrder(data);
@@ -512,9 +510,10 @@ const EditRepairOrder = ({
     };
 
     const getPartList = async () => {
+        setIsLoading(true)
         try {
             const res = await fetch(`${API_URL}fetch_parts`, {
-                method: "POST",
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
@@ -523,10 +522,10 @@ const EditRepairOrder = ({
             });
             const json = await res.json();
             if (json !== undefined) {
-                // setPartList(json.data);
-                // setFilteredPartData(json.data);
                 setPartList(json.data);
                 setFilteredPartData(json.data);
+                // setPartList([...partList, ...json.data.data]);
+                // setFilteredPartData([...filteredPartData, ...json.data.data]);
                 setIsLoading(false);
             }
         } catch (e) {
@@ -538,7 +537,7 @@ const EditRepairOrder = ({
         setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_parts`, {
-                method: "POST",
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
@@ -557,11 +556,12 @@ const EditRepairOrder = ({
     };
 
     const getServiceList = async () => {
+        setIsLoading(true);
         try {
             const res = await fetch(
                 `${API_URL}fetch_service`,
                 {
-                    method: "POST",
+                    method: "GET",
                     headers: {
                         Accept: "application/json",
                         "Content-Type": "application/json",
@@ -584,7 +584,7 @@ const EditRepairOrder = ({
         setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_service`, {
-                method: "POST",
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
@@ -636,7 +636,7 @@ const EditRepairOrder = ({
     const addNewPart = async () => {
         try {
             const res = await fetch(`${API_URL}add_parts`, {
-                method: "POST",
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
@@ -696,38 +696,23 @@ const EditRepairOrder = ({
                 amount: item.amount,
             });
         });
-
-        let total = 0;
-        values.forEach((item) => {
-            total += parseInt(item.amount);
-        });
-        setServicesTotal(parseInt(total));
-
-        let total2 = 0;
-        values2.forEach((item) => {
-            total2 += parseInt(item.amount);
-        });
-        setPartsTotal(parseInt(total));
-
-        let discountTotal1 = 0;
-        route?.params?.data?.parts_list.forEach((item) => {
-            discountTotal1 += item.rate * item.qty * (item.discount / 100);
-        });
-        setIsTotalPartDiscount(parseInt(discountTotal1));
-        let discountTotal2 = 0;
-        route?.params?.data?.services_list.forEach((item) => {
-            discountTotal2 += item.rate * item.qty * (item.discount / 100)
-        });
-        setIsTotalServiceDiscount(parseInt(discountTotal2));
-        let discountTotal = discountTotal1 + discountTotal2;
-
-        let totalDiscount = (parseInt(route?.params?.data?.total) * (parseInt(route?.params?.data?.applicable_discount)/100));
-        setIsApplicableDiscount(totalDiscount + discountTotal);
-
-        let totalWithoutDiscount = parseInt(route?.params?.data?.total) + (parseInt(route?.params?.data?.total) * (parseInt(route?.params?.data?.applicable_discount)/100));
-        setIsTotal(totalWithoutDiscount);
-       
         setFieldsParts(values2);
+
+        // Calculate Total of Order
+        let discountServicesTotal = 0;
+        values.forEach((item) => {
+            discountServicesTotal += item.applicableDiscountForItem;
+        });
+        setIsTotalServiceDiscount(discountServicesTotal);
+        let discountPartsTotal = 0;
+        values2.forEach((item) => {
+            discountPartsTotal += item.applicableDiscountForItem;
+        });
+        setIsTotalPartDiscount(discountPartsTotal);
+
+        let totalDiscount = (discountPartsTotal + discountServicesTotal);
+        setIsApplicableDiscount(parseInt(totalDiscount));
+
     }, [route?.params?.data]);
 
     useEffect(() => {
@@ -737,17 +722,7 @@ const EditRepairOrder = ({
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={{ marginBottom: 35 }}>
-                {selectedGarageId == 0 ? (
-                    <Text style={styles.garageNameTitle}>
-                        All Garages - {user.name}
-                    </Text>
-                ) : (
-                    <Text style={styles.garageNameTitle}>
-                        {selectedGarage?.garage_name} - {user.name}
-                    </Text>
-                )}
-            </View>
+            <CommonHeader />
             <View style={styles.pageContainer}>
                 <InputScrollView
                     contentContainerStyle={{
@@ -1187,24 +1162,6 @@ const EditRepairOrder = ({
                             <View style={{ flex: 0.5 }}></View>
                         </View>
 
-                        <TextInput
-                            mode="outlined"
-                            label="Discount on Total"
-                            style={styles.input}
-                            placeholder="Discount on Total"
-                            value={isDiscountOnTotal}
-                            onChangeText={(e) => {
-                                handleDiscountOnTotal(e);
-                            }}
-                            // onChangeText={(text) => setIsDiscountOnTotal(text)}
-                            keyboardType={"numeric"}
-                        />
-                        {isDiscountOnTotal > 100 ? (
-                            <Text style={styles.errorTextStyle}>
-                                Discounted should be less then 100.
-                            </Text>
-                        ) : null}
-
                         <Text
                             style={[styles.headingStyle, { marginTop: 20 }]}
                         >
@@ -1291,49 +1248,11 @@ const EditRepairOrder = ({
                                 <View
                                     style={[
                                         styles.totalFieldsLeftContent,
-                                        { flex: 0.8 },
-                                    ]}
-                                >
-                                    <Text style={styles.partNameContent}>
-                                        Applicable Discount
-                                    </Text>
-                                </View>
-                                <View
-                                    style={[
-                                        styles.totalFieldsRightContent,
-                                        { flex: 1 },
-                                    ]}
-                                >
-                                    <Text
-                                        style={
-                                            styles.totalFieldTextContainer
-                                        }
-                                    >
-                                        INR{" "}
-                                    </Text>
-                                    <View
-                                        style={styles.totalFieldContainer}
-                                    >
-                                        <Text
-                                            style={{
-                                                fontSize: 18,
-                                                color: colors.black,
-                                            }}
-                                        >
-                                            {isApplicableDiscount}
-                                        </Text>
-                                    </View>
-                                </View>
-                            </View>
-                            <View style={styles.totalFieldsGroup}>
-                                <View
-                                    style={[
-                                        styles.totalFieldsLeftContent,
                                         { flex: 0.9 },
                                     ]}
                                 >
                                     <Text style={styles.partNameContent}>
-                                        Total {"\n"} after discount
+                                        Total {"\n"} (Inclusive of Taxes)
                                     </Text>
                                 </View>
                                 <View
@@ -1358,7 +1277,7 @@ const EditRepairOrder = ({
                                                 color: colors.black,
                                             }}
                                         >
-                                            {isTotalAfterDiscount}
+                                            {isTotal}
                                         </Text>
                                     </View>
                                 </View>
@@ -1595,7 +1514,7 @@ const EditRepairOrder = ({
                         onDismiss={() => {
                             setPartListModal(false);
                             setSearchQueryForParts("");
-                            onPartRefresh();
+                            getPartList();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,

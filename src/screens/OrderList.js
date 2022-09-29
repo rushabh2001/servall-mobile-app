@@ -8,6 +8,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import moment from 'moment';
 import RBSheet from "react-native-raw-bottom-sheet";
 import Spinner from "react-native-loading-spinner-overlay";
+import CommonHeader from "../Component/CommonHeaderComponent";
 
 const OrderList = ({navigation, userToken, navigator, selectedGarageId, selectedGarage, user  }) => {
     const [isLoading, setIsLoading] = useState(true);
@@ -127,9 +128,7 @@ const OrderList = ({navigation, userToken, navigator, selectedGarageId, selected
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={{ marginBottom: 35 }}>
-                { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
-            </View>
+            <CommonHeader />
             <View style={styles.surfaceContainer}>
                 <Searchbar
                     placeholder="Search here..."

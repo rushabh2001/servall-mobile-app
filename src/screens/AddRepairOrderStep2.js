@@ -1,25 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-    View,
-    Text,
-    StyleSheet,
-    Keyboard,
-    ActivityIndicator,
-    TouchableOpacity,
-    RefreshControl,
-    FlatList,
-    Alert,
-    Platform,
-} from "react-native";
-import {
-    Modal,
-    Portal,
-    Divider,
-    TextInput,
-    Button,
-    List,
-    Searchbar,
-} from "react-native-paper";
+import { View, Text, StyleSheet, Keyboard, ActivityIndicator, TouchableOpacity, RefreshControl, FlatList, Alert, Platform, } from "react-native";
+import { Modal, Portal, Divider, TextInput, Button, List, Searchbar, } from "react-native-paper";
 import { connect } from "react-redux";
 import { colors } from "../constants";
 import { API_URL } from "../constants/config";
@@ -39,18 +20,8 @@ import VehicalModalComponet from "../Component/VehicalModalComponet";
 const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 const phoneReg = /^[0-9]{10}$/;
 
-const AddRepairOrderStep2 = ({
-    navigation,
-    userRole,
-    userToken,
-    selectedGarageId,
-    selectedGarage,
-    user,
-    userId,
-    garageId,
-}) => {
+const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId, selectedGarage, user, userId, garageId, }) => {
     const [isUserVehicleDetails, setIsUserVehicleDetails] = useState("");
-
     // Customer Fields
     const [isName, setIsName] = useState();
     const [isEmail, setIsEmail] = useState();
@@ -106,10 +77,6 @@ const AddRepairOrderStep2 = ({
     const [garageIdError, setGarageIdError] = useState();
     const [loadMoreGarages, setLoadMoreGarages] = useState(true);
 
-    const [garagePage, setGaragePage] = useState(1);
-    const [isGarageScrollLoading, setIsGarageScrollLoading] = useState(false);
-    const [garageRefreshing, setGarageRefreshing] = useState(false);
-
     const [cityFieldToggle, setCityFieldToggle] = useState(false);
     const [modelFieldToggle, setModelFieldToggle] = useState(false);
 
@@ -138,7 +105,7 @@ const AddRepairOrderStep2 = ({
     const [isModelName, setIsModelName] = useState();
     const [modelList, setModelList] = useState([]);
     const [modelListModal, setModelListModal] = useState(false);
-    
+
     const [modelError, setModelError] = useState(""); // Error State
     // Insurance Provider Company for Dropdown
     const [isInsuranceProvider, setIsInsuranceProvider] = useState("");
@@ -184,6 +151,8 @@ const AddRepairOrderStep2 = ({
     const isVehicalNumRef = useRef();
     const isAddressRef = useRef();
     const scrollViewRef = useRef();
+
+    
 
     const selectRegistrationCrtImg = async () => {
         // Opening Document Picker to select one file
@@ -338,11 +307,6 @@ const AddRepairOrderStep2 = ({
                     isPhoneRef.current.focus();
                     return false;
                 }
-                if (!isPhoneNumber ||
-                    isPhoneNumber?.trim().length === 0) {
-                    isPhoneRef.current.focus();
-                    return false;
-                }
                 if (!isState ||
                     isState === 0) {
                     isPhoneRef.current.focus();
@@ -368,6 +332,7 @@ const AddRepairOrderStep2 = ({
                     isVehicalNumRef.current.focus();
                     return false;
                 }
+                return true;
             }
             else {
                 if (!isGarageId ||
@@ -394,6 +359,7 @@ const AddRepairOrderStep2 = ({
                     isVehicalNumRef.current.focus();
                     return false;
                 }
+                return true;
             }
         }
     };
@@ -555,12 +521,8 @@ const AddRepairOrderStep2 = ({
                             vehicle_registration_number:
                                 res.data.vehicle_data
                                     .vehicle_registration_number,
-                            brand_name: brandList.find(
-                                (data) => data.id == isBrand
-                            ).name,
-                            model_name: modelList.find(
-                                (data) => data.id == isModel
-                            ).model_name,
+                            brand_name: isBrandName,
+                            model_name: isModelName,
                             garage_id: res.data.garage_id,
                         };
                         // console.log('res', jsonData);
@@ -820,38 +782,25 @@ const AddRepairOrderStep2 = ({
     };
 
     const getGarageList = async () => {
-        if (garagePage == 1) setIsLoading(true)
-        if (garagePage != 1) setIsGarageScrollLoading(true)
+        setIsLoading(true);
         try {
             const res = await fetch(
-                `${API_URL}fetch_owner_garages?page=${garagePage}`,
+                `${API_URL}fetch_owner_garages?user_id=${userId}&user_role=${userRole}`,
                 {
-                    method: "POST",
+                    method: "GET",
                     headers: {
                         Accept: "application/json",
                         "Content-Type": "application/json",
                         Authorization: "Bearer " + userToken,
                     },
-                    body: JSON.stringify({
-                        user_id: userId,
-                        user_role: userRole,
-                        search: searchQueryForGarages,
-                    }),
                 }
             );
             const json = await res.json();
             console.log(json);
             if (json !== undefined) {
-                setGarageList([...garageList, ...json.garage_list.data]);
-                setFilteredGarageData([
-                    ...filteredGarageData,
-                    ...json.garage_list.data,
-                ]);
+                setGarageList(json.garage_list);
+                setFilteredGarageData(json.garage_list);
                 setIsLoading(false);
-                setIsGarageScrollLoading(false)
-                { json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false) }
-                { json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(garagePage + 1) : null }
-                // setGarageList(json.garage_list);
             }
         } catch (e) {
             console.log(e);
@@ -861,78 +810,23 @@ const AddRepairOrderStep2 = ({
     const searchFilterForGarages = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch(`${API_URL}fetch_owner_garages`, {
-                method: "POST",
+            const response = await fetch(`${API_URL}fetch_owner_garages?user_id=${userId}&user_role=${userRole}`, {
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify({
-                    user_id: userId,
-                    user_role: userRole,
-                    search: searchQueryForGarages,
-                }),
             });
             const json = await response.json();
             if (response.status == "200") {
-                setGarageList(json.garage_list.data);
-                setFilteredGarageData(json.garage_list.data);
-                { json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false) }
-                { json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(2) : null }
-                setGarageRefreshing(false);
+                setGarageList(json.garage_list);
+                setFilteredGarageData(json.garage_list);
                 setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
         }
-    };
-
-    const pullGarageRefresh = async () => {
-        setSearchQueryForGarages(null);
-        try {
-            const response = await fetch(`${API_URL}fetch_owner_garages`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    user_id: userId,
-                    user_role: userRole,
-                    search: null,
-                }),
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setGarageList(json.garage_list.data);
-                setFilteredGarageData(json.garage_list.data);
-                { json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false) }
-                { json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(2) : null }
-                setGarageRefreshing(false);
-                setIsLoading(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const renderGarageFooter = () => {
-        return (
-            <>
-                {isGarageScrollLoading && (
-                    <View style={styles.footer}>
-                        <ActivityIndicator size="large" />
-                    </View>
-                )}
-            </>
-        );
-    };
-
-    const onGarageRefresh = () => {
-        setGarageRefreshing(true);
-        pullGarageRefresh();
     };
 
     const getUserList = async () => {
@@ -2185,7 +2079,7 @@ const AddRepairOrderStep2 = ({
                         visible={garageListModal}
                         onDismiss={() => {
                             setGarageListModal(false);
-                            onGarageRefresh();
+                            getGarageList();
                             setSearchQueryForGarages("");
                         }}
                         contentContainerStyle={[
@@ -2214,7 +2108,7 @@ const AddRepairOrderStep2 = ({
                             onPress={() => {
                                 setGarageListModal(false);
                                 setSearchQueryForGarages("");
-                                onGarageRefresh();
+                                getGarageList();
                             }}
                         />
                         <View
@@ -2263,7 +2157,7 @@ const AddRepairOrderStep2 = ({
                                                         colors.light_gray
                                                     }
                                                     onPress={() =>
-                                                        onGarageRefresh()
+                                                        getGarageList()
                                                     }
                                                 />
                                             )
@@ -2297,17 +2191,7 @@ const AddRepairOrderStep2 = ({
                                 ItemSeparatorComponent={() => (!isLoading && <Divider />)}
                                 data={filteredGarageData}
                                 onEndReached={loadMoreGarages ? getGarageList : null}
-                                showsVerticalScrollIndicator={false}
-                                onEndReachedThreshold={0.5}
                                 contentContainerStyle={{ flexGrow: 1 }}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={garageRefreshing}
-                                        onRefresh={onGarageRefresh}
-                                        colors={["green"]}
-                                    />
-                                }
-                                ListFooterComponent={loadMoreGarages ? renderGarageFooter : null}
                                 ListEmptyComponent={() => (
                                     !isLoading && (
                                         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
@@ -2351,7 +2235,7 @@ const AddRepairOrderStep2 = ({
                                             setIsGarageId(item.id);
                                             setGarageError("");
                                             setGarageIdError("");
-                                            onGarageRefresh();
+                                            getGarageList();
                                             setSearchQueryForGarages("");
                                             setGarageListModal(false);
                                         }}
@@ -2370,15 +2254,14 @@ const AddRepairOrderStep2 = ({
                         setError={(val) => { setBrandError(val) }}
 
                     />
+                    {/* Vehicle Model List Modal */}
                     <VehicalModalComponet visible={modelListModal} brand={isBrand}
                         closeModal={(val) => setModelListModal(val)}
                         modelName={(val) => { setIsModelName(val) }}
                         ModalId={(val) => { setIsModel(val) }}
-                        // setError={(val) => { setBrandError(val) }}
-
+                        modelError={(val) => { setModelError(val) }}
+                        IsLoading={(val) => {setIsLoading(val)}}
                     />
-                    {/* Vehicle Model List Modal */}
-                    
 
                     {/* States List Modal */}
                     <Modal

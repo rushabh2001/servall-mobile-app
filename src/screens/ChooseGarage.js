@@ -15,6 +15,7 @@ import Icon from "react-native-vector-icons/FontAwesome5";
 import { API_URL } from "../constants/config";
 import { setSelectedGarage } from "../actions/garage";
 import Spinner from "react-native-loading-spinner-overlay";
+import CommonHeader from "../Component/CommonHeaderComponent";
 
 const ChooseGarage = ({
     navigation,
@@ -36,89 +37,33 @@ const ChooseGarage = ({
     const [loadMoreGarages, setLoadMoreGarages] = useState(true);
 
     const getGarageList = async () => {
-        if(page == 1) setIsLoading(true)
-        if(page != 1) setIsScrollLoading(true)
+        setIsLoading(true)
         try {
             const res = await fetch(
-                `${API_URL}fetch_owner_garages?page=${page}`,
+                `${API_URL}fetch_owner_garages?user_id=${userId}&user_role=${userRole}`,
                 {
-                    method: "POST",
+                    method: "GET",
                     headers: {
                         Accept: "application/json",
                         "Content-Type": "application/json",
                         Authorization: "Bearer " + userToken,
                     },
-                    body: JSON.stringify({
-                        user_id: userId,
-                        user_role: userRole,
-                        search: "",
-                    }),
                 }
             );
             const json = await res.json();
             console.log("fetch_owner_garages", json);
             if (json !== undefined) {
-                setData([...data, ...json.garage_list.data]);
-                if(page == 1) setIsLoading(false)
-                if(page != 1) setIsScrollLoading(false)
-                {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
-                {json.garage_list.current_page != json.garage_list.last_page ? setPage(page + 1) : null}
+                setData(json.garage_list);
+                setIsLoading(false)
             }
         } catch (e) {
             console.log(e);
         }
     };
 
-    const pullRefresh = async () => {
-        try {
-            const response = await fetch(`${API_URL}fetch_owner_garages`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    user_id: userId,
-                    user_role: userRole,
-                    search: "",
-                }),
-            });
-            const json = await response.json();
-            console.log("1", json);
-            if (response.status == "200") {
-                setData(json.garage_list.data);
-                {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
-                {json.garage_list.current_page != json.garage_list.last_page ? setPage(2) : null}
-                setRefreshing(false);
-                setIsLoading(false);
-            }
-        } catch (error) {
-            // if (error?.message == 'Unauthenticated.') signOut();
-            console.error(error);
-        }
-    };
-
-    const renderFooter = () => {
-        return (
-            <>
-                {isScrollLoading && (
-                    <View style={styles.footer}>
-                        <ActivityIndicator size="large" />
-                    </View>
-                )}
-            </>
-        );
-    };
-
-    const onRefresh = () => {
-        setRefreshing(true);
-        pullRefresh();
-    };
-
     useEffect(() => {
         setIsLoading(true);
-        pullRefresh();
+        getGarageList();
 
         // if (isFocused) {
         //     setData([]);
@@ -130,19 +75,10 @@ const ChooseGarage = ({
 
     return (
         <View style={{ flex: 1 }}>
+            <CommonHeader />
             {!isLoading && 
                 <>
-                    <View style={{ marginBottom: 35 }}>
-                        {selectedGarageId == 0 ? (
-                            <Text style={styles.garageNameTitle}>
-                                All Garages - {user.name}
-                            </Text>
-                        ) : (
-                            <Text style={styles.garageNameTitle}>
-                                {selectedGarage?.garage_name} - {user.name}
-                            </Text>
-                        )}
-                    </View>
+                  
                     <View style={styles.surfaceContainer}>
                         <View
                             style={[
@@ -203,17 +139,7 @@ const ChooseGarage = ({
                                 showsVerticalScrollIndicator={false}
                                 ItemSeparatorComponent={() => <Divider />}
                                 data={data}
-                                onEndReached={loadMoreGarages ? getGarageList : null}
-                                onEndReachedThreshold={0.5}
                                 contentContainerStyle={{ flexGrow: 1 }}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={refreshing}
-                                        onRefresh={onRefresh}
-                                        colors={["green"]}
-                                    />
-                                }
-                                ListFooterComponent={loadMoreGarages ? renderFooter : null}
                                 ListEmptyComponent={() => (
                                     !isLoading && (
                                         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>

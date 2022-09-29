@@ -8,6 +8,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { WebView } from 'react-native-webview';
 import RNFetchBlob from 'rn-fetch-blob';
 import Toast from 'react-native-toast-message';
+import CommonHeader from "../Component/CommonHeaderComponent";
 
 const InvoicePreview = ({ userToken, selectedGarageId, selectedGarage, user, route  }) => {
     const [isLoading, setIsLoading] = useState(true);
@@ -128,9 +129,7 @@ const InvoicePreview = ({ userToken, selectedGarageId, selectedGarage, user, rou
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={{ marginBottom: 35 }}>
-            { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
-            </View>
+            <CommonHeader />
             <View style={styles.surfaceContainer}>
                 {isLoading ? <View style={{ flex: 1, justifyContent: "center"}}><ActivityIndicator></ActivityIndicator></View> :
                     <>  

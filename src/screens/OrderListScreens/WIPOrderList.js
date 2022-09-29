@@ -19,6 +19,7 @@ import moment from "moment";
 import RBSheet from "react-native-raw-bottom-sheet";
 import { useIsFocused } from "@react-navigation/native";
 import Spinner from "react-native-loading-spinner-overlay";
+import CommonHeader from "../Component/CommonHeaderComponent";
 
 const WIPOrderList = ({
     navigation,
@@ -158,17 +159,7 @@ const WIPOrderList = ({
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={{ marginBottom: 35 }}>
-                {selectedGarageId == 0 ? (
-                    <Text style={styles.garageNameTitle}>
-                        All Garages - {user.name}
-                    </Text>
-                ) : (
-                    <Text style={styles.garageNameTitle}>
-                        {selectedGarage?.garage_name} - {user.name}
-                    </Text>
-                )}
-            </View>
+            <CommonHeader />
             <View style={styles.surfaceContainer}>
                 <View>
                     <View style={{ marginBottom: 15, flexDirection: "row" }}>
