@@ -291,6 +291,9 @@ const VehicalModalComponet = ({ visible, closeModal, brand, userToken, modelName
                                     ModalId(item.id);
                                     modelError("");
                                     closeModal()
+                                    search_text.current.clear();
+                                    setFilteredModelData(modelList);
+                                    setSearchQueryForModels(null);
                                 }}
                             />
                         )}

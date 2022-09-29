@@ -285,6 +285,9 @@ const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, set
                                     setModalVisible(false)
                                     closeModal(false)
                                     setError("");
+                                    search_text.current.clear(); 
+                                    setFilteredBrandData(bradData)
+                                    setSearchQueryForBrands(null);
                                     // setBrandListModal(false);
                                 }}
                             />

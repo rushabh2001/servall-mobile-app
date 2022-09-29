@@ -1,25 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-    View,
-    Text,
-    StyleSheet,
-    Keyboard,
-    ActivityIndicator,
-    TouchableOpacity,
-    RefreshControl,
-    FlatList,
-    Alert,
-    Platform,
-} from "react-native";
-import {
-    Modal,
-    Portal,
-    Divider,
-    TextInput,
-    Button,
-    List,
-    Searchbar,
-} from "react-native-paper";
+import { View, Text, StyleSheet, Keyboard, ActivityIndicator, TouchableOpacity, RefreshControl, FlatList, Alert, Platform, } from "react-native";
+import { Modal, Portal, Divider, TextInput, Button, List, Searchbar, } from "react-native-paper";
 import { connect } from "react-redux";
 import { colors } from "../constants";
 import { API_URL } from "../constants/config";
@@ -39,18 +20,8 @@ import VehicalModalComponet from "../Component/VehicalModalComponet";
 const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 const phoneReg = /^[0-9]{10}$/;
 
-const AddRepairOrderStep2 = ({
-    navigation,
-    userRole,
-    userToken,
-    selectedGarageId,
-    selectedGarage,
-    user,
-    userId,
-    garageId,
-}) => {
+const AddRepairOrderStep2 = ({ navigation, userRole, userToken, selectedGarageId, selectedGarage, user, userId, garageId, }) => {
     const [isUserVehicleDetails, setIsUserVehicleDetails] = useState("");
-
     // Customer Fields
     const [isName, setIsName] = useState();
     const [isEmail, setIsEmail] = useState();
@@ -138,7 +109,7 @@ const AddRepairOrderStep2 = ({
     const [isModelName, setIsModelName] = useState();
     const [modelList, setModelList] = useState([]);
     const [modelListModal, setModelListModal] = useState(false);
-    
+
     const [modelError, setModelError] = useState(""); // Error State
     // Insurance Provider Company for Dropdown
     const [isInsuranceProvider, setIsInsuranceProvider] = useState("");
@@ -2378,7 +2349,7 @@ const AddRepairOrderStep2 = ({
 
                     />
                     {/* Vehicle Model List Modal */}
-                    
+
 
                     {/* States List Modal */}
                     <Modal
