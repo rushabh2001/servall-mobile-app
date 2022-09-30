@@ -11,7 +11,7 @@ import { API_URL } from "../../constants/config";
 import Spinner from "react-native-loading-spinner-overlay";
 import CommonHeader from "../../Component/CommonHeaderComponent";
 
-const OrderCreated = ({ navigation, userRole, route, userToken, selectedGarageId, selectedGarage, user }) => {
+const OrderCreated = ({ navigation, userRole, route, userToken }) => {
 
     const [partData, setPartData] = useState([]);
     const [serviceData, setServiceData] = useState([]);
@@ -82,37 +82,9 @@ const OrderCreated = ({ navigation, userRole, route, userToken, selectedGarageId
         }
     }
 
-    // const changePartsStatus = async () => {
-    //     let orderStatusArray = [];
-    //     partData.forEach(item => {
-    //         orderStatusArray.push({ order_part_id: item.id, is_done: item.is_done });
-    //     });
-    //     try {
-    //         const res = await fetch(`${API_URL}part_status/update`, {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Accept': 'application/json',
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': 'Bearer ' + userToken
-    //             },
-    //             body: JSON.stringify({
-    //                 order_id: isOrderId,
-    //                 order_part: orderStatusArray,
-    //             }),
-    //         });
-    //         const json = await res.json();
-    //         if (json !== undefined) {
-    //             {(partData.length != 0 && serviceData.length != 0) && navigation.navigate('OrderWorkInProgress')}
-    //         }
-    //     } catch (e) {
-    //         console.log(e);
-    //     }
-    // }
-
     useEffect(() => {
         setServiceData(route?.params?.data?.services_list);
         setPartData(route?.params?.data?.parts_list);
-        // console.log(route?.params?.data?.parts_list);
     }, [route?.params?.data]);
     
     return (
@@ -399,9 +371,6 @@ const styles = StyleSheet.create({
 const mapStateToProps = state => ({
     userRole: state.role.user_role,
     userToken: state.user.userToken,
-    user: state.user.user,
-    selectedGarageId: state.garage.selected_garage_id,
-    selectedGarage: state.garage.selected_garage,
 })
 
 export default connect(mapStateToProps)(OrderCreated);

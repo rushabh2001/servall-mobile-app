@@ -11,7 +11,7 @@ import { API_URL } from "../../constants/config";
 import Spinner from "react-native-loading-spinner-overlay";
 import CommonHeader from "../../Component/CommonHeaderComponent";
 
-const OrderVehicleReady = ({ navigation, userRole, route, userToken, selectedGarageId, selectedGarage, user }) => {
+const OrderVehicleReady = ({ navigation, userRole, route, userToken }) => {
 
     const [partData, setPartData] = useState([]);
     const [serviceData, setServiceData] = useState([]);
@@ -314,17 +314,10 @@ const styles = StyleSheet.create({
     surfaceContainer: {
         flex:1,
         padding:15,
-        // marginBottom: 35
     },
     stepLables: {
-        // flexDirection: 'row',
-        // width: '100%',
-        // alignContent: 'space-between'
         flexDirection: "row", 
         alignItems:"center", 
-        // elevation: 3, 
-        // backgroundColor: colors.white,
-        // padding: 8,
         marginBottom: -15,
         justifyContent:"space-between",
         width: "100%",
@@ -360,7 +353,6 @@ const styles = StyleSheet.create({
     smallButton: {
         fontSize: 16,
         color: colors.primary,
-        // flex: 1,
         flexDirection: 'row',
         justifyContent: 'center',
         borderRadius: 2,
@@ -369,7 +361,6 @@ const styles = StyleSheet.create({
         padding: 3,
         marginHorizontal: 4,
         marginTop: 3,
-        // alignSelf: 'space-between'
     },
     cardContainer: {
         flexDirection: "row", 
@@ -379,7 +370,6 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         padding: 8,
         marginVertical: 10,
-        // marginHorizonal: 40,
         justifyContent:"space-around",
         width: "70%",
     },
@@ -388,9 +378,6 @@ const styles = StyleSheet.create({
 const mapStateToProps = state => ({
     userRole: state.role.user_role,
     userToken: state.user.userToken,
-    user: state.user.user,
-    selectedGarageId: state.garage.selected_garage_id,
-    selectedGarage: state.garage.selected_garage,
 })
 
 export default connect(mapStateToProps)(OrderVehicleReady);

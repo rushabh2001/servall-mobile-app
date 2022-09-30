@@ -15,16 +15,14 @@ import { API_URL } from "../constants/config";
 import IconX from "react-native-vector-icons/FontAwesome5";
 import Spinner from "react-native-loading-spinner-overlay";
 import CommonHeader from "../Component/CommonHeaderComponent";
+import { useIsFocused } from "@react-navigation/native";
 
 const AddRepairOrder = ({
     navigation,
     userToken,
     selectedGarageId,
-    selectedGarage,
-    user,
 }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [searchQuery, setSearchQuery] = useState();
     const [filteredData, setFilteredData] = useState([]);
     const [page, setPage] = useState(1);
@@ -32,13 +30,14 @@ const AddRepairOrder = ({
     const [isScrollLoading, setIsScrollLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [loadMoreVehicles, setLoadMoreVehicles] = useState(true);
+    const isFocused = useIsFocused();
 
     const getVehicleList = async () => {
         if(page == 1) setIsLoading(true)
         if(page != 1) setIsScrollLoading(true)
         try {
             const res = await fetch(
-                `${API_URL}fetch_all_vehicle_by_query/${isGarageId}?page=${page}`,
+                `${API_URL}fetch_all_vehicle_by_query/${selectedGarageId}?page=${page}`,
                 {
                     method: "POST",
                     headers: {
@@ -69,7 +68,7 @@ const AddRepairOrder = ({
         setIsLoading(true);
         try {
             const response = await fetch(
-                `${API_URL}fetch_all_vehicle_by_query/${isGarageId}`,
+                `${API_URL}fetch_all_vehicle_by_query/${selectedGarageId}`,
                 {
                     method: "POST",
                     headers: {
@@ -137,7 +136,7 @@ const AddRepairOrder = ({
         setSearchQuery(null);
         try {
             const response = await fetch(
-                `${API_URL}fetch_all_vehicle_by_query/${isGarageId}`,
+                `${API_URL}fetch_all_vehicle_by_query/${selectedGarageId}`,
                 {
                     method: "POST",
                     headers: {
@@ -183,7 +182,7 @@ const AddRepairOrder = ({
 
     useEffect(() => {
         getVehicleList();
-    }, []);
+    }, [isFocused, selectedGarageId]);
 
     return (
         <View style={{ flex: 1 }}>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import {
     Text,
     View,
@@ -14,8 +14,6 @@ import { Button, TextInput, TextInputMask } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
 import InputScrollView from "react-native-input-scroll-view";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import IconX from "react-native-vector-icons/FontAwesome5";
 import moment from "moment";
 import { API_URL } from "../constants/config";
 import Spinner from "react-native-loading-spinner-overlay";
@@ -23,12 +21,8 @@ import CommonHeader from "../Component/CommonHeaderComponent";
 
 const AddPayment = ({
     navigation,
-    userRole,
     route,
     userToken,
-    selectedGarageId,
-    selectedGarage,
-    user,
 }) => {
     const scroll1Ref = useRef();
 

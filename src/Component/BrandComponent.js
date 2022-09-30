@@ -18,7 +18,7 @@ import Modal from "react-native-modal";
 import Spinner from "react-native-loading-spinner-overlay";
 const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, setError }) => {
     const [filteredBrandData, setFilteredBrandData] = useState([]);
-    const [bradData, setBrandData] = useState([])
+    const [brandData, setBrandData] = useState([])
     const [isLoading, setIsLoading] = useState(false);
     const [modalVisible, setModalVisible] = useState(false)
     const [searchQueryForBrands, setSearchQueryForBrands] = useState();
@@ -64,10 +64,8 @@ const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, set
             console.log('data', newData)
             setFilteredBrandData(newData);
         } else {
-            setFilteredBrandData(bradData);
+            setFilteredBrandData(brandData);
         }
-
-
     };
     const addNewBrand = async () => {
         if (!newBrandName ||
@@ -206,7 +204,7 @@ const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, set
                                             color={
                                                 colors.light_gray
                                             }
-                                            onPress={() => { search_text.current.clear(); setFilteredBrandData(bradData) }
+                                            onPress={() => { search_text.current.clear(); setFilteredBrandData(brandData) }
                                             }
                                         />
                                     )
@@ -285,7 +283,7 @@ const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, set
                                     closeModal(false)
                                     setError("");
                                     search_text.current.clear(); 
-                                    setFilteredBrandData(bradData)
+                                    setFilteredBrandData(brandData)
                                     setSearchQueryForBrands(null);
                                     // setBrandListModal(false);
                                 }}

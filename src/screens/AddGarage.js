@@ -181,6 +181,13 @@ const AddGarage = ({
                     isPhoneRef.current.focus();
                     return false;
                 }
+                return true;
+            } else if (ownerOption == "existing_user") {
+                if (!ownerId ||
+                    ownerId === 0) {
+                    return false;
+                }
+                return true;
             }
         }
     };

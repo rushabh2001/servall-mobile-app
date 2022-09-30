@@ -12,7 +12,6 @@ import CommonHeader from "../Component/CommonHeaderComponent";
 
 const PurchaseOrderSelectOrder = ({navigation, userToken, selectedGarageId, navigator  }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState(); 
     const [filteredData, setFilteredData] = useState([]);
@@ -22,7 +21,7 @@ const PurchaseOrderSelectOrder = ({navigation, userToken, selectedGarageId, navi
 
     const getOrderList = async () => {
         try {
-            const res = await fetch(`${API_URL}fetch_garage_order/${isGarageId}`, {
+            const res = await fetch(`${API_URL}fetch_garage_order/${selectedGarageId}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',

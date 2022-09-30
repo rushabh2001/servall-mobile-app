@@ -24,11 +24,8 @@ const MyCustomer = ({
     navigation,
     userToken,
     selectedGarageId,
-    selectedGarage,
-    user,
 }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState();
     const [filteredData, setFilteredData] = useState([]);
@@ -56,7 +53,7 @@ const MyCustomer = ({
                         Authorization: "Bearer " + userToken,
                     },
                     body: JSON.stringify({
-                        garage_id: isGarageId,
+                        garage_id: selectedGarageId,
                         search: searchQuery,
                     }),
                 }
@@ -89,7 +86,7 @@ const MyCustomer = ({
                         Authorization: "Bearer " + userToken,
                     },
                     body: JSON.stringify({
-                        garage_id: isGarageId,
+                        garage_id: selectedGarageId,
                         search: searchQuery,
                     }),
                 }
@@ -121,7 +118,7 @@ const MyCustomer = ({
                         Authorization: "Bearer " + userToken,
                     },
                     body: JSON.stringify({
-                        garage_id: isGarageId,
+                        garage_id: selectedGarageId,
                         search: "",
                     }),
                 }
@@ -167,7 +164,7 @@ const MyCustomer = ({
         setPage(1);
         setIsLoading(true);
         pullRefresh();
-    }, [isFocused]);
+    }, [isFocused, selectedGarageId]);
 
     return (
         <View style={{ flex: 1 }}>

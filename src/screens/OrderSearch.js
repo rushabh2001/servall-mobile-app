@@ -19,6 +19,7 @@ import moment from "moment";
 import RBSheet from "react-native-raw-bottom-sheet";
 import Spinner from "react-native-loading-spinner-overlay";
 import CommonHeader from "../Component/CommonHeaderComponent";
+import { useIsFocused } from "@react-navigation/native";
 
 const OrderSearch = ({
     navigation,
@@ -29,7 +30,6 @@ const OrderSearch = ({
     navigator,
 }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [filteredData, setFilteredData] = useState([]);
@@ -37,17 +37,14 @@ const OrderSearch = ({
     const [isScrollLoading, setIsScrollLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [loadMoreOrders, setLoadMoreOrders] = useState(true);
+    const isFocused = useIsFocused();
 
     const getOrderList = async () => {
-        {
-            page == 1 && setIsLoading(true);
-        }
-        {
-            page != 1 && setIsScrollLoading(true);
-        }
+        if(page == 1) setIsLoading(true)
+        if(page != 1) setIsScrollLoading(true)
         try {
             const res = await fetch(
-                `${API_URL}fetch_garage_order/${isGarageId}?page=${page}`,
+                `${API_URL}fetch_garage_order/${selectedGarageId}?page=${page}`,
                 {
                     method: "POST",
                     headers: {
@@ -78,7 +75,7 @@ const OrderSearch = ({
         setIsLoading(true);
         try {
             const response = await fetch(
-                `${API_URL}fetch_garage_order/${isGarageId}`,
+                `${API_URL}fetch_garage_order/${selectedGarageId}`,
                 {
                     method: "POST",
                     headers: {
@@ -111,7 +108,7 @@ const OrderSearch = ({
         setSearchQuery(null);
         try {
             const response = await fetch(
-                `${API_URL}fetch_garage_order/${isGarageId}`,
+                `${API_URL}fetch_garage_order/${selectedGarageId}`,
                 {
                     method: "POST",
                     headers: {
@@ -156,7 +153,7 @@ const OrderSearch = ({
 
     useEffect(() => {
         getOrderList();
-    }, []);
+    }, [isFocused, selectedGarageId]);
 
     return (
         <View style={{ flex: 1 }}>

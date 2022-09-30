@@ -17,21 +17,15 @@ import CommonHeader from "../Component/CommonHeaderComponent";
 
 const EditStock = ({
     navigation,
-    userRole,
-    userId,
     userToken,
     route,
-    garageId,
     selectedGarageId,
-    selectedGarage,
-    user,
 }) => {
     // User / Customer Fields
     const [isPart, setIsPart] = useState(route?.params?.data?.parts?.id);
     const [isPartName, setIsPartName] = useState(
         route?.params?.data?.parts?.name
     );
-    const [isStockId, setIsStockId] = useState(route?.params?.data?.id);
     const [isPrice, setIsPrice] = useState(route?.params?.data?.purchase_price);
     const [isMRP, setIsMRP] = useState(route?.params?.data?.mrp);
     const [isCurrentStock, setIsCurrentStock] = useState(
@@ -45,33 +39,6 @@ const EditStock = ({
     );
     const [isRackId, setIsRackId] = useState(route?.params?.data?.rack_id);
     const [isComment, setIsComment] = useState(route?.params?.data?.comment);
-
-    // Error States
-    const [priceError, setPriceError] = useState("");
-    const [mrpError, setMrpError] = useState("");
-    const [currentStockError, setCurrentStockError] = useState("");
-    const [minStockError, setMinStockError] = useState("");
-    const [maxStockError, setMaxStockError] = useState("");
-    const [rackIdError, setAddressError] = useState("");
-    const [commentError, setCommentError] = useState("");
-
-    // Vendor Fields
-    // const [isVendor, setIsVendor] = useState();
-    // const [isVendorName, setIsVendorName] = useState();
-    // const [vendorError, setVendorError] = useState('');
-    // const [vendorList, setVendorList] = useState([]);
-    // const [addVendorModal, setAddVendorModal] = useState(false);
-    // const [newVendor, setNewVendor] = useState();
-    // const [newVendorError, setNewVendorError] = useState();
-
-    // States for Garage Dropdown
-    const [isGarage, setIsGarage] = useState(route?.params?.data?.garage?.id);
-    const [isGarageName, setIsGarageName] = useState(
-        !route?.params?.data?.garage?.garage_name
-            ? ""
-            : route?.params?.data?.garage?.garage_name
-    );
-    const [garageError, setGarageError] = useState();
 
     const [isLoading, setIsLoading] = useState(false);
     const scroll1Ref = useRef();
@@ -92,9 +59,8 @@ const EditStock = ({
             isMinStock?.trim().length === 0 ||
             !isMaxStock ||
             isMaxStock?.trim().length === 0 ||
-            // !isVendor || isVendor === 0 ||
-            !isGarage ||
-            isGarage === 0
+            !selectedGarageId ||
+            selectedGarageId === 0
         );
     };
 
@@ -107,32 +73,14 @@ const EditStock = ({
             if (!isCurrentStock) setIsCurrentStock("");
             if (!isMinStock) setIsMinStock("");
             if (!isMaxStock) setIsMaxStock("");
-            // if (!isPart) setPartError("Part is required");
-            // else setPartError("");
-            // if (!isPrice) setPriceError("Price is required");
-            // else setPriceError("");
-            // if (!isMRP) setMrpError("MRP is required");
-            // else setMrpError("");
-            // if (!isRackId) setRackIdError("Rack ID is required");
-            // else setRackIdError("");
-            // if (!isCurrentStock)
-            //     setCurrentStockError("Current Stock is required");
-            // else setCurrentStockError("");
-            // if (!isMinStock) setMinStockError("Minimum Stock is required");
-            // else setMinStockError("");
-            // if (!isMaxStock) setMaxStockError("Maximum Stock is required");
-            // else setMaxStockError("");
-            // if (!isVendor || isVendor === 0) setVendorError('Brand is required'); else setVendorError('');
-            if (!isGarage || isGarage == 0)
-                setGarageError("Customer Belongs to Garage Field is required");
-            else setGarageError("");
+            if (!selectedGarageId || selectedGarageId == 0)
+                alert("Customer Belongs to Garage Field is required");
             return;
         }
 
         const data = {
             parts_id: isPart,
-            garage_id: isGarage,
-            // 'vendor_id': isVendor,
+            garage_id: selectedGarageId,
             mrp: isMRP?.trim(),
             rack_id: isRackId?.trim(),
             current_stock: isCurrentStock?.trim(),
@@ -191,31 +139,6 @@ const EditStock = ({
                         >
                             Stock Details:
                         </Text>
-
-                        {(userRole == "Super Admin" ||
-                            garageId?.length > 1) && (
-                            <View style={{marginTop: 20}}>
-                                <TextInput
-                                    mode="outlined"
-                                    label="Garage"
-                                    style={{
-                                        backgroundColor: "#f1f1f1",
-                                        width: "100%",
-                                    }}
-                                    placeholder="Select Garage"
-                                    value={isGarageName}
-                                    right={
-                                        <TextInput.Icon name="menu-down" />
-                                    }
-                                    disabled={true}
-                                />
-                                {garageError?.length > 0 && (
-                                    <Text style={styles.errorTextStyle}>
-                                        {garageError}
-                                    </Text>
-                                )}
-                            </View>
-                        )}
 
                         <TextInput
                             mode="outlined"
@@ -331,12 +254,7 @@ const EditStock = ({
                             numberOfLines={3}
                             multiline={true}
                         />
-                        {commentError?.length > 0 && (
-                            <Text style={styles.errorTextStyle}>
-                                {commentError}
-                            </Text>
-                        )}
-
+            
                         <Button
                             style={{ marginTop: 15 }}
                             mode={"contained"}

@@ -28,17 +28,15 @@ import Lightbox from "react-native-lightbox-v2";
 import RBSheet from "react-native-raw-bottom-sheet";
 import Spinner from "react-native-loading-spinner-overlay";
 import CommonHeader from "../Component/CommonHeaderComponent";
+import { useIsFocused } from "@react-navigation/native";
 
 const AddPaymentSelectOrder = ({
     navigation,
     userToken,
     selectedGarageId,
-    selectedGarage,
-    user,
     navigator,
 }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState();
     const [filteredData, setFilteredData] = useState([]);
@@ -51,6 +49,7 @@ const AddPaymentSelectOrder = ({
     const [isScrollLoading, setIsScrollLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [loadMoreOrders, setLoadMoreOrders] = useState(true);
+    const isFocused = useIsFocused();
 
     const getOrderList = async () => {
         if(page == 1) setIsLoading(true)
@@ -73,8 +72,8 @@ const AddPaymentSelectOrder = ({
             );
             const json = await res.json();
             if (json !== undefined) {
-                setData([...data, ...json.data.data]);
-                setFilteredData([...filteredData, ...json.data.data]);
+                setData(page == 1 ? json.data.data : [...data, ...json.data.data]);
+                setFilteredData(page == 1 ? json.data.data : [...filteredData, ...json.data.data]);
                 if(page == 1) setIsLoading(false)
                 if(page != 1) setIsScrollLoading(false)
                 {json.data.current_page != json.data.last_page ? setLoadMoreOrders(true) : setLoadMoreOrders(false)}
@@ -188,7 +187,7 @@ const AddPaymentSelectOrder = ({
 
     useEffect(() => {
         getOrderList();
-    }, []);
+    }, [isFocused, selectedGarageId]);
 
     return (
         <View style={{ flex: 1 }}>

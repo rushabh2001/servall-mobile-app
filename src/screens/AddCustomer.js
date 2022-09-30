@@ -49,19 +49,7 @@ const AddCustomer = ({
     const [isName, setIsName] = useState();
     const [isEmail, setIsEmail] = useState();
     const [isPhoneNumber, setIsPhoneNumber] = useState();
-    // const [isCity, setIsCity] = useState();
-    // const [isState, setIsState] = useState();
     const [isAddress, setIsAddress] = useState("");
-
-    // Error States
-    const [nameError, setNameError] = useState("");
-    const [emailError, setEmailError] = useState("");
-    const [phoneNumberError, setPhoneNumberError] = useState("");
-    // const [cityError, setCityError] = useState('');
-    // const [stateError, setStateError] = useState('');
-
-    // const [CityList, setCityList] =  useState([]);
-    // const [StateList, setStateList] =  useState([]);
 
     // Vehicle Fields
     const [isVehicleRegistrationNumber, setIsVehicleRegistrationNumber] =
@@ -113,29 +101,16 @@ const AddCustomer = ({
     const [displayInsuranceExpiryCalender, setDisplayInsuranceExpiryCalender] =
         useState(false);
 
-    const [addBrandModal, setAddBrandModal] = useState(false);
-    const [newBrandName, setNewBrandName] = useState();
-    const [newBrandNameError, setNewBrandNameError] = useState();
-    const [addModelModal, setAddModelModal] = useState(false);
-    const [newModelName, setNewModelName] = useState();
-    const [newModelNameError, setNewModelNameError] = useState();
-
     // Brand States
     const [isBrand, setIsBrand] = useState();
     const [isBrandName, setIsBrandName] = useState();
-    const [brandList, setBrandList] = useState([]);
     const [brandListModal, setBrandListModal] = useState(false);
-    const [filteredBrandData, setFilteredBrandData] = useState([]);
-    const [searchQueryForBrands, setSearchQueryForBrands] = useState();
     const [brandError, setBrandError] = useState(""); // Error State
 
     // Vehicle Model States
     const [isModel, setIsModel] = useState();
     const [isModelName, setIsModelName] = useState();
-    const [modelList, setModelList] = useState([]);
     const [modelListModal, setModelListModal] = useState(false);
-    const [filteredModelData, setFilteredModelData] = useState([]);
-    const [searchQueryForModels, setSearchQueryForModels] = useState();
     const [modelError, setModelError] = useState(""); // Error State
 
     // Insurance Provider Company for Dropdown
@@ -184,60 +159,6 @@ const AddCustomer = ({
     const isVehicalNumRef = useRef();
     const isAddressRef = useRef();
     const scrollViewRef = useRef();
-
-    const addNewBrand = async () => {
-        let data = { name: newBrandName };
-        try {
-            const res = await fetch(`${API_URL}create_brand`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify(data),
-            });
-            const json = await res.json();
-            console.log('json', json);
-            if (res.status == 200 || res.status == 201){
-                getBrandList();
-                setAddBrandModal(false);
-                setIsBrandName(json.data.name);
-                setIsBrand(json.data.id);
-                // console.log('res', res);
-            } else if(res.status == 400) {
-                setNewBrandNameError(json.message.name);
-            }
-        } catch (e) {
-            console.log(e);
-        } 
-    };
-
-    const addNewModel = async () => {
-        let data = { model_name: newModelName, brand_id: parseInt(isBrand) };
-        try {
-            const res = await fetch(`${API_URL}create_vehicle_model`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify(data),
-            });
-            const json = await res.json();
-            if (res.status == 200 || res.status == 201){
-                getModelList();
-                setAddModelModal(false);
-                setIsModelName(json.data.model_name);
-                setIsModel(json.data.id);
-            } else if(res.status == 400) {
-                setNewModelNameError(json.message.model_name);
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    };
 
     const selectRegistrationCrtImg = async () => {
         // Opening Document Picker to select one file
@@ -402,6 +323,7 @@ const AddCustomer = ({
                 isVehicalNumRef.current.focus();
                 return false;
             }
+            return true;
         }
     };
 
@@ -649,97 +571,6 @@ const AddCustomer = ({
         }
     };
 
-    const getBrandList = async () => {
-        setIsLoading(true);
-        try {
-            const res = await fetch(`${API_URL}fetch_brand`, {
-                method: "GET",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-            });
-            const json = await res.json();
-            if (json !== undefined) {
-                setBrandList(json.brand_list);
-                setFilteredBrandData(json.brand_list);
-                setIsLoading(false);
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    };
-
-    const searchFilterForBrands = async () => {
-        setIsLoading(true);
-        try {
-            const response = await fetch(`${API_URL}fetch_brand`, {
-                method: "GET",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setBrandList(json.brand_list);
-                setFilteredBrandData(json.brand_list);
-                setIsLoading(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const getModelList = async () => {
-        try {
-            const res = await fetch(
-                `${API_URL}fetch_vehicle_model?brand_id=${isBrand}`,
-                {
-                    method: "GET",
-                    headers: {
-                        Accept: "application/json",
-                        "Content-Type": "application/json",
-                        Authorization: "Bearer " + userToken,
-                    },
-                }
-            );
-            const json = await res.json();
-            console.log("model_json", json);
-            if (json !== undefined) {
-                setModelList(json.vehicle_model_list);
-                setFilteredModelData(json.vehicle_model_list);
-                setIsLoading(false);
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    };
-
-    const searchFilterForModels = async () => {
-        setIsLoading(true);
-        try {
-            const response = await fetch(`${API_URL}fetch_vehicle_model?brand_id=${isBrand}`, {
-                method: "GET",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setModelList(json.vehicle_model_list);
-                setFilteredModelData(json.vehicle_model_list);
-                setIsLoading(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
     // Functions Dropdown for Insurance Provider
     const addNewInsuranceProvider = async () => {
         let data = { name: isNewInsuranceProvider };
@@ -858,7 +689,6 @@ const AddCustomer = ({
 
     useEffect(() => {
         getStateList();
-        getBrandList();
         getGarageList();
         getInsuranceProviderList();
     }, []);
@@ -873,10 +703,11 @@ const AddCustomer = ({
 
     useEffect(() => {
         if (isBrand != undefined) {
-            getModelList();
+            // setIsLoading(true);
             setIsModel();
             setIsModelName("");
             setModelFieldToggle(true);
+            // getModelList();
         }
     }, [isBrand]);
 
@@ -1394,147 +1225,6 @@ const AddCustomer = ({
                     </View>
                 </InputScrollView>
                 <Portal>
-                    <Modal
-                        visible={addBrandModal}
-                        onDismiss={() => {
-                            setAddBrandModal(false);
-                            setNewBrandName();
-                            setNewBrandNameError();
-                            setBrandListModal(true);
-                        }}
-                        contentContainerStyle={styles.modalContainerStyle}
-                    >
-                        <Text
-                            style={[
-                                styles.headingStyle,
-                                { marginTop: 0, alignSelf: "center" },
-                            ]}
-                        >
-                            Add New Brand
-                        </Text>
-                        <IconX
-                            name="times"
-                            size={20}
-                            color={colors.black}
-                            style={{
-                                position: "absolute",
-                                top: 25,
-                                right: 25,
-                                zIndex: 99,
-                            }}
-                            onPress={() => {
-                                setAddBrandModal(false);
-                                setNewBrandName();
-                                setNewBrandNameError();
-                                setBrandListModal(true);
-                            }}
-                        />
-                        <TextInput
-                            mode="outlined"
-                            label="Brand Name"
-                            style={styles.input}
-                            placeholder="Brand Name"
-                            value={newBrandName}
-                            onChangeText={(text) => setNewBrandName(text)}
-                        />
-                        {newBrandNameError?.length > 0 && (
-                            <Text style={styles.errorTextStyle}>
-                                {newBrandNameError}
-                            </Text>
-                        )}
-                        <View style={{ flexDirection: "row" }}>
-                            <Button
-                                style={{
-                                    marginTop: 15,
-                                    flex: 1,
-                                    marginRight: 10,
-                                }}
-                                mode={"contained"}
-                                onPress={addNewBrand}
-                            >
-                                Add
-                            </Button>
-                            <Button
-                                style={{ marginTop: 15, flex: 1 }}
-                                mode={"contained"}
-                                onPress={() => setAddBrandModal(false)}
-                            >
-                                Close
-                            </Button>
-                        </View>
-                    </Modal>
-
-                    <Modal
-                        visible={addModelModal}
-                        onDismiss={() => {
-                            setAddModelModal(false);
-                            setNewModelName("");
-                            setNewModelNameError();
-                            setModelListModal(true);
-                        }}
-                        contentContainerStyle={styles.modalContainerStyle}
-                    >
-                        <Text
-                            style={[
-                                styles.headingStyle,
-                                { marginTop: 0, alignSelf: "center" },
-                            ]}
-                        >
-                            Add New Model
-                        </Text>
-                        <IconX
-                            name="times"
-                            size={20}
-                            color={colors.black}
-                            style={{
-                                position: "absolute",
-                                top: 25,
-                                right: 25,
-                                zIndex: 99,
-                            }}
-                            onPress={() => {
-                                setAddModelModal(false);
-                                setNewModelName("");
-                                setNewModelNameError();
-                                setModelListModal(true);
-                            }}
-                        />
-                        <TextInput
-                            mode="outlined"
-                            label="Model Name"
-                            style={styles.input}
-                            placeholder="Model Name"
-                            value={newModelName}
-                            onChangeText={(text) => setNewModelName(text)}
-                        />
-                        {newModelNameError?.length > 0 && (
-                            <Text style={styles.errorTextStyle}>
-                                {newModelNameError}
-                            </Text>
-                        )}
-
-                        <View style={{ flexDirection: "row" }}>
-                            <Button
-                                style={{
-                                    marginTop: 15,
-                                    flex: 1,
-                                    marginRight: 10,
-                                }}
-                                mode={"contained"}
-                                onPress={addNewModel}
-                            >
-                                Add
-                            </Button>
-                            <Button
-                                style={{ marginTop: 15, flex: 1 }}
-                                mode={"contained"}
-                                onPress={() => setAddModelModal(false)}
-                            >
-                                Close
-                            </Button>
-                        </View>
-                    </Modal>
-
                     {/* Insurance Providers List Modal */}
                     <Modal
                         visible={insuranceProviderListModal}

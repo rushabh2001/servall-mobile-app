@@ -20,8 +20,6 @@ const Services = ({
     navigation,
     selectedGarageId,
     userToken,
-    selectedGarage,
-    user,
 }) => {
     const [isGarageId, setIsGarageId] = useState(selectedGarageId);
     const [isOpenOrders, setIsOpenOrders] = useState(0);
@@ -84,17 +82,7 @@ const Services = ({
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={{ marginBottom: 35 }}>
-                {selectedGarageId == 0 ? (
-                    <Text style={styles.garageNameTitle}>
-                        All Garages - {user.name}
-                    </Text>
-                ) : (
-                    <Text style={styles.garageNameTitle}>
-                        {selectedGarage?.garage_name} - {user?.name}
-                    </Text>
-                )}
-            </View>
+            <CommonHeader />
             <View style={styles.customSurface}>
                 {/* {isLoading == true ? <ActivityIndicator></ActivityIndicator> : */}
                 <ScrollView showsVerticalScrollIndicator={false}>

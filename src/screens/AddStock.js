@@ -1,10 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-    RefreshControl,
     View,
     Text,
     StyleSheet,
-    ActivityIndicator,
     TouchableOpacity,
     FlatList,
     Keyboard,
@@ -31,12 +29,7 @@ import CommonHeader from "../Component/CommonHeaderComponent";
 const AddStock = ({
     navigation,
     selectedGarageId,
-    userRole,
-    userId,
     userToken,
-    garageId,
-    selectedGarage,
-    user,
 }) => {
     // User / Customer Fields
     const [isPrice, setIsPrice] = useState();
@@ -46,15 +39,6 @@ const AddStock = ({
     const [isMaxStock, setIsMaxStock] = useState();
     const [isRackId, setIsRackId] = useState();
     const [isComment, setIsComment] = useState("");
-
-    // Error States
-    const [priceError, setPriceError] = useState("");
-    const [mrpError, setMrpError] = useState("");
-    const [currentStockError, setCurrentStockError] = useState("");
-    const [minStockError, setMinStockError] = useState("");
-    const [maxStockError, setMaxStockError] = useState("");
-    const [rackIdError, setRackIdError] = useState("");
-    const [commentError, setCommentError] = useState("");
 
     // Vehicle Fields
     const [isPart, setIsPart] = useState("");
@@ -69,33 +53,8 @@ const AddStock = ({
     const [newPartError, setNewPartError] = useState();
     const [addNewPartModal, setAddNewPartModal] = useState(false);
 
-    // Property Vendor Dropdown
-    // const [isVendor, setIsVendor] = useState();
-    // const [isVendorName, setIsVendorName] = useState('');
-    // const [vendorList, setVendorList] = useState([]);
-    // const [vendorListModal, setVendorListModal] = useState(false);
-    // const [isLoadingVendorList, setIsLoadingVendorList] = useState(true);
-    // const [filteredVendorData, setFilteredVendorData] = useState([]);
-    // const [searchQueryForVendors, setSearchQueryForVendors] = useState();
-    // const [vendorError, setVendorError] = useState('');   // Error State
-
-    // const [isNewVendor, setIsNewVendor] = useState('');
-    // const [newVendorError, setNewVendorError] = useState();
-    // const [addNewVendorModal, setAddNewVendorModal] = useState(false);
-
-    // Property Garage Dropdown
-    const [isGarageId, setIsGarageId] = useState(selectedGarageId);
-    const [isGarageName, setIsGarageName] = useState(
-        !selectedGarage ? "" : selectedGarage.garage_name
-    );
-
     const [isLoading, setIsLoading] = useState(false);
-
     const scrollViewRef = useRef();
-
-    const [garagePage, setGaragePage] = useState(1);
-    const [isGarageScrollLoading, setIsGarageScrollLoading] = useState(false);
-    const [garageRefreshing, setGarageRefreshing] = useState(false);
 
     const validate = (show = false) => {
         if (!show) {
@@ -115,8 +74,8 @@ const AddStock = ({
                 !isMaxStock ||
                 isMaxStock?.trim().length === 0 ||
                 // !isVendor || isVendor === 0 ||
-                !isGarageId ||
-                isGarageId === 0
+                !selectedGarageId ||
+                selectedGarageId === 0
             );
         } else {
             if (!isPart ||
@@ -124,11 +83,13 @@ const AddStock = ({
                 scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true })
                 return false;
             }
-            if (!isGarageId ||
-                isGarageId === 0) {
-                scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true })
+            if (!selectedGarageId ||
+                selectedGarageId === 0) {
+                    alert('Please select any specific garage');
+                // scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true })
                 return false;
             }
+            return true;
         }
     };
 
@@ -143,29 +104,14 @@ const AddStock = ({
             if (!isCurrentStock) setIsCurrentStock("");
             if (!isMinStock) setIsMinStock("");
             if (!isMaxStock) setIsMaxStock("");
-            // if (!isPrice) setPriceError("Price is required");
-            // else setPriceError("");
-            // if (!isMRP) setMrpError("MRP is required");
-            // else setMrpError("");
-            // if (!isRackId) setRackIdError("Rack ID is required");
-            // else setRackIdError("");
-            // if (!isCurrentStock)
-            //     setCurrentStockError("Current Stock is required");
-            // else setCurrentStockError("");
-            // if (!isMinStock) setMinStockError("Minimum Stock is required");
-            // else setMinStockError("");
-            // if (!isMaxStock) setMaxStockError("Maximum Stock is required");
-            // else setMaxStockError("");
-            // if (!isVendor || isVendor === 0) setVendorError('Brand is required'); else setVendorError('');
-            if (!isGarageId || isGarageId == 0)
-                setGarageError("Customer Belongs to Garage Field is required");
-            else setGarageError("");
+            if (!selectedGarageId || selectedGarageId == 0)
+                alert("Please choose any specific garage!");
             return;
         }
 
         const data = {
             parts_id: isPart,
-            garage_id: isGarageId,
+            garage_id: selectedGarageId,
             // 'vendor_id': isVendor,
             purchase_price: isPrice?.trim(),
             mrp: isMRP?.trim(),
@@ -250,24 +196,20 @@ const AddStock = ({
     };
 
     const searchFilterForParts = async () => {
-        setIsLoading(true);
-        try {
-            const response = await fetch(`${API_URL}fetch_parts`, {
-                method: "GET",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setPartList(json.data);
-                setFilteredPartData(json.data);
-                setIsLoading(false);
-            }
-        } catch (error) {
-            console.error(error);
+        if (searchQueryForParts) {
+            const newData = filteredPartData.filter(
+                function (item) {
+                    const itemData = item.name
+                        ? item.name.toUpperCase()
+                        : ''.toUpperCase()
+
+                    const textData = searchQueryForParts.toUpperCase();
+                    return itemData.indexOf(textData) > -1;
+                });
+            console.log('data', newData)
+            setFilteredPartData(newData);
+        } else {
+            setFilteredPartData(partList);
         }
     };
 
@@ -297,7 +239,7 @@ const AddStock = ({
         setIsLoading(true);
         try {
             await fetch(
-                `${API_URL}fetch_parts_inventory?parts_id=${isPart}&garage_id=${isGarageId}`,
+                `${API_URL}fetch_parts_inventory?parts_id=${isPart}&garage_id=${selectedGarageId}`,
                 {
                     method: "POST",
                     headers: {
@@ -342,22 +284,21 @@ const AddStock = ({
                         setIsPrice("");
                         setIsComment("");
                     }
+                    setIsLoading(false);
                 });
         } catch (e) {
             console.log(e);
-        } finally {
-            setIsLoading(false);
-        }
+        } 
     };
 
     useEffect(() => {
-        getGarageList();
+        // getGarageList();
         getPartList();
     }, []);
 
     useEffect(() => {
-        if (isPart != 0 && isGarageId != 0) getInvetoryData();
-    }, [isPart, isGarageId]);
+        if (isPart != 0 && selectedGarageId != 0) getInvetoryData();
+    }, [isPart, selectedGarageId]);
 
     return (
         <View style={{ flex: 1 }}>
@@ -378,37 +319,6 @@ const AddStock = ({
                         <Text style={[styles.headingStyle, { marginTop: 20 }]}>
                             New Stock Details:
                         </Text>
-
-                        {(userRole == "Super Admin" ||
-                            garageId?.length > 1) && (
-                            <View style={{marginTop: 20}}>
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        setGarageListModal(true);
-                                    }}
-                                >
-                                    <TextInput
-                                        mode="outlined"
-                                        label="Garage"
-                                        style={{
-                                            backgroundColor: "#f1f1f1",
-                                            width: "100%",
-                                        }}
-                                        placeholder="Select Garage"
-                                        value={isGarageName}
-                                        editable={false}
-                                        right={
-                                            <TextInput.Icon name="menu-down" />
-                                        }
-                                    />
-                                </TouchableOpacity>
-                                {garageError?.length > 0 && (
-                                    <Text style={styles.errorTextStyle}>
-                                        {garageError}
-                                    </Text>
-                                )}
-                            </View>
-                        )}
 
                         <View style={{marginTop: 20}}>
                             <TouchableOpacity
@@ -539,11 +449,6 @@ const AddStock = ({
                             numberOfLines={3}
                             multiline={true}
                         />
-                        {commentError?.length > 0 && (
-                            <Text style={styles.errorTextStyle}>
-                                {commentError}
-                            </Text>
-                        )}
 
                         <Button
                             style={{ marginTop: 15 }}
@@ -562,7 +467,7 @@ const AddStock = ({
                         onDismiss={() => {
                             setPartListModal(false);
                             setSearchQueryForParts("");
-                            getPartList();
+                            setFilteredPartData(partList);
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -590,7 +495,7 @@ const AddStock = ({
                             onPress={() => {
                                 setPartListModal(false);
                                 setSearchQueryForParts("");
-                                getPartList();
+                                setFilteredPartData(partList);
                             }}
                         />
                         <View style={{ marginTop: 20, flex: 1 }}>
@@ -632,9 +537,10 @@ const AddStock = ({
                                                     color={
                                                         colors.light_gray
                                                     }
-                                                    onPress={() =>
-                                                        getPartList()
-                                                    }
+                                                    onPress={() => {
+                                                        setSearchQueryForParts("");
+                                                        setFilteredPartData(partList);
+                                                    }}
                                                 />
                                             )
                                         }
@@ -677,7 +583,7 @@ const AddStock = ({
                                     !isLoading && (
                                         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
                                             <Text style={{ color: colors.black }}>
-                                                No garage found!
+                                                No part found!
                                             </Text>
                                         </View>
                                 ))}

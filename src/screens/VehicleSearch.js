@@ -19,16 +19,14 @@ import Lightbox from "react-native-lightbox-v2";
 import { API_URL, WEB_URL } from "../constants/config";
 import Spinner from "react-native-loading-spinner-overlay";
 import CommonHeader from "../Component/CommonHeaderComponent";
+import { useIsFocused } from "@react-navigation/native";
 
 const VehicleSearch = ({
     userToken,
     selectedGarageId,
-    selectedGarage,
-    user,
     navigator,
 }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [searchQuery, setSearchQuery] = useState();
     const [filteredData, setFilteredData] = useState([]);
     const [viewVehicleDetailsModal, setViewVehicleDetailsModal] =
@@ -40,6 +38,7 @@ const VehicleSearch = ({
     const [refreshing, setRefreshing] = useState(false);
     const [data, setData] = useState([]);
     const [loadMoreVehicles, setLoadMoreVehicles] = useState(true);
+    const isFocused = useIsFocused();
 
     const getVehicleDetails = async (vehicleId) => {
         setVehicleDataLoading(true);
@@ -70,7 +69,7 @@ const VehicleSearch = ({
         if(page != 1) setIsScrollLoading(true)
         try {
             const res = await fetch(
-                `${API_URL}fetch_all_vehicle_by_query/${isGarageId}?page=${page}`,
+                `${API_URL}fetch_all_vehicle_by_query/${selectedGarageId}?page=${page}`,
                 {
                     method: "POST",
                     headers: {
@@ -101,7 +100,7 @@ const VehicleSearch = ({
         setIsLoading(true);
         try {
             const response = await fetch(
-                `${API_URL}fetch_all_vehicle_by_query/${isGarageId}`,
+                `${API_URL}fetch_all_vehicle_by_query/${selectedGarageId}`,
                 {
                     method: "POST",
                     headers: {
@@ -134,7 +133,7 @@ const VehicleSearch = ({
         setSearchQuery(null);
         try {
             const response = await fetch(
-                `${API_URL}fetch_all_vehicle_by_query/${isGarageId}`,
+                `${API_URL}fetch_all_vehicle_by_query/${selectedGarageId}`,
                 {
                     method: "POST",
                     headers: {
@@ -181,7 +180,7 @@ const VehicleSearch = ({
 
     useEffect(() => {
         getVehicleList();
-    }, []);
+    }, [isFocused, selectedGarageId]);
 
     return (
         <View style={{ flex: 1 }}>

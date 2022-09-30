@@ -22,13 +22,10 @@ import CommonHeader from "../Component/CommonHeaderComponent";
 
 const VehicleList = ({
     userToken,
-    selectedGarageId,
-    selectedGarage,
     user,
     navigator,
 }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [searchQuery, setSearchQuery] = useState();
     const [filteredData, setFilteredData] = useState([]);
     const [viewVehicleDetailsModal, setViewVehicleDetailsModal] =
@@ -745,21 +742,6 @@ const VehicleList = ({
 };
 
 const styles = StyleSheet.create({
-    garageNameTitle: {
-        textAlign: "center",
-        fontSize: 17,
-        fontWeight: "500",
-        color: colors.white,
-        paddingVertical: 7,
-        backgroundColor: colors.secondary,
-        position: "absolute",
-        top: 0,
-        zIndex: 5,
-        width: "100%",
-        flex: 1,
-        left: 0,
-        right: 0,
-    },
     surfaceContainer: {
         flex: 1,
         padding: 15,

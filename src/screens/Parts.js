@@ -9,10 +9,9 @@ import {
     RefreshControl,
     FlatList,
 } from "react-native";
-import { TextInput, Divider, List, Modal, Portal } from "react-native-paper";
+import { TextInput, Divider } from "react-native-paper";
 import { colors } from "../constants";
 import Icon from "react-native-vector-icons/FontAwesome5";
-import IconX from "react-native-vector-icons/FontAwesome5";
 import { connect } from "react-redux";
 import { API_URL } from "../constants/config";
 import { useIsFocused } from "@react-navigation/native";
@@ -24,10 +23,6 @@ const Parts = ({
     navigation,
     userToken,
     selectedGarageId,
-    userRole,
-    user,
-    selectedGarage,
-    garageId,
 }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [partList, setPartList] = useState([]);
@@ -42,71 +37,12 @@ const Parts = ({
     const [filteredPartData, setFilteredPartData] = useState([]);
     const [searchQueryForParts, setSearchQueryForParts] = useState();
 
-    const [isGarageId, setIsGarageId] = useState();
-    const [isGarageName, setIsGarageName] = useState(!selectedGarage ? "" : selectedGarage.garage_name);
-    const [garageList, setGarageList] = useState([]);
-    const [garageListModal, setGarageListModal] = useState(false);
-    const [isLoadingGarageList, setIsLoadingGarageList] = useState(true);
-    const [filteredGarageData, setFilteredGarageData] = useState([]);
-    const [searchQueryForGarages, setSearchQueryForGarages] = useState(); 
-    const [garageError, setGarageError] = useState('');   // Error State
-
-    
-    const getGarageList = async () => {
-        setIsLoading(true)
-        try {
-            const res = await fetch(
-                `${API_URL}fetch_owner_garages?user_id=${user.id}&user_role=${userRole}`,
-                {
-                    method: "GET",
-                    headers: {
-                        Accept: "application/json",
-                        "Content-Type": "application/json",
-                        Authorization: "Bearer " + userToken,
-                    },
-                }
-            );
-            const json = await res.json();
-            console.log(json);
-            if (json !== undefined) {
-                setGarageList(json.garage_list);
-                setFilteredGarageData(json.garage_list);
-                setIsLoading(false);
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    };
-
-    const searchFilterForGarages = async () => {
-        setIsLoading(true);
-        try {
-            const response = await fetch(`${API_URL}fetch_owner_garages?user_id=${user.id}&user_role=${userRole}`, {
-                method: "GET",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setGarageList(json.garage_list);
-                setFilteredGarageData(json.garage_list);
-                setIsLoading(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-
     const getPartList = async () => {
         if(page == 1) setIsLoading(true)
         if(page != 1) setIsScrollLoading(true)
         try {
             const res = await fetch(
-                `${API_URL}fetch_garage_inventory/${isGarageId}?page=${page}`,
+                `${API_URL}fetch_garage_inventory/${selectedGarageId}?page=${page}`,
                 {
                     method: "POST",
                     headers: {
@@ -119,6 +55,7 @@ const Parts = ({
                     }),
                 }
             );
+            console.log('fetch_garage_inventory', json);
             const json = await res.json();
             if (json !== undefined) {
                 setPartList([...partList, ...json.data.data]);
@@ -138,7 +75,7 @@ const Parts = ({
         setIsLoading(true);
         try {
             const response = await fetch(
-                `${API_URL}fetch_garage_inventory/${isGarageId}`,
+                `${API_URL}fetch_garage_inventory/${selectedGarageId}`,
                 {
                     method: "POST",
                     headers: {
@@ -169,7 +106,7 @@ const Parts = ({
         setSearchQueryForParts(null);
         try {
             const response = await fetch(
-                `${API_URL}fetch_garage_inventory/${isGarageId}`,
+                `${API_URL}fetch_garage_inventory/${selectedGarageId}`,
                 {
                     method: "POST",
                     headers: {
@@ -215,29 +152,9 @@ const Parts = ({
     };
 
     useEffect(() => {
-        setIsLoading(true);
-        getGarageList();
-        if(isGarageId) {
-            pullRefresh();
-        }
-        // console.log('1');
-    }, [isFocused]);
-
-    // useEffect(() => {
-    //     if(!isGarageId && selectedGarageId == 0 && garageList) {
-    //         setIsGarageId(garageList[0]?.id); 
-    //         setIsGarageName(garageList[0]?.garage_name);
-    //     } 
-    // }, [garageList]);
-
-    useEffect(() => {
-            // console.log('4', isGarageId);
-        if(isGarageId) {
             setIsLoading(true);
             pullRefresh();
-            console.log('2');
-        }
-    }, [isGarageId]);
+    }, [isFocused, selectedGarageId]);
 
     const element = (data, index) => (
         <Icon
@@ -351,63 +268,65 @@ const Parts = ({
                                             ))}
                                             keyExtractor={(item) => item.id}
                                             renderItem={({ item, index }) => (
-                                                <View style={{ margin: 5 }}>
-                                                    <TouchableOpacity
-                                                        style={{
-                                                            flexDirection:
-                                                                "row",
-                                                        }}
-                                                        onPress={() => {
-                                                            navigation.navigate(
-                                                                "EditStock",
-                                                                { data: item }
-                                                            );
-                                                        }}
-                                                    >
-                                                        <Cell
-                                                            data={
-                                                                item.parts.name
-                                                            }
-                                                            style={{ flex: 2 }}
-                                                            textStyle={
-                                                                styles.text
-                                                            }
-                                                        />
-                                                        <Cell
-                                                            data={
-                                                                item.current_stock
-                                                            }
-                                                            style={{ flex: 1 }}
-                                                            textStyle={
-                                                                styles.text
-                                                            }
-                                                        />
-                                                        <Cell
-                                                            data={item.mrp}
-                                                            style={{ flex: 1 }}
-                                                            textStyle={
-                                                                styles.text
-                                                            }
-                                                        />
-                                                        <Cell
-                                                            data={item.rack_id}
-                                                            style={{ flex: 1 }}
-                                                            textStyle={
-                                                                styles.text
-                                                            }
-                                                        />
-                                                        <Cell
-                                                            data={element(
-                                                                item,
-                                                                index
-                                                            )}
-                                                            style={{ flex: 1 }}
-                                                            textStyle={
-                                                                styles.text
-                                                            }
-                                                        />
-                                                    </TouchableOpacity>
-                                                </View>
+                                                !isLoading && (
+                                                    <View style={{ margin: 5 }}>
+                                                        <TouchableOpacity
+                                                            style={{
+                                                                flexDirection:
+                                                                    "row",
+                                                            }}
+                                                            onPress={() => {
+                                                                navigation.navigate(
+                                                                    "EditStock",
+                                                                    { data: item }
+                                                                );
+                                                            }}
+                                                        >
+                                                            <Cell
+                                                                data={
+                                                                    item.parts.name
+                                                                }
+                                                                style={{ flex: 2 }}
+                                                                textStyle={
+                                                                    styles.text
+                                                                }
+                                                            />
+                                                            <Cell
+                                                                data={
+                                                                    item.current_stock
+                                                                }
+                                                                style={{ flex: 1 }}
+                                                                textStyle={
+                                                                    styles.text
+                                                                }
+                                                            />
+                                                            <Cell
+                                                                data={item.mrp}
+                                                                style={{ flex: 1 }}
+                                                                textStyle={
+                                                                    styles.text
+                                                                }
+                                                            />
+                                                            <Cell
+                                                                data={item.rack_id}
+                                                                style={{ flex: 1 }}
+                                                                textStyle={
+                                                                    styles.text
+                                                                }
+                                                            />
+                                                            <Cell
+                                                                data={element(
+                                                                    item,
+                                                                    index
+                                                                )}
+                                                                style={{ flex: 1 }}
+                                                                textStyle={
+                                                                    styles.text
+                                                                }
+                                                            />
+                                                        </TouchableOpacity>
+                                                    </View>
+                                                )
                                             )}
                                         />
                                 }
@@ -417,176 +336,6 @@ const Parts = ({
                     }
                 </View>
             </View>
-            <Portal>
-                 {/* Garage List Modal */}
-                 <Modal
-                        visible={garageListModal}
-                        onDismiss={() => {
-                            setGarageListModal(false);
-                            setSearchQueryForGarages("");
-                            getGarageList();
-                        }}
-                        contentContainerStyle={[
-                            styles.modalContainerStyle,
-                            { flex: 0.9 },
-                        ]}
-                    >
-                        <Text
-                            style={[
-                                styles.headingStyle,
-                                { marginTop: 0, alignSelf: "center" },
-                            ]}
-                        >
-                            Select Garage
-                        </Text>
-                        <IconX
-                            name="times"
-                            size={20}
-                            color={colors.black}
-                            style={{
-                                position: "absolute",
-                                top: 25,
-                                right: 25,
-                                zIndex: 99,
-                            }}
-                            onPress={() => {
-                                setGarageListModal(false);
-                                setSearchQueryForGarages("");
-                                getGarageList();
-                            }}
-                        />
-                        <View style={{ marginTop: 20, flex: 1 }}>
-                            {/* Search Bar */}
-                            <View>
-                                <View
-                                    style={{
-                                        marginBottom: 15,
-                                        flexDirection: "row",
-                                    }}
-                                >
-                                    <TextInput
-                                        mode={"flat"}
-                                        placeholder="Search here..."
-                                        onChangeText={(text) =>
-                                            setSearchQueryForGarages(text)
-                                        }
-                                        value={searchQueryForGarages}
-                                        activeUnderlineColor={
-                                            colors.transparent
-                                        }
-                                        selectionColor="black"
-                                        underlineColor={colors.transparent}
-                                        style={{
-                                            elevation: 4,
-                                            height: 50,
-                                            backgroundColor: colors.white,
-                                            flex: 1,
-                                            borderTopRightRadius: 0,
-                                            borderBottomRightRadius: 0,
-                                            borderTopLeftRadius: 5,
-                                            borderBottomLeftRadius: 5,
-                                        }}
-                                        right={
-                                            searchQueryForGarages != null &&
-                                            searchQueryForGarages != "" && (
-                                                <TextInput.Icon
-                                                    icon="close"
-                                                    color={
-                                                        colors.light_gray
-                                                    }
-                                                    onPress={() =>
-                                                        getGarageList()
-                                                    }
-                                                />
-                                            )
-                                        }
-                                    />
-                                    <TouchableOpacity
-                                        onPress={() =>
-                                            searchFilterForGarages()
-                                        }
-                                        style={{
-                                            elevation: 4,
-                                            borderTopRightRadius: 5,
-                                            borderBottomRightRadius: 5,
-                                            paddingRight: 25,
-                                            paddingLeft: 25,
-                                            zIndex: 2,
-                                            backgroundColor: colors.primary,
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                        }}
-                                    >
-                                        <IconX
-                                            name={"search"}
-                                            size={17}
-                                            color={colors.white}
-                                        />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                            <FlatList
-                                showsVerticalScrollIndicator={false}
-                                ItemSeparatorComponent={() => (!isLoading && <Divider />)}
-                                data={filteredGarageData}
-                                style={{
-                                    borderColor: "#0000000a",
-                                    borderWidth: 1,
-                                    flex: 1,
-                                }}
-                                contentContainerStyle={{ flexGrow: 1 }}
-                                ListEmptyComponent={() => (
-                                    !isLoading && (
-                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
-                                            <Text style={{ color: colors.black }}>
-                                                No garage found!
-                                            </Text>
-                                        </View>
-                                ))}
-                                keyExtractor={(item) => item.id}
-                                renderItem={({ item }) => (
-                                    !isLoading && 
-                                        <List.Item
-                                            title={
-                                                <View
-                                                    style={{
-                                                        flexDirection:
-                                                            "row",
-                                                        display: "flex",
-                                                        flexWrap:
-                                                            "wrap",
-                                                    }}
-                                                >
-                                                    <Text
-                                                        style={{
-                                                            fontSize: 16,
-                                                            color: colors.black,
-                                                        }}
-                                                    >
-                                                        {
-                                                            item.garage_name
-                                                        }
-                                                    </Text>
-                                                </View>
-                                            }
-                                            onPress={() => {
-                                                setIsGarageName(
-                                                    item.garage_name
-                                                );
-                                                setIsGarageId(item.id);
-                                                setGarageError("");
-                                                setGarageListModal(
-                                                    false
-                                                );
-                                                setSearchQueryForGarages("");
-                                                getGarageList();
-                                            }}
-                                        />
-                                )}
-                            />
-                        </View>
-                    </Modal>
-            </Portal>
             {isLoading &&
                 <Spinner
                     visible={isLoading}

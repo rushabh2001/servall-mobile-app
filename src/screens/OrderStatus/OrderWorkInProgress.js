@@ -11,7 +11,7 @@ import { API_URL } from "../../constants/config";
 import Spinner from "react-native-loading-spinner-overlay";
 import CommonHeader from "../../Component/CommonHeaderComponent";
 
-const OrderWorkInProgress = ({ navigation, userRole, route, userToken, selectedGarageId, selectedGarage, user }) => {
+const OrderWorkInProgress = ({ navigation, userRole, route, userToken }) => {
 
     const [partData, setPartData] = useState([]);
     const [serviceData, setServiceData] = useState([]);
@@ -360,9 +360,6 @@ const styles = StyleSheet.create({
 const mapStateToProps = state => ({
     userRole: state.role.user_role,
     userToken: state.user.userToken,
-    user: state.user.user,
-    selectedGarageId: state.garage.selected_garage_id,
-    selectedGarage: state.garage.selected_garage,
 })
 
 export default connect(mapStateToProps)(OrderWorkInProgress);

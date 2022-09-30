@@ -29,7 +29,6 @@ const WIPOrderList = ({
     user,
 }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState();
     const [filteredData, setFilteredData] = useState([]);
@@ -44,7 +43,7 @@ const WIPOrderList = ({
         if(page != 1) setIsScrollLoading(true)
         try {
             const res = await fetch(
-                `${API_URL}fetch_garage_order/status/${isGarageId}?page=${page}`,
+                `${API_URL}fetch_garage_order/status/${selectedGarageId}?page=${page}`,
                 {
                     method: "POST",
                     headers: {
@@ -76,7 +75,7 @@ const WIPOrderList = ({
         setIsLoading(true);
         try {
             const response = await fetch(
-                `${API_URL}fetch_garage_order/status/${isGarageId}`,
+                `${API_URL}fetch_garage_order/status/${selectedGarageId}`,
                 {
                     method: "POST",
                     headers: {
@@ -108,7 +107,7 @@ const WIPOrderList = ({
         setSearchQuery(null);
         try {
             const response = await fetch(
-                `${API_URL}fetch_garage_order/status/${isGarageId}`,
+                `${API_URL}fetch_garage_order/status/${selectedGarageId}`,
                 {
                     method: "POST",
                     headers: {
@@ -155,7 +154,7 @@ const WIPOrderList = ({
 
     useEffect(() => {
         pullRefresh();
-    }, [isFocused]);
+    }, [isFocused, selectedGarageId]);
 
     return (
         <View style={{ flex: 1 }}>

@@ -24,17 +24,10 @@ const ChooseGarage = ({
     setSelectedGarage,
     userId,
     selectedGarageId,
-    selectedGarage,
-    user,
 }) => {
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const isFocused = useIsFocused();
-
-    const [page, setPage] = useState(1);
-    const [isScrollLoading, setIsScrollLoading] = useState(false);
-    const [refreshing, setRefreshing] = useState(false);
-    const [loadMoreGarages, setLoadMoreGarages] = useState(true);
 
     const getGarageList = async () => {
         setIsLoading(true)
@@ -62,12 +55,12 @@ const ChooseGarage = ({
     };
 
     useEffect(() => {
-        setIsLoading(true);
+        // setIsLoading(true);
         getGarageList();
 
         // if (isFocused) {
         //     setData([]);
-        // pullRefresh();
+        //     getGarageList();
         // } else {
         //     setData([]);
         // }

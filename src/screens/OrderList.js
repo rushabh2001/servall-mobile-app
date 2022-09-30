@@ -9,22 +9,23 @@ import moment from 'moment';
 import RBSheet from "react-native-raw-bottom-sheet";
 import Spinner from "react-native-loading-spinner-overlay";
 import CommonHeader from "../Component/CommonHeaderComponent";
+import { useIsFocused } from "@react-navigation/native";
 
-const OrderList = ({navigation, userToken, navigator, selectedGarageId, selectedGarage, user  }) => {
+const OrderList = ({navigation, userToken, navigator, selectedGarageId }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const [isGarageId, setGarageId] = useState(selectedGarageId);
     const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState(); 
     const [filteredData, setFilteredData] = useState([]);
     const [page, setPage] = useState(1);
     const [isScrollLoading, setIsScrollLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    const isFocused = useIsFocused();
 
     const getOrderList = async () => {
         { page == 1 && setIsLoading(true) }
         { page != 1 && setIsScrollLoading(true) }
         try {
-            const res = await fetch(`${API_URL}fetch_garage_order/${isGarageId}?page=${page}`, {
+            const res = await fetch(`${API_URL}fetch_garage_order/${selectedGarageId}?page=${page}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -73,7 +74,7 @@ const OrderList = ({navigation, userToken, navigator, selectedGarageId, selected
 
     const pullRefresh = async () => {
         try {
-            const response = await fetch(`${API_URL}fetch_garage_order/status/${isGarageId}`, {
+            const response = await fetch(`${API_URL}fetch_garage_order/status/${selectedGarageId}`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -124,7 +125,7 @@ const OrderList = ({navigation, userToken, navigator, selectedGarageId, selected
 
     useEffect(() => {
         getOrderList();
-    }, []);
+    }, [isFocused, selectedGarageId]);
 
     return (
         <View style={{ flex: 1 }}>

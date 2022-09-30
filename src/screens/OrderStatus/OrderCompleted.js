@@ -1,23 +1,20 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Linking, FlatList } from "react-native";
-import { Checkbox, Divider, Button } from "react-native-paper";
+import { Checkbox, Divider } from "react-native-paper";
 import { colors } from "../../constants";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import IconX from "react-native-vector-icons/FontAwesome5";
 import { connect } from 'react-redux';
 import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
 import moment from "moment";
-import { API_URL } from "../../constants/config";
 import Spinner from "react-native-loading-spinner-overlay";
 import CommonHeader from "../../Component/CommonHeaderComponent";
 
-const OrderCompleted = ({ navigation, userRole, route, userToken, selectedGarageId, selectedGarage, user }) => {
+const OrderCompleted = ({ navigation, userRole, route }) => {
 
     const [partData, setPartData] = useState([]);
     const [serviceData, setServiceData] = useState([]);
-    const [isOrderData, setIsOrderData] = useState(route?.params?.data);
 
-    const [isOrderId, setIsOrderId] = useState(route?.params?.data?.order_id);
     const [isName, setIsName] = useState(route?.params?.data?.name);
     const [isPhoneNumber, setIsPhoneNumber] = useState(route?.params?.data?.phone_number);
 
@@ -29,56 +26,6 @@ const OrderCompleted = ({ navigation, userRole, route, userToken, selectedGarage
     const [estimatedDeliveryDateTime, setEstimatedDeliveryDateTime] = useState(moment(route?.params?.data?.estimated_delivery_time, 'YYYY-MM-DD hh:mm:ss').format('DD-MM-YYYY hh:mm A'));
 
     const [isLoading, setIsLoading] = useState(false);
-
-    // const changeOrderStatus = async () => {
-    //     setIsLoading(true);
-
-    //     // Data to call API 
-    //     let orderServicesArray = [];
-    //     let orderPartsArray = [];
-    //     serviceData.forEach(item => {
-    //         orderServicesArray.push({ order_service_id: item.id, is_done: item.is_done });
-    //     });
-    //     partData.forEach(item => {
-    //         orderPartsArray.push({ order_part_id: item.id, is_done: item.is_done });
-    //     });
-
-    //     // Data to send for next screen 
-    //     isOrderData.parts_list = partData;
-    //     isOrderData.services_list = serviceData;
-
-    //     try {
-    //         const res = await fetch(`${API_URL}order_status/update`, {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Accept': 'application/json',
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': 'Bearer ' + userToken
-    //             },
-    //             body: JSON.stringify({
-    //                 order_id: isOrderId,
-    //                 order_service: orderServicesArray,
-    //                 order_part: orderPartsArray,
-    //             }),
-    //         });
-    //         const json = await res.json();
-    //         if (json !== undefined) {
-    //             setIsLoading(false);
-    //             // console.log(json);
-    //             if (json.order_status == "Vehicle Received") {
-    //                 navigation.navigate('OrderCreated', {'data': isOrderData});
-    //             } else if(json.order_status == "Work in Progress Order") {
-    //                 navigation.navigate('OrderWorkInProgress', {'data': isOrderData});
-    //             } else if(json.order_status == "Vehicle Ready") {
-    //                 navigation.navigate('OrderVehicleReady', {'data': isOrderData});
-    //             } else if(json.order_status == "Completed Order") {
-    //                 // navigation.navigate('OrderCompleted', {'data': isOrderData});
-    //             }
-    //         }
-    //     } catch (e) {
-    //         console.log(e);
-    //     }
-    // }
 
     useEffect(() => {
         setServiceData(route?.params?.data?.services_list);
@@ -272,8 +219,6 @@ const OrderCompleted = ({ navigation, userRole, route, userToken, selectedGarage
                         </View>
                         
                     </View>
-                    {/* <View style={styles.lowerContainer}>
-                    </View> */}
                 </ScrollView>
                 {isLoading &&
                     <Spinner
@@ -372,10 +317,6 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => ({
     userRole: state.role.user_role,
-    userToken: state.user.userToken,
-    user: state.user.user,
-    selectedGarageId: state.garage.selected_garage_id,
-    selectedGarage: state.garage.selected_garage,
 })
 
 export default connect(mapStateToProps)(OrderCompleted);

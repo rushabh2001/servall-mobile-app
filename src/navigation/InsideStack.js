@@ -663,6 +663,51 @@ const PartsStack = ({ navigation }) => {
                     title: "Purchase Order - Select Vehicle",
                 }}
             />
+            <Stack.Screen
+                name={"ChooseGarage"}
+                component={ChooseGarage}
+                options={{
+                    title: "Choose Garage",
+                    headerRight: () => (
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "flex-end",
+                                marginRight: 15,
+                            }}
+                        >
+                            {userRole == "Super Admin" && (
+                                <Button
+                                    onPress={() =>
+                                        navigation.navigate("AddGarage")
+                                    }
+                                    style={styles.buttonStyle}
+                                    color={colors.secondary}
+                                    icon={(color) => (
+                                        <Icon
+                                            name={"plus"}
+                                            size={16}
+                                            color={colors.secondary}
+                                        />
+                                    )}
+                                    uppercase={false}
+                                >
+                                    <Text style={{ fontSize: 12, padding: 0 }}>
+                                        Add Garage
+                                    </Text>
+                                </Button>
+                            )}
+                        </View>
+                    ),
+                }}
+            />
+            <Stack.Screen
+                name="AddGarage"
+                component={AddGarage}
+                options={{
+                    title: "Add Garage",
+                }}
+            />
         </Stack.Navigator>
     );
 };
@@ -858,17 +903,17 @@ const AllStack = ({ navigation }) => {
                 }}
             />
             <MoreStack.Screen
-                name="VehicleSearch"
-                component={VehicleSearch}
-                options={{
-                    title: "Vehicles Search",
-                }}
-            />
-            <MoreStack.Screen
                 name="AddGarage"
                 component={AddGarage}
                 options={{
                     title: "Add Garage",
+                }}
+            />
+            <MoreStack.Screen
+                name="VehicleSearch"
+                component={VehicleSearch}
+                options={{
+                    title: "Vehicles Search",
                 }}
             />
             <MoreStack.Screen

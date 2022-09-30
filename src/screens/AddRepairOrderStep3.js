@@ -4,10 +4,8 @@ import {
     Text,
     StyleSheet,
     Keyboard,
-    ActivityIndicator,
     TouchableOpacity,
     FlatList,
-    RefreshControl,
     Alert,
     Platform,
 } from "react-native";
@@ -37,9 +35,6 @@ const AddRepairOrderStep3 = ({
     route,
     userToken,
     navigation,
-    selectedGarageId,
-    selectedGarage,
-    user,
 }) => {
     // User / Customer Fields
     const [isGarageId, setIsGarageId] = useState(
@@ -498,24 +493,20 @@ const AddRepairOrderStep3 = ({
     };
 
     const searchFilterForParts = async () => {
-        setIsLoading(true);
-        try {
-            const response = await fetch(`${API_URL}fetch_parts`, {
-                method: "GET",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setPartList(json.data);
-                setFilteredPartData(json.data);
-                setIsLoading(false);
-            }
-        } catch (error) {
-            console.error(error);
+        if (searchQueryForParts) {
+            const newData = filteredPartData.filter(
+                function (item) {
+                    const itemData = item.name
+                        ? item.name.toUpperCase()
+                        : ''.toUpperCase()
+
+                    const textData = searchQueryForParts.toUpperCase();
+                    return itemData.indexOf(textData) > -1;
+                });
+            console.log('data', newData)
+            setFilteredPartData(newData);
+        } else {
+            setFilteredPartData(partList);
         }
     };
 
@@ -545,24 +536,20 @@ const AddRepairOrderStep3 = ({
     };
 
     const searchFilterForServices = async () => {
-        setIsLoading(true);
-        try {
-            const response = await fetch(`${API_URL}fetch_service`, {
-                method: "GET",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setServiceList(json.data);
-                setFilteredServiceData(json.data);
-                setIsLoading(false);
-            }
-        } catch (error) {
-            console.error(error);
+        if (searchQueryForServices) {
+            const newData = filteredServiceData.filter(
+                function (item) {
+                    const itemData = item.name
+                        ? item.name.toUpperCase()
+                        : ''.toUpperCase()
+
+                    const textData = searchQueryForServices.toUpperCase();
+                    return itemData.indexOf(textData) > -1;
+                });
+            console.log('data', newData)
+            setFilteredServiceData(newData);
+        } else {
+            setFilteredServiceData(serviceList);
         }
     };
 
@@ -582,7 +569,7 @@ const AddRepairOrderStep3 = ({
             const json = await res.json();
             if (json !== undefined) {
                 setIsLoading(true);
-                pullServiceRefresh();
+                getServiceList();
                 let data = {
                     service_id: json.data.id,
                     serviceName: json.data.name,
@@ -610,7 +597,7 @@ const AddRepairOrderStep3 = ({
             const json = await res.json();
             if (json !== undefined) {
                 setIsLoading(true);
-                pullPartRefresh();
+                getPartList();
                 let data = {
                     parts_id: json.data.id,
                     partName: json.data.name,
@@ -1408,8 +1395,8 @@ const AddRepairOrderStep3 = ({
                         visible={partListModal}
                         onDismiss={() => {
                             setPartListModal(false);
-                            setSearchQueryForParts("");
-                            getPartList();
+                            setSearchQueryForParts('');
+                            setFilteredPartData(partList);
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -1436,8 +1423,8 @@ const AddRepairOrderStep3 = ({
                             }}
                             onPress={() => {
                                 setPartListModal(false);
-                                setSearchQueryForParts("");
-                                getPartList();
+                                setSearchQueryForParts('');
+                                setFilteredPartData(partList);
                             }}
                         />
                         <View style={{ marginTop: 20, flex: 1 }}>
@@ -1479,9 +1466,11 @@ const AddRepairOrderStep3 = ({
                                                     color={
                                                         colors.light_gray
                                                     }
-                                                    onPress={() =>
-                                                        getPartList()
-                                                    }
+                                                    onPress={() => {
+                                                        setSearchQueryForParts('');
+                                                        setFilteredPartData(partList);
+                                                        // getPartList()
+                                                    }}
                                                 />
                                             )
                                         }
@@ -1564,8 +1553,8 @@ const AddRepairOrderStep3 = ({
 
                                                 setPartError("");
                                                 setPartListModal(false);
-                                                setSearchQueryForParts("");
-                                                getPartList();
+                                                setSearchQueryForParts('');
+                                                setFilteredPartData(partList);
                                             }}
                                         />
                                 )}
@@ -1613,8 +1602,8 @@ const AddRepairOrderStep3 = ({
                         visible={serviceListModal}
                         onDismiss={() => {
                             setServiceListModal(false);
-                            setSearchQueryForServices("");
-                            getServiceList();
+                            setSearchQueryForServices('');
+                            setFilteredServiceData(serviceList);
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -1641,8 +1630,8 @@ const AddRepairOrderStep3 = ({
                             }}
                             onPress={() => {
                                 setServiceListModal(false);
-                                setSearchQueryForServices("");
-                                getServiceList();
+                                setSearchQueryForServices('');
+                                setFilteredServiceData(serviceList);
                             }}
                         />
                         <View style={{ marginTop: 20, flex: 1 }}>
@@ -1686,9 +1675,10 @@ const AddRepairOrderStep3 = ({
                                                     color={
                                                         colors.light_gray
                                                     }
-                                                    onPress={() =>
-                                                        getServiceList()
-                                                    }
+                                                    onPress={() => {
+                                                        setSearchQueryForServices('');
+                                                        setFilteredServiceData(serviceList);
+                                                    }}
                                                 />
                                             )
                                         }
@@ -1773,8 +1763,8 @@ const AddRepairOrderStep3 = ({
                                                 setServiceListModal(
                                                     false
                                                 );
-                                                setSearchQueryForServices("");
-                                                getServiceList();
+                                                setSearchQueryForServices('');
+                                                setFilteredServiceData(serviceList);
                                             }}
                                         />
                                 )}
