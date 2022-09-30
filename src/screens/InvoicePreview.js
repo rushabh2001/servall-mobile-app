@@ -9,6 +9,7 @@ import { WebView } from 'react-native-webview';
 import RNFetchBlob from 'rn-fetch-blob';
 import Toast from 'react-native-toast-message';
 import Spinner from "react-native-loading-spinner-overlay";
+import CommonHeader from "../Component/CommonHeaderComponent";
 
 const InvoicePreview = ({ userToken, route, selectedGarageId, selectedGarage, user  }) => {
     const [isLoading, setIsLoading] = useState(true);
@@ -129,9 +130,7 @@ const InvoicePreview = ({ userToken, route, selectedGarageId, selectedGarage, us
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={{ marginBottom: 35 }}>
-                { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
-            </View>
+            <CommonHeader />
             <View style={styles.surfaceContainer}>
                 <View style={{ marginHorizontal: 20, flexDirection: 'row' }}>
                     <Button

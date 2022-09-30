@@ -4,10 +4,8 @@ import {
     Text,
     StyleSheet,
     Keyboard,
-    ActivityIndicator,
     TouchableOpacity,
     FlatList,
-    RefreshControl,
     Alert,
     Platform,
 } from "react-native";
@@ -31,6 +29,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { SliderPicker } from "react-native-slider-picker";
 import { Picker } from "@react-native-picker/picker";
 import Spinner from "react-native-loading-spinner-overlay";
+import CommonHeader from "../Component/CommonHeaderComponent";
 
 // Edit Repair Order
 const EditRepairOrder = ({
@@ -136,7 +135,7 @@ const EditRepairOrder = ({
         parseInt(route?.params?.data?.total)
     );
     const [isApplicableDiscount, setIsApplicableDiscount] = useState(
-        parseInt(route?.params?.data?.applicable_discount)
+        parseInt()
     );
     const [isTotalServiceDiscount, setIsTotalServiceDiscount] = useState(0);
     const [isTotalPartDiscount, setIsTotalPartDiscount] = useState(0);
@@ -438,7 +437,7 @@ const EditRepairOrder = ({
         // data.append("status", isOrderStatus);
         data.append("labor_total", parseInt(servicesTotal));
         data.append("parts_total", parseInt(partsTotal));
-        data.append("discount", parseInt(isApplicableDiscount));
+        data.append("discount", 0);
         // if(isVehicleImg != null) data.append("orderimage", isVehicleImg);
         data.append("total", parseInt(isTotal));
         if(isComment) data.append("comment", isComment?.trim());
@@ -511,30 +510,23 @@ const EditRepairOrder = ({
     };
 
     const getPartList = async () => {
-        if(partPage == 1) setIsLoading(true)
-        if(partPage != 1) setIsPartScrollLoading(false)
+        setIsLoading(true)
         try {
-            const res = await fetch(`${API_URL}fetch_parts?page=${partPage}`, {
-                method: "POST",
+            const res = await fetch(`${API_URL}fetch_parts`, {
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify({
-                    search: searchQueryForParts,
-                }),
             });
             const json = await res.json();
             if (json !== undefined) {
-                // setPartList(json.data);
-                // setFilteredPartData(json.data);
-                setPartList([...partList, ...json.data.data]);
-                setFilteredPartData([...filteredPartData, ...json.data.data]);
+                setPartList(json.data);
+                setFilteredPartData(json.data);
+                // setPartList([...partList, ...json.data.data]);
+                // setFilteredPartData([...filteredPartData, ...json.data.data]);
                 setIsLoading(false);
-                if(partPage != 1) setIsPartScrollLoading(false)
-                {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
-                {json.data.current_page != json.data.last_page ? setPartPage(partPage + 1) : null}
             }
         } catch (e) {
             console.log(e);
@@ -545,104 +537,43 @@ const EditRepairOrder = ({
         setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_parts`, {
-                method: "POST",
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify({
-                    search: searchQueryForParts,
-                }),
             });
             const json = await response.json();
             if (response.status == "200") {
-                setPartList(json.data.data);
-                setFilteredPartData(json.data.data);
-                {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
-                {json.data.current_page != json.data.last_page ? setPartPage(2) : null}
-                setIsLoading(false);
-                setPartRefreshing(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const pullPartRefresh = async () => {
-        setSearchQueryForParts(null);
-        try {
-            const response = await fetch(`${API_URL}fetch_parts`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    search: null,
-                }),
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setPartList(json.data.data);
-                setFilteredPartData(json.data.data);
-                {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
-                {json.data.current_page != json.data.last_page ? setPartPage(2) : null}
-                setPartRefreshing(false);
+                setPartList(json.data);
+                setFilteredPartData(json.data);
                 setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
         }
-    };
-
-    const renderPartFooter = () => {
-        return (
-            <>
-                {isPartScrollLoading && (
-                    <View style={styles.footer}>
-                        <ActivityIndicator size="large" />
-                    </View>
-                )}
-            </>
-        );
-    };
-
-    const onPartRefresh = () => {
-        setPartRefreshing(true);
-        pullPartRefresh();
     };
 
     const getServiceList = async () => {
-        if(servicePage == 1) setIsLoading(true)
-        if(servicePage != 1) setIsServiceScrollLoading(true)
+        setIsLoading(true);
         try {
             const res = await fetch(
-                `${API_URL}fetch_service?page=${servicePage}`,
+                `${API_URL}fetch_service`,
                 {
-                    method: "POST",
+                    method: "GET",
                     headers: {
                         Accept: "application/json",
                         "Content-Type": "application/json",
                         Authorization: "Bearer " + userToken,
                     },
-                    body: JSON.stringify({
-                        search: searchQueryForServices,
-                    }),
                 }
             );
             const json = await res.json();
             if (json !== undefined) {
-                setServiceList([...serviceList, ...json.data.data]);
-                setFilteredServiceData([
-                    ...filteredServiceData,
-                    ...json.data.data,
-                ]);
+                setServiceList(json.data);
+                setFilteredServiceData(json.data);
                 setIsLoading(false);
-                if(servicePage != 1) setIsServiceScrollLoading(false)
-                {json.data.current_page != json.data.last_page ? setLoadMoreServices(true) : setLoadMoreServices(false)}
-                {json.data.current_page != json.data.last_page ? setServicePage(servicePage + 1) : null}
             }
         } catch (e) {
             console.log(e);
@@ -653,73 +584,22 @@ const EditRepairOrder = ({
         setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_service`, {
-                method: "POST",
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify({
-                    search: searchQueryForServices,
-                }),
             });
             const json = await response.json();
             if (response.status == "200") {
-                setServiceList(json.data.data);
-                setFilteredServiceData(json.data.data);
-                {json.data.current_page != json.data.last_page ? setLoadMoreServices(true) : setLoadMoreServices(false)}
-                {json.data.current_page != json.data.last_page ? setServicePage(servicePage + 1) : null}
-                setIsLoading(false);
-                setServiceRefreshing(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const pullServiceRefresh = async () => {
-        setSearchQueryForServices(null);
-        try {
-            const response = await fetch(`${API_URL}fetch_service`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    search: null,
-                }),
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setServiceList(json.data.data);
-                setFilteredServiceData(json.data.data);
-                {json.data.current_page != json.data.last_page ? setLoadMoreServices(true) : setLoadMoreServices(false)}
-                {json.data.current_page != json.data.last_page ? setServicePage(servicePage + 1) : null}
-                setServiceRefreshing(false);
+                setServiceList(json.data);
+                setFilteredServiceData(json.data);
                 setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
         }
-    };
-
-    const renderServiceFooter = () => {
-        return (
-            <>
-                {isServiceScrollLoading && (
-                    <View style={styles.footer}>
-                        <ActivityIndicator size="large" />
-                    </View>
-                )}
-            </>
-        );
-    };
-
-    const onServiceRefresh = () => {
-        setServiceRefreshing(true);
-        pullServiceRefresh();
     };
 
     const addNewService = async () => {
@@ -737,7 +617,7 @@ const EditRepairOrder = ({
             });
             const json = await res.json();
             if (json !== undefined) {
-                pullServiceRefresh();
+                getServiceList();
                 let data = {
                     service_id: json.data.id,
                     serviceName: json.data.name,
@@ -756,7 +636,7 @@ const EditRepairOrder = ({
     const addNewPart = async () => {
         try {
             const res = await fetch(`${API_URL}add_parts`, {
-                method: "POST",
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
@@ -769,7 +649,7 @@ const EditRepairOrder = ({
             const json = await res.json();
             if (json !== undefined) {
                 setIsLoading(true);
-                pullPartRefresh();
+                getPartList();
                 let data = {
                     parts_id: json.data.id,
                     partName: json.data.name,
@@ -817,6 +697,22 @@ const EditRepairOrder = ({
             });
         });
         setFieldsParts(values2);
+
+        // Calculate Total of Order
+        let discountServicesTotal = 0;
+        values.forEach((item) => {
+            discountServicesTotal += item.applicableDiscountForItem;
+        });
+        setIsTotalServiceDiscount(discountServicesTotal);
+        let discountPartsTotal = 0;
+        values2.forEach((item) => {
+            discountPartsTotal += item.applicableDiscountForItem;
+        });
+        setIsTotalPartDiscount(discountPartsTotal);
+
+        let totalDiscount = (discountPartsTotal + discountServicesTotal);
+        setIsApplicableDiscount(parseInt(totalDiscount));
+
     }, [route?.params?.data]);
 
     useEffect(() => {
@@ -826,17 +722,7 @@ const EditRepairOrder = ({
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={{ marginBottom: 35 }}>
-                {selectedGarageId == 0 ? (
-                    <Text style={styles.garageNameTitle}>
-                        All Garages - {user.name}
-                    </Text>
-                ) : (
-                    <Text style={styles.garageNameTitle}>
-                        {selectedGarage?.garage_name} - {user.name}
-                    </Text>
-                )}
-            </View>
+            <CommonHeader />
             <View style={styles.pageContainer}>
                 <InputScrollView
                     contentContainerStyle={{
@@ -1362,44 +1248,6 @@ const EditRepairOrder = ({
                                 <View
                                     style={[
                                         styles.totalFieldsLeftContent,
-                                        { flex: 0.8 },
-                                    ]}
-                                >
-                                    <Text style={styles.partNameContent}>
-                                        Applicable Discount
-                                    </Text>
-                                </View>
-                                <View
-                                    style={[
-                                        styles.totalFieldsRightContent,
-                                        { flex: 1 },
-                                    ]}
-                                >
-                                    <Text
-                                        style={
-                                            styles.totalFieldTextContainer
-                                        }
-                                    >
-                                        INR{" "}
-                                    </Text>
-                                    <View
-                                        style={styles.totalFieldContainer}
-                                    >
-                                        <Text
-                                            style={{
-                                                fontSize: 18,
-                                                color: colors.black,
-                                            }}
-                                        >
-                                            {isApplicableDiscount}
-                                        </Text>
-                                    </View>
-                                </View>
-                            </View>
-                            <View style={styles.totalFieldsGroup}>
-                                <View
-                                    style={[
-                                        styles.totalFieldsLeftContent,
                                         { flex: 0.9 },
                                     ]}
                                 >
@@ -1666,7 +1514,7 @@ const EditRepairOrder = ({
                         onDismiss={() => {
                             setPartListModal(false);
                             setSearchQueryForParts("");
-                            onPartRefresh();
+                            getPartList();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -1686,7 +1534,7 @@ const EditRepairOrder = ({
                             onPress={() => {
                                 setPartListModal(false);
                                 setSearchQueryForParts("");
-                                onPartRefresh();
+                                getPartList();
                             }}
                         />
                         <Text
@@ -1737,7 +1585,7 @@ const EditRepairOrder = ({
                                                         colors.light_gray
                                                     }
                                                     onPress={() =>
-                                                        onPartRefresh()
+                                                        getPartList()
                                                     }
                                                 />
                                             )
@@ -1776,17 +1624,7 @@ const EditRepairOrder = ({
                                     borderWidth: 1,
                                     flex: 1,
                                 }}
-                                onEndReached={loadMoreParts ? getPartList : null}
-                                onEndReachedThreshold={0.5}
                                 contentContainerStyle={{ flexGrow: 1 }}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={partRefreshing}
-                                        onRefresh={onPartRefresh}
-                                        colors={["green"]}
-                                    />
-                                }
-                                ListFooterComponent={loadMoreParts ? renderPartFooter : null}
                                 ListEmptyComponent={() => (
                                     !isLoading && (
                                         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
@@ -1832,7 +1670,7 @@ const EditRepairOrder = ({
                                                 setPartError("");
                                                 setPartListModal(false);
                                                 setSearchQueryForParts("");
-                                                onPartRefresh();
+                                                getPartList();
                                             }}
                                         />
                                 )}
@@ -1881,7 +1719,7 @@ const EditRepairOrder = ({
                         onDismiss={() => {
                             setServiceListModal(false);
                             setSearchQueryForServices("");
-                            onServiceRefresh();
+                            getServiceList();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -1901,7 +1739,7 @@ const EditRepairOrder = ({
                             onPress={() => {
                                 setServiceListModal(false);
                                 setSearchQueryForServices("");
-                                onServiceRefresh();
+                                getServiceList();
                             }}
                         />
                         <Text
@@ -1954,7 +1792,7 @@ const EditRepairOrder = ({
                                                         colors.light_gray
                                                     }
                                                     onPress={() =>
-                                                        onServiceRefresh()
+                                                        getServiceList()
                                                     }
                                                 />
                                             )
@@ -1993,17 +1831,7 @@ const EditRepairOrder = ({
                                     borderWidth: 1,
                                     flex: 1,
                                 }}
-                                onEndReached={loadMoreServices ? getServiceList : null}
-                                onEndReachedThreshold={0.5}
                                 contentContainerStyle={{ flexGrow: 1 }}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={serviceRefreshing}
-                                        onRefresh={onServiceRefresh}
-                                        colors={["green"]}
-                                    />
-                                }
-                                ListFooterComponent={loadMoreServices ? renderServiceFooter : null}
                                 ListEmptyComponent={() => (
                                     !isLoading && (
                                         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
@@ -2051,7 +1879,7 @@ const EditRepairOrder = ({
                                                     false
                                                 );
                                                 setSearchQueryForServices("");
-                                                onServiceRefresh();
+                                                getServiceList();
                                             }}
                                         />
                                 )}

@@ -13,6 +13,7 @@ import Lightbox from 'react-native-lightbox-v2';
 import moment from "moment";
 import ServAllLogo from '../assets/images/placeholder_servall.jpg';
 import Spinner from "react-native-loading-spinner-overlay";
+import CommonHeader from "../Component/CommonHeaderComponent";
 
 const customerTopTabs = createMaterialTopTabNavigator();
 
@@ -218,9 +219,7 @@ const CustomerDetails = ({ navigation, route, userToken, userRole, selectedGarag
     
     return (
         <View style={{ flex: 1 }}>
-            <View style={{ marginBottom: 35 }}>
-            { selectedGarageId == 0 ? <Text style={styles.garageNameTitle}>All Garages - {user.name}</Text> : <Text style={styles.garageNameTitle}>{selectedGarage?.garage_name} - {user.name}</Text> }
-            </View>
+            <CommonHeader />
             <View style={styles.surfaceContainer}>
                 <View style={styles.upperContainer}>
                     <View>

@@ -26,6 +26,7 @@ import InputScrollView from "react-native-input-scroll-view";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import IconX from "react-native-vector-icons/FontAwesome5";
 import Spinner from "react-native-loading-spinner-overlay";
+import CommonHeader from "../Component/CommonHeaderComponent";
 
 const AddStock = ({
     navigation,
@@ -63,15 +64,10 @@ const AddStock = ({
     const [filteredPartData, setFilteredPartData] = useState([]);
     const [searchQueryForParts, setSearchQueryForParts] = useState();
     const [partError, setPartError] = useState("");
-    const [loadMoreParts, setLoadMoreParts] = useState(true);
 
     const [isNewPart, setIsNewPart] = useState("");
     const [newPartError, setNewPartError] = useState();
     const [addNewPartModal, setAddNewPartModal] = useState(false);
-
-    const [partPage, setPartPage] = useState(1);
-    const [isPartScrollLoading, setIsPartScrollLoading] = useState(false);
-    const [partRefreshing, setPartRefreshing] = useState(false);
 
     // Property Vendor Dropdown
     // const [isVendor, setIsVendor] = useState();
@@ -92,13 +88,6 @@ const AddStock = ({
     const [isGarageName, setIsGarageName] = useState(
         !selectedGarage ? "" : selectedGarage.garage_name
     );
-    const [garageList, setGarageList] = useState([]);
-    const [garageListModal, setGarageListModal] = useState(false);
-    const [filteredGarageData, setFilteredGarageData] = useState([]);
-    const [searchQueryForGarages, setSearchQueryForGarages] = useState();
-    const [garageError, setGarageError] = useState(""); // Error State
-    const [garageIdError, setGarageIdError] = useState();
-    const [loadMoreGarages, setLoadMoreGarages] = useState(true);
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -251,7 +240,7 @@ const AddStock = ({
             const json = await res.json();
             if (json !== undefined) {
                 setIsLoading(true);
-                pullPartRefresh();
+                getPartList();
                 setIsPart(parseInt(json.data.id));
                 setIsPartName(json.data.name);
             }
@@ -264,23 +253,17 @@ const AddStock = ({
         setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_parts`, {
-                method: "POST",
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify({
-                    search: searchQueryForParts,
-                }),
             });
             const json = await response.json();
             if (response.status == "200") {
-                setPartList(json.data.data);
-                setFilteredPartData(json.data.data);
-                {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
-                {json.data.current_page != json.data.last_page ? setPartPage(2) : null}
-                setPartRefreshing(false);
+                setPartList(json.data);
+                setFilteredPartData(json.data);
                 setIsLoading(false);
             }
         } catch (error) {
@@ -289,191 +272,25 @@ const AddStock = ({
     };
 
     const getPartList = async () => {
-        if(partPage == 1) setIsLoading(true)
-        if(partPage != 1) setIsPartScrollLoading(true)
+        setIsLoading(true)
         try {
-            const res = await fetch(`${API_URL}fetch_parts?page=${partPage}`, {
-                method: "POST",
+            const res = await fetch(`${API_URL}fetch_parts`, {
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify({
-                    search: searchQueryForParts,
-                }),
             });
             const json = await res.json();
             if (json !== undefined) {
-                setPartList([...partList, ...json.data.data]);
-                setFilteredPartData([...filteredPartData, ...json.data.data]);
+                setPartList(json.data);
+                setFilteredPartData(json.data);
                 setIsLoading(false);
-                if(partPage != 1) setIsPartScrollLoading(false)
-                {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
-                {json.data.current_page != json.data.last_page ? setPartPage(partPage + 1) : null}
             }
         } catch (e) {
             console.log(e);
         }
-    };
-
-    const pullPartRefresh = async () => {
-        setSearchQueryForParts(null);
-        try {
-            const response = await fetch(`${API_URL}fetch_parts`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    search: null,
-                }),
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setPartList(json.data.data);
-                setFilteredPartData(json.data.data);
-                {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
-                {json.data.current_page != json.data.last_page ? setPartPage(2) : null}
-                setPartRefreshing(false);
-                setIsLoading(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const renderPartFooter = () => {
-        return (
-            <>
-                {isPartScrollLoading && (
-                    <View style={styles.footer}>
-                        <ActivityIndicator size="large" />
-                    </View>
-                )}
-            </>
-        );
-    };
-
-    const onPartRefresh = () => {
-        setPartRefreshing(true);
-        pullPartRefresh();
-    };
-
-    const getGarageList = async () => {
-        if(garagePage == 1) setIsLoading(true)
-        if(garagePage != 1) setIsGarageScrollLoading(true)
-        try {
-            const res = await fetch(
-                `${API_URL}fetch_owner_garages?page=${garagePage}`,
-                {
-                    method: "POST",
-                    headers: {
-                        Accept: "application/json",
-                        "Content-Type": "application/json",
-                        Authorization: "Bearer " + userToken,
-                    },
-                    body: JSON.stringify({
-                        user_id: userId,
-                        user_role: userRole,
-                        search: searchQueryForGarages,
-                    }),
-                }
-            );
-            const json = await res.json();
-            console.log(json);
-            if (json !== undefined) {
-                setGarageList([...garageList, ...json.garage_list.data]);
-                setFilteredGarageData([
-                    ...filteredGarageData,
-                    ...json.garage_list.data,
-                ]);
-                setIsLoading(false);
-                if(garagePage != 1) setIsGarageScrollLoading(false)
-                {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
-                {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(garagePage + 1) : null}
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    };
-
-    const searchFilterForGarages = async () => {
-        setIsLoading(true);
-        try {
-            const response = await fetch(`${API_URL}fetch_owner_garages`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    user_id: userId,
-                    user_role: userRole,
-                    search: searchQueryForGarages,
-                }),
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setGarageList(json.garage_list.data);
-                setFilteredGarageData(json.garage_list.data);
-                {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
-                {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(2) : null}
-                setGarageRefreshing(false);
-                setIsLoading(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const pullGarageRefresh = async () => {
-        setSearchQueryForGarages(null);
-        try {
-            const response = await fetch(`${API_URL}fetch_owner_garages`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    user_id: userId,
-                    user_role: userRole,
-                    search: null,
-                }),
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setGarageList(json.garage_list.data);
-                setFilteredGarageData(json.garage_list.data);
-                {json.garage_list.current_page != json.garage_list.last_page ? setLoadMoreGarages(true) : setLoadMoreGarages(false)}
-                {json.garage_list.current_page != json.garage_list.last_page ? setGaragePage(2) : null}
-                setGarageRefreshing(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const renderGarageFooter = () => {
-        return (
-            <>
-                {isGarageScrollLoading && (
-                    <View style={styles.footer}>
-                        <ActivityIndicator size="large" />
-                    </View>
-                )}
-            </>
-        );
-    };
-
-    const onGarageRefresh = () => {
-        setGarageRefreshing(true);
-        pullGarageRefresh();
     };
 
     const getInvetoryData = async () => {
@@ -544,17 +361,7 @@ const AddStock = ({
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={{ marginBottom: 35 }}>
-                {selectedGarageId == 0 ? (
-                    <Text style={styles.garageNameTitle}>
-                        All Garages - {user.name}
-                    </Text>
-                ) : (
-                    <Text style={styles.garageNameTitle}>
-                        {selectedGarage?.garage_name} - {user.name}
-                    </Text>
-                )}
-            </View>
+            <CommonHeader />
             <View style={styles.pageContainer}>
                 <InputScrollView
                     ref={scrollViewRef}
@@ -755,7 +562,7 @@ const AddStock = ({
                         onDismiss={() => {
                             setPartListModal(false);
                             setSearchQueryForParts("");
-                            onPartRefresh();
+                            getPartList();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -783,7 +590,7 @@ const AddStock = ({
                             onPress={() => {
                                 setPartListModal(false);
                                 setSearchQueryForParts("");
-                                onPartRefresh();
+                                getPartList();
                             }}
                         />
                         <View style={{ marginTop: 20, flex: 1 }}>
@@ -826,7 +633,7 @@ const AddStock = ({
                                                         colors.light_gray
                                                     }
                                                     onPress={() =>
-                                                        onPartRefresh()
+                                                        getPartList()
                                                     }
                                                 />
                                             )
@@ -865,17 +672,7 @@ const AddStock = ({
                                     borderWidth: 1,
                                     flex: 1,
                                 }}
-                                onEndReached={loadMoreParts ? getPartList : null}
-                                onEndReachedThreshold={0.5}
                                 contentContainerStyle={{ flexGrow: 1 }}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={partRefreshing}
-                                        onRefresh={onPartRefresh}
-                                        colors={["green"]}
-                                    />
-                                }
-                                ListFooterComponent={loadMoreParts ? renderPartFooter : null}
                                 ListEmptyComponent={() => (
                                     !isLoading && (
                                         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
@@ -916,7 +713,7 @@ const AddStock = ({
                                                 setPartError("");
                                                 setPartListModal(false);
                                                 setSearchQueryForParts("");
-                                                onPartRefresh();
+                                                getPartList();
                                             }}
                                         />
                                     )
@@ -1047,184 +844,6 @@ const AddStock = ({
                         </View>
                     </Modal>
 
-                    {/* Garage List Modal */}
-                    <Modal
-                        visible={garageListModal}
-                        onDismiss={() => {
-                            setGarageListModal(false);
-                            setSearchQueryForGarages("");
-                            onGarageRefresh();
-                        }}
-                        contentContainerStyle={[
-                            styles.modalContainerStyle,
-                            { flex: 0.9 },
-                        ]}
-                    >
-                        <Text
-                            style={[
-                                styles.headingStyle,
-                                { marginTop: 0, alignSelf: "center" },
-                            ]}
-                        >
-                            Select Garage
-                        </Text>
-                        <IconX
-                            name="times"
-                            size={20}
-                            color={colors.black}
-                            style={{
-                                position: "absolute",
-                                top: 25,
-                                right: 25,
-                                zIndex: 99,
-                            }}
-                            onPress={() => {
-                                setGarageListModal(false);
-                                setSearchQueryForGarages("");
-                                onGarageRefresh();
-                            }}
-                        />
-                        <View style={{ marginTop: 20, flex: 1 }}>
-                            {/* Search Bar */}
-                            <View>
-                                <View
-                                    style={{
-                                        marginBottom: 15,
-                                        flexDirection: "row",
-                                    }}
-                                >
-                                    <TextInput
-                                        mode={"flat"}
-                                        placeholder="Search here..."
-                                        onChangeText={(text) =>
-                                            setSearchQueryForGarages(text)
-                                        }
-                                        value={searchQueryForGarages}
-                                        activeUnderlineColor={
-                                            colors.transparent
-                                        }
-                                        selectionColor="black"
-                                        underlineColor={colors.transparent}
-                                        style={{
-                                            elevation: 4,
-                                            height: 50,
-                                            backgroundColor: colors.white,
-                                            flex: 1,
-                                            borderTopRightRadius: 0,
-                                            borderBottomRightRadius: 0,
-                                            borderTopLeftRadius: 5,
-                                            borderBottomLeftRadius: 5,
-                                        }}
-                                        right={
-                                            searchQueryForGarages != null &&
-                                            searchQueryForGarages != "" && (
-                                                <TextInput.Icon
-                                                    icon="close"
-                                                    color={
-                                                        colors.light_gray
-                                                    }
-                                                    onPress={() =>
-                                                        onGarageRefresh()
-                                                    }
-                                                />
-                                            )
-                                        }
-                                    />
-                                    <TouchableOpacity
-                                        onPress={() =>
-                                            searchFilterForGarages()
-                                        }
-                                        style={{
-                                            elevation: 4,
-                                            borderTopRightRadius: 5,
-                                            borderBottomRightRadius: 5,
-                                            paddingRight: 25,
-                                            paddingLeft: 25,
-                                            zIndex: 2,
-                                            backgroundColor: colors.primary,
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                        }}
-                                    >
-                                        <IconX
-                                            name={"search"}
-                                            size={17}
-                                            color={colors.white}
-                                        />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                            <FlatList
-                                showsVerticalScrollIndicator={false}
-                                ItemSeparatorComponent={() => (!isLoading && <Divider />)}
-                                data={filteredGarageData}
-                                style={{
-                                    borderColor: "#0000000a",
-                                    borderWidth: 1,
-                                    flex: 1,
-                                }}
-                                onEndReached={loadMoreGarages ? getGarageList : null}
-                                onEndReachedThreshold={0.5}
-                                contentContainerStyle={{ flexGrow: 1 }}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={garageRefreshing}
-                                        onRefresh={onGarageRefresh}
-                                        colors={["green"]}
-                                    />
-                                }
-                                ListFooterComponent={loadMoreGarages ? renderGarageFooter : null}
-                                ListEmptyComponent={() => (
-                                    !isLoading && (
-                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
-                                            <Text style={{ color: colors.black }}>
-                                                No garage found!
-                                            </Text>
-                                        </View>
-                                ))}
-                                keyExtractor={(item) => item.id}
-                                renderItem={({ item }) => (
-                                    !isLoading && 
-                                        <List.Item
-                                            title={
-                                                <View
-                                                    style={{
-                                                        flexDirection:
-                                                            "row",
-                                                        display: "flex",
-                                                        flexWrap:
-                                                            "wrap",
-                                                    }}
-                                                >
-                                                    <Text
-                                                        style={{
-                                                            fontSize: 16,
-                                                            color: colors.black,
-                                                        }}
-                                                    >
-                                                        {
-                                                            item.garage_name
-                                                        }
-                                                    </Text>
-                                                </View>
-                                            }
-                                            onPress={() => {
-                                                setIsGarageName(
-                                                    item.garage_name
-                                                );
-                                                setIsGarageId(item.id);
-                                                setGarageError("");
-                                                setGarageListModal(
-                                                    false
-                                                );
-                                                setSearchQueryForGarages("");
-                                                onGarageRefresh();
-                                            }}
-                                        />
-                                )}
-                            />
-                        </View>
-                    </Modal>
                 </Portal>
             </View>
             {isLoading &&

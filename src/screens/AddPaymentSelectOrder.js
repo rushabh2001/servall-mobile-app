@@ -27,6 +27,7 @@ import moment from "moment";
 import Lightbox from "react-native-lightbox-v2";
 import RBSheet from "react-native-raw-bottom-sheet";
 import Spinner from "react-native-loading-spinner-overlay";
+import CommonHeader from "../Component/CommonHeaderComponent";
 
 const AddPaymentSelectOrder = ({
     navigation,
@@ -191,17 +192,7 @@ const AddPaymentSelectOrder = ({
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={{ marginBottom: 35 }}>
-                {selectedGarageId == 0 ? (
-                    <Text style={styles.garageNameTitle}>
-                        All Garages - {user.name}
-                    </Text>
-                ) : (
-                    <Text style={styles.garageNameTitle}>
-                        {selectedGarage?.garage_name} - {user.name}
-                    </Text>
-                )}
-            </View>
+            <CommonHeader />
             <View style={styles.surfaceContainer}>
                 <View>
                     <View style={{ marginBottom: 15, flexDirection: "row" }}>

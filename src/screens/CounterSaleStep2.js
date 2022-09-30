@@ -15,6 +15,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import InputScrollView from "react-native-input-scroll-view";
 import { Picker } from "@react-native-picker/picker";
 import moment from "moment";
+import CommonHeader from "../Component/CommonHeaderComponent";
 
 // Step - 2 for Repair Order
 const CounterSaleStep2 = ({
@@ -242,17 +243,7 @@ const CounterSaleStep2 = ({
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={{ marginBottom: 35 }}>
-                {selectedGarageId == 0 ? (
-                    <Text style={styles.garageNameTitle}>
-                        All Garages - {user.name}
-                    </Text>
-                ) : (
-                    <Text style={styles.garageNameTitle}>
-                        {selectedGarage?.garage_name} - {user.name}
-                    </Text>
-                )}
-            </View>
+            <CommonHeader />
             <View style={styles.pageContainer}>
                 {isLoading == true ? (
                     <ActivityIndicator></ActivityIndicator>

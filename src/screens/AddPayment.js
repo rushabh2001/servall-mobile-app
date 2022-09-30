@@ -19,6 +19,7 @@ import IconX from "react-native-vector-icons/FontAwesome5";
 import moment from "moment";
 import { API_URL } from "../constants/config";
 import Spinner from "react-native-loading-spinner-overlay";
+import CommonHeader from "../Component/CommonHeaderComponent";
 
 const AddPayment = ({
     navigation,
@@ -146,17 +147,7 @@ const AddPayment = ({
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={{ marginBottom: 35 }}>
-                {selectedGarageId == 0 ? (
-                    <Text style={styles.garageNameTitle}>
-                        All Garages - {user.name}
-                    </Text>
-                ) : (
-                    <Text style={styles.garageNameTitle}>
-                        {selectedGarage?.garage_name} - {user.name}
-                    </Text>
-                )}
-            </View>
+            <CommonHeader />
             <View style={styles.surfaceContainer}>
                 <ScrollView showsVerticalScrollIndicator={false}>
                     <View style={styles.cardContainer}>

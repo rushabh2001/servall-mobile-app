@@ -30,6 +30,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { SliderPicker } from "react-native-slider-picker";
 import { Picker } from "@react-native-picker/picker";
 import Spinner from "react-native-loading-spinner-overlay";
+import CommonHeader from "../Component/CommonHeaderComponent";
 
 // Step - 2 for Repair Order
 const AddRepairOrderStep3 = ({
@@ -130,16 +131,6 @@ const AddRepairOrderStep3 = ({
     const [filteredServiceData, setFilteredServiceData] = useState([]);
     const [serviceListModal, setServiceListModal] = useState(false);
 
-    const [partPage, setPartPage] = useState(1);
-    const [isPartScrollLoading, setIsPartScrollLoading] = useState(false);
-    const [partRefreshing, setPartRefreshing] = useState(false);
-    const [loadMoreParts, setLoadMoreParts] = useState(true);
-
-    const [servicePage, setServicePage] = useState(1);
-    const [isServiceScrollLoading, setIsServiceScrollLoading] = useState(false);
-    const [serviceRefreshing, setServiceRefreshing] = useState(false);
-    const [loadMoreServices, setLoadMoreServices] = useState(true);
-
     const validate = () => {
         return !(
             !isOdometerKMs ||
@@ -194,7 +185,7 @@ const AddRepairOrderStep3 = ({
         );
         data.append("labor_total", servicesTotal);
         data.append("parts_total", partsTotal);
-        data.append("discount", isApplicableDiscount);
+        data.append("discount", 0);
         data.append("status", isOrderStatus);
         // if (isVehicleImg != null) data.append("orderimage", isVehicleImg);
         data.append("total", isTotal);
@@ -483,30 +474,23 @@ const AddRepairOrderStep3 = ({
 
     // Parts Functions ----- End Here
     const getPartList = async () => {
-        if(partPage == 1) setIsLoading(true)
-        if(partPage != 1) setIsPartScrollLoading(true)
+        setIsLoading(true)
         try {
-            const res = await fetch(`${API_URL}fetch_parts?page=${partPage}`, {
-                method: "POST",
+            const res = await fetch(`${API_URL}fetch_parts`, {
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify({
-                    search: searchQueryForParts,
-                }),
             });
             const json = await res.json();
             if (json !== undefined) {
-                // setPartList(json.data);
-                // setFilteredPartData(json.data);
-                setPartList([...partList, ...json.data.data]);
-                setFilteredPartData([...filteredPartData, ...json.data.data]);
+                setPartList(json.data);
+                setFilteredPartData(json.data);
+                // setPartList([...partList, ...json.data.data]);
+                // setFilteredPartData([...filteredPartData, ...json.data.data]);
                 setIsLoading(false);
-                if(partPage != 1) setIsPartScrollLoading(false)
-                {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
-                {json.data.current_page != json.data.last_page ? setPartPage(partPage + 1) : null}
             }
         } catch (e) {
             console.log(e);
@@ -517,104 +501,43 @@ const AddRepairOrderStep3 = ({
         setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_parts`, {
-                method: "POST",
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify({
-                    search: searchQueryForParts,
-                }),
             });
             const json = await response.json();
             if (response.status == "200") {
-                setPartList(json.data.data);
-                setFilteredPartData(json.data.data);
-                {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
-                {json.data.current_page != json.data.last_page ? setPartPage(2) : null}
-                setIsLoading(false);
-                setPartRefreshing(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const pullPartRefresh = async () => {
-        setSearchQueryForParts(null);
-        try {
-            const response = await fetch(`${API_URL}fetch_parts`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    search: null,
-                }),
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setPartList(json.data.data);
-                setFilteredPartData(json.data.data);
-                {json.data.current_page != json.data.last_page ? setLoadMoreParts(true) : setLoadMoreParts(false)}
-                {json.data.current_page != json.data.last_page ? setPartPage(2) : null}
-                setPartRefreshing(false);
+                setPartList(json.data);
+                setFilteredPartData(json.data);
                 setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
         }
-    };
-
-    const renderPartFooter = () => {
-        return (
-            <>
-                {isPartScrollLoading && (
-                    <View style={styles.footer}>
-                        <ActivityIndicator size="large" />
-                    </View>
-                )}
-            </>
-        );
-    };
-
-    const onPartRefresh = () => {
-        setPartRefreshing(true);
-        pullPartRefresh();
     };
 
     const getServiceList = async () => {
-        if(servicePage == 1) setIsLoading(true)
-        if(servicePage != 1) setIsServiceScrollLoading(true)
+        setIsLoading(true)
         try {
             const res = await fetch(
-                `${API_URL}fetch_service?page=${servicePage}`,
+                `${API_URL}fetch_service`,
                 {
-                    method: "POST",
+                    method: "GET",
                     headers: {
                         Accept: "application/json",
                         "Content-Type": "application/json",
                         Authorization: "Bearer " + userToken,
                     },
-                    body: JSON.stringify({
-                        search: searchQueryForServices,
-                    }),
                 }
             );
             const json = await res.json();
             if (json !== undefined) {
-                setServiceList([...serviceList, ...json.data.data]);
-                setFilteredServiceData([
-                    ...filteredServiceData,
-                    ...json.data.data,
-                ]);
+                setServiceList(json.data);
+                setFilteredServiceData(json.data);
                 setIsLoading(false);
-                if(servicePage != 1) setIsServiceScrollLoading(false)
-                {json.data.current_page != json.data.last_page ? setLoadMoreServices(true) : setLoadMoreServices(false)}
-                {json.data.current_page != json.data.last_page ? setServicePage(servicePage + 1) : null}
             }
         } catch (e) {
             console.log(e);
@@ -625,73 +548,22 @@ const AddRepairOrderStep3 = ({
         setIsLoading(true);
         try {
             const response = await fetch(`${API_URL}fetch_service`, {
-                method: "POST",
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify({
-                    search: searchQueryForServices,
-                }),
             });
             const json = await response.json();
             if (response.status == "200") {
-                setServiceList(json.data.data);
-                setFilteredServiceData(json.data.data);
-                {json.data.current_page != json.data.last_page ? setLoadMoreServices(true) : setLoadMoreServices(false)}
-                {json.data.current_page != json.data.last_page ? setServicePage(servicePage + 1) : null}
-                setServiceRefreshing(false);
+                setServiceList(json.data);
+                setFilteredServiceData(json.data);
                 setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
         }
-    };
-
-    const pullServiceRefresh = async () => {
-        setSearchQueryForServices(null);
-        try {
-            const response = await fetch(`${API_URL}fetch_service`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json"  ,
-                    Authorization: "Bearer " + userToken,
-                },
-                body: JSON.stringify({
-                    search: null,
-                }),
-            });
-            const json = await response.json();
-            if (response.status == "200") {
-                setServiceList(json.data.data);
-                setFilteredServiceData(json.data.data);
-                {json.data.current_page != json.data.last_page ? setLoadMoreServices(true) : setLoadMoreServices(false)}
-                {json.data.current_page != json.data.last_page ? setServicePage(servicePage + 1) : null}
-                setServiceRefreshing(false);
-                setIsLoading(false);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const renderServiceFooter = () => {
-        return (
-            <>
-                {isServiceScrollLoading && (
-                    <View style={styles.footer}>
-                        <ActivityIndicator size="large" />
-                    </View>
-                )}
-            </>
-        );
-    };
-
-    const onServiceRefresh = () => {
-        setServiceRefreshing(true);
-        pullServiceRefresh();
     };
 
     const addNewService = async () => {
@@ -757,17 +629,7 @@ const AddRepairOrderStep3 = ({
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={{ marginBottom: 35 }}>
-                {selectedGarageId == 0 ? (
-                    <Text style={styles.garageNameTitle}>
-                        All Garages - {user.name}
-                    </Text>
-                ) : (
-                    <Text style={styles.garageNameTitle}>
-                        {selectedGarage?.garage_name} - {user.name}
-                    </Text>
-                )}
-            </View>
+            <CommonHeader />
             <View style={styles.pageContainer}>
                 <InputScrollView
                     contentContainerStyle={{
@@ -990,7 +852,7 @@ const AddRepairOrderStep3 = ({
                                                         ? fieldsServices[
                                                                 idx
                                                             ].amount
-                                                        : 0}
+                                                        : 0}{" "}INR
                                                 </Text>
                                             </View>
                                         </View>
@@ -1169,7 +1031,7 @@ const AddRepairOrderStep3 = ({
                                                     {fieldsParts[idx]
                                                         ? fieldsParts[idx]
                                                                 .amount
-                                                        : 0}
+                                                        : 0}{" "}INR
                                                 </Text>
                                             </View>
                                         </View>
@@ -1270,44 +1132,6 @@ const AddRepairOrderStep3 = ({
                                             }}
                                         >
                                             {partsTotal}
-                                        </Text>
-                                    </View>
-                                </View>
-                            </View>
-                            <View style={styles.totalFieldsGroup}>
-                                <View
-                                    style={[
-                                        styles.totalFieldsLeftContent,
-                                        { flex: 0.8 },
-                                    ]}
-                                >
-                                    <Text style={styles.partNameContent}>
-                                        Applicable Discount
-                                    </Text>
-                                </View>
-                                <View
-                                    style={[
-                                        styles.totalFieldsRightContent,
-                                        { flex: 1 },
-                                    ]}
-                                >
-                                    <Text
-                                        style={
-                                            styles.totalFieldTextContainer
-                                        }
-                                    >
-                                        INR{" "}
-                                    </Text>
-                                    <View
-                                        style={styles.totalFieldContainer}
-                                    >
-                                        <Text
-                                            style={{
-                                                fontSize: 18,
-                                                color: colors.black,
-                                            }}
-                                        >
-                                            {isApplicableDiscount}
                                         </Text>
                                     </View>
                                 </View>
@@ -1585,7 +1409,7 @@ const AddRepairOrderStep3 = ({
                         onDismiss={() => {
                             setPartListModal(false);
                             setSearchQueryForParts("");
-                            onPartRefresh();
+                            getPartList();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -1613,7 +1437,7 @@ const AddRepairOrderStep3 = ({
                             onPress={() => {
                                 setPartListModal(false);
                                 setSearchQueryForParts("");
-                                onPartRefresh();
+                                getPartList();
                             }}
                         />
                         <View style={{ marginTop: 20, flex: 1 }}>
@@ -1656,7 +1480,7 @@ const AddRepairOrderStep3 = ({
                                                         colors.light_gray
                                                     }
                                                     onPress={() =>
-                                                        onPartRefresh()
+                                                        getPartList()
                                                     }
                                                 />
                                             )
@@ -1695,17 +1519,7 @@ const AddRepairOrderStep3 = ({
                                     borderWidth: 1,
                                     flex: 1,
                                 }}
-                                onEndReached={loadMoreParts ? getPartList : null}
-                                onEndReachedThreshold={0.5}
                                 contentContainerStyle={{ flexGrow: 1 }}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={partRefreshing}
-                                        onRefresh={onPartRefresh}
-                                        colors={["green"]}
-                                    />
-                                }
-                                ListFooterComponent={loadMoreParts ? renderPartFooter : null}
                                 ListEmptyComponent={() => (
                                     !isLoading && (
                                         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
@@ -1751,7 +1565,7 @@ const AddRepairOrderStep3 = ({
                                                 setPartError("");
                                                 setPartListModal(false);
                                                 setSearchQueryForParts("");
-                                                onPartRefresh();
+                                                getPartList();
                                             }}
                                         />
                                 )}
@@ -1800,7 +1614,7 @@ const AddRepairOrderStep3 = ({
                         onDismiss={() => {
                             setServiceListModal(false);
                             setSearchQueryForServices("");
-                            onServiceRefresh();
+                            getServiceList();
                         }}
                         contentContainerStyle={[
                             styles.modalContainerStyle,
@@ -1828,7 +1642,7 @@ const AddRepairOrderStep3 = ({
                             onPress={() => {
                                 setServiceListModal(false);
                                 setSearchQueryForServices("");
-                                onServiceRefresh();
+                                getServiceList();
                             }}
                         />
                         <View style={{ marginTop: 20, flex: 1 }}>
@@ -1873,7 +1687,7 @@ const AddRepairOrderStep3 = ({
                                                         colors.light_gray
                                                     }
                                                     onPress={() =>
-                                                        onServiceRefresh()
+                                                        getServiceList()
                                                     }
                                                 />
                                             )
@@ -1912,17 +1726,7 @@ const AddRepairOrderStep3 = ({
                                     borderWidth: 1,
                                     flex: 1,
                                 }}
-                                onEndReached={loadMoreServices ? getServiceList : null}
-                                onEndReachedThreshold={0.5}
                                 contentContainerStyle={{ flexGrow: 1 }}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={serviceRefreshing}
-                                        onRefresh={onServiceRefresh}
-                                        colors={["green"]}
-                                    />
-                                }
-                                ListFooterComponent={loadMoreServices ? renderServiceFooter : null}
                                 ListEmptyComponent={() => (
                                     !isLoading && (
                                         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
@@ -1970,7 +1774,7 @@ const AddRepairOrderStep3 = ({
                                                     false
                                                 );
                                                 setSearchQueryForServices("");
-                                                onServiceRefresh();
+                                                getServiceList();
                                             }}
                                         />
                                 )}
