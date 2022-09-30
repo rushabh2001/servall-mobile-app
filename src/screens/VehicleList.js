@@ -67,11 +67,10 @@ const VehicleList = ({
     };
 
     const getVehicleList = async () => {
-        if(page == 1) setIsLoading(true)
-        if(page != 1) setIsScrollLoading(true)
+        setIsLoading(true)
         try {
             const res = await fetch(
-                `${API_URL}fetch_customer_vehicle/${user.id}?page=${page}`,
+                `${API_URL}fetch_customer_vehicle/${user.id}`,
                 {
                     method: "POST",
                     headers: {
@@ -85,13 +84,11 @@ const VehicleList = ({
                 }
             );
             const json = await res.json();
+            console.log(json);
             if (json !== undefined) {
-                setData([...data, ...json.vehicle_list.data]);
-                setFilteredData([...filteredData, ...json.vehicle_list.data]);
+                setData(json.vehicle_list.data);
+                setFilteredData(json.vehicle_list.data);
                 setIsLoading(false);
-                if(page != 1) setIsScrollLoading(false)
-                {json.vehicle_list.current_page != json.vehicle_list.last_page ? setLoadMoreVehicles(true) : setLoadMoreVehicles(false)}
-                {json.vehicle_list.current_page != json.vehicle_list.last_page ? setPage(page + 1) : null}
             }
         } catch (e) {
             console.log(e);
@@ -119,11 +116,8 @@ const VehicleList = ({
             if (response.status == "200") {
                 setData(json.vehicle_list.data);
                 setFilteredData(json.vehicle_list.data);
-                {json.vehicle_list.current_page != json.vehicle_list.last_page ? setLoadMoreVehicles(true) : setLoadMoreVehicles(false)}
-                {json.vehicle_list.current_page != json.vehicle_list.last_page ? setPage(2) : null}
+                setIsLoading(false);
             }
-            setRefreshing(false);
-            setIsLoading(false);
         } catch (error) {
             console.error(error);
         }
@@ -150,14 +144,10 @@ const VehicleList = ({
             if (response.status == "200") {
                 setData(json.vehicle_list.data);
                 setFilteredData(json.vehicle_list.data);
-                {json.vehicle_list.current_page != json.vehicle_list.last_page ? setLoadMoreVehicles(true) : setLoadMoreVehicles(false)}
-                {json.vehicle_list.current_page != json.vehicle_list.last_page ? setPage(2) : null}
+                setIsLoading(false);
             }
         } catch (error) {
             console.error(error);
-        } finally {
-            setRefreshing(false);
-            setIsLoading(false);
         }
     };
 
@@ -184,11 +174,7 @@ const VehicleList = ({
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={{ marginBottom: 35 }}>
-                <Text style={styles.garageNameTitle}>
-                    Hello {user.name}!
-                </Text>
-            </View>
+            <CommonHeader />
             <View style={styles.surfaceContainer}>
                 <View>
                     <View style={{ marginBottom: 15, flexDirection: "row" }}>

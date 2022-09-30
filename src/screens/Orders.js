@@ -191,11 +191,7 @@ const Orders = ({
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={{ marginBottom: 35 }}>
-                <Text style={styles.garageNameTitle}>
-                    Hello {user.name}!
-                </Text>
-            </View>
+            <CommonHeader />
             <View style={styles.surfaceContainer}>
                 <View>
                     <View style={{ marginBottom: 15, flexDirection: "row" }}>
