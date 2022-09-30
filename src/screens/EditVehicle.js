@@ -686,6 +686,7 @@ const EditVehicle = ({
             setIsModel();
             setIsModelName("");
             setModelFieldToggle(true);
+            // getModelList();
         }
     }, [isBrand]);
 
