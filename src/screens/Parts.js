@@ -294,12 +294,12 @@ const Parts = ({
         // console.log('1');
     }, [isFocused]);
 
-    useEffect(() => {
-        if(!isGarageId && selectedGarageId == 0 && garageList) {
-            setIsGarageId(garageList[0]?.id); 
-            setIsGarageName(garageList[0]?.garage_name);
-        } 
-    }, [garageList]);
+    // useEffect(() => {
+    //     if(!isGarageId && selectedGarageId == 0 && garageList) {
+    //         setIsGarageId(garageList[0]?.id); 
+    //         setIsGarageName(garageList[0]?.garage_name);
+    //     } 
+    // }, [garageList]);
 
     useEffect(() => {
             // console.log('4', isGarageId);
@@ -332,33 +332,10 @@ const Parts = ({
                 )}
             </View>
             <View style={styles.customSurface}>
-                {(userRole == "Super Admin" ||
-                    garageId?.length > 1) && (
-                        <View>
-                            <TouchableOpacity 
-                                onPress={() => {
-                                    setGarageListModal(true);
-                                }}
-                            >
-                                <TextInput
-                                    mode="outlined"
-                                    label='Garage'
-                                    style={{marginTop: 10, marginBottom: 20,  backgroundColor: colors.white, width:'100%' }}
-                                    placeholder="Select Garage"
-                                    editable={false}
-                                    value={isGarageName}
-                                    right={<TextInput.Icon name="menu-down" />}
-                                />
-                            </TouchableOpacity>
-                            {garageError?.length > 0 &&
-                                <Text style={styles.errorTextStyle}>{garageError}</Text>
-                            }
-                        </View>
-                    )}
-
+            
                 {/* Search Bar */}
                 <View>
-                    <View style={{ marginBottom: 15, flexDirection: "row" }}>
+                    <View style={{ marginTop: 7, marginBottom: 15, flexDirection: "row" }}>
                         <TextInput
                             mode={"flat"}
                             placeholder="Search here..."
@@ -424,89 +401,97 @@ const Parts = ({
                                         textStyle={styles.textHeading}
                                         flexArr={[2, 1, 1, 1, 1]}
                                     />
-                                    <FlatList
-                                        showsVerticalScrollIndicator={false}
-                                        ItemSeparatorComponent={() => (<Divider />)}
-                                        data={filteredPartData}
-                                        onEndReached={loadMoreParts ? getPartList : null}
-                                        onEndReachedThreshold={0.5}
-                                        refreshControl={
-                                            <RefreshControl
-                                                refreshing={refreshing}
-                                                onRefresh={onRefresh}
-                                                colors={["green"]}
-                                            />
-                                        }
-                                        ListFooterComponent={loadMoreParts ? renderFooter : null}
-                                        ListEmptyComponent={() => (
-                                            !isLoading && (
-                                                <View style={{ marginVertical: 40, flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
-                                                    <Text style={{ color: colors.black }}>
-                                                        No part exist!
-                                                    </Text>
+                                    {selectedGarageId === 0 ? 
+                                        <View style={{ marginVertical: 40, flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                            <Text style={{ color: colors.black }}>
+                                                Please select any garage!
+                                            </Text>
+                                        </View>
+                                    :
+                                        <FlatList
+                                            showsVerticalScrollIndicator={false}
+                                            ItemSeparatorComponent={() => (<Divider />)}
+                                            data={filteredPartData}
+                                            onEndReached={loadMoreParts ? getPartList : null}
+                                            onEndReachedThreshold={0.5}
+                                            refreshControl={
+                                                <RefreshControl
+                                                    refreshing={refreshing}
+                                                    onRefresh={onRefresh}
+                                                    colors={["green"]}
+                                                />
+                                            }
+                                            ListFooterComponent={loadMoreParts ? renderFooter : null}
+                                            ListEmptyComponent={() => (
+                                                !isLoading && (
+                                                    <View style={{ marginVertical: 40, flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.white }}>
+                                                        <Text style={{ color: colors.black }}>
+                                                            No part exist!
+                                                        </Text>
+                                                    </View>
+                                            ))}
+                                            keyExtractor={(item) => item.id}
+                                            renderItem={({ item, index }) => (
+                                                <View style={{ margin: 5 }}>
+                                                    <TouchableOpacity
+                                                        style={{
+                                                            flexDirection:
+                                                                "row",
+                                                        }}
+                                                        onPress={() => {
+                                                            navigation.navigate(
+                                                                "EditStock",
+                                                                { data: item }
+                                                            );
+                                                        }}
+                                                    >
+                                                        <Cell
+                                                            data={
+                                                                item.parts.name
+                                                            }
+                                                            style={{ flex: 2 }}
+                                                            textStyle={
+                                                                styles.text
+                                                            }
+                                                        />
+                                                        <Cell
+                                                            data={
+                                                                item.current_stock
+                                                            }
+                                                            style={{ flex: 1 }}
+                                                            textStyle={
+                                                                styles.text
+                                                            }
+                                                        />
+                                                        <Cell
+                                                            data={item.mrp}
+                                                            style={{ flex: 1 }}
+                                                            textStyle={
+                                                                styles.text
+                                                            }
+                                                        />
+                                                        <Cell
+                                                            data={item.rack_id}
+                                                            style={{ flex: 1 }}
+                                                            textStyle={
+                                                                styles.text
+                                                            }
+                                                        />
+                                                        <Cell
+                                                            data={element(
+                                                                item,
+                                                                index
+                                                            )}
+                                                            style={{ flex: 1 }}
+                                                            textStyle={
+                                                                styles.text
+                                                            }
+                                                        />
+                                                    </TouchableOpacity>
                                                 </View>
-                                        ))}
-                                        keyExtractor={(item) => item.id}
-                                        renderItem={({ item, index }) => (
-                                            <View style={{ margin: 5 }}>
-                                                <TouchableOpacity
-                                                    style={{
-                                                        flexDirection:
-                                                            "row",
-                                                    }}
-                                                    onPress={() => {
-                                                        navigation.navigate(
-                                                            "EditStock",
-                                                            { data: item }
-                                                        );
-                                                    }}
-                                                >
-                                                    <Cell
-                                                        data={
-                                                            item.parts.name
-                                                        }
-                                                        style={{ flex: 2 }}
-                                                        textStyle={
-                                                            styles.text
-                                                        }
-                                                    />
-                                                    <Cell
-                                                        data={
-                                                            item.current_stock
-                                                        }
-                                                        style={{ flex: 1 }}
-                                                        textStyle={
-                                                            styles.text
-                                                        }
-                                                    />
-                                                    <Cell
-                                                        data={item.mrp}
-                                                        style={{ flex: 1 }}
-                                                        textStyle={
-                                                            styles.text
-                                                        }
-                                                    />
-                                                    <Cell
-                                                        data={item.rack_id}
-                                                        style={{ flex: 1 }}
-                                                        textStyle={
-                                                            styles.text
-                                                        }
-                                                    />
-                                                    <Cell
-                                                        data={element(
-                                                            item,
-                                                            index
-                                                        )}
-                                                        style={{ flex: 1 }}
-                                                        textStyle={
-                                                            styles.text
-                                                        }
-                                                    />
-                                                </TouchableOpacity>
-                                            </View>
-                                        )}
-                                    />
+                                            )}
+                                        />
+                                }
                                 </Table>
                             </View>
                         </ScrollView>

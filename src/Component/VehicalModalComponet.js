@@ -7,16 +7,13 @@ import { connect } from "react-redux";
 import { colors } from "../constants";
 
 import {
-    Portal,
     Divider,
     TextInput,
     Button,
     List,
-    Searchbar,
 } from "react-native-paper";
 import Modal from "react-native-modal";
-import Spinner from "react-native-loading-spinner-overlay";
-const VehicalModalComponet = ({ visible, closeModal, brand, userToken, modelName, ModalId, modelError }) => {
+const VehicalModalComponet = ({ visible, closeModal, brand, userToken, modelName, ModalId, IsLoading, modelError }) => {
     const [filteredModelData, setFilteredModelData] = useState([]);
     const [modelList, setModelList] = useState([]);
     const [searchQueryForModels, setSearchQueryForModels] = useState();
@@ -28,25 +25,24 @@ const VehicalModalComponet = ({ visible, closeModal, brand, userToken, modelName
     const [brandId, setBrandId] = useState();
     const getBrand = async () => {
         setSearchQueryForModels(null);
+        setFilteredModelData();
+        IsLoading(true);
         try {
-            const response = await fetch(`${API_URL}fetch_vehicle_model`, {
-                method: "POST",
+            const response = await fetch(`${API_URL}fetch_vehicle_model?brand_id=${brand}`, {
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + userToken,
                 },
-                body: JSON.stringify({
-                    brand_id: brandId,
-                    // search: null,
-                }),
+
             });
             const json = await response.json();
             if (response.status == "200") {
                 console.log('ddd', json.vehicle_model_list)
                 setModelList(json.vehicle_model_list);
                 setFilteredModelData(json.vehicle_model_list);
-                setIsLoading(false);
+                IsLoading(false);
             }
         } catch (error) {
             console.error(error);
@@ -64,7 +60,6 @@ const VehicalModalComponet = ({ visible, closeModal, brand, userToken, modelName
                     const textData = searchQueryForModels.toUpperCase();
                     return itemData.indexOf(textData) > -1;
                 });
-            console.log('data', newData)
             setFilteredModelData(newData);
         } else {
             setFilteredModelData(modelList);
@@ -79,7 +74,7 @@ const VehicalModalComponet = ({ visible, closeModal, brand, userToken, modelName
             return;
         }
         closeModal();
-        let data = { model_name: newModelName, brand_id: parseInt(brandId) };
+        let data = { model_name: newModelName, brand_id: parseInt(brand) };
         try {
             const res = await fetch(`${API_URL}create_vehicle_model`, {
                 method: "POST",

@@ -29,11 +29,10 @@ const BrandComponet = ({ visible, closeModal, userToken, brandName, brandId, set
     global.maxDeviceHeight = Math.max(Dimensions.get('window').height, Dimensions.get('screen').height);
 
     const getBrandList = async () => {
-
         setIsLoading(true)
         try {
             const res = await fetch(`${API_URL}fetch_brand`, {
-                method: "POST",
+                method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
