@@ -97,7 +97,6 @@ const Login = ({ loginRequest, loginError, error }) => {
         if (loginError) {
             setIsLoading(false)
         }
-
     }, [loginError]);
     // const loginWithOtp = (formOTP) => { 
     //     fetch(`${API_URL}loginWithOtp`, 

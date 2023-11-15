@@ -1,7 +1,7 @@
 require_relative '../node_modules/react-native/scripts/react_native_pods'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
-platform :ios, '11.0'
+platform :ios, '13.0'
 
 target 'ServAll' do
   config = use_native_modules!
@@ -20,7 +20,7 @@ target 'ServAll' do
 
   pod 'react-native-document-picker', :path => '../node_modules/react-native-document-picker'
 
-  pod 'RNTableView', :path => '../node_modules/react-native-tableview'
+  # pod 'RNTableView', :path => '../node_modules/react-native-tableview'
 
   pod 'react-native-splash-screen', :path => '../node_modules/react-native-splash-screen'
 
